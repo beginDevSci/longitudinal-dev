@@ -94,7 +94,7 @@ export default defineNuxtConfig({
   content: {
     documentDriven: true, // Ensuring document-driven mode is correctly enabled
     highlight: {
-      langs: ['json', 'js', 'ts', 'html', 'css', 'vue', 'shell', 'md', 'yaml', 'r', 'mdc']
+      langs: ['json', 'js', 'ts', 'html', 'css', 'vue', 'shell', 'md', 'yaml', 'r', 'mdc', 'python']
     }
   },
 
@@ -112,5 +112,15 @@ export default defineNuxtConfig({
     }
   },
 
-  compatibilityDate: '2024-07-11'
+  compatibilityDate: '2024-07-11',
+
+  head: {
+    script: [
+      {
+        src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js',
+        type: 'text/javascript',
+        async: true
+      }
+    ]
+  }
 })
