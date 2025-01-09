@@ -112,15 +112,15 @@ export default defineNuxtConfig({
     }
   },
 
-  compatibilityDate: '2024-07-11',
+  compatibilityDate: '2024-07-11'
 
-  head: {
-    script: [
-      {
-        src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js',
-        type: 'text/javascript',
-        async: true
-      }
-    ]
-  }
+  // head: {
+  //   script: [
+  //     {
+  //       src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js',
+  //       type: 'text/javascript',
+  //       async: true
+  //     }
+  //   ]
+  // }
 })
