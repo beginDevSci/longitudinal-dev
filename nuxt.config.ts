@@ -95,6 +95,14 @@ export default defineNuxtConfig({
     documentDriven: true, // Ensuring document-driven mode is correctly enabled
     highlight: {
       langs: ['json', 'js', 'ts', 'html', 'css', 'vue', 'shell', 'md', 'yaml', 'r', 'mdc', 'python']
+    },
+    markdown: {
+      remarkPlugins: [
+        'remark-math' // Add remark-math plugin
+      ],
+      rehypePlugins: [
+        'rehype-katex' // Add rehype-katex plugin
+      ]
     }
   },
 
@@ -112,15 +120,12 @@ export default defineNuxtConfig({
     }
   },
 
-  compatibilityDate: '2024-07-11'
+  compatibilityDate: '2024-07-11',
 
-  // head: {
-  //   script: [
-  //     {
-  //       src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js',
-  //       type: 'text/javascript',
-  //       async: true
-  //     }
-  //   ]
-  // }
+  head: {
+    link: [{
+      rel: 'stylesheet',
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.11.0/dist/katex.min.css'
+    }]
+  }
 })

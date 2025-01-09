@@ -30,6 +30,8 @@
     "@nuxt/eslint": "^0.5.7",
     "@nuxthq/studio": "^2.1.1",
     "eslint": "^9.11.1",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "vue-tsc": "^2.1.6"
   },
   "resolutions": {
