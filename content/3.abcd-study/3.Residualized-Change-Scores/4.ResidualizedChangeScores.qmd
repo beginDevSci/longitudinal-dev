@@ -7,7 +7,7 @@ author: "Biostatistics Working Group"
 ::code-group
 
 ```r [setUp.r]
-This set of codeblocks are for solely for testing initial setup and can be ignored at present 
+This setp of codeblocks are for solely for testing initial setup and can be ignored at present 
 ```
 
 ```r  [knitR.r]

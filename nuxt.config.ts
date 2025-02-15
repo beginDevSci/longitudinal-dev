@@ -108,7 +108,8 @@ export default defineNuxtConfig({
 
   css: [
     '@fortawesome/fontawesome-free/css/all.min.css',
-    '@/assets/css/main.css'
+    '@/assets/css/main.css',
+    'katex/dist/katex.min.css'
   ],
 
   build: {

@@ -4,6 +4,9 @@ import defaultTheme from 'tailwindcss/defaultTheme'
 export default <Partial<Config>>{
   theme: {
     extend: {
+      fontWeight: {
+        extra: '900' // Define an even heavier font weight
+      },
       fontFamily: {
         sans: ['DM Sans', ...defaultTheme.fontFamily.sans]
       },
