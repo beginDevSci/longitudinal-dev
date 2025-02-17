@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const { data: page } = await useAsyncData("index", () =>
   queryContent("/").findOne()
 );
@@ -10,6 +11,7 @@ useSeoMeta({
   description: page.value.description,
   ogDescription: page.value.description,
 });
+
 </script>
 
 <template>

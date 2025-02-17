@@ -8,7 +8,8 @@ definePageMeta({
 const route = useRoute();
 const { toc, seo } = useAppConfig();
 
-const { data: page } = await useAsyncData(route.path, () =>
+// Fetch page content
+const { data: page, pending } = await useAsyncData(route.path, () =>
   queryContent(route.path).findOne()
 );
 if (!page.value) {
@@ -19,6 +20,7 @@ if (!page.value) {
   });
 }
 
+// Fetch surrounding content (for navigation)
 const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
   queryContent()
     .where({ _extension: "md", navigation: { $ne: false } })
@@ -27,31 +29,33 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
 );
 
 useSeoMeta({
-  title: page.value.title,
-  ogTitle: `${page.value.title} - ${seo?.siteName}`,
-  description: page.value.description,
-  ogDescription: page.value.description,
+  title: page.value?.title,
+  ogTitle: `${page.value?.title} - ${seo?.siteName}`,
+  description: page.value?.description,
+  ogDescription: page.value?.description,
 });
 
 defineOgImage({
   component: "Docs",
-  title: page.value.title,
-  description: page.value.description,
+  title: page.value?.title,
+  description: page.value?.description,
 });
 
 const headline = computed(() => findPageHeadline(page.value));
 
-// Construct GitHub Web Editor URL dynamically
+// Construct GitHub edit link safely
 const githubRepoUrl = "https://github.com/beginDevSci/longitudinal-dev";
-const filePath = page?.value?._file.replace(/^content\//, ""); // Adjust based on your file structure
-const editUrl = `${githubRepoUrl}/edit/main/content/${filePath}`;
+const filePath = computed(() =>
+  page.value?._file ? page.value._file.replace(/^content\//, "") : ""
+);
+const editUrl = computed(() => `${githubRepoUrl}/edit/main/content/${filePath.value}`);
 
 const links = computed(() =>
   [
     toc?.bottom?.edit && {
       icon: "i-heroicons-pencil-square",
       label: "Edit this page",
-      to: editUrl, // Use the constructed GitHub Web Editor URL
+      to: editUrl.value,
       target: "_blank",
     },
     ...(toc?.bottom?.links || []),
@@ -62,31 +66,31 @@ const links = computed(() =>
 <template>
   <UPage>
     <UPageHeader
-      :title="page.title"
-      :description="page.description"
-      :links="page.links"
+      :title="page?.title"
+      :description="page?.description"
+      :links="page?.links"
       :headline="headline"
     />
 
     <UPageBody prose>
-      <client-only>
-        <ContentRenderer v-if="page.body" :value="page" />
-      </client-only>
+      <ClientOnly>
+        <ContentRenderer v-if="page?.body && !pending" :value="page" />
+        <p v-else>Loading content...</p>
+      </ClientOnly>
 
       <hr v-if="surround?.length" />
 
       <UContentSurround :surround="surround" />
     </UPageBody>
 
-    <template v-if="page.toc !== false" #right>
-      <UContentToc :title="toc?.title" :links="page.body?.toc?.links">
+    <template v-if="page?.toc !== false" #right>
+      <UContentToc :title="toc?.title" :links="page?.body?.toc?.links">
         <template v-if="toc?.bottom" #bottom>
           <div
             class="hidden lg:block space-y-6"
-            :class="{ '!mt-6': page.body?.toc?.links?.length }"
+            :class="{ '!mt-6': page?.body?.toc?.links?.length }"
           >
-            <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
-
+            <UDivider v-if="page?.body?.toc?.links?.length" type="dashed" />
             <UPageLinks :title="toc.bottom.title" :links="links" />
           </div>
         </template>
