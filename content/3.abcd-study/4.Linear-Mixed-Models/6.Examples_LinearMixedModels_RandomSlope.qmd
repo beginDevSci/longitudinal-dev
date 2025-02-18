@@ -163,7 +163,9 @@ table_output
 
 ```
 
-<img src="/examples/LMM/ViewData_Table.png" width="800" style="display: block; margin: auto;">
+<ImageComponent :src="/examples/LMM/ViewData_Table.png" alt="Logo Image" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent>
 
 </details>
 
@@ -238,10 +240,11 @@ descriptives_table
 </details>
 
 <figure class="w-full text-center">
-  <img src="/examples/LMM/Descriptives_Table.png"
-       alt="Table Output" 
-       class="w-full max-w-2xl h-auto mx-auto rounded-lg shadow-lg border border-gray-300">
-  <figcaption class="text-gray-600 text-sm mt-2">Figure: Descriptive Statistics</figcaption>
+
+<ImageComponent :src="/examples/LMM/Descriptives_Table.png" alt="Table Output" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: Descriptive Statistics</figcaption>
+
 </figure>
 
 ::
@@ -290,11 +293,13 @@ confint(model_random_slope, oldNames = TRUE, method = "Wald")
 ```
 
 <figure class="w-full text-center">
-  <img src="/examples/LMM/LMM_Output.png"
-       alt="Table Output" 
-       class="w-full max-w-2xl h-auto mx-auto rounded-lg shadow-lg border border-gray-300">
-  <figcaption class="text-gray-600 text-sm mt-2">Figure: Descriptive Statistics</figcaption>
+
+<ImageComponent :src="/examples/LMM/LMM_Output.png" alt="LMM Output" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Output</figcaption>
+
 </figure>
+
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
         <span style="font-size: 20px;"> 
@@ -329,11 +334,12 @@ sjPlot::tab_model(model_random_slope,
 
 </details>
 
-<figure class="w-full text-center bg-white p-4 rounded-lg shadow-md">
-  <img src="/examples/LMM/LMM_Table.png"
-       alt="Table Output" 
-       class="w-full max-w-2xl h-auto mx-auto rounded-lg shadow-lg border border-gray-300">
-  <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Table</figcaption>
+<figure class="mx-auto text-center bg-white p-4 rounded-lg shadow-md" style="width: 800px;" justify="center">
+
+<ImageComponent :src="/examples/LMM/LMM_Table.png" alt="LMM Table" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Table</figcaption>
+
 </figure>
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
@@ -409,11 +415,12 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 ```
 </details>
 
-<figure class="w-full text-center bg-white p-4 rounded-lg shadow-md">
-  <img src="/examples/LMM/LMM_Trajectories.png"
-       alt="Table Output" 
-       class="w-full max-w-2xl h-auto mx-auto rounded-lg shadow-lg border border-gray-300">
-  <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Table</figcaption>
+<figure class="mx-auto text-center bg-white p-4 rounded-lg shadow-md" style="width: 800px;" justify="center">
+
+<ImageComponent :src="/examples/LMM/LMM_Trajectories.png" alt="LMM Trajectories" width="800" class="block mx-auto" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Trajectories</figcaption>
+
 </figure>
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
@@ -423,7 +430,6 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
 </details>
     
-
 ::
 ::
 
