@@ -14,6 +14,12 @@ export default defineNuxtConfig({
     '@nuxt/icon' // Add the @nuxt/icon module
   ],
 
+  image: {
+    cloudflare: {
+      baseURL: 'https://longitudinal.dev' // Replace with your actual domain
+    }
+  },
+
   hooks: {
     // Define `@nuxt/ui` components as global to use them in `.md`
     'components:extend': (components) => {

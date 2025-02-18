@@ -20,18 +20,14 @@
     <main class="neve-main">
       <section id="books">
         <div class="container mx-auto">
-          <h2 class="text-2xl font-bold text-center mb-4">Open Source R</h2>
+          <h2 class="text-2xl font-bold text-center mb-4">Open Source R Books</h2>
           <div
             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            <BookCard
+            <BookLandingCard
               v-for="(book, index) in books"
               :key="index"
-              :title="book.title"
-              :author="book.author"
-              :description="book.description"
-              :image="book.image"
-              :link="book.link"
+              :book="book"
             />
           </div>
         </div>
@@ -40,47 +36,29 @@
       <section id="videos" class="py-8 bg-gray-200 dark:bg-white">
         <div class="container mx-auto">
           <h2 class="text-2xl font-bold text-center text-black mb-4">
-            Instructional Videos
+            Open Source R Videos
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div v-for="(video, index) in videos" :key="index" class="video">
-              <iframe
-                :src="video.link"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                class="w-full h-64"
-              />
-              <h3 class="text-lg font-semibold mt-2">
-                {{ video.title }}
-              </h3>
-              <p>{{ video.description }}</p>
-            </div>
+            <VideoLandingCard
+              v-for="(video, index) in videos"
+              :key="index"
+              :video="video"
+            />
           </div>
         </div>
       </section>
 
-      <section id="interactive">
+      <section id="interactive" class="py-4">
         <div class="container mx-auto">
           <h2 class="text-2xl font-bold text-center mb-4">
-            Interactive Tutorials
+            Open Source R Tutorials
           </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <TutorialsLandingCard
               v-for="(tutorial, index) in tutorials"
               :key="index"
-              class="tutorial"
-            >
-              <a
-                :href="tutorial.link"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block bg-white dark:bg-gray-900 p-4 rounded-lg shadow hover:shadow-lg"
-              >
-                <h3 class="text-lg font-semibold">{{ tutorial.title }}</h3>
-                <p>{{ tutorial.description }}</p>
-              </a>
-            </div>
+              :tutorial="tutorial"
+            />
           </div>
         </div>
       </section>
@@ -88,27 +66,19 @@
       <section id="cheatsheets" class="py-8 bg-blue-100 dark:bg-white">
         <div class="container mx-auto">
           <h2 class="text-2xl font-bold text-center mb-4 text-black">
-            Cheatsheets
+            Open Source R Cheatsheets
           </h2>
           <!-- Add cheatsheets content here -->
         </div>
       </section>
 
-      <section id="additional-tutorials">
-        <div class="container mx-auto">
-          <h2 class="text-2xl font-bold text-center mb-4">
-            Add additional tutorials
-          </h2>
-          <!-- Add text-based tutorials content here -->
-        </div>
-      </section>
+
     </main>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import BookCard from "~/components/BookCard.vue";
 
 definePageMeta({ documentDriven: { page: false } });
 
@@ -117,7 +87,7 @@ const books = ref([
     title: "R for Data Science",
     author: "Hadley Wickham & Garrett Grolemund",
     description:
-      "This book will teach you how to do data science with R, covering the entire data analysis workflow.",
+      "Data science with R, covering the entire data analysis workflow.",
     image: "/images/r-for-data-science-cover.jpg",
     link: "https://r4ds.hadley.nz/",
   },
@@ -132,8 +102,7 @@ const books = ref([
   {
     title: "Efficient R Programming",
     author: "Colin Gillespie & Robin Lovelace",
-    description:
-      "This book provides tools and techniques to make your R code more efficient.",
+    description: "Tools and techniques to make your R code more efficient.",
     image: "/images/efficient-r-programming.png",
     link: "https://csgillespie.github.io/efficientR/",
   },
@@ -149,8 +118,8 @@ const books = ref([
     title: "Hands-On Programming with R",
     author: "Garrett Grolemund",
     description:
-      "This book provides a practical introduction to programming with R, focusing on hands-on experience and real-world examples.",
-    image: "/longit//images/hands-on-programming-with-r.jpg",
+      "A practical introduction to programming with R, focusing on hands-on experience and real-world examples.",
+    image: "/images/hands-on-programming-with-r.jpg",
     link: "https://rstudio-education.github.io/hopr/",
   },
   {
@@ -165,7 +134,7 @@ const books = ref([
     title: "Software for Data Analysis with R",
     author: "John M. Chambers",
     description:
-      "This book covers software development for data analysis, with a focus on R and its applications.",
+      "Software development for data analysis, with a focus on R and its applications.",
     image: "/images/software-for-data-analysis-with-r.jpg",
     link: "https://bookdown.org/rdpeng/RProgDA/",
   },
@@ -173,7 +142,7 @@ const books = ref([
     title: "The Pirate's Guide to R",
     author: "Nathaniel D. Phillips",
     description:
-      "A fun and accessible introduction to R, presented in a pirate-themed format to engage readers.",
+      "An accessible introduction to R, presented in a pirate-themed format to engage readers.",
     image: "/images/yarrr-the-pirates-guide-to-r.jpeg",
     link: "https://bookdown.org/ndphillips/YaRrr/",
   },
@@ -181,7 +150,7 @@ const books = ref([
     title: "The Art of R Programming",
     author: "Norman Matloff",
     description:
-      "This book provides a comprehensive guide to R programming, covering everything from basic concepts to advanced techniques.",
+      "A comprehensive guide to R programming, covering everything from basic concepts to advanced techniques.",
     image: "/images/the-art-of-r-programming.jpg",
     link: "https://web.cs.ucdavis.edu/~matloff/matloff/public_html/145/PLN/RMaterials/NSPpart.pdf",
   },
@@ -193,38 +162,82 @@ const books = ref([
     image: "/images/deep-r-programming.png",
     link: "https://deepr.gagolewski.com/",
   },
+  {
+    title: "R Cookbook, 2nd Edition",
+    author: "James (JD) Long",
+    description:
+      "This book is full of how-to recipes, each of which solves a specific problem.",
+    image: "/images/rc2e.jpg",
+    link: "https://rc2e.com/",
+  },
+  {
+    title: "ggplot2: Elegant Graphics for Data Analysis (3e)",
+    author: "Hadley Wickham",
+    description:
+      "This book is full of how-to recipes, each of which solves a specific problem.",
+    image: "/images/ggplot2.jpg",
+    link: "https://ggplot2-book.org/",
+  },
 ]);
 
 const videos = ref([
   {
-    title: "Introduction to Data Science",
-    link: "https://www.youtube.com/embed/example1",
-    description:
-      "An introductory video on data science concepts and techniques.",
+    title: "R Programming Tutorial by freeCodeCamp.org",
+    link: "https://www.youtube.com/embed/_V8eKsto3Ug?si=Xcpi5ieqGAL1EvGv",
+    description: "Learn the Basics of Statistical Computing",
   },
   {
-    title: "Advanced R Programming",
+    title: "An introduction to programming using a language called R",
+    link: "https://www.youtube.com/embed/videoseries?si=zuDZo4eQIMhSYvXw&amp;list=PLhQjrBD2T382yfNp_-xzX244d-O9W6YmD",
+    description: "CS50's Introduction to Programming with R",
+  },
+  {
+    title: "R Programming by R Programming 101 ",
+    link: "https://www.youtube.com/embed/videoseries?si=63KVaFKRiu2D9v6P&amp;list=PLtL57Fdbwb_Chn-dNR0qBjH3esKS2MXY3",
+    description: "R Programming For Beginners",
+  },
+  {
+    title: "R Programming by Simplilearn ",
     link: "https://www.youtube.com/embed/videoseries?list=PLm-R300a1uRfH-cy2-KuOD7gHzSRFnX-h",
-    description: "A deep dive into advanced R programming topics.",
+    description: "An R Tutorial For Beginners",
   },
   {
-    title: "Data Wrangling with R",
-    link: "https://www.youtube.com/embed/videoseries?si=dNM2v87Ri3byUhe-&amp;list=PLEiEAq2VkUUKAw0aAJ1W4jpZ1q9LpX4yG",
-    description: "Learn the essentials of data wrangling with R.",
+    title: "R Analysis by Equitable Equations ",
+    link: "https://www.youtube.com/embed/videoseries?si=hWHp7QvCXjWq3HHE&amp;list=PLKBUk9FL4nBbnAFHU3AZfsGHShsMC2AJC",
+    description: "Full data analyses with R",
+  },
+  {
+    title: "Statistical Learning with R",
+    link: "https://www.youtube.com/embed/videoseries?si=rKw0bKInPkgcUjIH&amp;list=PLoROMvodv4rOzrYsAxzQyHb8n_RWNuS1e",
+    description:
+      "Introductory-level course in supervised learning, with a focus on regression and classification methods.",
   },
 ]);
 
 const tutorials = ref([
   {
-    title: "Interactive R Tutorial",
-    link: "https://www.example.com/interactive-tutorial",
-    description: "An interactive tutorial to learn R programming.",
+    title: "Datacamp R Programming Tutorials",
+    link: "https://www.datacamp.com/tutorial/category/r-programming",
+    description:
+      "R tutorials, with helpful tips and use cases to grow your programming skills.",
   },
   {
-    title: "Another Interactive Tutorial",
-    link: "https://www.example.com/another-interactive-tutorial",
+    title: " {swirl} Learn R, in R.",
+    link: "https://swirlstats.com/",
     description:
-      "Another great interactive tutorial for learning advanced R programming techniques.",
+      "swirl teaches you R programming and data science interactively, at your own pace, and right in the R console!",
+  },
+  {
+    title: "HarvardX: CS50's Introduction to Programming with R",
+    link: "https://cs50.harvard.edu/r/2024/",
+    description:
+      "An introduction to programming using a language called R, a popular language for statistical computing and graphics in data science and other domains.",
+  },
+  {
+    title: "fasteR",
+    link: "https://github.com/matloff/fasteR",
+    description:
+      "fasteR: Fast Lane to Learning R! Becoming productive in R, as fast as possible",
   },
 ]);
 </script>
@@ -268,27 +281,27 @@ const tutorials = ref([
   padding-bottom: 20px;
 }
 
-.book-gallery-section,
-.video-gallery-section,
+/* .book-gallery-section, */
+/* .video-gallery-section, */
 .tutorial-gallery-section {
   padding: 20px;
   margin-bottom: 20px;
 }
 
-.book-gallery-section {
+/* .book-gallery-section {
   background-color: #f9f9f9;
-}
+} */
 
-.video-gallery-section {
+/* .video-gallery-section {
   background-color: #e9ecef;
-}
+} */
 
 .tutorial-gallery-section {
   background-color: #d3f9d8;
 }
 
-.book-gallery,
-.video-gallery,
+/* .book-gallery, */
+/* .video-gallery, */
 .tutorial-gallery {
   display: flex;
   flex-wrap: wrap;
@@ -296,20 +309,20 @@ const tutorials = ref([
   justify-content: space-around;
 }
 
-.book,
-.video,
+/* .book, */
+/* .video, */
 .tutorial {
   text-align: center;
   max-width: 200px;
 }
 
-.book-cover,
-.video iframe {
+/* .book-cover, */
+/* .video iframe {
   width: 150px;
-  height: auto;
+  height: 50px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
-}
+} */
 
 h3 {
   margin: 10px 0 5px;
