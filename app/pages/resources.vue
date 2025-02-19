@@ -14,7 +14,6 @@
         </NuxtLink>
         <NuxtLink to="#videos" class="nav-button"> Videos </NuxtLink>
         <NuxtLink to="#cheatsheets" class="nav-button"> Cheatsheets </NuxtLink>
-        <NuxtLink to="#text-tutorials" class="nav-button"> Blogs </NuxtLink>
       </nav>
     </header>
     <main class="neve-main">

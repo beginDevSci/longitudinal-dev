@@ -5,7 +5,6 @@ const navigation = inject<Ref<NavItem[]>>("navigation");
 </script>
 
 <template>
-  this is the docs layout page
   <UContainer>
     <UPage>
       <template #left>
