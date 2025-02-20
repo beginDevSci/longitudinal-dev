@@ -1,5 +1,5 @@
 ---
-title: "Random Intercept & Slope Model"
+title: "Time Invariant Covariate LMM"
 author: "Biostatistics Working Group"
 ---
 
@@ -7,28 +7,29 @@ author: "Biostatistics Working Group"
 
 ### <span class="text-green-500 text-xl font-extrabold text-transparent">Overview</span>
 
-A **linear mixed model (LMM)** with **random intercepts and slopes** extends traditional linear regression by allowing each participant not only to have a unique intercept (baseline level), but also a unique slope (rate of change). This approach is particularly useful for **longitudinal data** with more than two timepoints, as it captures both average growth patterns (fixed effects) and individual variations (random effects) in baseline status and change over time.
+A **linear mixed model (LMM)** is a statistical approach used in longitudinal data analysis to account for both **fixed effects** (population-level trends) and **random effects** (individual variation). 
+
+Unlike traditional linear regression, LMMs allow for **random intercepts** (individual differences in baseline values) and **random slopes** (individual differences in rate of change over time). This makes LMM particularly useful for **modeling repeated measures** where observations are nested within individuals.
 
 ### <span class="text-green-500 text-xl font-extrabold text-transparent">Objectives</span>
 
 - **Fit** an LMM with random intercepts and slopes 
 - **Analyze** repeated measurement (4 bi-annual assessments) of scores on a measure of cognition.
-- **Characterize** individual differences in both baseline scores and rates of change.
-- **Check** model assumptions (residual distribution, random effects).
-- **Visualize** individual and overall trajectories.
-- **Discuss** limitations and alternative approaches for more complex data.
+- **Characterize** individual differences in neurocognitive change over time**
+- **Examine** the effect of time-invariant covariates (e.g., parental education) on cognitive development.
+- **Discuss** limitations and alternative approaches for varying contexts.
 
 ### <span class="text-green-500 text-xl font-extrabold text-transparent">When to Use This Approach</span>
 
--   **Repeated Measures**: When you need to account for correlated within-subject observations.
--   **Individual Variability**: When participants differ in both their baseline levels and rates of change.
--   **Flexible Framework**: When you need to include covariates or require modeling nonlinear change.
+- When **repeated measures** are collected from the same individuals.
+- When individual differences in **both baseline values (intercepts) and change over time (slopes)** are expected.
+- When accounting for **time-invariant (e.g., parental education) and time-varying (e.g., age) predictors**.
 
 ### <span class="text-green-500 text-xl font-extrabold text-transparent">Limitations & Alternatives</span>
 
--   **Model Complexity**: Random slope structures can fail to converge with small samples or highly correlated data.
--   **Assumptions**: Assumes normally distributed random effects and linear change (unless adding nonlinear terms).
--   **Alternatives**: If only two timepoints exist, difference scores or residualized change scores may suffice. If growth is nonlinear, consider polynomial or spline terms.
+- If **random slopes are not needed**, a **random intercept-only model** may be preferable.
+- If **correlation between measurements is unknown**, **Generalized Estimating Equations (GEE)** could be considered.
+- If modeling **latent change processes**, **Structural Equation Modeling (SEM)** may be a better choice.
 
 <hr border="2" style="border-color: green;">
 
@@ -62,12 +63,16 @@ Load data from a Parquet file and selects relevant variables.
 
 ```r [LoadData.r]
 # 📌 Define file paths (Update as needed)
-nc_file <- "/path_to/Neurocognition.parquet"
+ab_file <- "/Users/shawes/ABCD/data/release6/ABCD_General/ABCD_General.parquet"
+nc_file <- "/Users/shawes/ABCD/data/release6/Neurocognition/Neurocognition.parquet"
 
 # 📌 Load relevant variables from the Parquet file
-nc_data <- read_parquet(nc_file,
-    col_select = c("participant_id", "session_id", 
-                   "nc_y_nihtb__comp__cryst__fullcorr_tscore"))
+ab_data <- read_parquet(ab_file, col_select = c("participant_id", "session_id", "ab_p_demo__ed__slf_001"))
+nc_data <- read_parquet(nc_file, col_select = c("participant_id", "session_id", "nc_y_nihtb__comp__cryst__fullcorr_tscore"))
+
+# Merge datasets and prepare for analysis
+combined_data <- inner_join(ab_data, nc_data, by = c("participant_id", "session_id"))
+
 ```
 </details>
 
@@ -77,8 +82,8 @@ Clean and transform the data.
 
 ```r [PrepareData.r]
 # 📌 Prepare data for LMM analysis
-df_long <- nc_data %>%
-    select(participant_id, session_id, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
+df_long <- combined_data %>%
+  select(participant_id, session_id, ab_p_demo__ed__slf_001, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
     # 📌 Filter to include only 4 relevant measurement occasions
     filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
     # 📌 Ensure dataset is sorted by participant and session
@@ -86,14 +91,37 @@ df_long <- nc_data %>%
     # 📌 Convert categorical and numerical variables
     mutate(
         participant_id = factor(participant_id), # Convert IDs to factors
-        session_id = factor(session_id, # Convert session to a factors
+        session_id = factor(session_id, # Convert session to factors
             levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
             labels = c("Baseline", "Year_2", "Year_4", "Year_6")
         ),
         time = as.numeric(session_id) - 1, # Convert session_id to numeric
         nc_y_nihtb__comp__cryst__fullcorr_tscore =
-            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2) 
-    ) %>% 
+            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2),
+         
+        # 📌 Convert and clean parent education variable
+        parent_education = as.numeric(ab_p_demo__ed__slf_001),
+        parent_education = na_if(parent_education, 777),  # Set "Decline to Answer" as NA
+    ) %>%
+    # 📌 Fill missing parent education values with baseline value per participant
+    group_by(participant_id) %>%
+    mutate(parent_education = first(na.omit(parent_education))) %>%
+    ungroup() %>%
+    mutate(
+        # 📌 Categorize parent education levels
+        parent_education_cat = case_when(
+            parent_education <= 12 ~ "Less than HS",
+            parent_education %in% 13:14 ~ "HS Diploma/GED",
+            parent_education %in% 15:17 ~ "Some College/Associate",
+            parent_education == 18 ~ "Bachelor’s Degree",
+            parent_education %in% 19:21 ~ "Graduate Degree",
+            TRUE ~ NA_character_
+        ) %>% factor(levels = c("Less than HS", "HS Diploma/GED", 
+                                 "Some College/Associate", "Bachelor’s Degree", "Graduate Degree")),
+        
+        # 📌 Convert neurocognition score
+        neurocognition = round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2)
+    ) %>%
     # 📌 Rename variables for clarity
     rename(
         id = participant_id, 
@@ -181,7 +209,7 @@ table_output
 ```r [Transform.r]
 # 📌 Select relevant columns for summary
 df_summary <- df_long %>%
-    select(session, cognition)  # ✅ Select only session and cognition variables
+    select(session, parent_education_cat, cognition)  # ✅ Select only session and cognition variables
 
 # 📌 Convert 'session' into a factor for proper grouping
 df_summary <- df_summary %>%
@@ -204,7 +232,7 @@ descriptives_table <- df_summary %>%
     tbl_summary(
         by = session,  # Group statistics by session
         missing = "no",  # Exclude missing data from summary
-        label = list(cognition ~ "Cognition Score"),  # Rename cognition column for readability
+        label = list(cognition ~ "Cognition Score", parent_education_cat ~ "Parental Education"),  # Rename cognition column for readability
         statistic = list(
             all_continuous() ~ "{mean} ({sd})"  # Display mean and standard deviation
         )
@@ -258,17 +286,20 @@ descriptives_table
 
 ::tab{label="Fit Model" icon="i-heroicons-document-text"}
 
-> Fitting a Random-Intercept and Random-Slope LMM
+> Fitting a Random-Intercept and Random-Slope LMM with a time-invariant covariate.
 
 <details open>
     <summary>✅ <span class="text-l text-green-500">Fit Model</span></summary>
 Fit a linear mixed model to predict cognition scores over time.
 
+- **Fixed effects:** Intercept, event (time), parental education.
+- **Random effects:** Individual differences in intercepts and slopes.
+
 ```r [FitModel.r]
 
 # 📌 Fit a Linear Mixed Model (LMM) to predict cognition over time
-model_random_slope <- lmerTest::lmer(
-    cognition ~ time + (1 + time | id), # Fixed effect (time), random intercept & slope (id)
+model_LMM <- lmerTest::lmer(
+    cognition ~ time + parent_education + (1 + time | id), # Fixed effect (time), random intercept & slope (id)
     data = df_long # Dataset containing repeated measures of cognition
 )
 ```
@@ -284,10 +315,10 @@ Display the model output and summary statistics.
 ```r [ModelOutput.r]
 
 # 📌 Display summary statistics for the fitted Linear Mixed Model (LMM)
-summary(model_random_slope)  # Provides estimates for fixed & random effects, along with model diagnostics
+summary(model_LMM)  # Provides estimates for fixed & random effects, along with model diagnostics
 
 # 📌 Compute 95% confidence intervals for model parameters using the Wald method
-confint(model_random_slope, oldNames = TRUE, method = "Wald")  
+confint(model_LMM, oldNames = TRUE, method = "Wald")  
 # Shows uncertainty around fixed effect estimates, useful for statistical inference
 
 ```
@@ -303,7 +334,10 @@ confint(model_random_slope, oldNames = TRUE, method = "Wald")
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
         <span style="font-size: 20px;"> 
-        The fixed effects estimates suggest that the average cognition score at baseline (time = 0) is 50.56 (p < 0.001), with cognition declining by 0.37 points per biannual assessment. Over a six-year period (time = 3), this results in a total predicted decline of approximately 1.10 points. The 95% confidence interval for the time effect (-0.45 to -0.28) confirms that this decline is statistically significant, making it unlikely due to random chance. Examining the random effects, we find substantial variability in baseline cognition scores (SD = 9.53) and differences in individual rates of cognitive decline (SD = 1.41). Furthermore, the negative correlation (-0.28) between intercept and slope suggests that individuals with higher initial cognition scores tend to experience steeper declines over time.
+        - **Intercept**: Baseline neurocognition score.
+        - **Event (Time)**: Change over time.
+        - **Parental Education**: Effect on cognitive development.
+        - **Random Intercepts & Slopes**: Individual variability in baseline and growth rates.
         </span>
         ::
 
@@ -323,7 +357,7 @@ Use the sJPlot library to create a publication-quality summary table for the LMM
 ```r [sjPlot.r]
 
 # 📌 Generate a publication-quality summary table for the LMM model
-sjPlot::tab_model(model_random_slope,
+sjPlot::tab_model(model_LMM,
     show.se = TRUE, show.df = FALSE, show.ci = FALSE,
     digits = 3, pred.labels = c("Intercept", "Time"),
     dv.labels = c("LMM Model (lme4)"), string.se = "SE",
@@ -358,59 +392,19 @@ sjPlot::tab_model(model_random_slope,
     <summary>✅ <span class="text-l text-green-500">Model Predictions and Filtering</span></summary>
 Generate predicted cognition scores and plot values of 250 randomly selected participants.
 
-```r [Predict&Filter.r]
-# 📌 Generate model predictions for the full dataset
-df_long$predicted_fixed <- predict(model_random_slope, re.form = NA)  
-# ✅ Fixed effects only: Represents the overall population-level trajectory
-
-df_long$predicted_random <- predict(model_random_slope, re.form = ~ (1 | id))  
-# ✅ Includes individual-specific random effects: Allows for variation across participants
-
-# 📌 Select a subset of participant IDs for visualization
-set.seed(123)  # ✅ Set seed for reproducibility
-sample_ids <- sample(unique(df_long$id), size = 250)  # ✅ Randomly select 250 participants
-
-# 📌 Filter dataset to include only sampled participants
-df_long_sub <- df_long %>%
-    filter(id %in% sample_ids)  # ✅ Retain only selected participant IDs
-
-```
-</details>
-
-<details open>
-    <summary>✅ <span class="text-l text-green-500">Create and Customize the Visualization</span></summary>
-Create plot, adding observed data and model predictions.
-
 ```r [CreateVisualization.r]
-# 📌 Create the visualization of individual and overall cognition trajectories
-ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
+# Get predicted neurocognition scores by parental education
+preds_edu <- ggpredict(model_lmm, terms = "parent_education")  # Correct function
 
-    # 📌 Plot observed data (individual trajectories)
-    geom_line(aes(color = "Actual Data"), alpha = 0.3) +
-    geom_point(alpha = 0.3) +
-
-    # 📌 Plot model-predicted values
-    geom_line(aes(y = predicted_random, color = "Random Intercept"), alpha = 0.7) +
-    geom_line(aes(y = predicted_fixed, group = 1, color = "Fixed Effect Mean"), linewidth = 1.2) +
-
-    # 📌 Customize colors for clarity
-    scale_color_manual(values = c(
-        "Actual Data" = "red",
-        "Random Intercept" = "grey40",
-        "Fixed Effect Mean" = "blue"
-    )) +
-
-    # 📌 Add labels and title
-    labs(
-        title = "Random-Intercept & Random-Slope LMM: Individual vs. Overall Trajectories (Subset of 250 Participants)",
-        x = "Assessment Wave",
-        y = "Cognition",
-        color = "Trajectory Type"
-    ) +
-
-    # 📌 Apply a minimalistic theme for clarity
-    theme_minimal() +
-    theme(legend.position = "bottom")  # ✅ Move legend below the plot
+# Plot
+ggplot(preds_edu, aes(x = x, y = predicted)) +
+  geom_point(size = 3, color = "darkred") +
+  geom_line(group = 1, color = "darkred") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  labs(title = "Effect of Parental Education on Neurocognition",
+       x = "Parental Education Level",
+       y = "Predicted Neurocognition Score") +
+  theme_minimal()
 
 ```
 </details>
@@ -425,7 +419,7 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
         <span style="font-size: 20px;">
-        The plot illustrates individual and overall cognition trajectories over time. Red lines represent raw cognition trajectories for each participant, while grey lines show their adjusted trajectories incorporating random intercepts. The blue line represents the overall fixed-effect mean trajectory, depicting typical cognition growth from Baseline to Year 6. The vertical spread of lines indicates variability in initial cognition scores among participants, with some starting higher or lower, and highlights differences in how cognition trends evolve over time. 
+        The plot illustrates xxxxxx. 
         </span>
 
 </details>
@@ -439,23 +433,22 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
 1.  <span class="text-green-500 text-4lg font-extrabold text-transparent">Key Findings</span>
 
-    -   **Decreasing Trajectory**: On average, participants show a slight decrease in cognition from Baseline through Year 6.
-    -   **Inter-Individual Variability**: The random-intercept standard deviation indicates that children differ in their starting cognition scores (intercept) around the overall mean, while the random-slope standard deviation indicates that their are differences in patterns of change in these scores over time among these youth.
+- Neurocognition **changes over time**, but the rate differs across individuals.
+- **Higher parental education** is associated with better cognitive performance.
+- **Individual differences exist** in both starting points and growth rates.
     
 2.  <span class="text-green-500 text-4lg font-extrabold text-transparent">Assumptions & Caveats</span>
 
-       -   **Linearity**: Assumes a linear relationship between time and cognition scores, which may not capture the course of cognitive development.
-       
-       -   **Normality of Random Effects**: Large deviations from normality in random intercepts/slopes can undermine model fit. These random effects should be checked (e.g., via Q-Q plots).
-    
-    -   **Missing Data**: Participants missing a timepoint are excluded unless using advanced missing-data techniques. 
+- Assumes **normally distributed random effects**.
+- May be **sensitive to missing data**.
+- Alternative models (**GEE, SEM**) may be considered.
 
 3.  <span class="text-green-500 text-4lg font-extrabold text-transparent">Alternative Models</span>  
 
-    -   **Random Intercept Only**: If growth rates are assumed the same across participants, `(1|id)` might suffice.
-    -   **Nonlinear Models**: For evaluating different patterns of development, consider polynomial or spline expansions of time.
-    -   **Bayesian LMM**: A Bayesian approach can offer more flexibility in parameter estimation and uncertainty quantification and may offer more flexibility in handling small samples or complex random effects.   
-    
+- **Random Intercept-Only Model** (if slope variability is small).
+- **Growth Curve Models** (if curvilinear trends exist).
+- **Bayesian Mixed Models** (for complex priors).
+
 4.  <span class="text-green-500 text-4lg font-extrabold text-transparent">Practical Tips</span>  
 
     -   **Data Inspection**: Always visualize raw trajectories and predicted lines to confirm model assumptions.
@@ -467,9 +460,11 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
 ### <span class="text-green-500 text-4lg font-extrabold text-transparent">Conclusion</span>
 
-By employing a **random-intercept & random-slope linear mixed model**, we accounted for individual differences in baseline crystallized cognition while estimating an overall growth trend across three timepoints. The fixed effects support a small but consistent downward trajectory, whereas the random intercept highlights subject-specific starting points. This method is especially suited for longitudinal designs, allowing more nuanced analysis than traditional ANOVA or basic difference scores—particularly in developmental research where participants vary widely in initial status and growth patterns.
+By employing a **random-intercept and random-slope linear mixed model**, we accounted for both **individual differences in baseline cognitive performance** and **variation in change trajectories over time**. This approach allows for more precise modeling than traditional repeated-measures ANOVA or simple difference scores by capturing subject-specific growth patterns.
 
-A **random intercept and slope** LMM provides a nuanced way to handle repeated height measurements across multiple timepoints, accommodating individual differences in both baseline (intercept) and growth rate (slope). This framework is especially valuable in developmental research where children may start at different heights and grow at varying speeds. For more complex patterns (e.g., puberty spurts), consider adding nonlinear terms or exploring **growth curve modeling**.
+The fixed effects suggest that **neurocognition changes over time**, with **higher parental education linked to better cognitive performance**. The inclusion of **random slopes** indicates that **individuals differ not only in their starting points but also in their rates of change**, underscoring the importance of modeling both sources of variability.
+
+This method is particularly well-suited for **developmental research** where participants show **heterogeneous trajectories**, making it a valuable tool for understanding cognitive development, intervention effects, and risk factors over time.
 
 ### See also
 - [Introduction to Linear Mixed-Effects Models](https://www.google.com/search?q=linear+mixed+effects+models+longitudinal+analysis+r)  

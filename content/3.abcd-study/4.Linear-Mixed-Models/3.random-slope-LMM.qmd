@@ -1,24 +1,24 @@
 ---
-title: "TEST_Random Intercept Model"
+title: "Random Intercept & Slope LMM"
 author: "Biostatistics Working Group"
 ---
 
 ## <span class="text-green-500 text-4xl font-extrabold text-transparent">Introduction</span>
 
-### <span class="text-green-500 text-xl font-extrabold text-transparent">Overview</span>
-
-A **linear mixed model (LMM)** with a **random intercept** extends traditional (fixed‐effect) linear regression by allowing each participant to have their own unique intercept, in addition to the overall mean intercept. In this example, we demonstrate how to analyze scores on a measure of cognition across multiple timepoints using a random‐intercept LMM to account for individual differences in baseline cognition scores.
-
-<div class="border-2 border-[#00dc82] rounded-lg p-4 mt-6 mb-6 bg-gray-700 shadow-[0_0_10px_white]">
+A **linear mixed model (LMM)** with **random intercepts and slopes** extends traditional linear regression by allowing each participant to have both, a unique intercept (baseline level) and a unique slope (rate of change). In this example, we illustrate how to analyze cognition scores across multiple time points using a random-intercept and random-slope LMM, effectively capturing individual differences in both baseline cognition and longitudinal changes over time.
 
 
-### <span class="text-green-500 text-xl font-extrabold text-transparent">Objectives</span>
+<div class="flex justify-center">
+  <div class="border-2 border-[#00dc82] text-sm w-3/4 rounded-lg p-1 mt-4 mb-0 bg-gray-700 shadow-[0_0_10px_white]">
+    <span class="text-green-500 text-lg font-extrabold text-transparent">Objectives</span>
 
--   **Fit** a random‐intercept LMM for cognition data across four bi-annual timepoints.
--   **Explain** how subject-specific intercepts capture baseline cognition differences.
--   **Investigate** cognition growth patterns, accounting for within-person correlation.
--   **Visualize** random effects and overall trend in cognition scores.
+- **Fit** a random‐intercept and random‐slope LMM for cognition data across four timepoints.  
+- **Explain** how subject-specific intercepts reflect baseline cognition differences.  
+- **Examine** how subject-specific slopes capture variability in cognition change.  
+- **Investigate** cognition growth while accounting for within-person correlation.  
+- **Visualize** random effects (intercepts & slopes) and the overall cognition trend.  
 
+</div>
 </div>
 
 <hr border="2" style="border-color: green;">
@@ -44,7 +44,7 @@ library(kableExtra)  # Formatting & styling in HTML/Markdown reports
 library(performance) # Useful functions for model diagnostics & comparisons
 
 # 📌 Define file paths (Update as needed)
-nc_file <- "/path_to/Neurocognition.parquet"
+nc_file <- "/Users/shawes/ABCD/data/release6/Neurocognition/Neurocognition.parquet"
 
 # 📌 Load relevant variables from the Parquet file
 nc_data <- read_parquet(nc_file,
@@ -128,11 +128,12 @@ descriptives_table
 
 <figure class="w-full text-center">
 
-<ImageComponent :src="/examples/LMM/Descriptives_Table.png" alt="Table Output" width="800" style="display: block; margin: auto;" />
+<ImageComponent :src="/examples/LMM/SummaryTable.png" alt="Table Output" width="800" style="display: block; margin: auto;" />
 
 </ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: Descriptive Statistics</figcaption>
 
 </figure>
+
 
 ::
 ::
@@ -151,23 +152,24 @@ descriptives_table
 
 ```r [Model.r]
 
-# 📌 Fit a Linear Mixed Model (LMM) with random intercepts for each participant
-model_random_intercept <- lmerTest::lmer(
-    cognition ~ time + (1 | id), # Fixed effect (time), random intercept (id)
+# 📌 Fit a Linear Mixed Model (LMM) to with random intercepts and slopes for each participant
+model_random_slope <- lmerTest::lmer(
+    cognition ~ time + (1 + time | id), # Fixed effect (time), random intercept & slope (id)
     data = df_long # Dataset containing repeated measures of cognition
-)
 
 # 📌 Generate a summary table for the LMM model
-sjPlot::tab_model(model_random_intercept,
+sjPlot::tab_model(model_random_slope,
     show.se = TRUE, show.df = FALSE, show.ci = FALSE,
-    digits = 3, pred.labels = c("Intercept", "Time"),
-    dv.labels = c("LMM Model (lme4)"), string.se = "SE",
+    digits = 3, 
+    pred.labels = c("Intercept", "Time", "Random Slope (Time)"),  # Adjust predictor labels
+    dv.labels = c("Random Intercept & Slope LMM"),  # Update model label
+    string.se = "SE",
     string.p = "P-Value"
 )
 
 # Also used to display model output 
-#summary(model_random_intercept)
-#confint(model_random_intercept, method = "Wald")
+#summary(model_random_slope)
+#confint(model_random_slope, method = "Wald")
 
 ```
 
@@ -181,10 +183,13 @@ sjPlot::tab_model(model_random_intercept,
 
 </figure>
 
-        ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
+       ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
         <span style="font-size: 20px;">
 
-        The **fixed effects estimates** indicate that the **average baseline cognition score** is **50.561 (SE = 0.102, p < 0.001)**, with cognition declining by approximately **0.37 points per biannual assessment** (**Time coefficient = -0.366, SE = 0.042, p < 0.001**), confirming a significant negative trajectory over time. **Random effects estimates** highlight substantial individual variability, with the **random intercept variance (τ00 = 90.73)** suggesting significant differences in baseline cognition. A **negative intercept-slope correlation (ρ01 = -0.28)** indicates that individuals with higher initial cognition tend to experience steeper declines.
+        The **fixed effects estimates** suggest that the average cognition score at baseline **(time = 0) is 50.561 (p < 0.001)**, with cognition declining by **0.37 points per biannual assessment**. Over a six-year period, this results in a total predicted decline of approximately **1.10 points**.
+        
+        Examining the **random effects**, we find considerable variability in both baseline cognition scores **(random intercept variance τ00 = 90.73)** and individual rates of cognitive decline **(random slope variance τ11 = 2.00)**. The negative correlation **(ρ01 = -0.28)** between the intercept and slope suggests that individuals with higher initial cognition scores tend to experience steeper declines over time. This model better accounts for individual differences in both **starting cognition levels and their rate of change**, making it a more flexible approach compared to the random intercept-only model.
+
         </span>
         ::
 
@@ -256,11 +261,13 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
         ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
         <span style="font-size: 20px;">
-        The plot illustrates individual and overall cognition trajectories over time. Red lines represent raw cognition trajectories for each participant, while grey lines show their adjusted trajectories incorporating random intercepts. The blue line represents the overall fixed-effect mean trajectory, depicting typical cognition growth from Baseline to Year 6. The vertical spread of lines indicates variability in initial cognition scores among participants, with some starting higher or lower. 
+
+        The plot illustrates individual and overall cognition trajectories over time. **Red lines represent observed cognition trajectories for each participant**, while **grey lines** depict their model-estimated trajectories incorporating **both random intercepts and random slopes**. The **blue line** represents the overall **fixed-effect mean trajectory**, summarizing the population-average trend in cognition from **Baseline to Year 6**.
+
+        Compared to the **random intercept-only model**, the **random slopes component allows for individual differences in the rate of cognitive change** over time. This results in **diverging trajectories**, where some individuals experience **steeper declines** while others remain relatively stable. The **negative intercept-slope correlation (-0.28)** suggests that those with higher initial cognition tend to decline faster, a pattern captured by the spread of grey lines becoming wider over time.
+
         </span>
 
-</details>
-    
 ::
 ::
 
@@ -268,10 +275,11 @@ ggplot(df_long_sub, aes(x = session, y = cognition, group = id)) +
 
 ## <span class="text-green-500 text-4xl font-extrabold text-transparent">Discussion</span>
 
--   Gradual Cognitive Decline: On average, participants exhibit a slight but consistent decline in cognition scores from Baseline to Year 6, suggesting a subtle downward trend over time.
+- **Diverse Cognitive Trajectories:** While the overall trend indicates a gradual decline in cognition scores from Baseline to Year 6, the inclusion of random slopes reveals meaningful individual differences in rates of change over time.
 
--   Individual Differences in Baseline Cognition: The random-intercept variance indicates substantial variability in participants’ starting cognition scores, reflecting meaningful differences in baseline ability levels.
-    
-By employing a **random-intercept linear mixed model**, we accounted for individual differences in baseline cognition while estimating an overall growth trend across 4 timepoints. The fixed effects support a small but consistent downward trajectory, whereas the random intercept highlights subject-specific starting points. 
+- **Variability in Baseline & Change:** The random intercept variance highlights substantial differences in initial cognition scores, while the random slope variance suggests that some participants experience steeper declines, whereas others remain relatively stable.
 
+- **Intercept-Slope Relationship:** The negative intercept-slope correlation implies that individuals with higher initial cognition tend to decline faster, reinforcing the importance of considering both baseline ability and rate of change in cognitive aging research.
+
+By employing a **random-intercept and random-slope linear mixed model**, we not only accounted for individual differences in baseline cognition but also captured person-specific variations in cognitive decline. The results emphasize that cognitive trajectories are not uniform—some individuals decline rapidly, while others exhibit more stable cognition over time. This model provides a nuanced perspective on cognitive aging, highlighting the necessity of personalized approaches in longitudinal research.
 
