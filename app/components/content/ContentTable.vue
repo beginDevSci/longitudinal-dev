@@ -1,14 +1,5 @@
 <template>
   <div class="mb-6">
-    test 1
-
-    <img src="/logo.png" />
-
-    test 2
-
-    <NuxtImg src="/logo.png" />
-
-    test 3
     <!-- Table Title (Optional) -->
     <h3
       v-if="title"
