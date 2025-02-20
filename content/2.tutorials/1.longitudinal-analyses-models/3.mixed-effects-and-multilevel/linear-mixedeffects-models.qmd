@@ -39,6 +39,7 @@ In this tutorial, we will introduce the concept of linear mixed-effects models (
 3. Interpret the results of the LMM analysis.
 
 Let's dive in!
+
 </div>
 
 <div class="hands-on-section">

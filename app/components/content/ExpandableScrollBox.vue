@@ -13,7 +13,7 @@
       @click="expanded = !expanded"
     >
       <span class="text-white-100 font-medium">
-        {{ expanded ? "Show Less" : "Show More" }}
+        {{ expanded ? "Show Less" : "Show Full Code" }}
       </span>
       <Icon
         :name="expanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
