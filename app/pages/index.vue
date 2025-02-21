@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const { data: page } = await useAsyncData("index", () =>
   queryContent("/").findOne()
 );
@@ -11,12 +10,11 @@ useSeoMeta({
   description: page.value.description,
   ogDescription: page.value.description,
 });
-
 </script>
 
 <template>
   <div>
-    <ULandingHero v-if="page.hero" v-bind="page.hero">
+    <ULandingHero v-if="page.hero" v-bind="page.hero" class="!py-0 sm:!py-0 md:!py-0">
       <template #headline>
         <UBadge
           v-if="page.hero.headline"
