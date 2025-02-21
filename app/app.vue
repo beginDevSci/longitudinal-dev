@@ -32,6 +32,18 @@ provide("navigation", navigation);
   <div>
     <NuxtLoadingIndicator />
     <AppHeader />
+    <div
+      class="border-l-6 border-yellow-500 bg-yellow-100 p-5 shadow-lg text-center rounded-lg"
+    >
+      <p
+        class="text-2xl font-extrabold text-yellow-700 flex items-center justify-center"
+      >
+        ⚠️ Caution: Site Under Construction ⚠️
+      </p>
+      <p class="text-lg font-semibold text-yellow-800 mt-2">
+        Examples may be incomplete or incorrect.
+      </p>
+    </div>
     <UMain>
       <NuxtLayout>
         <NuxtPage />
