@@ -67,7 +67,7 @@ export default defineNuxtConfig({
         '/abcd-study/'
       ],
       crawlLinks: true, // Enable crawling to find more links automatically
-      ignore: []
+      ignore: ['/tutorials', '/api/_content/query']
     }
   },
 
@@ -98,6 +98,9 @@ export default defineNuxtConfig({
   },
 
   content: {
+    sources: {
+      disable: ['_2.tutorials', '_3.abcd-study_og'] // Ignore this folder
+    },
     documentDriven: true, // Ensuring document-driven mode is correctly enabled
     highlight: {
       langs: ['json', 'js', 'ts', 'html', 'css', 'vue', 'shell', 'md', 'yaml', 'r', 'mdc', 'python']
