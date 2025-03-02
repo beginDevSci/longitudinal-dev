@@ -201,14 +201,14 @@
             >Github</a
           >
         </li>
-        <li>
+        <!-- <li>
           <NuxtLink
             to="/playground"
             class="text-white hover:text-gray-300 whitespace-nowrap"
           >
             Playground
           </NuxtLink>
-        </li>
+        </li> -->
       </ul>
     </div>
 
