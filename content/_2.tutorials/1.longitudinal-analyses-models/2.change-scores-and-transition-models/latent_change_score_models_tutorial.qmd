@@ -1,6 +1,6 @@
 ---
 title: "Latent Change Score Models (LCSM)"
-author: "Your Name"
+#author: "Your Name"
 format: 
   html:
     code-tools: true
