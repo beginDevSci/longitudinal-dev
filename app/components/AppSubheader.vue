@@ -201,14 +201,6 @@
             >Github</a
           >
         </li>
-        <!-- <li>
-          <NuxtLink
-            to="/playground"
-            class="text-white hover:text-gray-300 whitespace-nowrap"
-          >
-            Playground
-          </NuxtLink>
-        </li> -->
       </ul>
     </div>
 
