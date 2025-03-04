@@ -1,0 +1,312 @@
+---
+title: "Random Intercept LMM"
+author: "Biostatistics Working Group"
+---
+
+## <span class="text-green-500 text-4xl font-extrabold text-transparent">Introduction</span>
+
+A **linear mixed model (LMM)** with a **random intercept** extends ordinary linear regression (with fixed effects only), by allowing each participant to have their own unique baseline level, in addition to the overall mean intercept. This approach accounts for individual differences while modeling changes over time.
+
+In this example, we analyze scores on a cognitive measure from participants assessed at four annual time points in the ABCD Study®. By using a random intercept LMM, we model cognitive trajectories while allowing for individual variation in baseline performance.
+
+This approach enables us to estimate the overall effect of time on cognition while accounting for individual differences in starting scores. Finally, we visualize the model’s predictions to examine how cognition changes over time across participants.
+
+<div class="flex justify-center">
+<div class="border-2 border-[#00dc82] text-sm w-3/4 rounded-lg p-1 mt-4 mb-0 bg-gray-700 shadow-[0_0_10px_white]">
+<span class="text-green-500 text-lg font-extrabold text-transparent">Objectives</span>
+
+- **Use** a linear mixed model (LMM) with a random intercept to analyze repeated measures data.
+
+- **Model** cognitive scores across multiple time points while accounting for individual differences in baseline performance.
+
+- **Estimate** the overall effect of time while allowing participants to have unique starting points.
+
+- **Visualize** random effects and overall trend in cognition scores.
+
+</div>
+</div>
+
+<hr border="2" style="border-color: green;">
+
+## <span class="text-4xl text-green-500 font-black">Preprocessing</span>
+
+::tabs
+
+::tab{label="Data Wrangling" icon="i-heroicons-document-text"}
+
+> Load libraries, read in data, and process data for analysis.
+
+<ExpandableScrollBox>
+
+```r [LoadData.r]
+# Load necessary libraries
+library(arrow)       # For reading Parquet files
+library(tidyverse)   # For data manipulation & visualization
+library(gtsummary)   # For generating publication-quality summary tables
+library(rstatix)     # Provides tidy-format statistical tests
+library(lme4)        # Linear mixed-effects models (LMMs)
+library(kableExtra)  # Formatting & styling in HTML/Markdown reports
+library(performance) # Useful functions for model diagnostics & comparisons
+
+# Define file paths (Update as needed)
+ag_file <- "path-to-file/ABCD_General.parquet"
+nc_file <- "path-to-file/Neurocognition.parquet"
+
+# Load relevant variables from the Parquet file
+ag_data <- read_parquet(ag_file, col_select = c("participant_id", "session_id", "ab_g_dyn__design_site", "ab_g_stc__design_id__fam"))
+nc_data <- read_parquet(nc_file,
+    col_select = c("participant_id", "session_id", 
+                   "nc_y_nihtb__comp__cryst__fullcorr_tscore"))
+
+# Merge data on participant_id and session_id 
+combined_data <- ag_data %>%
+  inner_join(nc_data, by = c("participant_id", "session_id")) %>%
+  group_by(participant_id) %>%
+  ungroup()
+
+#  📌 Prepare data for LMM analysis
+df_long <- combined_data %>%
+    select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
+    # Filter to include only 4 relevant measurement occasions
+    filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
+    #  📌 Ensure dataset is sorted by participant and session
+    arrange(participant_id, session_id) %>%
+    #  📌 Convert categorical and numerical variables
+    mutate(
+        participant_id = factor(participant_id), # Convert IDs to factors
+        session_id = factor(session_id, # Convert session to a factors
+            levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
+            labels = c("Baseline", "Year_2", "Year_4", "Year_6")
+        ),
+        time = as.numeric(session_id) - 1, # Convert session_id to numeric
+        ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
+        ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
+        nc_y_nihtb__comp__cryst__fullcorr_tscore =
+            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2) 
+    ) %>% 
+    #  📌 Rename variables for clarity
+    rename(
+        site = ab_g_dyn__design_site,
+        family_id = ab_g_stc__design_id__fam,
+        cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
+    ) %>%
+  #  📌 Remove participants with any missing cognition scores across time points
+    group_by(participant_id) %>%
+    group_by(participant_id) %>%
+    filter(sum(!is.na(cognition)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
+    ungroup() %>%
+    drop_na(site, family_id, participant_id, cognition)  # Ensure all remaining rows have complete cases
+
+```
+
+</ExpandableScrollBox>
+
+::
+
+::tab{label="Descriptive Statistics" icon="i-heroicons-document-text"}
+> Display summary statistics.
+
+<ExpandableScrollBox>
+
+```r [PreviewData.r]
+#  📌 Create descriptive summary table
+descriptives_table <- df_long %>%
+  select(session_id, cognition) %>%
+  tbl_summary(
+    by = session_id,
+    missing = "no",
+    label = list(
+      cognition ~ "Cognition"
+    ),
+    statistic = list(all_continuous() ~ "{mean} ({sd})")
+  ) %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
+  bold_labels() %>%
+  italicize_levels()
+
+#  📌 Apply compact styling
+theme_gtsummary_compact()
+
+#  📌 Print the table
+descriptives_table
+
+```
+
+</ExpandableScrollBox>
+
+<figure class="w-full text-center">
+
+<ImageComponent :src="/examples/LMM/SummaryTable.png" alt="Table Output" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: Descriptive Statistics</figcaption>
+
+</figure>
+
+::
+::
+
+<hr border="2" style="border-color: green;">
+
+## <span class="text-green-500 text-4xl font-extrabold text-transparent">Analysis</span>
+
+::tabs
+
+::tab{label="Fit Model" icon="i-heroicons-document-text"}
+
+> Fit a linear mixed model to predict cognition scores over time.
+
+<ExpandableScrollBox>
+
+```r [Model.r]
+
+#  📌 Fit a Linear Mixed Model (LMM) with random intercepts 
+model <- lmerTest::lmer(
+    cognition ~ time + (1 | site:family_id:participant_id), # Fixed effect (time), random intercept (participant_id, site, family_id)
+    data = df_long # Dataset containing repeated measures of cognition
+)
+
+# Generate a summary table for the LMM model
+sjPlot::tab_model(model,
+    show.se = TRUE, show.df = FALSE, show.ci = FALSE,
+    digits = 3, pred.labels = c("Intercept", "Time"),
+    dv.labels = c("LMM Model (lme4)"), string.se = "SE",
+    string.p = "P-Value"
+)
+
+#  📌 Also used to display model output 
+summ <- summary(model)
+#confint(model, method = "Wald")
+
+```
+
+</ExpandableScrollBox>
+
+<figure class="mx-auto text-center bg-white p-4 rounded-lg shadow-md" style="width: 800px;" justify="center">
+
+<ImageComponent :src="/examples/LMM/LMM_Table.png" alt="LMM Table" width="800" style="display: block; margin: auto;" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Table</figcaption>
+
+</figure>
+
+        ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
+        <span style="font-size: 20px;">
+
+        The **fixed effects estimates** indicate that the average baseline cognition score is `r round(summ$coefficients[1],2)` (SE = `r round(summ$coefficients[3],3)`, p < 0.001), with cognition declining by approximately `r round(abs(summ$coefficients[2]),2)` points per biannual assessment (Time coefficient = `r round(summ$coefficients[2],2)`, SE = `r round(summ$coefficients[4],3)`, p < 0.001), confirming a significant negative trajectory over time.
+
+        The **random intercept variance (τ00 = `r round(summ$varcor[[1]][1],2)`)** suggests substantial individual differences in baseline cognition scores, reinforcing the need to account for between-person variability. The intraclass correlation (ICC = `r round(performance::icc(model)[[1]],2)`) indicates that a large proportion (`r round(performance::icc(model)[[1]],2)*100`%) of the total variance in cognition scores is attributable to differences between-individuals rather than within-person fluctuations over time. Since **no random slope is included**, this model assumes a common rate of cognitive decline across all participants, capturing individual differences only in their starting cognition levels.
+
+        </span>
+        ::
+
+::
+
+::tab{label="Visualization" icon="i-heroicons-document-text"}
+
+> Plot the model-implied trajectories for each individual.
+
+<ExpandableScrollBox>
+
+```r [Visualization.r]
+#  📌 Ensure there are no missing values in site, family_id, or participant_id
+df_long <- df_long %>%
+  filter(!is.na(site), !is.na(family_id), !is.na(participant_id))  # Remove rows with missing nesting variables
+
+#  📌 Ensure factor levels match those used in model fitting
+df_long <- df_long %>%
+  mutate(
+    site = factor(site, levels = unique(df_long$site)),
+    family_id = factor(family_id, levels = unique(df_long$family_id)),
+    participant_id = factor(participant_id, levels = unique(df_long$participant_id))
+  )
+
+#  📌 Generate model predictions
+df_long$predicted_fixed <- predict(model, newdata = df_long, re.form = NA)  
+# ✅ Fixed effects only: Represents the overall population-level trajectory
+
+df_long$predicted_random <- predict(model, newdata = df_long, re.form = ~ (1 | site:family_id:participant_id), allow.new.levels = TRUE)  
+# ✅ Includes individual-specific random effects: Allows for variation across participants
+
+#  📌 Select a subset of participant IDs for visualization
+set.seed(321)  # ✅ Set seed for reproducibility
+sample_ids <- sample(unique(df_long$participant_id), size = 250)  # ✅ Randomly select 250 participants
+
+#  📌 Filter dataset to include only sampled participants
+df_long_sub <- df_long %>%
+    filter(participant_id %in% sample_ids)  # ✅ Retain only selected participant IDs
+
+#  📌 Create the visualization of individual and overall cognition trajectories
+ggplot(df_long_sub, aes(x = time, y = cognition, group = participant_id)) +  # ✅ Use `time` for x-axis
+
+    #  📌 Plot observed data (individual trajectories)
+    geom_line(aes(color = "Actual Data"), alpha = 0.3) +
+    geom_point(alpha = 0.3) +
+
+    #  📌 Plot model-predicted values
+    geom_line(aes(y = predicted_random, color = "Random Intercept"), alpha = 0.7) +
+    geom_line(aes(y = predicted_fixed, group = 1, color = "Fixed Effect Mean"), linewidth = 1.2) +
+
+    #  📌 Customize colors for clarity
+    scale_color_manual(values = c(
+        "Actual Data" = "red",
+        "Random Intercept" = "grey40",
+        "Fixed Effect Mean" = "blue"
+    )) +
+
+    #  📌 Format x-axis labels to reflect `session_id`
+    scale_x_continuous(
+      breaks = 0:3,  # Assuming time is coded as 0,1,2,3
+      labels = c("Baseline", "Year 2", "Year 4", "Year 6")
+    ) +
+
+    #  📌 Add labels and title
+    labs(
+        title = "Random-Intercept LMM: Individual vs. Overall Cognition Trajectories",
+        x = "Assessment Wave",
+        y = "Cognition",
+        color = "Trajectory Type"
+    ) +
+
+    #  📌 Apply a minimalistic theme for clarity
+    theme_minimal() +
+    theme(legend.position = "bottom")  # ✅ Move legend below the plot
+
+```
+
+</ExpandableScrollBox>
+
+<figure class="mx-auto text-center bg-white p-4 rounded-lg shadow-md" style="width: 800px;" justify="center">
+
+<ImageComponent :src="/examples/LMM/LMM_Trajectories.png" alt="LMM Trajectories" width="800" class="block mx-auto" />
+
+</ImageComponent> <figcaption class="text-gray-600 text-sm mt-2">Figure: LMM Trajectories</figcaption>
+
+</figure>
+
+        ::card{title="Interpretation" icon="i-heroicons-light-bulb" style="max-width: 800px; margin: auto;"}
+        <span style="font-size: 20px;">
+
+        The plot illustrates individual and overall cognition trajectories over time. **Red lines represent observed cognition trajectories for each participant**, while **grey lines** show their model-estimated trajectories incorporating **random intercepts**. The **blue line** represents the overall **fixed-effect mean trajectory**, reflecting the population-average trend in cognition from **Baseline to Year 6**.
+        
+        The **vertical spread of lines at each time point** highlights substantial individual variability in **baseline cognition scores**, as participants start at different levels. However, since this model assumes a **common rate of change** over time, all individuals follow **parallel** trajectories with different starting points, reinforcing the importance of accounting for between-person differences in initial cognition.
+
+        </span>
+ 
+::
+::
+
+<hr border="2" style="border-color: green;">
+
+## <span class="text-green-500 text-4xl font-extrabold text-transparent">Discussion</span>
+
+- Gradual cognitive decline: On average, participants exhibited a slight decline in cognitive scores over multiple assessments, reflecting expected age-related trends.  
+
+- Random intercept variability: The model accounted for individual differences in baseline cognition, with some participants starting at higher or lower levels.  
+
+- Model interpretation: While a general trend of decline was observed, individual trajectories varied, highlighting the importance of accounting for within-subject variability.  
+
+- Conclusion: A **random intercept LMM** effectively models longitudinal data by allowing each participant to have a unique starting point, improving estimates of overall change. 
+
+
+
