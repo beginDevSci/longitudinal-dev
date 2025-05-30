@@ -8,5 +8,5 @@
     ```r
     TestComponent
     ```
-    `
+    
 </template>

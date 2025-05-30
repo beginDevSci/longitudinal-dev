@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     '@nuxthq/studio',
     'nuxt-og-image',
     '@nuxtjs/tailwindcss',
-    '@nuxt/icon' // Add the @nuxt/icon module
+    '@nuxt/icon'
   ],
 
   image: {
@@ -98,17 +98,12 @@ export default defineNuxtConfig({
   },
 
   content: {
-    documentDriven: true, // Ensuring document-driven mode is correctly enabled
     highlight: {
-      langs: ['json', 'js', 'ts', 'html', 'css', 'vue', 'shell', 'md', 'yaml', 'r', 'mdc', 'python']
-    },
-    markdown: {
-      remarkPlugins: [
-        'remark-math' // Add remark-math plugin
-      ],
-      rehypePlugins: [
-        'rehype-katex' // Add rehype-katex plugin
-      ]
+      theme: {
+        default: 'github-dark',
+        dark: 'github-light'
+      },
+      langs: ['js', 'ts', 'r', 'python', 'c', 'cpp']
     }
   },
 
