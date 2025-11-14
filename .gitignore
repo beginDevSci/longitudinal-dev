@@ -78,4 +78,5 @@ OPTION_A_PLAN*.md
 # Note: /docs/ is NOT ignored - it's used for GitHub Pages deployment
 
 # Generated JSON from markdown (Stage 5 validation)
-content/posts/*.post.json
+# NOTE: These are now committed to ensure CI builds work
+# content/posts/*.post.json
