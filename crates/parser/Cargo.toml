@@ -10,7 +10,7 @@ name = "md2json"
 path = "src/main.rs"
 
 [dependencies]
-pulldown-cmark = "=0.11.3"
+pulldown-cmark = "=0.13.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
