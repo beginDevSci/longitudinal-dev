@@ -19,7 +19,7 @@ description: Introduce latent growth curve modeling to estimate average emotiona
 
 ## Summary {.summary}
 
-Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
+Latentz Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
 
 ## Features {.features}
 
