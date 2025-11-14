@@ -1,0 +1,10 @@
+# Configuration for cargo-audit
+# See: https://github.com/rustsec/rustsec/blob/main/cargo-audit/audit.toml.example
+
+[advisories]
+# Ignore unmaintained warnings for transitive dependencies we cannot control
+# These are INFO-level advisories, not security vulnerabilities
+ignore = [
+    "RUSTSEC-2024-0436",  # paste - unmaintained (via leptos dependency chain)
+    "RUSTSEC-2024-0320",  # yaml-rust - unmaintained (via syntect)
+]

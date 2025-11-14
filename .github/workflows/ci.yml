@@ -90,7 +90,13 @@ jobs:
         run: cargo install cargo-audit --locked
 
       - name: Security audit
-        run: cargo audit --deny warnings
+        run: |
+          # Ignore unmaintained warnings for transitive dependencies we cannot control
+          # RUSTSEC-2024-0436: paste (via leptos) - unmaintained but no security issue
+          # RUSTSEC-2024-0320: yaml-rust (via syntect) - unmaintained but no security issue
+          cargo audit --deny warnings \
+            --ignore RUSTSEC-2024-0436 \
+            --ignore RUSTSEC-2024-0320
 
       - name: Tailwind compliance checks
         run: |
