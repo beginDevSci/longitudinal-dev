@@ -77,18 +77,13 @@ pub struct OutputData {
 }
 
 /// Output format types
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum OutputFormat {
+    #[default]
     Text,
     Table,
     Image,
-}
-
-impl Default for OutputFormat {
-    fn default() -> Self {
-        Self::Text
-    }
 }
 
 /// Note block data - explanation/context callout cards
