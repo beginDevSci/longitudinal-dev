@@ -30,7 +30,7 @@ regex = "1.0"
 # JSON handling
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-jsonschema = "0.17"
+jsonschema = "0.34"
 url = "2.5"
 
 # R process execution (non-WASM only)
