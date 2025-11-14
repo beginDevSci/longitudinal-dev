@@ -44,7 +44,7 @@ longitudinal_parser = { path = "crates/parser" }
 # Date/time handling for test runner
 chrono = { version = "=0.4.42", optional = true }
 # Shared dependencies (also used by other binaries)
-clap = { version = "4.0", features = ["derive"], optional = true }
+clap = { version = "4.5", features = ["derive"], optional = true }
 anyhow = { version = "1.0", optional = true }
 regex = { version = "1.0", optional = true }
 jsonschema = { version = "0.17", optional = true }
