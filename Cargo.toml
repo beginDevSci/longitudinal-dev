@@ -28,7 +28,7 @@ required-features = ["ssr"]
 
 [dependencies]
 # Features are scoped per build target to minimize WASM bundle size
-leptos = { version = "=0.8.10", default-features = false }
+leptos = { version = "=0.8.12", default-features = false }
 leptos_meta = { version = "=0.8.5", default-features = false }
 # pinned to match wasm-bindgen-cli version used in CI (must match exactly)
 wasm-bindgen = { version = "=0.2.104", optional = true }
