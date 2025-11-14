@@ -1,0 +1,8 @@
+# Allowed Custom R Functions
+# Add one function name per line (without parentheses)
+# Lines starting with # are comments
+
+# Add custom helper functions here as they're created
+# Example:
+# my_custom_function
+# prepare_abcd_data

@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "List of collapsible sections or prose blocks",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["collapsible", "prose"]
+          },
+          "title": {
+            "type": "string",
+            "description": "Title for collapsible sections"
+          },
+          "content": {
+            "type": "string",
+            "description": "HTML content"
+          },
+          "open": {
+            "type": "boolean",
+            "description": "Whether collapsible section is open by default",
+            "default": true
+          }
+        }
+      },
+      "default": []
+    },
+    "prose": {
+      "type": ["string", "null"],
+      "description": "Fallback prose content for backward compatibility",
+      "default": null
+    }
+  },
+  "additionalProperties": false
+}

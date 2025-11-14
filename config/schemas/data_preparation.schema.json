@@ -1,0 +1,179 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Data Preparation Section - Flexible Blocks (v2)",
+  "description": "Simplified block-based system with 3 types: code, output, note. Author controls exact ordering with zero constraints.",
+
+  "type": "object",
+  "required": ["content_blocks"],
+
+  "properties": {
+    "content_blocks": {
+      "type": "array",
+      "description": "Ordered sequence of content blocks. Author has complete control over order and quantity. No validation constraints on relationships between blocks.",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/CodeBlock" },
+          { "$ref": "#/definitions/OutputBlock" },
+          { "$ref": "#/definitions/NoteBlock" }
+        ]
+      }
+    }
+  },
+
+  "definitions": {
+    "CodeBlock": {
+      "type": "object",
+      "required": ["type", "data"],
+      "description": "Code snippet block for displaying R, Python, Julia, or other programming language code. Can appear any number of times in any position.",
+      "properties": {
+        "type": {
+          "const": "code",
+          "description": "Block type discriminator"
+        },
+        "data": {
+          "type": "object",
+          "required": ["title", "content"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Code block title describing the code's purpose",
+              "examples": [
+                "Load and Filter Data",
+                "Transform Variables",
+                "Quality Checks",
+                "Create Composites",
+                "Handle Missing Data"
+              ]
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The actual code content",
+              "examples": [
+                "library(tidyverse)\ndf <- read_csv('data.csv')",
+                "df <- df %>% filter(!is.na(outcome))",
+                "summary(df)"
+              ]
+            },
+            "language": {
+              "type": "string",
+              "default": "r",
+              "description": "Programming language identifier for syntax highlighting. Defaults to 'r' if not specified.",
+              "examples": ["r", "python", "julia", "bash", "sql"]
+            },
+            "filename": {
+              "type": "string",
+              "description": "Optional source filename reference for context",
+              "examples": ["01_load_data.R", "02_clean.py", "prepare.jl"]
+            },
+            "default_open": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the code block should be expanded by default on page load. If false or omitted, the block starts collapsed. Useful for showing key code sections without requiring user interaction.",
+              "examples": [true, false]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "OutputBlock": {
+      "type": "object",
+      "required": ["type", "data"],
+      "description": "Output/result block for displaying console output, tables, or images. Can appear any number of times in any position.",
+      "properties": {
+        "type": {
+          "const": "output",
+          "description": "Block type discriminator"
+        },
+        "data": {
+          "type": "object",
+          "required": ["content"],
+          "properties": {
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Output content. Interpretation depends on format field:\n- format='text': Raw console output (displayed in preformatted code block)\n- format='table': HTML table markup or delimited table data\n- format='image': Image URL or file path (absolute or relative)",
+              "examples": [
+                "Loaded 8,234 observations\n2,156 unique participants\n342 families",
+                "/images/posts/glmm/data_quality.png",
+                "<table><tr><th>Variable</th><th>N</th><th>Missing</th></tr></table>"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "enum": ["text", "table", "image"],
+              "default": "text",
+              "description": "Output format for rendering:\n- 'text': Preformatted console output\n- 'table': Tabular data (HTML or CSV/TSV format)\n- 'image': Plot, diagram, or screenshot"
+            },
+            "alt": {
+              "type": "string",
+              "description": "Accessibility alt text. Strongly recommended when format='image' for screen reader support.",
+              "examples": [
+                "Bar chart showing missing data patterns across variables",
+                "Scatterplot of original vs transformed variables"
+              ]
+            },
+            "caption": {
+              "type": "string",
+              "description": "Optional caption displayed below output. Useful for images and tables to provide context.",
+              "examples": [
+                "Figure 1: Missing data patterns show minimal missingness (<5%) across key variables",
+                "Table 1: Descriptive statistics before and after transformation"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "NoteBlock": {
+      "type": "object",
+      "required": ["type", "data"],
+      "description": "Note block for explanations, interpretations, or contextual information. Renders as a visually distinct callout card. Can appear any number of times in any position.",
+      "properties": {
+        "type": {
+          "const": "note",
+          "description": "Block type discriminator"
+        },
+        "data": {
+          "type": "object",
+          "required": ["title", "content"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Note heading or label",
+              "examples": [
+                "Processing Rationale",
+                "Data Quality Notes",
+                "Transformation Justification",
+                "Missing Data Strategy"
+              ]
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Note body text explaining rationale, decisions, or observations. Can be multiple paragraphs.",
+              "examples": [
+                "We chose to filter to complete cases because the missingness pattern was not random and imputation could introduce bias.",
+                "The log transformation normalizes the skewed distribution of alcohol use, making it more appropriate for linear modeling."
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "additionalProperties": false
+}

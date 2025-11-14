@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": [
+    "paragraphs"
+  ],
+  "properties": {
+    "paragraphs": {
+      "type": "array",
+      "description": "Narrative paragraphs for the discussion section (at least 1 paragraph required)",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

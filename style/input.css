@@ -1,0 +1,2447 @@
+@import "tailwindcss";
+
+@source "./src/**/*.rs";
+@source "./dist/**/*.html";
+
+/* Design Tokens - Dark-mode ready structure */
+@theme {
+  /* ========================================
+     SPACING SCALE
+     ======================================== */
+  --spacing-1: 0.25rem;   /* 4px  - tight elements */
+  --spacing-2: 0.5rem;    /* 8px  - inline spacing */
+  --spacing-3: 0.75rem;   /* 12px - default gap */
+  --spacing-4: 1rem;      /* 16px - comfortable */
+  --spacing-5: 1.25rem;   /* 20px - medium-large */
+  --spacing-6: 1.5rem;    /* 24px - container padding */
+  --spacing-8: 2rem;      /* 32px - large spacing */
+  --spacing-10: 2.5rem;   /* 40px - extra large */
+  --spacing-12: 3rem;     /* 48px - section vertical */
+  --spacing-16: 4rem;     /* 64px - section separation */
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-sm: 0.375rem;  /* 6px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.5rem;   /* 24px */
+  --radius-3xl: 2rem;     /* 32px */
+  --radius-full: 9999px;
+
+  /* Semantic radius aliases */
+  --radius-container: var(--radius-2xl);
+  --radius-panel: var(--radius-xl);
+  --radius-pill: var(--radius-full);
+
+  /* ========================================
+     SHADOWS - Minimal elevation scheme
+     ======================================== */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  /* ========================================
+     NEUTRAL PALETTE (Cool slate grays)
+     Slightly cooler tone for modern, technical aesthetic
+     ======================================== */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+
+  /* ========================================
+     ACCENT PALETTE (Teal/Cyan - Modern Data Science)
+     Professional teal for research and technical content
+     ======================================== */
+  --color-accent-50: #ecfeff;
+  --color-accent-100: #cffafe;
+  --color-accent-200: #a5f3fc;
+  --color-accent-300: #67e8f9;
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+  --color-accent-700: #0e7490;
+
+  /* ========================================
+     INFO TONE (Cyan - for informational callouts)
+     ======================================== */
+  --color-info-50: #ecfeff;
+  --color-info-300: #67e8f9;
+  --color-info-500: #06b6d4;
+
+  /* ========================================
+     WARNING TONE (Amber - for warning callouts)
+     ======================================== */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #fcd34d;
+  --color-warning-500: #f59e0b;
+  --color-warning-700: #b45309;
+
+  /* ========================================
+     SUCCESS TONE (Green - for success states, validation)
+     ======================================== */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-300: #86efac;
+  --color-success-500: #22c55e;
+  --color-success-700: #15803d;
+
+  /* ========================================
+     ERROR/DANGER TONE (Red - for errors, required fields, validation)
+     ======================================== */
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-300: #fca5a5;
+  --color-error-500: #ef4444;
+  --color-error-700: #b91c1c;
+
+  /* ========================================
+     SEMANTIC ALIASES - Light mode
+     Dark mode would reassign these to inverted values
+     ======================================== */
+
+  /* Text colors */
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-muted: var(--color-neutral-600); /* Changed from 500 to 600 for WCAG AA compliance (7.5:1 contrast) */
+  --color-text-accent: var(--color-accent-600);
+
+  /* Background colors */
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: var(--color-neutral-50);
+  --color-bg-accent: var(--color-accent-500);
+  --color-bg-accent-subtle: var(--color-accent-100);
+
+  /* Border colors */
+  --color-border-default: var(--color-neutral-300);
+  --color-border-subtle: var(--color-neutral-200);
+  --color-border-accent: var(--color-accent-500);
+
+  /* State-specific semantic colors */
+  --color-text-success: var(--color-success-700);
+  --color-text-warning: var(--color-warning-700);
+  --color-text-error: var(--color-error-700);
+  --color-bg-success: var(--color-success-50);
+  --color-bg-warning: var(--color-warning-50);
+  --color-bg-error: var(--color-error-50);
+  --color-border-success: var(--color-success-500);
+  --color-border-warning: var(--color-warning-500);
+  --color-border-error: var(--color-error-500);
+
+  /* Focus ring variants for different states */
+  --color-focus-ring: var(--color-accent-500);
+  --color-focus-ring-success: var(--color-success-500);
+  --color-focus-ring-warning: var(--color-warning-500);
+  --color-focus-ring-error: var(--color-error-500);
+
+  /* ========================================
+     TYPOGRAPHY SCALE (Responsive with clamp())
+     Fluid typography that scales between min and max viewport sizes
+     ======================================== */
+
+  /* Font Sizes - Responsive with clamp(min, preferred, max)
+     Scales fluidly between mobile (320px) and desktop (1920px) viewports */
+  --font-size-post-title: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);      /* 28px → 40px - Main post title */
+  --font-size-section-title: clamp(1.25rem, 1.125rem + 0.625vw, 1.75rem); /* 20px → 28px - H1 section headings */
+  --font-size-panel-title: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);      /* 16px → 20px - H2/H3 panel headings */
+  --font-size-body: clamp(1rem, 0.97rem + 0.15vw, 1.125rem);            /* 16px → 18px - Regular paragraph text */
+  --font-size-supporting: clamp(0.813rem, 0.8rem + 0.0625vw, 0.875rem); /* 13px → 14px - Secondary/metadata text */
+  --font-size-stat-value: clamp(0.875rem, 0.85rem + 0.125vw, 1rem);     /* 14px → 16px - Stat values */
+
+  /* Line Heights */
+  --leading-tight: 1.25;                /* For headings and titles */
+  --leading-normal: 1.5;                /* For body text (default) */
+  --leading-relaxed: 1.75;              /* For long-form prose */
+  --leading-longform: 1.8;              /* For extended reading (Discussion, Overview) */
+
+  /* Font Weights */
+  --font-weight-regular: 400;           /* Normal text */
+  --font-weight-medium: 500;            /* Emphasized text */
+  --font-weight-semibold: 600;          /* Headings and titles */
+
+  /* ========================================
+     ASIDE/NAVIGATION COMPONENTS
+     Dark background matching left nav (slate-800/95)
+     ======================================== */
+
+  /* Aside backgrounds - matches left nav for visual consistency */
+  --color-aside-bg: rgba(30, 41, 59, 0.95);          /* slate-800 at 95% opacity - matches left nav */
+  --color-aside-bg-solid: rgb(30, 41, 59);           /* Solid slate-800 background */
+  --color-aside-border: rgba(51, 65, 85, 0.5);       /* slate-700 at 50% opacity - matches left nav border */
+  --color-aside-border-accent: rgba(51, 65, 85, 0.5); /* Consistent border for dividers */
+
+  /* Aside text colors - lighter for dark backgrounds */
+  --color-aside-text-primary: rgb(226, 232, 240);    /* neutral-200 - high contrast on dark */
+  --color-aside-text-secondary: rgb(148, 163, 184);  /* neutral-400 - readable secondary */
+  --color-aside-text-muted: rgba(148, 163, 184, 0.8); /* neutral-400/80 - subtle text */
+
+  /* Aside interaction states */
+  --color-aside-hover-bg: rgba(51, 65, 85, 0.2);     /* Subtle hover background */
+  --color-aside-hover-text: var(--color-accent-300); /* Teal accent on hover */
+  --color-aside-hover-border: rgba(6, 182, 212, 0.2); /* Accent border on hover */
+
+  /* Aside active/selected states */
+  --color-aside-active-bg: rgba(6, 182, 212, 0.1);   /* Subtle teal background */
+  --color-aside-active-border: var(--color-accent-400); /* Teal border */
+
+  /* ========================================
+     CODE BLOCK COLORS - Semantic tokens
+     Dark theme with teal accent
+     ======================================== */
+  --color-code-bg: rgb(15, 23, 42);                   /* slate-900 - dark background */
+  --color-code-border: var(--color-accent-500);       /* teal accent border */
+  --color-code-text: var(--color-neutral-100);        /* light text on dark */
+}
+
+/* ========================================
+   DARK THEME
+   Inverts light theme using slate/teal palette
+   ======================================== */
+[data-theme="dark"] {
+  /* Semantic color overrides - flip light/dark values */
+  --color-text-primary: var(--color-neutral-100);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-muted: var(--color-neutral-500);
+  --color-text-accent: var(--color-accent-400);
+
+  /* Background colors - darker tones */
+  --color-bg-surface: var(--color-neutral-900);
+  --color-bg-subtle: var(--color-neutral-800);
+  --color-bg-accent: var(--color-accent-600);
+  --color-bg-accent-subtle: rgba(6, 182, 212, 0.15);
+
+  /* Border colors - lighter than background for visibility */
+  --color-border-default: var(--color-neutral-700);
+  --color-border-subtle: var(--color-neutral-800);
+  --color-border-accent: var(--color-accent-500);
+
+  /* State colors - darker backgrounds, lighter text */
+  --color-text-success: var(--color-success-300);
+  --color-text-warning: var(--color-warning-300);
+  --color-text-error: var(--color-error-300);
+  --color-bg-success: rgba(34, 197, 94, 0.15);
+  --color-bg-warning: rgba(245, 158, 11, 0.15);
+  --color-bg-error: rgba(239, 68, 68, 0.15);
+  --color-border-success: var(--color-success-500);
+  --color-border-warning: var(--color-warning-500);
+  --color-border-error: var(--color-error-500);
+
+  /* Focus rings - brighter for dark backgrounds */
+  --color-focus-ring: var(--color-accent-400);
+  --color-focus-ring-success: var(--color-success-400);
+  --color-focus-ring-warning: var(--color-warning-400);
+  --color-focus-ring-error: var(--color-error-400);
+
+  /* Aside/nav - slightly lighter than body for contrast */
+  --color-aside-bg: rgba(51, 65, 85, 0.95);
+  --color-aside-bg-solid: rgb(51, 65, 85);
+  --color-aside-border: rgba(71, 85, 105, 0.5);
+  --color-aside-border-accent: rgba(71, 85, 105, 0.5);
+  --color-aside-text-primary: rgb(241, 245, 249);
+  --color-aside-text-secondary: rgb(148, 163, 184);
+  --color-aside-text-muted: rgba(148, 163, 184, 0.8);
+  --color-aside-hover-bg: rgba(71, 85, 105, 0.3);
+  --color-aside-hover-text: var(--color-accent-300);
+  --color-aside-hover-border: rgba(6, 182, 212, 0.3);
+  --color-aside-active-bg: rgba(6, 182, 212, 0.15);
+  --color-aside-active-border: var(--color-accent-400);
+
+  /* Code blocks - even darker than body */
+  --color-code-bg: rgb(15, 23, 42);
+  --color-code-border: var(--color-accent-500);
+  --color-code-text: var(--color-neutral-100);
+
+  /* Shadows - softer for dark backgrounds */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+
+  /* Icon filters - invert dark icons for visibility on dark backgrounds */
+  .download-btn-icon--invert {
+    filter: brightness(0) invert(0.9);
+  }
+}
+
+/* ========================================
+   DRACULA THEME
+   Full Dracula color palette
+   ======================================== */
+[data-theme="dracula"] {
+  /* Dracula color palette */
+  --color-neutral-50: #f8f8f2;   /* Dracula foreground */
+  --color-neutral-100: #f8f8f2;
+  --color-neutral-200: #e2e2e2;
+  --color-neutral-300: #a0a0a0;
+  --color-neutral-400: #6272a4;  /* Dracula comment */
+  --color-neutral-500: #6272a4;
+  --color-neutral-600: #44475a;  /* Dracula current line */
+  --color-neutral-700: #44475a;
+  --color-neutral-800: #282a36;  /* Dracula background */
+  --color-neutral-900: #21222c;  /* Darker than Dracula BG */
+
+  /* Dracula accent colors */
+  --color-accent-50: #f0f9ff;
+  --color-accent-100: #d8f0ff;
+  --color-accent-200: #b3e0ff;
+  --color-accent-300: #8be9fd;   /* Dracula cyan */
+  --color-accent-400: #8be9fd;
+  --color-accent-500: #8be9fd;
+  --color-accent-600: #50fa7b;   /* Dracula green */
+  --color-accent-700: #50fa7b;
+
+  /* Dracula state colors */
+  --color-info-50: #f0f9ff;
+  --color-info-300: #8be9fd;     /* Cyan */
+  --color-info-500: #8be9fd;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #ffb86c;  /* Orange */
+  --color-warning-500: #ffb86c;
+  --color-warning-700: #ff8c3a;
+
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-300: #50fa7b;  /* Green */
+  --color-success-500: #50fa7b;
+  --color-success-700: #2dd45f;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-300: #ff5555;    /* Red */
+  --color-error-500: #ff5555;
+  --color-error-700: #ff0000;
+
+  /* Semantic color mappings */
+  --color-text-primary: #f8f8f2;
+  --color-text-secondary: #6272a4;
+  --color-text-tertiary: #6272a4;
+  --color-text-muted: #6272a4;
+  --color-text-accent: #8be9fd;
+
+  /* Background colors */
+  --color-bg-surface: #282a36;
+  --color-bg-subtle: #44475a;
+  --color-bg-accent: #8be9fd;
+  --color-bg-accent-subtle: rgba(139, 233, 253, 0.15);
+
+  /* Border colors */
+  --color-border-default: #6272a4;
+  --color-border-subtle: #44475a;
+  --color-border-accent: #bd93f9;  /* Dracula purple */
+
+  /* State semantic colors */
+  --color-text-success: #50fa7b;
+  --color-text-warning: #ffb86c;
+  --color-text-error: #ff5555;
+  --color-bg-success: rgba(80, 250, 123, 0.15);
+  --color-bg-warning: rgba(255, 184, 108, 0.15);
+  --color-bg-error: rgba(255, 85, 85, 0.15);
+  --color-border-success: #50fa7b;
+  --color-border-warning: #ffb86c;
+  --color-border-error: #ff5555;
+
+  /* Focus rings */
+  --color-focus-ring: #bd93f9;
+  --color-focus-ring-success: #50fa7b;
+  --color-focus-ring-warning: #ffb86c;
+  --color-focus-ring-error: #ff5555;
+
+  /* Aside/nav - use current line color */
+  --color-aside-bg: rgba(68, 71, 90, 0.95);
+  --color-aside-bg-solid: rgb(68, 71, 90);
+  --color-aside-border: rgba(98, 114, 164, 0.5);
+  --color-aside-border-accent: rgba(189, 147, 249, 0.3);
+  --color-aside-text-primary: #f8f8f2;
+  --color-aside-text-secondary: #8be9fd;
+  --color-aside-text-muted: rgba(139, 233, 253, 0.7);
+  --color-aside-hover-bg: rgba(98, 114, 164, 0.3);
+  --color-aside-hover-text: #bd93f9;
+  --color-aside-hover-border: rgba(189, 147, 249, 0.5);
+  --color-aside-active-bg: rgba(189, 147, 249, 0.15);
+  --color-aside-active-border: #bd93f9;
+
+  /* Code blocks */
+  --color-code-bg: #282a36;
+  --color-code-border: #bd93f9;
+  --color-code-text: #f8f8f2;
+
+  /* Shadows - subtle for dark theme */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6);
+
+  /* Icon filters - invert dark icons with purple tint for Dracula aesthetic */
+  .download-btn-icon--invert {
+    filter: brightness(0) invert(0.95) sepia(0.15) hue-rotate(200deg);
+  }
+}
+
+/* ========================================
+   GLOBAL PAGE STYLING
+   Apply theme colors to entire page
+   ======================================== */
+html {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+body {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+/* Minimal structural hooks; feel free to replace with utilities later */
+  .post {
+    display: grid;
+    gap: var(--spacing-6);
+  }
+.post__title-container {
+  margin-block-end: var(--spacing-4);
+}
+
+/* Tutorial hero/header */
+.post-hero {
+  padding-top: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border-default);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+
+.post-hero__content {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.post-hero__breadcrumb {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.post-hero__summary {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-2);
+}
+
+.post-hero__actions {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-6);
+}
+
+@media (max-width: 1023px) {
+  .post-hero__actions {
+    position: static;
+    margin-top: var(--spacing-3);
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+.section {
+  display: grid;
+  gap: var(--spacing-3);
+}
+.section__title {
+  font-size: 1.25rem;
+}
+.section__content {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+@layer components {
+  /* ========================================
+     CONTAINER COMPONENTS
+     ======================================== */
+
+  /* Primary container - elevated card with responsive padding */
+  .card {
+    border-radius: var(--radius-container);
+    /* border: 1px solid var(--color-border-default); */
+    border-left: 3px solid var(--color-border-accent);
+    padding: var(--spacing-6); /* Mobile: 24px (--spacing-6) */
+    box-shadow: var(--shadow-sm);
+    background-color: var(--color-bg-surface);
+  }
+
+  /* Tablet and desktop: increase card padding for more breathing room */
+  @media (min-width: 768px) {
+    .card {
+      padding: var(--spacing-6); /* Tablet: maintain 24px */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .card {
+      padding: var(--spacing-8); /* Desktop: 32px (--spacing-8) */
+    }
+  }
+
+  /* Nested cards - regular borders without accent */
+  .card .card {
+    border: 1px solid var(--color-border-default);
+    border-left: 1px solid var(--color-border-default); /* Override accent */
+  }
+
+  /* Code blocks in nested cards - remove accent border */
+  .card .card pre {
+    border-left: 1px solid var(--color-border-default);
+  }
+
+  /* Secondary container - flat panel */
+  .panel {
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-5);
+    background-color: var(--color-bg-surface);
+  }
+
+  /* Callout/note box with accent border */
+  .callout {
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--color-border-accent);
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-accent-subtle);
+  }
+
+  /* Tone-specific callouts */
+  .tone-info {
+    border-color: var(--color-info-300);
+    background-color: var(--color-info-50);
+  }
+
+  .tone-warning {
+    border-color: var(--color-warning-300);
+    background-color: var(--color-warning-50);
+  }
+
+  /* ========================================
+     CALLOUT MODIFIERS - Semantic Variants
+     ======================================== */
+
+  /* Interpretation callout - for statistical analysis notes */
+  .callout--interpretation {
+    background: var(--color-info-50);
+    border-color: var(--color-info-500);
+    padding: var(--spacing-6);
+    color: var(--color-neutral-900);
+  }
+
+  /* Icon container for interpretation callouts */
+  .callout--interpretation .icon-circle {
+    width: 2.5rem;       /* 40px - h-10 equivalent */
+    height: 2.5rem;      /* 40px - w-10 equivalent */
+    background: var(--color-info-500);
+    border-radius: var(--radius-full);
+  }
+
+  .callout--interpretation .icon-circle svg {
+    stroke: white;
+  }
+
+  .callout--interpretation .body-text,
+  .callout--interpretation p {
+    color: inherit;
+  }
+
+  [data-theme="dark"] .callout--interpretation,
+  [data-theme="dracula"] .callout--interpretation {
+    background: rgba(139, 233, 253, 0.12);
+    border-color: rgba(139, 233, 253, 0.7);
+    color: var(--color-neutral-50);
+  }
+
+  [data-theme="dark"] .callout--interpretation .body-text,
+  [data-theme="dark"] .callout--interpretation p,
+  [data-theme="dracula"] .callout--interpretation .body-text,
+  [data-theme="dracula"] .callout--interpretation p {
+    color: inherit;
+  }
+
+  /* ========================================
+     DISCUSSION PULL QUOTE
+     For highlighting key quotes in discussion sections
+     ======================================== */
+
+  .discussion-pull-quote {
+    border-left: 4px solid var(--color-border-accent);
+    padding-left: var(--spacing-4);
+    margin: var(--spacing-6) 0;
+    font-style: italic;
+    font-size: 1.125rem;  /* Slightly larger than body text */
+    line-height: var(--leading-longform);
+    color: var(--color-text-secondary);
+  }
+
+  .discussion-pull-quote::before {
+    content: '"';
+    font-size: 2rem;
+    color: var(--color-text-accent);
+    font-weight: var(--font-weight-semibold);
+    line-height: 0;
+    vertical-align: -0.4em;
+    margin-right: 0.25rem;
+  }
+
+  /* ========================================
+     CARD HOVER UTILITY - Interactive Depth Effect
+     Adds elevation and subtle scale on hover/focus for interactive cards
+     ======================================== */
+
+  .card-hover {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .card-hover:hover,
+  .card-hover:focus-within {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-hover,
+    .card-hover:hover,
+    .card-hover:focus-within {
+      transform: none;
+    }
+  }
+
+  /* ========================================
+     ICON CIRCLE UTILITY - Circular Icon Container
+     For icons inside circular backgrounds (stats, features, etc.)
+     ======================================== */
+
+  .icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;        /* 40px - h-10 equivalent */
+    height: 2.5rem;       /* 40px - w-10 equivalent */
+    background: var(--color-bg-subtle);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+  }
+
+  .icon-circle svg {
+    width: 1.25rem;       /* 20px - reasonable icon size */
+    height: 1.25rem;
+    stroke: currentColor;
+  }
+
+  /* ========================================
+     FIGURE FRAMING & CAPTIONS
+     Semantic figure elements for visualizations with consistent styling
+     ======================================== */
+
+  .figure-frame {
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    background: var(--color-bg-surface);
+    max-width: 50rem; /* 800px cap for large charts */
+    margin: 0 auto;
+  }
+
+  .figure-frame img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .figure-caption {
+    margin-top: var(--spacing-3);
+    font-size: var(--font-size-supporting);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  /* Optional: Auto-numbering for figures
+     Apply .figure-numbered to parent container to enable */
+  .figure-numbered {
+    counter-reset: figure;
+  }
+
+  .figure-numbered .figure-caption::before {
+    counter-increment: figure;
+    content: "Figure " counter(figure) ": ";
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+
+  /* Pill/badge for labels and tags */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: 0.875rem; /* text-sm */
+    color: var(--color-text-secondary);
+  }
+
+  /* Context pill modifier - for metadata badges */
+  .pill--context {
+    background: var(--color-bg-accent-subtle);
+    color: var(--color-text-accent);
+    border-color: var(--color-border-accent);
+    font-size: 0.8125rem; /* 13px - slightly smaller */
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  /* Code pill modifier - for language badges in code blocks */
+  .pill--code {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border-subtle);
+    font-size: 0.6875rem; /* 11px - compact for metadata */
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-1) var(--spacing-2);
+    letter-spacing: 0.025em; /* Slight tracking for uppercase readability */
+  }
+
+  /* Control bar for tab/filter controls */
+  .control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  /* ========================================
+     LAYOUT SPACING UTILITIES
+     ======================================== */
+
+  /* Vertical section padding */
+  .section-padding {
+    padding-top: var(--spacing-12);
+    padding-bottom: var(--spacing-12);
+  }
+
+  .section-padding-sm {
+    padding-top: var(--spacing-6);
+    padding-bottom: var(--spacing-6);
+  }
+
+  .section-padding-xs {
+    padding-top: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+  }
+
+  /* Component gap spacing */
+  .gap-section {
+    gap: var(--spacing-8);
+  }
+
+  .gap-component {
+    gap: var(--spacing-6);
+  }
+
+  /* Button/control base */
+  .control {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: 1rem; /* text-base */
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+  }
+
+  .control:hover {
+    background-color: var(--color-bg-subtle);
+    border-color: var(--color-neutral-400);
+  }
+
+  .control:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+  }
+
+  /* Active/selected control state */
+  .control-active {
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    border-color: var(--color-border-default);
+  }
+
+  .control-active:hover {
+    background-color: var(--color-bg-surface);
+  }
+
+  /* Tab label (peer-checked state needs custom utilities below) */
+  .tab-label {
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    transition: all 0.2s;
+  }
+
+  .tab-label:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+  }
+
+  /* ========================================
+     TABLE COMPONENTS - Dark-friendly theme
+     Stage4 table styling with overflow handling
+     ======================================== */
+
+  /* Table wrapper - provides scrolling container and gradient indicator */
+  .table-wrapper {
+    position: relative;
+    overflow-x: auto;
+    padding-bottom: var(--spacing-3);
+    /* Scrollbar styling for dark themes */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-default) var(--color-bg-subtle);
+  }
+
+  /* Webkit scrollbar styling */
+  .table-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-wrapper::-webkit-scrollbar-track {
+    background: var(--color-bg-subtle);
+    border-radius: var(--radius-sm);
+  }
+
+  .table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--color-border-default);
+    border-radius: var(--radius-sm);
+  }
+
+  .table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-accent);
+  }
+
+  /* Gradient scroll indicator - shows when content overflows */
+  .table-wrapper::after {
+    content: "";
+    pointer-events: none;
+    position: sticky;
+    top: 0;
+    right: 0;
+    width: 2rem;
+    height: 100%;
+    background: linear-gradient(to left, var(--color-bg-surface), transparent);
+    float: right;
+    margin-left: -2rem;
+  }
+
+  /* Remove gradient on reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .table-wrapper::after {
+      display: none;
+    }
+  }
+
+  /* Base table styling - targets injected gt tables */
+  .card table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: var(--color-bg-surface) !important;
+    font-size: 0.875rem !important; /* 14px - readable size */
+    margin: 0 !important;
+  }
+
+  /* Override gt table inline styles for theme support */
+  .card table.gt_table {
+    background-color: var(--color-bg-surface) !important;
+    color: var(--color-text-primary) !important;
+    border-top-color: var(--color-border-default) !important;
+    border-bottom-color: var(--color-border-default) !important;
+  }
+
+  /* Table cells - consistent padding and theme colors */
+  .card table td,
+  .card table th {
+    padding: var(--spacing-3) var(--spacing-4) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border-subtle) !important;
+  }
+
+  /* Table headers - sticky with accent background */
+  .card table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--color-bg-accent-subtle) !important;
+    color: var(--color-text-accent) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    border-bottom: 1px solid var(--color-border-default) !important;
+    text-align: left;
+  }
+
+  /* Column headings specific styling */
+  .card table .gt_col_heading,
+  .card table .gt_col_headings th {
+    background-color: var(--color-bg-accent-subtle) !important;
+    color: var(--color-text-accent) !important;
+  }
+
+  /* Table title styling */
+  .card table .gt_heading .gt_title {
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-surface) !important;
+  }
+
+  /* Zebra striping for better readability */
+  .card table tbody tr:nth-child(even) {
+    background-color: var(--color-bg-subtle) !important;
+  }
+
+  .card table tbody tr:nth-child(odd) {
+    background-color: var(--color-bg-surface) !important;
+  }
+
+  /* Override gt striped class */
+  .card table .gt_striped {
+    background-color: var(--color-bg-subtle) !important;
+  }
+
+  /* Table body rows */
+  .card table .gt_row {
+    background-color: inherit !important;
+    color: var(--color-text-primary) !important;
+    border-top-color: var(--color-border-subtle) !important;
+  }
+
+  /* Table stub (row headers) */
+  .card table .gt_stub {
+    background-color: inherit !important;
+    color: var(--color-text-primary) !important;
+    border-right-color: var(--color-border-default) !important;
+  }
+
+  /* Footer styling - subdued for diagnostics/notes */
+  .card table tfoot {
+    font-size: 0.8125rem; /* 13px - slightly smaller */
+    color: var(--color-text-secondary) !important;
+  }
+
+  .card table tfoot td,
+  .card table .gt_footnote,
+  .card table .gt_sourcenote {
+    color: var(--color-text-secondary) !important;
+    background-color: var(--color-bg-surface) !important;
+    border-color: var(--color-border-subtle) !important;
+  }
+
+  /* Condensed density modifier - for regression outputs with many rows */
+  .card[data-density="condensed"] table td,
+  .card[data-density="condensed"] table th {
+    padding: var(--spacing-2) var(--spacing-3) !important;
+  }
+
+  /* Group headings within tables */
+  .card table .gt_group_heading {
+    background-color: var(--color-bg-accent-subtle) !important;
+    color: var(--color-text-accent) !important;
+    font-weight: var(--font-weight-medium) !important;
+    border-color: var(--color-border-default) !important;
+  }
+
+  /* Summary rows styling */
+  .card table .gt_summary_row,
+  .card table .gt_grand_summary_row {
+    background-color: var(--color-bg-subtle) !important;
+    color: var(--color-text-primary) !important;
+    font-weight: var(--font-weight-medium) !important;
+  }
+
+  /* Table utilities (legacy - kept for compatibility) */
+  .border-table {
+    border-color: var(--color-border-accent);
+  }
+
+  .border-table-row {
+    border-color: var(--color-border-subtle);
+  }
+
+  .table-cell {
+    padding: var(--spacing-2) var(--spacing-4);
+  }
+
+  /* Code block styling with semantic tokens */
+  pre {
+    background-color: var(--color-code-bg);
+    color: var(--color-code-text);
+    border-left: 2px solid var(--color-code-border);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 0.9em;
+    color: var(--color-code-text);
+  }
+
+  /* Inline code (not in pre) gets subtle background */
+  :not(pre) > code {
+    background-color: var(--color-bg-accent-subtle);
+    color: var(--color-text-primary);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ========================================
+     ICON & BADGE COMPONENTS
+     ======================================== */
+
+  /* Circular icon container */
+  .icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem; /* h-10 */
+    width: 2.5rem; /* w-10 */
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-default);
+  }
+
+  /* Small badge/label (similar to .pill but smaller) */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-text-muted);
+  }
+
+  /* ========================================
+     SEMANTIC TEXT UTILITIES
+     ======================================== */
+
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  .text-tertiary {
+    color: var(--color-text-tertiary);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .text-accent {
+    color: var(--color-text-accent);
+  }
+
+  /* ========================================
+     SEMANTIC BACKGROUND UTILITIES
+     ======================================== */
+
+  .bg-surface {
+    background-color: var(--color-bg-surface);
+  }
+
+  .bg-subtle {
+    background-color: var(--color-bg-subtle);
+  }
+
+  .bg-accent {
+    background-color: var(--color-bg-accent);
+  }
+
+  .bg-accent-subtle {
+    background-color: var(--color-bg-accent-subtle);
+  }
+
+  /* ========================================
+     SEMANTIC BORDER UTILITIES
+     ======================================== */
+
+  .border-default {
+    border-color: var(--color-border-default);
+  }
+
+  .border-subtle {
+    border-color: var(--color-border-subtle);
+  }
+
+  .border-accent {
+    border-color: var(--color-border-accent);
+  }
+
+  /* ========================================
+     TYPOGRAPHY CLASSES
+     Semantic classes for consistent text hierarchy
+     Use these instead of raw text-* utilities
+     ======================================== */
+
+  /* Post title - Main heading for each post */
+.post-title {
+  font-size: var(--font-size-post-title);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  background: linear-gradient(90deg, var(--color-text-primary), var(--color-text-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  text-wrap: balance;
+}
+
+  /* Section title - Primary H1 headings (Overview, Data Access, etc.) */
+  .section-title {
+    font-size: var(--font-size-section-title);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-accent);
+    scroll-margin-top: 6rem; /* Offset for sticky header when using anchor links */
+  }
+
+  /* Panel title - Secondary H2/H3 headings within sections */
+  .panel-title {
+    font-size: var(--font-size-panel-title);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-normal);
+    color: var(--color-text-accent);
+  }
+
+  /* Body text - Regular paragraph content */
+  .body-text {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--leading-longform);
+    color: var(--color-text-primary);
+  }
+
+  /* Supporting text - Metadata, descriptions, secondary content */
+  .supporting-text {
+    font-size: var(--font-size-supporting);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  /* Stat label - Labels in statistics panels */
+  .stat-label {
+    font-size: var(--font-size-supporting);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  /* Stat value - Descriptive text values in statistics */
+  .stat-value {
+    font-size: var(--font-size-stat-value);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+  }
+
+  /* ========================================
+     INTERACTIVE STATE UTILITIES
+     Reusable hover/focus patterns for consistent UX
+     ======================================== */
+
+  /* Focus ring - WCAG 2.1 AA compliant outline for all interactive elements */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+    border-radius: var(--radius-md);
+  }
+
+  /* Hover elevate - Subtle lift effect with shadow increase */
+  .hover-elevate {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .hover-elevate:hover,
+  .hover-elevate:focus-within {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .hover-elevate,
+    .hover-elevate:hover,
+    .hover-elevate:focus-within {
+      transform: none;
+    }
+  }
+
+  /* ========================================
+     ASIDE/TABLE OF CONTENTS COMPONENTS
+     Dark theme with teal accents
+     ======================================== */
+
+  /* Main aside container - dark with transparency and blur */
+  .aside-container {
+    background-color: var(--color-aside-bg);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-aside-border);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  /* Aside section heading (e.g., "On this page", "Contribute") */
+  .aside-heading {
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-1);
+    font-size: 0.75rem; /* text-xs */
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-aside-text-muted);
+  }
+
+  /* Aside navigation link */
+  .aside-link {
+    display: block;
+    padding: var(--spacing-1) var(--spacing-1);
+    font-size: 0.75rem; /* text-xs */
+    line-height: 1.25;
+    color: var(--color-aside-text-primary);
+    border-radius: var(--radius-md);
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .aside-link:hover {
+    color: var(--color-aside-hover-text);
+    background-color: var(--color-aside-hover-bg);
+    border-left-color: var(--color-aside-hover-border);
+  }
+
+  .aside-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-400), 0 0 0 4px rgba(6, 182, 212, 0.2);
+  }
+
+  /* Aside action link (Edit/Discussion with icons) */
+  .aside-action {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-aside-text-primary);
+    transition: all 0.2s;
+  }
+
+  .aside-action:hover {
+    color: var(--color-aside-hover-text);
+    background-color: var(--color-aside-hover-bg);
+  }
+
+  /* Icon within aside action */
+  .aside-action-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-accent-400);
+    opacity: 0.9;
+    transition: color 0.2s;
+  }
+
+  .aside-action:hover .aside-action-icon {
+    color: var(--color-accent-300);
+  }
+
+  /* External link indicator */
+  .aside-external-indicator {
+    margin-left: auto;
+    color: var(--color-aside-text-muted);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .aside-action:hover .aside-external-indicator {
+    opacity: 1;
+    color: var(--color-aside-text-secondary);
+  }
+
+  .aside-action[disabled],
+  .aside-action--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--color-aside-text-muted);
+    pointer-events: none;
+  }
+
+  .aside-action[disabled] .aside-action-icon,
+  .aside-action--disabled .aside-action-icon {
+    color: var(--color-aside-text-muted);
+  }
+
+  /* Aside divider - dashed border between sections */
+  .aside-divider {
+    margin: var(--spacing-3) var(--spacing-3);
+    border-top: 1px dashed var(--color-aside-border-accent);
+  }
+
+
+  .right-aside-panel {
+    height: 100%;
+    transition: transform 0.3s ease;
+  }
+
+  .right-aside-panel--collapsed {
+    transform: translateX(100%);
+  }
+
+  .right-aside-panel--collapsed .aside-container {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .right-aside-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 0.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.2s ease, transform 0.3s ease;
+  }
+
+  .right-aside-toggle:hover {
+    background: var(--color-bg-subtle);
+  }
+
+  .right-aside-toggle__icon {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .right-aside-toggle--collapsed .right-aside-toggle__icon {
+    transform: rotate(180deg);
+  }
+
+  /* Download button - contrasts with aside background */
+  .download-btn {
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    color: var(--color-text-primary);
+  }
+
+  .download-btn:hover {
+    background-color: var(--color-bg-subtle);
+    border-color: var(--color-accent-400);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .download-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .download-btn:hover,
+    .download-btn:active {
+      transform: none;
+    }
+  }
+
+  /* Download button icon */
+  .download-btn-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+
+  /* ========================================
+     BUTTON COMPONENTS - Secondary Style
+     Reusable button styling for interactive controls
+     ======================================== */
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    user-select: none;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg-subtle);
+    border-color: var(--color-border-accent);
+    color: var(--color-text-accent);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* ========================================
+     COPY CODE BUTTON
+     Appears on code blocks for clipboard copying
+     Enhanced contrast for better visibility in dark themes
+     ======================================== */
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem; /* 6px - space between icon and text */
+    padding: 0 var(--spacing-3);
+    min-height: 2.25rem; /* 36px - meets 44px tap target with surrounding spacing */
+    background-color: var(--color-bg-accent-subtle);
+    border: 1px solid var(--color-border-accent);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-text-accent);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .copy-btn:hover {
+    background-color: var(--color-bg-accent);
+    border-color: var(--color-border-accent);
+    color: var(--color-neutral-900);
+  }
+
+  .copy-btn:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .copy-btn:active {
+    transform: translateY(1px);
+  }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .copy-btn:active {
+      transform: none;
+    }
+  }
+
+  /* ========================================
+     LEFT NAVIGATION COMPONENTS
+     Dark sidebar matching right aside theme
+     ======================================== */
+
+  /* Main left nav container - full height sticky sidebar */
+  .left-nav-container {
+    background-color: var(--color-aside-bg);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid var(--color-aside-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Left nav header section with branding */
+  .left-nav-header {
+    border-bottom: 1px solid var(--color-aside-border);
+    background: linear-gradient(to right, var(--color-aside-bg-solid), rgba(51, 65, 85, 0.9));
+  }
+
+  /* Brand icon container */
+  .left-nav-brand-icon {
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(to bottom right, var(--color-accent-400), var(--color-accent-600));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Brand title with gradient text */
+  .left-nav-brand-title {
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-semibold);
+    background: linear-gradient(to right, var(--color-accent-400), var(--color-accent-500));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.3;
+  }
+
+  /* Brand subtitle */
+  .left-nav-brand-subtitle {
+    font-size: 0.8125rem;
+    color: var(--color-aside-text-secondary);
+    line-height: 1.2;
+    margin-top: 0.125rem;
+  }
+
+  /* Collapse/expand button */
+  .left-nav-collapse-btn {
+    padding: var(--spacing-2);
+    color: var(--color-aside-text-secondary);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .left-nav-collapse-btn:hover {
+    color: var(--color-aside-hover-text);
+    background-color: var(--color-aside-hover-bg);
+  }
+
+  .left-nav-collapse-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-400);
+  }
+
+  /* Search input container */
+  .left-nav-search-container {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-aside-border);
+  }
+
+  /* Search input field */
+  .left-nav-search {
+    width: 100%;
+    background-color: var(--color-aside-hover-bg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2) var(--spacing-3) var(--spacing-2) 2.5rem;
+    font-size: 0.875rem;
+    color: var(--color-aside-text-primary);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .left-nav-search::placeholder {
+    color: var(--color-aside-text-secondary);
+  }
+
+  .left-nav-search:hover {
+    background-color: rgba(51, 65, 85, 0.25);
+  }
+
+  .left-nav-search:focus {
+    outline: none;
+    background-color: rgba(51, 65, 85, 0.3);
+    border-color: var(--color-accent-400);
+    box-shadow: 0 0 0 1px var(--color-accent-400);
+  }
+
+  /* Search icon */
+  .left-nav-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.625rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-aside-text-secondary);
+  }
+
+  /* Clear search button */
+  .left-nav-search-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    padding: 0.25rem;
+    color: var(--color-aside-text-secondary);
+    border-radius: var(--radius-sm);
+    transition: color 0.2s;
+  }
+
+  .left-nav-search-clear:hover {
+    color: var(--color-aside-text-primary);
+  }
+
+  /* Navigation link item */
+  .left-nav-link {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .left-nav-link:hover {
+    background-color: var(--color-aside-hover-bg);
+    border-left-color: var(--color-aside-hover-border);
+  }
+
+  .left-nav-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-400);
+  }
+
+  /* Active navigation link - subtle background with left border accent */
+  .left-nav-link-active {
+    background-color: rgba(6, 182, 212, 0.08);
+    border-left-color: var(--color-accent-400);
+  }
+
+  .left-nav-link-active:hover {
+    background-color: rgba(6, 182, 212, 0.12);
+  }
+
+  /* Link text content - tutorial titles (smaller, less prominent than categories) */
+  .left-nav-link-title {
+    color: rgba(226, 232, 240, 0.9); /* Slightly muted white */
+    font-weight: var(--font-weight-regular);
+    line-height: 1.2;
+    font-size: 0.8125rem; /* Slightly smaller for better fit */
+    text-shadow: 0 0 15px rgba(6, 182, 212, 0.08); /* Very subtle glow */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .left-nav-link:hover .left-nav-link-title {
+    color: var(--color-accent-200);
+    text-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+  }
+
+  .left-nav-link-active .left-nav-link-title {
+    color: var(--color-accent-300);
+    font-weight: var(--font-weight-semibold);
+    text-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+  }
+
+  /* Link description text */
+  .left-nav-link-description {
+    font-size: 0.75rem;
+    color: var(--color-aside-text-secondary);
+    margin-top: 0.125rem;
+  }
+
+  .left-nav-link-active .left-nav-link-description {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .hero-header {
+    position: relative;
+  }
+
+  .hero-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.85rem;
+    color: var(--color-accent-200);
+    background: linear-gradient(90deg, rgba(129, 140, 248, 0.95), rgba(56, 189, 248, 0.95));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-description {
+    max-width: 70ch;
+    line-height: 1.65;
+    margin-top: 0.35rem;
+  }
+
+  .hero-breadcrumb {
+    color: rgba(226, 232, 240, 0.75);
+    font-size: 0.95rem;
+  }
+
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.3);
+  }
+
+  .hero-pill--primary {
+    background: linear-gradient(120deg, rgba(59, 130, 246, 0.25), rgba(14, 165, 233, 0.25));
+    border-color: rgba(59, 130, 246, 0.4);
+    color: var(--color-accent-50);
+  }
+
+  .hero-pill--secondary {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.4);
+    color: rgba(226, 232, 240, 0.85);
+  }
+
+  .hero-pill--tag {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.35);
+    color: rgba(191, 219, 254, 0.95);
+  }
+
+  .hero-pill--tag:hover,
+  .hero-pill--secondary:hover,
+  .hero-pill--primary:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .hero-pill--primary {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: rgba(15, 23, 42, 0.9);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+    }
+
+    .hero-pill--secondary {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: rgba(100, 116, 139, 0.35);
+      color: rgba(15, 23, 42, 0.85);
+    }
+
+    .hero-pill--tag {
+      background: rgba(2, 132, 199, 0.12);
+      border-color: rgba(2, 132, 199, 0.3);
+      color: rgba(15, 23, 42, 0.9);
+    }
+  }
+
+  /* ========================================
+     RESOURCE ROWS - COMPACT LIST LAYOUT
+     Collapsible container with scannable list
+     ======================================== */
+
+  /* Collapsible details container */
+  .resources-details {
+    display: grid;
+    grid-template-rows: auto 0fr;
+    transition: grid-template-rows 0.3s ease-out;
+  }
+
+  .resources-details[open] {
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Summary (clickable header) */
+  .resources-summary {
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    padding: var(--spacing-4) var(--spacing-5);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-subtle);
+    transition: all 180ms ease;
+  }
+
+  .resources-summary:hover {
+    background-color: var(--color-bg-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Remove default details marker */
+  .resources-summary::-webkit-details-marker,
+  .resources-summary::marker {
+    display: none;
+  }
+
+  .resources-summary-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+  }
+
+  /* Chevron rotation when expanded */
+  .resources-details[open] .resources-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Wrapper for animated content */
+  .resources-content-wrapper {
+    overflow: hidden;
+    padding: 0 var(--spacing-5);
+  }
+
+  /* Resource list container */
+  .resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-6);
+    padding-bottom: var(--spacing-2);
+  }
+
+  /* Individual resource row */
+  .resource-row {
+    padding: var(--spacing-4);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-subtle);
+    transition: all 180ms ease;
+  }
+
+  .resource-row:hover {
+    border-color: var(--color-accent-400);
+    background-color: var(--color-bg-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Row header (icon + title + badge) */
+  .resource-row-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .resource-row-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-500);
+  }
+
+  .resource-row-title {
+    flex: 1;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .resource-row-badge {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+  }
+
+  /* Row body (description + link) */
+  .resource-row-body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    margin-left: 3.75rem;
+  }
+
+  .resource-row-description {
+    flex: 1;
+    font-size: var(--font-size-supporting);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .resource-row-link {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-supporting);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-900);
+    background: var(--color-accent-500);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 180ms ease;
+    white-space: nowrap;
+  }
+
+  .resource-row-link:hover {
+    background: var(--color-accent-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .resource-row-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+  }
+
+  /* Mobile: Stack description and link */
+  @media (max-width: 768px) {
+    .resource-row-header {
+      flex-wrap: wrap;
+    }
+
+    .resource-row-body {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 0;
+      gap: var(--spacing-3);
+    }
+
+    .resource-row-link {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .resource-row:hover,
+    .resource-row-link:hover {
+      transform: none;
+    }
+  }
+
+  /* Remove default browser disclosure markers from Data Access details/summary */
+  .resource-details summary {
+    list-style: none !important;
+  }
+
+  .resource-details summary::-webkit-details-marker,
+  .resource-details summary::marker {
+    display: none !important;
+  }
+
+  .resource-summary {
+    list-style: none !important;
+  }
+
+  .resource-summary::-webkit-details-marker,
+  .resource-summary::marker {
+    display: none !important;
+  }
+
+  /* ========================================
+     DATA ACCESS TABS - CSS-ONLY
+     Radio button technique for interactive tabs
+     ======================================== */
+
+  /* Hide radio inputs (they're siblings of all other elements) */
+  .da-tab-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Tab label styling */
+  .da-tab-label {
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .da-tab-label:hover {
+    opacity: 0.8;
+  }
+
+  /* Active tab styling - when corresponding radio is checked */
+  /* Using general sibling combinator since radios are siblings of the tab container */
+  #da-method-0:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-0"],
+  #da-method-1:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-1"],
+  #da-method-2:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-2"],
+  #da-method-3:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-3"],
+  #da-method-4:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-4"] {
+    background: linear-gradient(to right, var(--color-accent-600), var(--color-accent-500));
+    color: #ffffff;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Hide all tab panels by default */
+  .da-tab-panel {
+    display: none;
+  }
+
+  /* Show panel when corresponding radio is checked */
+  #da-method-0:checked ~ #da-panel-0,
+  #da-method-1:checked ~ #da-panel-1,
+  #da-method-2:checked ~ #da-panel-2,
+  #da-method-3:checked ~ #da-panel-3,
+  #da-method-4:checked ~ #da-panel-4 {
+    display: block;
+    animation: fadeIn 0.2s ease-in;
+  }
+
+  /* Smooth fade-in for tab content */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ========================================
+     COLLAPSIBLE CODE BLOCKS
+     CSS-only expandable code with <details>
+     ======================================== */
+
+  /* Constrain cards containing collapsible code blocks */
+  .card:has(.code-collapsible) {
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* Code collapsible container - uses grid-template-rows animation for smooth height transitions */
+  .code-collapsible {
+    display: grid;
+    /* Hidden by default: 0fr collapses the grid row */
+    grid-template-rows: auto 0fr;
+    transition: grid-template-rows 220ms ease-out;
+    width: 100%;
+    min-width: 0; /* Critical: prevents grid from expanding beyond container */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* When open: allow content to show with 1fr */
+  .code-collapsible[open] {
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .code-collapsible {
+      transition: none;
+    }
+  }
+
+  /* Code summary (clickable header) */
+  .code-summary {
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    padding: var(--spacing-2) 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  /* Remove default details marker */
+  .code-summary::-webkit-details-marker,
+  .code-summary::marker {
+    display: none;
+  }
+
+  /* Hover effect on summary */
+  .code-summary:hover {
+    opacity: 0.8;
+  }
+
+  /* Line count badge styling */
+  .code-line-count {
+    opacity: 0.7;
+  }
+
+  /* Chevron rotation when expanded - smooth transition */
+  .code-chevron {
+    transition: transform 220ms ease-out;
+  }
+
+  .code-collapsible[open] .code-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Disable chevron animation for reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .code-chevron {
+      transition: none;
+    }
+  }
+
+  /* Code content wrapper for smooth animation with opacity fade */
+  .code-content-wrapper {
+    /* MUST hide overflow for grid 0fr to work */
+    overflow: hidden;
+    min-width: 0; /* Critical: allows proper shrinking in grid */
+    width: 100%; /* Force wrapper to use available width, not content width */
+    min-height: 0; /* Allow grid to size this properly */
+    opacity: 0;
+    transition: opacity 180ms ease-out;
+  }
+
+  /* Fade in content when expanded */
+  .code-collapsible[open] .code-content-wrapper {
+    opacity: 1;
+  }
+
+  /* Disable opacity animation for reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .code-content-wrapper {
+      opacity: 1;
+      transition: none;
+    }
+  }
+
+  /* Code metadata row - displays language, filename, and line count */
+  .code-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-2) 0;
+    margin-top: var(--spacing-2);
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-text-secondary);
+  }
+
+  /* Filename display in code metadata */
+  .code-filename {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-text-muted);
+  }
+
+  /* Line count in metadata context (not in summary) */
+  .code-meta .code-line-count {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+    font-size: 0.75rem; /* text-xs */
+    color: var(--color-text-muted);
+    opacity: 0.8;
+  }
+
+  /* Ensure code panel doesn't overflow */
+  .code-content-wrapper .panel {
+    min-width: 0; /* Allows flex/grid children to shrink below content size */
+    width: 100%;
+    max-width: 100%; /* Prevent expansion beyond container */
+    border: none; /* Remove inner border - outer card provides containment */
+  }
+
+  /* When open: limit to ~15 lines for preview mode */
+  .code-collapsible[open] .code-content-wrapper .panel {
+    max-height: 22.5em;
+    overflow-y: auto;
+    transition: max-height 220ms ease-out;
+  }
+
+  /* Disable max-height animation for reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .code-collapsible[open] .code-content-wrapper .panel {
+      transition: none;
+    }
+  }
+
+  /* Constrain pre element within collapsible code blocks */
+  .code-content-wrapper pre {
+    /* DO NOT set width: 100% - it calculates from content, not container */
+    max-width: 100%;
+    box-sizing: border-box; /* Include padding in width calculation */
+    contain: inline-size; /* Prevent content from expanding parent width */
+  }
+
+  /* Force nested cards containing code blocks to respect parent width */
+  .card .card:has(.code-collapsible) {
+    max-width: 100%;
+  }
+
+  /* Ensure code element inside pre doesn't expand parent */
+  .code-content-wrapper pre code {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Focus state for accessibility */
+  .code-summary:focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+
+  /* ========================================
+     Full expansion toggle (CSS checkbox hack)
+     ======================================== */
+
+  /* Hide the checkbox visually but keep it accessible */
+  .code-expand-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Style the toggle link - combines with .btn-secondary for button-like appearance */
+  .code-expand-toggle {
+    /* Spacing override for code block context */
+    margin-top: var(--spacing-2);
+    /* Center text within button */
+    text-align: center;
+  }
+
+  /* Toggle text visibility based on checkbox state */
+  .code-expand-toggle .when-expanded {
+    display: none;
+  }
+
+  .code-expand-checkbox:checked ~ .code-expand-toggle .when-collapsed {
+    display: none;
+  }
+
+  .code-expand-checkbox:checked ~ .code-expand-toggle .when-expanded {
+    display: inline;
+  }
+
+  /* Remove max-height when checkbox is checked (full expansion) */
+  .code-content-wrapper:has(.code-expand-checkbox:checked) .panel {
+    max-height: none !important;
+  }
+}
+
+/* Data Access tab visibility (CSS-only via :has and ~) */
+@layer utilities {
+  /* Hover states */
+  .hover\:bg-subtle:hover {
+    background-color: var(--color-bg-subtle);
+  }
+
+  /* Focus ring states */
+  .focus\:ring-accent:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+  }
+
+  /* Peer-checked tab styling */
+  .peer-checked\:bg-accent-subtle:has(+ .peer:checked),
+  .peer:checked ~ .peer-checked\:bg-accent-subtle {
+    background-color: var(--color-bg-accent-subtle);
+  }
+
+  .peer-checked\:border-accent:has(+ .peer:checked),
+  .peer:checked ~ .peer-checked\:border-accent {
+    border-color: var(--color-border-accent);
+  }
+
+  .peer-checked\:font-semibold:has(+ .peer:checked),
+  .peer:checked ~ .peer-checked\:font-semibold {
+    font-weight: 600;
+  }
+
+  .peer-checked\:bg-accent:has(+ .peer:checked),
+  .peer:checked ~ .peer-checked\:bg-accent {
+    background-color: var(--color-bg-accent);
+  }
+
+  .peer-checked\:text-white:has(+ .peer:checked),
+  .peer:checked ~ .peer-checked\:text-white {
+    color: #ffffff;
+  }
+
+  /* Data Access tab panel visibility (CSS-only tabs)
+     Note: Complex :has() selectors may show Tailwind optimizer warnings
+     These are cosmetic - the CSS works correctly */
+  [class~="[&:has(~#da-tab-cli:checked)]:block"]:has(~#da-tab-cli:checked) { display: block; }
+  [class~="[&:has(~#da-tab-api:checked)]:block"]:has(~#da-tab-api:checked) { display: block; }
+  [class~="[&:has(~#da-tab-files:checked)]:block"]:has(~#da-tab-files:checked) { display: block; }
+  [class~="[&:has(~#da-tab-basics:checked)]:block"]:has(~#da-tab-basics:checked) { display: block; }
+  [class~="[&:has(~#da-tab-limits:checked)]:block"]:has(~#da-tab-limits:checked) { display: block; }
+
+  /* ========================================
+     Output Images - Placeholder Styling
+     ======================================== */
+
+  /* Placeholder images: smaller and faded to distinguish from actual content
+     Placed in @layer utilities to override w-full class (width: 100%) */
+  img[src*="placeholder.png"] {
+    width: 12rem; /* 192px - about 1/4 of actual images */
+    height: 12rem;
+    max-width: 12rem;
+    max-height: 12rem;
+    opacity: 0.5; /* Semi-transparent to indicate placeholder status */
+  }
+
+  /* ========================================
+     STAGE4 ARTIFACT SIZING
+     Consistent sizing for images and tables from stage4-artifacts
+     ======================================== */
+
+  /* Stage4 PNG images - visualization plots */
+  img[src*="stage4-artifacts"] {
+    max-width: 28rem; /* temporary 448px cap for review */
+    width: 100%; /* Responsive - scales down on smaller screens */
+    height: auto; /* Maintain aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    display: block; /* Center the image */
+  }
+
+  /* Make tables expand to fill their container */
+  .card table {
+    width: 100% !important; /* Force tables to fill container width */
+    font-size: 0.875rem; /* 14px - slightly smaller for readability */
+  }
+
+  /* Ensure table headers remain readable */
+  .card table thead th {
+    font-size: 0.875rem; /* 14px - match body text */
+  }
+
+  /* ========================================
+     DATA ACCESS CONTENT STYLING
+     Enhanced prose styling for Data Access section
+     ======================================== */
+
+  /* Simple container - minimal styling */
+  .data-access-simple-container {
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-canvas);
+  }
+
+  .data-access-content {
+    max-width: none;
+  }
+
+  /* Remove default h1 from prose content (we have section header) */
+  .data-access-content h1 {
+    display: none;
+  }
+
+  /* Bold section headings (Data Download, Required Variables, etc.) */
+  .data-access-content p > strong:only-child {
+    display: block;
+    font-size: var(--font-size-panel-title);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-accent);
+    margin-top: var(--spacing-6);
+    margin-bottom: var(--spacing-3);
+    line-height: var(--leading-tight);
+  }
+
+  /* Regular paragraphs */
+  .data-access-content p {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-longform);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+  }
+
+  /* Unordered lists - styled with accent color */
+  .data-access-content ul {
+    list-style: none;
+    margin: var(--spacing-4) 0;
+    padding-left: 0;
+  }
+
+  .data-access-content ul li {
+    position: relative;
+    padding-left: var(--spacing-6);
+    margin-bottom: var(--spacing-3);
+    font-size: var(--font-size-body);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+  }
+
+  /* Custom bullet with accent color */
+  .data-access-content ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: var(--color-accent-500);
+    border-radius: 50%;
+  }
+
+  /* Nested list items with bold labels (e.g., **mh_y_erq__suppr_mean** - Description) */
+  .data-access-content ul li strong:first-child {
+    color: var(--color-text-accent);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Links - styled with accent color and hover effects */
+  .data-access-content a {
+    color: var(--color-text-accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .data-access-content a:hover {
+    border-bottom-color: var(--color-accent-500);
+  }
+
+  .data-access-content a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-500), 0 0 0 4px var(--color-accent-100);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Code blocks - simple minimal styling */
+  .data-access-content pre {
+    background-color: var(--color-bg-canvas);
+    color: var(--color-code-text);
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-4);
+    margin: var(--spacing-4) 0;
+    overflow-x: auto;
+  }
+
+  .data-access-content pre code {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: var(--color-code-text);
+  }
+
+  /* Inline code */
+  .data-access-content :not(pre) > code {
+    background-color: var(--color-bg-accent-subtle);
+    color: var(--color-text-accent);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 0.9em;
+    font-weight: var(--font-weight-medium);
+    border: 1px solid var(--color-border-accent);
+  }
+
+  /* Add spacing between major sections */
+  .data-access-content > div > p > strong:only-child {
+    scroll-margin-top: 6rem; /* Offset for sticky header */
+  }
+
+  /* Improve spacing for consecutive paragraphs */
+  .data-access-content p + ul {
+    margin-top: calc(-1 * var(--spacing-2));
+  }
+
+  .data-access-content ul + p {
+    margin-top: var(--spacing-4);
+  }
+
+  /* Dark mode adjustments */
+  [data-theme="dark"] .data-access-content ul li::before {
+    background-color: var(--color-accent-400);
+  }
+
+  /* Dracula theme adjustments */
+  [data-theme="dracula"] .data-access-content ul li::before {
+    background-color: var(--color-accent-300);
+  }
+}

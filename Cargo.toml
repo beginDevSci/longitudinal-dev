@@ -1,0 +1,136 @@
+[package]
+name = "longitudinal_dev"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "validate-json"
+path = "src/bin/validate-json.rs"
+required-features = ["ssr"]
+
+[[bin]]
+name = "test_tutorials"
+path = "src/bin/test_tutorials.rs"
+required-features = ["ssr"]
+
+[[bin]]
+name = "check-prereqs"
+path = "src/bin/check-prereqs.rs"
+required-features = ["ssr"]
+
+[[bin]]
+name = "xtask"
+path = "src/bin/xtask.rs"
+required-features = ["ssr"]
+
+[dependencies]
+# Features are scoped per build target to minimize WASM bundle size
+leptos = { version = "=0.8.10", default-features = false }
+leptos_meta = { version = "=0.8.5", default-features = false }
+# pinned to match wasm-bindgen-cli version used in CI (must match exactly)
+wasm-bindgen = { version = "=0.2.104", optional = true }
+# JSON Schema content authoring
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Syntax highlighting at build time (SSR only, not in WASM)
+syntect = { version = "5.2", optional = true, default-features = false, features = ["default-fancy"] }
+# Tutorial Writer package
+longitudinal_writer = { path = "crates/writer" }
+# Markdown parser (for validation pipeline)
+longitudinal_parser = { path = "crates/parser" }
+# Date/time handling for test runner
+chrono = { version = "=0.4.42", optional = true }
+# Shared dependencies (also used by other binaries)
+clap = { version = "4.0", features = ["derive"], optional = true }
+anyhow = { version = "1.0", optional = true }
+regex = { version = "1.0", optional = true }
+jsonschema = { version = "0.17", optional = true }
+url = { version = "2.5", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = [
+    "Blob",
+    "BlobPropertyBag",
+    "HtmlAnchorElement",
+    "Url",
+    "Window",
+    "Document",
+    "Storage",
+    "HtmlElement",
+    "CssStyleDeclaration",
+    "HtmlTextAreaElement",
+    "Element",
+    "CustomEvent",
+    "Event",
+    "EventTarget",
+    "Clipboard",
+    "Navigator",
+] }
+js-sys = "0.3"
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wait-timeout = { version = "0.2", optional = true }
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+jsonschema = "0.17"
+url = "2.5"
+
+[dev-dependencies]
+regex = "1.0"
+once_cell = "1.19"
+walkdir = "2"
+blake3 = "1"
+tempfile = "3"
+uuid = { version = "=1.18.1", features = ["v4"] }
+
+[features]
+default = []
+# Server features: SSG binary uses these
+ssr = [
+    "leptos/ssr",
+    "leptos/islands",
+    "leptos_meta/ssr",
+    "syntect",
+    "dep:chrono",
+    "dep:clap",
+    "dep:anyhow",
+    "dep:regex",
+    "dep:jsonschema",
+    "dep:url",
+]
+# Client features: WASM build uses these (smaller bundle)
+hydrate = ["leptos/hydrate", "leptos/islands", "wasm-bindgen"]
+
+[package.metadata.leptos]
+# single-package + static-site output
+output-name = "blog"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+# Explicitly select the primary bin target so cargo-leptos doesn't fail when
+# the auxiliary `validate` binary is present in the workspace.
+bin-target = "longitudinal_dev"
+lib-features = ["hydrate"]
+bin-features = ["ssr"]
+
+# tailwind integration (v4 CSS-first, no JS config needed)
+tailwind-input-file = "style/input.css"
+
+# NOTE: assets-dir is not used in manual build pipeline
+# If you add static assets (images, fonts, etc.), keep them under `public/`.
+# This key is preserved for cargo-leptos compatibility if you switch to it.
+assets-dir = "public"
+url = "2.5"
+
+[workspace]
+members = [
+    "crates/parser",
+    "crates/writer",
+    "crates/validator",
+]
+resolver = "2"

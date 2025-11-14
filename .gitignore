@@ -1,0 +1,81 @@
+# Generated artifacts
+generated/
+
+# Rust build artifacts
+**/target/
+
+# WASM artifacts (except GitHub Pages deployment)
+*.wasm
+*.wat
+!docs/pkg/*.wasm
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node / NPM (if using Tailwind CLI locally)
+node_modules/
+.pnpm-store/
+# Removed from gitignore - we now commit package-lock.json for deterministic builds
+pnpm-lock.yaml
+
+# Leptos generated
+/target/site/
+/target/front/
+
+# Build output
+/dist/
+
+# Generated code (build.rs output)
+/src/generated/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary and backup files
+*.tmp
+*.bak
+*~
+docs/temp/
+content/markdown-source/
+
+# Test runner artifacts
+/tmp/test_*.R
+
+# Validation pipeline runtime artifacts
+.cache/
+
+# R temporary outputs
+Rplots.pdf
+model_summary.html
+model_summary.png
+visualization.png
+
+# Stage 4 validation artifacts
+public/stage4-artifacts/
+
+# Planning documents (local only)
+OPTION_A_PLAN*.md
+
+# Build artifact backups
+/docs_og/
+
+# Note: /docs/ is NOT ignored - it's used for GitHub Pages deployment
+
+# Generated JSON from markdown (Stage 5 validation)
+content/posts/*.post.json

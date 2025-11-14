@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          target: wasm32-unknown-unknown
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-wasm-bindgen-0.2.104
+          restore-keys: |
+            ${{ runner.os }}-cargo-bin-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install wasm-bindgen-cli
+        run: |
+          if ! command -v wasm-bindgen &> /dev/null; then
+            cargo install wasm-bindgen-cli --version 0.2.104
+          else
+            echo "wasm-bindgen already installed"
+          fi
+
+      - name: Install optimization tools
+        run: |
+          # Use apt-get instead of cargo for speed
+          sudo apt-get update
+          sudo apt-get install -y binaryen brotli
+          # Verify installations
+          wasm-opt --version
+          brotli --version
+          # gzip already present on Ubuntu
+
+      - name: Build SSG site
+        run: make ssg
+
+      - name: Test (unit + integration)
+        run: cargo test --locked --features ssr
+
+      - name: Install R
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y r-base
+          Rscript --version
+
+      - name: Validate tutorial structure (Stages 1-2)
+        run: cargo run --locked -p longitudinal_validator -- content/tutorials/*.md --validate-only
+
+      - name: Clippy (zero warnings - main workspace)
+        run: cargo clippy --locked --lib --bin check-prereqs --bin test_tutorials --bin xtask --features ssr -- -D warnings
+
+      - name: Clippy (zero warnings - workspace crates)
+        run: cargo clippy --locked -p longitudinal_parser -p longitudinal_writer -p longitudinal_validator --all-targets -- -D warnings
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: Security audit
+        run: cargo audit --deny warnings
+
+      - name: Tailwind compliance checks
+        run: |
+          rg -n 'class\s*=\s*format!' src && exit 1 || true
+          rg -n 'grid-cols-\{\}' src && exit 1 || true
+          rg -n 'text-\{\}' src && exit 1 || true
+
+      # Additional class-format guardrails run above via ripgrep.
