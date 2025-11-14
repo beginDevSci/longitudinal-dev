@@ -70,7 +70,9 @@ web-sys = { version = "0.3", features = [
     "Navigator",
 ] }
 js-sys = "0.3"
-getrandom = { version = "0.3", features = ["wasm_js"] }
+# Pin to 0.2.x to avoid getrandom 0.3.3 compilation issues in CI
+# See: https://github.com/rust-random/getrandom/issues/448
+getrandom = { version = "0.2", features = ["js"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 wait-timeout = { version = "0.2", optional = true }
