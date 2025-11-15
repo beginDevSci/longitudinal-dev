@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Pre-commit hook to validate JSON posts before committing
+set -euo pipefail
+
+# Get list of staged .post.json files
+changed_json=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.post\.json$' || true)
+
+# Exit early if no JSON posts staged
+[ -z "$changed_json" ] && exit 0
+
+echo "🔍 Validating staged JSON posts..."
+
+# Use pre-built binary if available (faster), otherwise cargo run
+if [ -x "./target/debug/validate-json" ]; then
+  VALIDATOR="./target/debug/validate-json"
+elif [ -x "./target/release/validate-json" ]; then
+  VALIDATOR="./target/release/validate-json"
+else
+  VALIDATOR="cargo run --quiet --bin validate-json --"
+fi
+
+fail=0
+while IFS= read -r f; do
+  if [ -f "$f" ]; then
+    echo "  Checking $f"
+    if ! $VALIDATOR "$f" 2>/dev/null; then
+      echo "❌ JSON syntax error in: $f"
+      fail=1
+    fi
+  fi
+done <<< "$changed_json"
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "✋ Commit blocked due to invalid JSON. Fix the files above."
+  exit 1
+fi
+
+echo "✅ JSON syntax OK for staged *.post.json"
+exit 0

@@ -1,0 +1,105 @@
+{
+  "type": "object",
+  "required": [
+    "summary"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stats_panel": {
+      "type": "object",
+      "description": "Stats Panel: Optional panel with custom title and 0-10 stat items. Title captured from markdown heading text (e.g., '## Analytical Approach {.stats}' → title: 'Analytical Approach'). Panel only renders if {.stats} marker present.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Custom title for stats panel, captured from markdown heading. Falls back to 'Analytical Approach' if not provided.",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "description": "0-10 stat items. Can be simple strings (auto-assigned labels) or objects with custom labels.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stat value with auto-assigned label based on position"
+              },
+              {
+                "type": "object",
+                "description": "Stat item with custom label and value",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Custom label for this stat (e.g., 'Approach:', 'Data Type:')"
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The stat value"
+                  }
+                },
+                "required": ["value"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 10
+        }
+      },
+      "required": ["items"],
+      "additionalProperties": false
+    },
+    "features_panel": {
+      "type": "object",
+      "description": "Features Panel: Optional panel with custom title and 0-5 feature items. Title captured from markdown heading text (e.g., '## Key Benefits {.features}' → title: 'Key Benefits'). Panel only renders if {.features} marker present.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Custom title for features panel, captured from markdown heading. Required when {.features} marker present.",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "description": "0-5 feature items. Can be simple strings (auto-assigned headings) or objects with custom headings.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "Feature text with auto-assigned heading based on position"
+              },
+              {
+                "type": "object",
+                "description": "Feature item with custom heading and text",
+                "properties": {
+                  "heading": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Custom heading for this feature (e.g., 'When to Use:', 'Key Benefit:')"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The feature text"
+                  }
+                },
+                "required": ["text"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 5
+        }
+      },
+      "required": ["items"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

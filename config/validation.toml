@@ -1,0 +1,79 @@
+# Validation Pipeline Configuration
+# Version: 1.0.0
+
+[cache]
+enabled = true
+directory = ".cache/validation"
+max_age_hours = 168  # 1 week
+
+[stages]
+# Which stages to run by default
+enabled = [1, 2, 3, 4, 5]
+
+[stage1]
+# Required frontmatter fields (must be present)
+required_frontmatter = ["title", "slug", "family", "engine"]
+
+# Required sections - must be present and are the ONLY allowed H1 sections
+required_sections = [
+    "Overview",
+    "Data Access",
+    "Data Preparation",
+    "Statistical Analysis",
+    "Discussion",
+    "Additional Resources"
+]
+
+# Valid subsection markers (subsections without markers are allowed)
+# Structural markers enforced by Stage 1: code, output, note
+# Custom organizational markers: summary, stats, features, resource
+valid_markers = ["code", "output", "note", "summary", "stats", "features", "resource"]
+
+# Expected types for frontmatter fields (optional but if present must match)
+# Format: field_name = "type"  where type is "string" or "array"
+[stage1.frontmatter_types]
+title = "string"
+slug = "string"
+family = "string"
+engine = "string"
+tags = "array"  # Optional but if present must be array
+author = "string"
+date_iso = "string"
+
+[stage2]
+check_string_literals = true
+check_custom_functions = true
+allowed_functions_file = "config/allowed_functions.txt"
+require_libraries_first = true
+
+[stage3]
+sample_rows = 500  # Increased to ensure sufficient data after filtering
+timeout_seconds = 90  # Increased for computationally intensive models like GLMMs
+
+[stage4]
+timeout_seconds = 120
+capture_warnings = true
+treat_warnings_as = "warning"  # Options: "warning", "error", "ignore"
+
+[stage5]
+auto_deploy = true  # Automatically deploy if Stage 4 passes
+output_dir = "content/posts"  # Where to copy JSON files
+schema_dir = "config/schemas"  # Where to find JSON schemas
+track_status = true  # Update status tracking file
+status_file = "generated/validation/status.json"
+overwrite_existing = true  # Overwrite if JSON already exists
+inject_metadata = true  # Add execution metadata to JSON
+validate_schema = true  # Validate against JSON schema (BUILD SCRIPT VALIDATES SEPARATELY)
+
+[r]
+# R executable path. Defaults to "Rscript" (searches PATH).
+# Can be overridden with R_EXECUTABLE environment variable.
+# Fallback logic tries: configured path → PATH → common locations
+executable = "Rscript"
+required_packages = ["tidyverse", "lavaan", "NBDCtools", "lme4", "lcmm", "gtsummary", "broom", "gt", "pagedown"]
+
+[output]
+terminal = true
+log_file = true
+log_directory = "logs"
+verbose = false

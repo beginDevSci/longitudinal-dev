@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "post.schema.json",
+  "type": "object",
+  "required": [
+    "title",
+    "overview",
+    "data_access",
+    "data_preparation",
+    "statistical_analysis",
+    "discussion",
+    "additional_resources"
+  ],
+  "properties": {
+    "layout": {
+      "type": "string",
+      "enum": ["standard", "compact"],
+      "default": "standard",
+      "description": "Layout variant for the post (standard includes all UI elements, compact omits Quick Summary Details)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadata for catalog/index display and filtering",
+      "properties": {
+        "method_family": {
+          "type": "string",
+          "description": "Statistical method family (e.g., LGCM, GLMM, LMM)"
+        },
+        "method_family_label": {
+          "type": "string",
+          "description": "Human-friendly label for the method family (e.g., Latent Growth Curve Models (LGCM))"
+        },
+        "statistical_engine": {
+          "type": "string",
+          "description": "Statistical software/package used (e.g., lavaan, lme4, glmmTMB)"
+        },
+        "covariates": {
+          "type": "string",
+          "description": "Covariate type (e.g., None, TIC, TVC, Both)"
+        },
+        "outcome_type": {
+          "type": "string",
+          "description": "Type of outcome variable (e.g., Continuous, Count, Binary)"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date",
+          "description": "Last updated date (YYYY-MM-DD)"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags for categorization and search"
+        },
+        "author": {
+          "type": "string",
+          "description": "Post author or authoring organization"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the tutorial for display in title section"
+        }
+      }
+    },
+    "overview": {
+      "$ref": "./overview.schema.json"
+    },
+    "data_access": {
+      "$ref": "./data_access.schema.json"
+    },
+    "data_preparation": {
+      "$ref": "./data_preparation.schema.json"
+    },
+    "statistical_analysis": {
+      "$ref": "./statistical_analysis.schema.json"
+    },
+    "discussion": {
+      "$ref": "./discussion.schema.json"
+    },
+    "additional_resources": {
+      "$ref": "./additional_resources.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

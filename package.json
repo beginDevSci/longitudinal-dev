@@ -1,0 +1,9 @@
+{
+  "name": "leptos-ssg-islands-blog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Leptos SSG + Islands Blog with Tailwind CSS v4",
+  "devDependencies": {
+    "@tailwindcss/cli": "4.1.16"
+  }
+}
