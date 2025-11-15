@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -128,7 +128,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Prepare data for LMM analysis with time-invariant covariate
 df_long <- abcd_data %>%
     select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ab_g_dyn__cohort_edu__cgs, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%

@@ -65,9 +65,17 @@
     "content_blocks": [
       {
         "data": {
-          "content": "### Load necessary libraries\nlibrary(NBDCtools)    # ABCD data access helper\nlibrary(arrow)        # For reading Parquet files\nlibrary(tidyverse)    # Collection of R packages for data science\nlibrary(gtsummary)    # Creating publication-quality tables\nlibrary(lavaan)       # Structural Equation Modeling in R\nlibrary(broom)        # For tidying model outputs\nlibrary(gt)           # For creating formatted tables\n\n# Set random seed for reproducible family member selection\nset.seed(123)\n\n### Load harmonized ABCD data required for this analysis\nrequested_vars <- c(\n    \"ab_g_dyn__design_site\",\n    \"ab_g_stc__design_id__fam\",\n    \"mh_y_erq__suppr_mean\"\n)\n\ndata_dir <- Sys.getenv(\"ABCD_DATA_PATH\", \"/path/to/abcd/6_0/phenotype\")\n\nabcd_data <- create_dataset(\n  dir_data = data_dir,\n  study = \"abcd\",\n  vars = requested_vars,\n  release = \"6.0\",\n  format = \"parquet\",\n  categ_to_factor = TRUE,   # Convert categorical variables to factors\n  value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA\n  add_labels = TRUE          # Add variable and value labels\n)\n\n# Create longitudinal dataset with cleaned variables\ndf_long <- abcd_data %>%\n  # Filter to ERQ assessment waves (Years 3-6)\n  filter(session_id %in% c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id) %>%\n  mutate(\n    # Convert IDs to factors for proper handling\n    participant_id = factor(participant_id),\n\n    # Create meaningful wave labels\n    session_id = factor(session_id,\n                        levels = c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\"),\n                        labels = c(\"Year_3\", \"Year_4\", \"Year_5\", \"Year_6\")),\n\n    # Clean clustering variables\n    site = factor(ab_g_dyn__design_site),\n    family_id = factor(ab_g_stc__design_id__fam),\n\n    # Clean outcome variable\n    suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)\n  ) %>%\n\n  # Keep only analysis variables\n  select(participant_id, session_id, site, family_id, suppression) %>%\n\n  # Remove cases with missing outcome data\n  drop_na(suppression) %>%\n  droplevels()\n\ndf_wide <- df_long %>%\n  select(participant_id, site, family_id, session_id, suppression) %>%\n  pivot_wider(\n    names_from = session_id,\n    values_from = suppression,\n    names_prefix = \"Suppression_\"\n  ) %>%\n  # Remove cases with incomplete data across waves\n  drop_na(starts_with(\"Suppression_\"))",
+          "content": "### Load necessary libraries\nlibrary(NBDCtools)    # ABCD data access helper\nlibrary(arrow)        # For reading Parquet files\nlibrary(tidyverse)    # Collection of R packages for data science\nlibrary(gtsummary)    # Creating publication-quality tables\nlibrary(lavaan)       # Structural Equation Modeling in R\nlibrary(broom)        # For tidying model outputs\nlibrary(gt)           # For creating formatted tables\n\n# Set random seed for reproducible family member selection\nset.seed(123)\n\n### Load harmonized ABCD data required for this analysis\nrequested_vars <- c(\n    \"ab_g_dyn__design_site\",\n    \"ab_g_stc__design_id__fam\",\n    \"mh_y_erq__suppr_mean\"\n)\n\ndata_dir <- Sys.getenv(\"ABCD_DATA_PATH\", \"/path/to/abcd/6_0/phenotype\")\n\nabcd_data <- create_dataset(\n  dir_data = data_dir,\n  study = \"abcd\",\n  vars = requested_vars,\n  release = \"6.0\",\n  format = \"parquet\",\n  categ_to_factor = TRUE,   # Convert categorical variables to factors\n  value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA\n  add_labels = TRUE          # Add variable and value labels\n)",
           "language": "r",
-          "title": "Load Packages"
+          "title": "NBDCtools Setup and Data Loading"
+        },
+        "type": "code"
+      },
+      {
+        "data": {
+          "content": "# Create longitudinal dataset with cleaned variables\ndf_long <- abcd_data %>%\n  # Filter to ERQ assessment waves (Years 3-6)\n  filter(session_id %in% c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id) %>%\n  mutate(\n    # Convert IDs to factors for proper handling\n    participant_id = factor(participant_id),\n\n    # Create meaningful wave labels\n    session_id = factor(session_id,\n                        levels = c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\"),\n                        labels = c(\"Year_3\", \"Year_4\", \"Year_5\", \"Year_6\")),\n\n    # Clean clustering variables\n    site = factor(ab_g_dyn__design_site),\n    family_id = factor(ab_g_stc__design_id__fam),\n\n    # Clean outcome variable\n    suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)\n  ) %>%\n\n  # Keep only analysis variables\n  select(participant_id, session_id, site, family_id, suppression) %>%\n\n  # Remove cases with missing outcome data\n  drop_na(suppression) %>%\n  droplevels()\n\ndf_wide <- df_long %>%\n  select(participant_id, site, family_id, session_id, suppression) %>%\n  pivot_wider(\n    names_from = session_id,\n    values_from = suppression,\n    names_prefix = \"Suppression_\"\n  ) %>%\n  # Remove cases with incomplete data across waves\n  drop_na(starts_with(\"Suppression_\"))",
+          "language": "r",
+          "title": "Data Transformation"
         },
         "type": "code"
       },
@@ -101,7 +109,7 @@
     "covariates": "None",
     "data_prep_status": "unknown",
     "description": "Incorporate nesting within families and sites in latent growth curve models to obtain robust emotional suppression trajectories for clustered ABCD youth.",
-    "execution_time_ms": 3912,
+    "execution_time_ms": 4983,
     "method_family": "LGCM",
     "method_family_label": "Latent Growth Curve Models (LGCM)",
     "outcome_type": "Continuous",
@@ -112,7 +120,7 @@
       "nesting"
     ],
     "updated_at": "2025-11-04",
-    "validated_at": "2025-11-14T22:38:08.827846+00:00",
+    "validated_at": "2025-11-15T23:03:09.876075+00:00",
     "validator_version": "1.0.0",
     "warnings": 1
   },

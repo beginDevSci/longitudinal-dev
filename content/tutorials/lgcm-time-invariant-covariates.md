@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Load Packages and Import Data {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 # Load required libraries
@@ -132,7 +132,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Create longitudinal dataset
 df_long <- abcd_data %>%
   # Filter to ERQ assessment waves (Years 3-6)

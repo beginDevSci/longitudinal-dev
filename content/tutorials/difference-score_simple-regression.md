@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -106,7 +106,7 @@ library(rstatix)    # Simplifying statistical tests
 library(effectsize) # Calculating effect sizes
 library(broom)      # Organizing model outputs
 
-### Load harmonized ABCD data required for this analysis
+### Specify variables of interest
 requested_vars <- c(
     "ab_g_dyn__design_site",
     "ab_g_stc__design_id__fam",
@@ -114,6 +114,7 @@ requested_vars <- c(
     "ph_y_anthr__height_mean"
 )
 
+### Load harmonized ABCD data
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
 
 abcd_data <- create_dataset(
@@ -127,7 +128,12 @@ abcd_data <- create_dataset(
   add_labels = TRUE          # Add variable and value labels
 )
 
-# Create a long-form dataset with relevant columns
+```
+
+## Data Transformation {.code}
+
+```r
+# Create long-form dataset with relevant columns
 df_long <- abcd_data %>%
   select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, nc_y_ehis_score, ph_y_anthr__height_mean) %>%
   filter(session_id %in% c("ses-00A", "ses-01A")) %>%   # Keep only baseline and year 1 sessions
