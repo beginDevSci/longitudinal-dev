@@ -1662,7 +1662,22 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     font-size: 0.85rem;
-    color: var(--color-accent-200);
+    background: linear-gradient(90deg, rgba(129, 140, 248, 0.95), rgba(56, 189, 248, 0.95));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Light mode - darker gradient for visibility */
+  :root .hero-kicker,
+  [data-theme="light"] .hero-kicker {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.95), rgba(14, 165, 233, 0.95));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Dark modes - lighter gradient */
+  [data-theme="dark"] .hero-kicker,
+  [data-theme="dracula"] .hero-kicker {
     background: linear-gradient(90deg, rgba(129, 140, 248, 0.95), rgba(56, 189, 248, 0.95));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1675,8 +1690,14 @@ body {
   }
 
   .hero-breadcrumb {
-    color: rgba(226, 232, 240, 0.75);
+    color: rgba(100, 116, 139, 0.85);
     font-size: 0.95rem;
+  }
+
+  /* Dark mode breadcrumb */
+  [data-theme="dark"] .hero-breadcrumb,
+  [data-theme="dracula"] .hero-breadcrumb {
+    color: rgba(226, 232, 240, 0.75);
   }
 
   .hero-pill {
@@ -1691,50 +1712,64 @@ body {
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.3);
   }
 
+  /* Light mode pills (default / :root) */
   .hero-pill--primary {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.35);
+    color: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+  }
+
+  .hero-pill--secondary {
+    background: rgba(148, 163, 184, 0.2);
+    border-color: rgba(100, 116, 139, 0.35);
+    color: rgba(15, 23, 42, 0.85);
+  }
+
+  .hero-pill--tag {
+    background: rgba(2, 132, 199, 0.12);
+    border-color: rgba(2, 132, 199, 0.3);
+    color: rgba(15, 23, 42, 0.9);
+  }
+
+  /* Dark mode pills */
+  [data-theme="dark"] .hero-pill--primary,
+  [data-theme="dracula"] .hero-pill--primary {
     background: linear-gradient(120deg, rgba(59, 130, 246, 0.25), rgba(14, 165, 233, 0.25));
     border-color: rgba(59, 130, 246, 0.4);
     color: var(--color-accent-50);
   }
 
-  .hero-pill--secondary {
+  [data-theme="dark"] .hero-pill--secondary,
+  [data-theme="dracula"] .hero-pill--secondary {
     background: rgba(148, 163, 184, 0.15);
     border-color: rgba(148, 163, 184, 0.4);
     color: rgba(226, 232, 240, 0.85);
   }
 
-  .hero-pill--tag {
+  [data-theme="dark"] .hero-pill--tag,
+  [data-theme="dracula"] .hero-pill--tag {
     background: rgba(2, 132, 199, 0.08);
     border-color: rgba(2, 132, 199, 0.35);
     color: rgba(191, 219, 254, 0.95);
   }
 
+  /* Hover states - different for light/dark */
   .hero-pill--tag:hover,
   .hero-pill--secondary:hover,
   .hero-pill--primary:hover {
-    border-color: rgba(255, 255, 255, 0.6);
-    color: #fff;
+    border-color: rgba(100, 116, 139, 0.6);
+    color: rgba(15, 23, 42, 1);
   }
 
-  @media (prefers-color-scheme: light) {
-    .hero-pill--primary {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.35);
-      color: rgba(15, 23, 42, 0.9);
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
-    }
-
-    .hero-pill--secondary {
-      background: rgba(148, 163, 184, 0.2);
-      border-color: rgba(100, 116, 139, 0.35);
-      color: rgba(15, 23, 42, 0.85);
-    }
-
-    .hero-pill--tag {
-      background: rgba(2, 132, 199, 0.12);
-      border-color: rgba(2, 132, 199, 0.3);
-      color: rgba(15, 23, 42, 0.9);
-    }
+  [data-theme="dark"] .hero-pill--tag:hover,
+  [data-theme="dark"] .hero-pill--secondary:hover,
+  [data-theme="dark"] .hero-pill--primary:hover,
+  [data-theme="dracula"] .hero-pill--tag:hover,
+  [data-theme="dracula"] .hero-pill--secondary:hover,
+  [data-theme="dracula"] .hero-pill--primary:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
   }
 
   /* ========================================
@@ -2443,5 +2478,54 @@ body {
   /* Dracula theme adjustments */
   [data-theme="dracula"] .data-access-content ul li::before {
     background-color: var(--color-accent-300);
+  }
+
+  /* ========================================
+     DRAFT BANNER - Work-in-progress notice
+     ======================================== */
+
+  /* Base draft banner styling - light mode */
+  .draft-banner {
+    margin-top: 1.5rem; /* mt-6 */
+    border-radius: 1rem; /* rounded-2xl */
+    border: 1px solid rgba(244, 63, 94, 0.4); /* border-rose-300/40 */
+    background-color: rgba(244, 63, 94, 0.1); /* bg-rose-500/10 */
+    padding: 0.75rem 1rem; /* px-4 py-3 */
+    color: rgb(190, 18, 60); /* text-rose-700 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem; /* gap-3 */
+  }
+
+  /* Dark mode adjustments */
+  [data-theme="dark"] .draft-banner {
+    color: rgb(254, 205, 211); /* text-rose-100 */
+  }
+
+  /* Dracula theme adjustments */
+  [data-theme="dracula"] .draft-banner {
+    color: rgb(254, 205, 211); /* text-rose-100 */
+  }
+
+  /* Pulse indicator dot - light mode */
+  .draft-banner-pulse {
+    margin-top: 0.125rem; /* mt-0.5 */
+    height: 0.625rem; /* h-2.5 */
+    width: 0.625rem; /* w-2.5 */
+    border-radius: 9999px; /* rounded-full */
+    background-color: rgb(244, 63, 94); /* bg-rose-500 */
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Dark mode pulse - lighter color */
+  [data-theme="dark"] .draft-banner-pulse {
+    background-color: rgb(251, 113, 133); /* bg-rose-300 */
+  }
+
+  /* Dracula theme pulse */
+  [data-theme="dracula"] .draft-banner-pulse {
+    background-color: rgb(251, 113, 133); /* bg-rose-300 */
   }
 }
