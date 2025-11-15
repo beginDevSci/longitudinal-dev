@@ -87,7 +87,12 @@ jobs:
         run: cargo clippy --locked -p longitudinal_parser -p longitudinal_writer -p longitudinal_validator --all-targets -- -D warnings
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit --locked
+        run: |
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit --locked
+          else
+            echo "cargo-audit already installed"
+          fi
 
       - name: Security audit
         run: |
