@@ -266,8 +266,8 @@ pub fn PostLayout(post: Post) -> impl IntoView {
                     </div>
 
                     // Draft banner shown on every tutorial page until content is finalized
-                    <div class="mt-6 rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-3 text-rose-100 text-sm font-medium flex items-start gap-3">
-                        <span class="mt-0.5 h-2.5 w-2.5 rounded-full bg-rose-300 animate-pulse" aria-hidden="true"></span>
+                    <div class="mt-6 rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-3 text-rose-700 dark:text-rose-100 text-sm font-medium flex items-start gap-3">
+                        <span class="mt-0.5 h-2.5 w-2.5 rounded-full bg-rose-500 dark:bg-rose-300 animate-pulse" aria-hidden="true"></span>
                         <p class="leading-relaxed whitespace-nowrap">
                             "Examples are a work in progress—please share feedback if you spot gaps."
                         </p>
