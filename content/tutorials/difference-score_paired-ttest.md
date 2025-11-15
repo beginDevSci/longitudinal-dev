@@ -191,7 +191,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Run Analysis {.code}
 
 ```r
 
@@ -199,17 +199,23 @@ descriptives_table
 df_wide <- df_wide %>%
   mutate(height_diff = Height_Year_1 - Height_Baseline)  # Difference in height across assessments
 
-# Calculate Cohen's d
-d_value <- cohens_d(df_wide$height_diff, mu = 0) # derive effect size of the height difference
+# Calculate Cohen's d effect size
+d_value <- cohens_d(df_wide$height_diff, mu = 0)
 print(d_value)
 
-# 1. Fit a Paired T-test
+# Fit paired t-test
 model <- t.test(df_wide$height_diff, mu = 0)  # tests if mean difference ≠ 0
 
-# 2. Convert test results into a tidy dataframe
+# Convert test results to tidy dataframe
 tidy_model <- broom::tidy(model)
 
-# 3. Create a styled gt table with improved formatting
+```
+
+## Format Results Table {.code}
+
+```r
+
+# Create styled gt table with improved formatting
 model_summary <- tidy_model %>%
   gt() %>%
   tab_header(title = "T-Test Summary Table") %>%
@@ -250,7 +256,6 @@ model_summary <- tidy_model %>%
 model_summary
 
 # Save as HTML with controlled dimensions
-# Use gtsave() (or save_gt()) for HTML, RTF, LaTeX, and image saving
 model_summary %>%
   gtsave(filename = "model_summary.html")
 
