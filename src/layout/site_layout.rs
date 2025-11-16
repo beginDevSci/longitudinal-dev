@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 
 use crate::base_path;
+use crate::layout::TopNav;
 
 /// Global site wrapper providing HTML shell, head, and body structure.
 ///
@@ -36,7 +37,12 @@ pub fn SiteLayout(options: leptos::config::LeptosOptions, children: Children) ->
                 <HydrationScripts options islands=true root=base_trimmed/>
             </head>
             <body>
-                {children()}
+                <div class="min-h-screen flex flex-col">
+                    <TopNav/>
+                    <div class="flex-1 flex flex-col">
+                        {children()}
+                    </div>
+                </div>
             </body>
         </html>
     }
