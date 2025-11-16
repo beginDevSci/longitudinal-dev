@@ -187,21 +187,21 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Fit GEE Model {.code}
 
 ```r
-
 # Fit GEE model: Predicting sufficient sleep over time
 model <- geeglm(sleep_binary ~ session_id + site,
-                    id = participant_id,
-                    data = df_long,
-                    family = binomial(link = "logit"),  # Logistic GEE for binary data
-                    corstr = "exchangeable")  # Assumes equal correlation across time points
+  id = participant_id,
+  data = df_long,
+  family = binomial(link = "logit"),
+  corstr = "exchangeable"
+)
 
-# Generate a summary table for the GEE model
+# Generate summary table
 model_summary_table <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
+  digits = 3,
+  intercept = TRUE
 ) %>%
   gtsummary::as_gt()
 
@@ -213,8 +213,12 @@ gt::gtsave(
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-# GEE Model Diagnostics
+## Create Model Diagnostics Table {.code}
+
+```r
+# Create GEE diagnostics data
 diagnostics_data <- data.frame(
   Characteristic = c(
     "Correlation Structure",
@@ -232,14 +236,15 @@ diagnostics_data <- data.frame(
   )
 )
 
+# Format diagnostics table
 diagnostics_table <- diagnostics_data %>%
   gt::gt() %>%
   gt::tab_header(title = "GEE Model Diagnostics")
 
 diagnostics_table
 
+# Save diagnostics table
 gt::gtsave(diagnostics_table, filename = "model_diagnostics.html")
-
 ```
 
 ## Model Summary Output {.output}

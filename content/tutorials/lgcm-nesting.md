@@ -206,7 +206,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Define Latent Growth Curve Model {.code}
+## Define and Fit Nested LGCM {.code}
 
 ```r
 # Define LGCM specification with explicit residual variance labels
@@ -229,36 +229,45 @@ model <- "
   Suppression_Year_6 ~~ var_y6*Suppression_Year_6
 "
 
-### Fit the model
+# Fit the model with nested clustering
 fit <- growth(
   model,
   data = df_wide,
-  cluster = c("site", "family_id"),  # Account for site and family-level dependencies
-  missing = "fiml",           # Full information maximum likelihood for missing data
-  se = "robust"               # Robust (sandwich) standard errors
+  cluster = c("site", "family_id"),
+  missing = "fiml",
+  se = "robust"
 )
 
 # Display model summary with fit indices
 summary(fit, fit.measures = TRUE, standardized = TRUE)
+```
 
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -273,13 +282,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}

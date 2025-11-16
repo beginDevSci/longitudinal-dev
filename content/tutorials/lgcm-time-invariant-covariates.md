@@ -234,7 +234,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Model Fit {.code}
+## Define and Fit LGCM with Covariates {.code}
 
 ```r
 # Specify LGCM with time-invariant covariates
@@ -269,28 +269,40 @@ model <- "
 fit <- lavaan(
   model,
   data = df_wide,
-  missing = "fiml",        # Handle missing data
-  cluster = "site"         # Cluster-robust SEs for site effects
+  missing = "fiml",
+  cluster = "site"
 )
 
+# Display model summary
+summary(fit)
+```
+
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -305,13 +317,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}

@@ -239,72 +239,83 @@ The fixed effects estimates suggest that the average cognition score at baseline
 
 Examining the random effects, we find considerable variability in both baseline cognition scores (random intercept variance τ₀₀ = 89.96) and individual rates of cognitive decline (random slope variance τ₁₁ = 0.56). The negative correlation (ρ₀₁ = -0.29) between the intercept and slope suggests that individuals with higher initial cognition scores tend to experience steeper declines over time. This model better accounts for individual differences in both starting cognition levels and their rate of change, making it a more flexible approach compared to the random-intercept-only model.
 
-## Visualization and Model Predictions {.code}
+## Generate Quick Diagnostic Plot and Predictions {.code}
 
 ```r
+# Generate quick diagnostic plot using sjPlot
 sjPlot::plot_model(model,
-    type = "pred",  # Predicts values based on the model
-    terms = c("time"),  # Plot cognition over time
-    title = "Predicted Cognition Scores Over Time",
-    axis.title = c("Time", "Predicted Cognition"),
-    show.data = TRUE,  # Overlay raw data points
-    ci.lvl = 0.95,  # Confidence interval (95%)
-    dot.size = 2,  # Size of individual data points
-    line.size = 1.2,  # Size of model prediction line
-    jitter = 0.2,  # Adds random horizontal variation to avoid overplotting
-    file = "lmm_sjPlot_results.html"
+  type = "pred",
+  terms = c("time"),
+  title = "Predicted Cognition Scores Over Time",
+  axis.title = c("Time", "Predicted Cognition"),
+  show.data = TRUE,
+  ci.lvl = 0.95,
+  dot.size = 2,
+  line.size = 1.2,
+  jitter = 0.2,
+  file = "lmm_sjPlot_results.html"
 )
 
-### Generate model predictions for the full dataset
-df_long$predicted_fixed <- predict(model, re.form = NA)
-### Fixed effects only: Represents the overall population-level trajectory
+# Generate model predictions for custom visualization
+df_long <- df_long %>%
+  mutate(
+    predicted_fixed = predict(model, re.form = NA),
+    predicted_random = predict(model, re.form = ~ (1 + time | participant_id))
+  )
 
-df_long$predicted_random <- predict(model, re.form = ~ (1 + time | participant_id))
-### Includes individual-specific random effects: Allows for variation across participants
+# Select a subset of participant IDs for visualization
+set.seed(124)
+sample_ids <- sample(unique(df_long$participant_id),
+                     size = min(250, length(unique(df_long$participant_id))))
 
-### Select a subset of participant IDs for visualization
-set.seed(124)  # Set seed for reproducibility
-n_sample <- min(250, length(unique(df_long$participant_id)))  # Sample up to 250 participants
-sample_ids <- sample(unique(df_long$participant_id), size = n_sample)  # Randomly select participants
-
-### Filter dataset to include only sampled participants
+# Filter dataset to include only sampled participants
 df_long_sub <- df_long %>%
-    filter(participant_id %in% sample_ids)  # Retain only selected participant IDs
+  filter(participant_id %in% sample_ids)
+```
 
-### Create the visualization of individual and overall cognition trajectories
-visualization <- ggplot(df_long_sub, aes(x = session_id, y = cognition, group = participant_id)) +
+## Create Custom Trajectory Visualization {.code}
 
-    # Plot observed data (individual trajectories)
-    geom_line(aes(color = "Actual Data"), alpha = 0.3) +
-    geom_point(alpha = 0.3) +
+```r
+# Create the visualization of individual and overall cognition trajectories
+visualization <- ggplot(df_long_sub, aes(x = time, y = cognition, group = participant_id)) +
 
-    # Plot model-predicted values
-    geom_line(aes(y = predicted_random, color = "Random Intercept"), alpha = 0.7) +
-    geom_line(aes(y = predicted_fixed, group = 1, color = "Fixed Effect Mean"), linewidth = 1.2) +
+  # Plot observed data (individual trajectories)
+  geom_line(aes(color = "Observed Data"), alpha = 0.3) +
+  geom_point(alpha = 0.3) +
 
-    # Customize colors for clarity
-    scale_color_manual(values = c(
-        "Actual Data" = "red",
-        "Random Intercept" = "grey40",
-        "Fixed Effect Mean" = "blue"
-    )) +
+  # Plot model-predicted values with random intercepts and slopes
+  geom_line(aes(y = predicted_random, color = "Model Predictions"), alpha = 0.7) +
+  geom_line(aes(y = predicted_fixed, group = 1, color = "Population Mean"), linewidth = 1.2) +
 
-    # Add labels and title
-    labs(
-        title = "Random-Intercept LMM: Individual vs. Overall Trajectories (Subset of 250 Participants)",
-        x = "Assessment Wave",
-        y = "Cognition",
-        color = "Trajectory Type"
-    ) +
+  # Customize colors for clarity
+  scale_color_manual(values = c(
+    "Observed Data" = "red",
+    "Model Predictions" = "grey40",
+    "Population Mean" = "blue"
+  )) +
 
-    # Apply a minimalistic theme for clarity
-    theme_minimal() +
-    theme(legend.position = "bottom")  # Move legend below the plot
+  # Format x-axis labels
+  scale_x_continuous(
+    breaks = 0:3,
+    labels = c("Baseline", "Year 2", "Year 4", "Year 6")
+  ) +
 
-### Display the plot
+  # Add labels and title
+  labs(
+    title = "Random Intercept-Slope Model: Individual Trajectories",
+    x = "Assessment Wave",
+    y = "Cognition",
+    color = "Trajectory Type"
+  ) +
+
+  # Apply theme
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# Display the plot
 visualization
 
-### Save the plot
+# Save the plot
 ggsave(
   filename = "visualization.png",
   plot = visualization,
