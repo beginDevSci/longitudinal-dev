@@ -165,7 +165,7 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "**{level}**N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   bold_labels() %>%
   italicize_levels()
@@ -198,7 +198,7 @@ model <- lmerTest::lmer(
     data = df_long # Dataset containing repeated measures of cognition
 )
 
-### Generate a summary table for the LMM model
+### Generate a summary table for the LMM model (gtsummary format)
 model_summary_table <- gtsummary::tbl_regression(model,
     digits = 3,
     intercept = TRUE
@@ -212,7 +212,8 @@ gt::gtsave(
   inline_css = FALSE
 )
 
-# Generate a summary table for the LMM model
+# Generate an alternative summary table with random effects (sjPlot format)
+# This provides additional details on variance components not shown in gtsummary
 sjPlot::tab_model(model,
     show.se = TRUE, show.df = FALSE, show.ci = FALSE,
     digits = 3,

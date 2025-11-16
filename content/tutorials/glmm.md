@@ -136,7 +136,6 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-01A", "ses-02A", "ses-03A", "ses-04A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    id = factor(participant_id),  # Convert participant ID to factor
     session_id = factor(session_id, levels = c("ses-01A", "ses-02A", "ses-03A", "ses-04A"),
                    labels = c("Year_1", "Year_2", "Year_3", "Year_4")),  # Rename sessions for clarity
     time = as.numeric(session_id) - 1,  # Converts factor to 0,1,2,3
@@ -192,6 +191,8 @@ descriptives_table
 
 ```r
 # Fit a Poisson GLMM with random intercepts for site, family, and participant
+# The random effects use fully nested structure (site:family:participant)
+# This accounts for hierarchical clustering in the ABCD design
 model <- glmer(
     alcohol_use ~ time + (1 | site:family_id:participant_id),
     data = df_long,
@@ -278,20 +279,8 @@ Model fit metrics, including the log-likelihood value, suggest that the GLMM pro
 ## Visualize {.code}
 
 ```r
-# Get predicted alcohol use by time
-preds <- ggeffect(model, terms = "time")
-
-# Plot predicted probabilities with confidence intervals
-ggplot(preds, aes(x = x, y = predicted)) +
-  geom_point(size = 3, color = "blue") +
-  geom_line(group = 1, color = "blue") +
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
-  labs(title = "Predicted Alcohol Use by time",
-       x = "time (Timepoint)",
-       y = "Predicted Alcohol Use") +
-  theme_minimal()
-
-  df_long$predicted <- predict(model, type = "response")
+# Generate model predictions for visualization
+df_long$predicted <- predict(model, type = "response")
 
 visualization <- ggplot(df_long, aes(x = predicted, y = alcohol_use)) +
   geom_point(alpha = 0.5) +

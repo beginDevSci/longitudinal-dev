@@ -133,6 +133,7 @@ abcd_data <- create_dataset(
 ### Clean and transform variables for analysis
 df_long <- abcd_data %>%
   # Filter to baseline through Year 3
+  # Note: Both "ses-00" and "ses-00A" are included as baseline to capture all available baseline data
   filter(session_id %in% c("ses-00", "ses-00A", "ses-01A", "ses-02A", "ses-03A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
@@ -165,8 +166,6 @@ df_wide <- df_long %>%
 ## Descriptive Statistics {.code}
 
 ```r
-### [Descriptives.r]
-
 ### Create descriptive summary table
 descriptives_table <- df_long %>%
   select(session_id, externalizing, internalizing) %>%
@@ -224,6 +223,7 @@ model <- "
   s_var2 ~ 1
 
   # Fix observed variable intercepts to 0 for identification
+  # This ensures the latent growth factors carry all the mean structure
   externalizing_Baseline ~ 0*1
   externalizing_Year_1   ~ 0*1
   externalizing_Year_2   ~ 0*1
@@ -321,7 +321,7 @@ mean_internalizing_long <- pivot_longer(mean_internalizing, cols = everything(),
 
 ### Plot the mean trajectories for externalizing
 externalizing_plot <- ggplot(mean_externalizing_long, aes(x = Time, y = Mean_externalizing, group = 1)) +
-    geom_line(color = "blue", size = 1.2) +
+    geom_line(color = "blue", linewidth = 1.2) +
     geom_point(color = "blue") +
     labs(title = "Mean Growth Trajectory for externalizing", y = "Mean externalizing", x = "Time Point") +
     theme_minimal() +
@@ -329,7 +329,7 @@ externalizing_plot <- ggplot(mean_externalizing_long, aes(x = Time, y = Mean_ext
 
 ### Plot the mean trajectories for internalizing
 internalizing_plot <- ggplot(mean_internalizing_long, aes(x = Time, y = Mean_internalizing, group = 1)) +
-    geom_line(color = "red", size = 1.2) +
+    geom_line(color = "red", linewidth = 1.2) +
     geom_point(color = "red") +
     labs(title = "Mean Growth Trajectory for internalizing", y = "Mean internalizing", x = "Time Point") +
     theme_minimal() +
