@@ -195,7 +195,7 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "{level}<br>N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "Assessment Wave") %>%
   bold_labels() %>%
   italicize_levels()
@@ -376,10 +376,6 @@ The multigroup LGCM found meaningful between-person variability in both baseline
 set.seed(123)  # For reproducibility
 selected_ids <- sample(unique(df_long$participant_id), 250)
 df_long_selected <- df_long %>% filter(participant_id %in% selected_ids)
-
-# Ensure 'sex' is a factor with meaningful labels
-df_long_selected <- df_long_selected %>%
-  mutate(sex = factor(sex, labels = c("Male", "Female")))
 
 # Plot memory growth by sex group
 visualization <- ggplot(df_long_selected, aes(x = session_id, y = memory, group = participant_id, color = sex)) +

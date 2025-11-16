@@ -19,7 +19,7 @@ description: Introduce latent growth curve modeling to estimate average emotiona
 
 ## Summary {.summary}
 
-Latentzz Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
+Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
 
 ## Features {.features}
 
@@ -161,7 +161,6 @@ df_wide <- df_long %>%
 ## Descriptive Statistics {.code}
 
 ```r
-### Descriptives
 ### Create descriptive summary table
 descriptives_table <- df_long %>%
   select(session_id, suppression) %>%
@@ -286,7 +285,6 @@ The LGCM fit was generally strong (CFI = 0.949, TLI = 0.938, SRMR = 0.045), with
 ## Visualization {.code}
 
 ```r
-### Visualization
 ### Select a subset of participants
 n_sample <- min(150, length(unique(df_long$participant_id)))
 selected_ids <- sample(unique(df_long$participant_id), n_sample)

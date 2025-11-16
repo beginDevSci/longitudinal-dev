@@ -183,7 +183,7 @@ descriptives_table <- df_long %>%
     statistic = list(all_continuous() ~ "{mean} ({sd})"),
     digits = all_continuous() ~ 2
   ) %>%
-  modify_header(all_stat_cols() ~ "**{level}**N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   add_overall(last = TRUE) %>%
   bold_labels()

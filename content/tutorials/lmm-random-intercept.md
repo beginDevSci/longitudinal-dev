@@ -98,7 +98,6 @@ For more details on using NBDCtools:
 ```r
 ### Load necessary libraries
 library(NBDCtools)    # ABCD data access helper
-### Load necessary libraries
 library(arrow)       # For reading Parquet files
 library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
@@ -211,7 +210,8 @@ gt::gtsave(
   inline_css = FALSE
 )
 
-# Generate a summary table for the LMM model
+# Generate alternative summary table with variance components (sjPlot format)
+# This provides additional details on random effects not shown in gtsummary
 sjPlot::tab_model(model,
     show.se = TRUE, show.df = FALSE, show.ci = FALSE,
     digits = 3, pred.labels = c("Intercept", "Time"),
