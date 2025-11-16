@@ -134,7 +134,7 @@ abcd_data <- create_dataset(
 )
 ```
 
-## Data Transformation {.code}
+## Create Long Format Dataset {.code}
 
 ```r
 # Create longitudinal dataset
@@ -183,7 +183,11 @@ baseline_covariates <- df_long %>%
     income_c = income - mean(income, na.rm = TRUE)
   ) %>%
   select(participant_id, age_c, female, education_c, income_c)
+```
 
+## Reshape to Wide Format for LGCM Analysis {.code}
+
+```r
 # Reshape suppression to wide format
 df_wide <- df_long %>%
   select(participant_id, session_id, suppression, site) %>%

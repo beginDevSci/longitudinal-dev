@@ -131,7 +131,7 @@ abcd_data <- create_dataset(
 )
 ```
 
-## Data Transformation {.code}
+## Create Long Format Dataset {.code}
 
 ```r
 # Create longitudinal dataset with cleaned variables
@@ -140,35 +140,33 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    # Convert IDs to factors
-    participant_id = factor(participant_id),
-
-    # Create meaningful wave labels
+    # Relabel session IDs for clarity
     session_id = factor(session_id,
                         levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
                         labels = c("Year_0", "Year_2", "Year_4", "Year_6")),
-
-    # Clean grouping and clustering variables
-    site = factor(ab_g_dyn__design_site),
-    family_id = factor(ab_g_stc__design_id__fam),
-
     # Create sex grouping variable with meaningful labels
-    sex = case_when(
+    sex = factor(case_when(
       ab_g_stc__cohort_sex == 1 ~ "Male",
       ab_g_stc__cohort_sex == 2 ~ "Female",
       TRUE ~ NA_character_
-    ),
-    sex = factor(sex),
-    age = as.numeric(ab_g_dyn__visit_age),
-    memory = as.numeric(nc_y_nihtb__picsq__agecor_score)
+    ))
+  ) %>%
+  # Rename for clarity
+  rename(
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam,
+    age = ab_g_dyn__visit_age,
+    memory = nc_y_nihtb__picsq__agecor_score
   ) %>%
   # Remove invalid memory scores and missing sex data
   filter(memory > 1, !is.na(sex)) %>%
-
-  # Keep only analysis variables
   select(participant_id, session_id, site, family_id, age, sex, memory) %>%
   droplevels()
+```
 
+## Reshape to Wide Format for Multigroup LGCM {.code}
+
+```r
 # Reshape data from long to wide format
 df_wide <- df_long %>%
   pivot_wider(
@@ -182,7 +180,6 @@ df_wide <- df_long %>%
   mutate(sex_group = sex_0) %>%
   # Remove cases with missing memory data
   drop_na(starts_with("memory_"))
-
 ```
 
 ## Descriptive Statistics by Group {.code}

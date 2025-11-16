@@ -135,52 +135,51 @@ abcd_data <- create_dataset(
 ```r
 # Prepare data for LMM analysis with time-invariant covariate
 df_long <- abcd_data %>%
-    select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ab_g_dyn__cohort_edu__cgs, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
+    ### Filter and forward-fill time-invariant covariates
     # Filter to include only 4 relevant measurement occasions
     filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
-    # Forward fill parental education (time-invariant covariate)
+    # Forward-fill parental education (time-invariant: carries baseline value forward)
     group_by(participant_id) %>%
     fill(ab_g_dyn__cohort_edu__cgs, .direction = "down") %>%
     ungroup() %>%
-    # Ensure dataset is sorted by participant and session
     arrange(participant_id, session_id) %>%
-    # Convert categorical and numerical variables
     mutate(
-        participant_id = factor(participant_id), # Convert IDs to factors
-        session_id = factor(session_id, # Convert session to a factors
+        # Relabel session IDs
+        session_id = factor(session_id,
             levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
-            labels = c("Baseline", "Year_2", "Year_4", "Year_6")
-        ),
-        time = as.numeric(session_id) - 1, # Convert session_id to numeric
-        ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-        ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
-        # Convert and clean parent education variable
-        parent_education = as.numeric(ab_g_dyn__cohort_edu__cgs),
-        parent_education = na_if(parent_education, 777),  # Set "Decline to Answer" as NA
-        # Categorize parent education levels
-        parent_education_cat = case_when(
+            labels = c("Baseline", "Year_2", "Year_4", "Year_6")),
+        # Create numeric time variable
+        time = as.numeric(session_id) - 1,
+        # Clean parent education (remove "Decline to Answer" code)
+        parent_education = na_if(as.numeric(ab_g_dyn__cohort_edu__cgs), 777)
+    ) %>%
+
+    ### Categorize parent education into 5 levels
+    mutate(
+        # Based on ABCD coding scheme
+        parent_education_cat = factor(case_when(
           parent_education <= 12 ~ "Less than HS",
           parent_education %in% 13:14 ~ "HS Diploma/GED",
           parent_education %in% 15:17 ~ "Some College/Associate",
           parent_education == 18 ~ "Bachelor's Degree",
           parent_education %in% 19:21 ~ "Graduate Degree",
           TRUE ~ NA_character_
-        ) %>% factor(levels = c("Less than HS", "HS Diploma/GED",
-                                 "Some College/Associate", "Bachelor's Degree", "Graduate Degree")),
-        nc_y_nihtb__comp__cryst__fullcorr_tscore =
-            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2)
+        ), levels = c("Less than HS", "HS Diploma/GED",
+                      "Some College/Associate", "Bachelor's Degree", "Graduate Degree"))
     ) %>%
-    # Rename variables for clarity
+
+    ### Rename and filter to final analysis dataset
+    # Rename for clarity
     rename(
         site = ab_g_dyn__design_site,
         family_id = ab_g_stc__design_id__fam,
         cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
     ) %>%
-    # Remove participants with any missing cognition scores across time points
+    # Keep only participants with sufficient data
     group_by(participant_id) %>%
-    filter(sum(!is.na(cognition)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
+    filter(sum(!is.na(cognition)) >= 2) %>%
     ungroup() %>%
-    drop_na(site, family_id, participant_id, cognition)  # Ensure all remaining rows have complete cases
+    drop_na(site, family_id, participant_id, cognition)
 ```
 
 ## Descriptive Statistics {.code}
