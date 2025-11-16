@@ -73,7 +73,7 @@
       },
       {
         "data": {
-          "content": "# Create longitudinal dataset\ndf_long <- abcd_data %>%\n  # Filter to ERQ assessment waves (Years 3-6)\n  filter(session_id %in% c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id)\n\n# Clean and transform variables\ndf_long <- df_long %>%\n  mutate(\n    participant_id = factor(participant_id),\n    session_id = factor(session_id,\n                       levels = c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\"),\n                       labels = c(\"Year_3\", \"Year_4\", \"Year_5\", \"Year_6\")),\n    site = factor(ab_g_dyn__design_site),\n    family_id = factor(ab_g_stc__design_id__fam),\n    age = as.numeric(ab_g_dyn__visit_age),\n    sex = factor(ab_g_stc__cohort_sex,\n                 levels = c(\"1\", \"2\"),\n                 labels = c(\"Male\", \"Female\")),\n    race = factor(ab_g_stc__cohort_race__nih,\n                  levels = c(\"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\"),\n                  labels = c(\"White\", \"Black\", \"Asian\", \"AI/AN\", \"NH/PI\", \"Multi-Race\", \"Other\")),\n    education = as.numeric(ab_g_dyn__cohort_edu__cgs),\n    income = as.numeric(ab_g_dyn__cohort_income__hhold__3lvl),\n    suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)\n  ) %>%\n  # Clean income coding (777 and 999 are missing codes)\n  mutate(\n    income = na_if(income, 777),\n    income = na_if(income, 999)\n  ) %>%\n  # Select analysis variables\n  select(participant_id, session_id, site, family_id, age, sex, race, education, income, suppression) %>%\n  drop_na()\n\n# Get baseline covariates (Year 3)\nbaseline_covariates <- df_long %>%\n  filter(session_id == \"Year_3\") %>%\n  select(participant_id, age, sex, education, income) %>%\n  mutate(\n    age_c = age - mean(age, na.rm = TRUE),\n    female = ifelse(sex == \"Female\", 1, 0),\n    education_c = education - mean(education, na.rm = TRUE),\n    income_c = income - mean(income, na.rm = TRUE)\n  ) %>%\n  select(participant_id, age_c, female, education_c, income_c)",
+          "content": "# Create longitudinal dataset\ndf_long <- abcd_data %>%\n  # Filter to ERQ assessment waves (Years 3-6)\n  filter(session_id %in% c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id)\n\n# Clean and transform variables\ndf_long <- df_long %>%\n  mutate(\n    participant_id = factor(participant_id),\n    session_id = factor(session_id,\n                       levels = c(\"ses-03A\", \"ses-04A\", \"ses-05A\", \"ses-06A\"),\n                       labels = c(\"Year_3\", \"Year_4\", \"Year_5\", \"Year_6\")),\n    site = factor(ab_g_dyn__design_site),\n    family_id = factor(ab_g_stc__design_id__fam),\n    age = as.numeric(ab_g_dyn__visit_age),\n    sex = factor(ab_g_stc__cohort_sex,\n                 levels = c(\"1\", \"2\"),\n                 labels = c(\"Male\", \"Female\")),\n    race = factor(ab_g_stc__cohort_race__nih,\n                  levels = c(\"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\"),\n                  labels = c(\"White\", \"Black\", \"Asian\", \"AI/AN\", \"NH/PI\", \"Multi-Race\", \"Other\")),\n    education = as.numeric(ab_g_dyn__cohort_edu__cgs),\n    income = as.numeric(ab_g_dyn__cohort_income__hhold__3lvl),\n    suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)\n  ) %>%\n  # Select analysis variables\n  select(participant_id, session_id, site, family_id, age, sex, race, education, income, suppression) %>%\n  drop_na()\n\n# Get baseline covariates (Year 3)\nbaseline_covariates <- df_long %>%\n  filter(session_id == \"Year_3\") %>%\n  select(participant_id, age, sex, education, income) %>%\n  mutate(\n    age_c = age - mean(age, na.rm = TRUE),\n    female = ifelse(sex == \"Female\", 1, 0),\n    education_c = education - mean(education, na.rm = TRUE),\n    income_c = income - mean(income, na.rm = TRUE)\n  ) %>%\n  select(participant_id, age_c, female, education_c, income_c)",
           "language": "r",
           "title": "Create Long Format Dataset"
         },
@@ -117,7 +117,7 @@
     "covariates": "TIC",
     "data_prep_status": "unknown",
     "description": "Add time-invariant covariates to latent growth curve models to evaluate how stable characteristics shift baseline levels and slopes of ABCD emotional suppression.",
-    "execution_time_ms": 4758,
+    "execution_time_ms": 4823,
     "method_family": "LGCM",
     "method_family_label": "Latent Growth Curve Models (LGCM)",
     "outcome_type": "Continuous",
@@ -128,7 +128,7 @@
       "time-invariant-covariate"
     ],
     "updated_at": "2025-11-05",
-    "validated_at": "2025-11-16T02:19:55.568234+00:00",
+    "validated_at": "2025-11-16T03:58:32.475265+00:00",
     "validator_version": "1.0.0",
     "warnings": 0
   },

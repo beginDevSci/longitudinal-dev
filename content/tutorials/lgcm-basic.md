@@ -136,15 +136,14 @@ df_long <- abcd_data %>%
   filter_events_abcd(conditions = c("annual", ">=3", "<=6")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),           # Convert participant_id to a factor
     session_id = factor(session_id,
                         levels = c("ses-03A", "ses-04A", "ses-05A", "ses-06A"),
-                        labels = c("Year_3", "Year_4", "Year_5", "Year_6")),  # Relabel sessions for clarity
-    family_id = factor(ab_g_stc__design_id__fam)      # Convert family id to a factor
+                        labels = c("Year_3", "Year_4", "Year_5", "Year_6"))  # Relabel sessions for clarity
   ) %>%
   rename(  # Rename for simplicity
-    site = ab_g_dyn__design_site,                      # site already a factor from NBDCtools
-    suppression = mh_y_erq__suppr_mean                 # suppression already numeric from NBDCtools
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam,
+    suppression = mh_y_erq__suppr_mean
   ) %>%
   droplevels() %>%                                     # Drop unused factor levels
   drop_na(suppression)                                 # Remove rows with missing outcome data
