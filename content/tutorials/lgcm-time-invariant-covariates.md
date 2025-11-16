@@ -163,11 +163,6 @@ df_long <- df_long %>%
     income = as.numeric(ab_g_dyn__cohort_income__hhold__3lvl),
     suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)
   ) %>%
-  # Clean income coding (777 and 999 are missing codes)
-  mutate(
-    income = na_if(income, 777),
-    income = na_if(income, 999)
-  ) %>%
   # Select analysis variables
   select(participant_id, session_id, site, family_id, age, sex, race, education, income, suppression) %>%
   drop_na()

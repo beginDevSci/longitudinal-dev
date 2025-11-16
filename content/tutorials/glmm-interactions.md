@@ -142,15 +142,13 @@ df_long <- abcd_data %>%
     session_id = factor(session_id, levels = c("ses-01A", "ses-02A", "ses-03A", "ses-04A"),
                    labels = c("Year_1", "Year_2", "Year_3", "Year_4")),  # Rename sessions for clarity
     time = as.numeric(session_id) - 1,  # Converts factor to 0,1,2,3
-    ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-    ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
     alcohol_use = as.numeric(su_y_lowuse__isip_001__l),  # Ensure alcohol use is numeric
     family_conflict = as.numeric(fc_p_fes__confl_mean)
   ) %>%
   filter(alcohol_use >= 0 & alcohol_use <= 10) %>%  # Keep only valid alcohol use values
   rename(  # Rename for simplicity
     site = ab_g_dyn__design_site,
-    family_id = ab_g_stc__design_id__fam,
+    family_id = ab_g_stc__design_id__fam
   ) %>%
   # Remove participants with any missing substance use reporting across time points
   group_by(participant_id) %>%

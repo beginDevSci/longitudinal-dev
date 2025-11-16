@@ -136,18 +136,17 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-00", "ses-00A", "ses-01A", "ses-02A", "ses-03A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),
     session_id = factor(
       session_id,
       levels = c("ses-00", "ses-00A", "ses-01A", "ses-02A", "ses-03A"),
       labels = c("Baseline", "Baseline", "Year_1", "Year_2", "Year_3")
-    ),
-    family_id = factor(ab_g_stc__design_id__fam)
+    )
   ) %>%
   rename(
-    site = ab_g_dyn__design_site,                        # site already a factor from NBDCtools
-    externalizing = mh_p_cbcl__synd__ext_tscore,        # already numeric from NBDCtools
-    internalizing = mh_p_cbcl__synd__int_tscore         # already numeric from NBDCtools
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam,
+    externalizing = mh_p_cbcl__synd__ext_tscore,
+    internalizing = mh_p_cbcl__synd__int_tscore
   ) %>%
   select(participant_id, session_id, site, family_id, externalizing, internalizing) %>%
   droplevels() %>%

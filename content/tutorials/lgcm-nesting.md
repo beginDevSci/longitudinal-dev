@@ -138,20 +138,17 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-03A", "ses-04A", "ses-05A", "ses-06A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    # Convert IDs to factors for proper handling
-    participant_id = factor(participant_id),
-
-    # Create meaningful wave labels
+    # Relabel sessions
     session_id = factor(session_id,
                         levels = c("ses-03A", "ses-04A", "ses-05A", "ses-06A"),
                         labels = c("Year_3", "Year_4", "Year_5", "Year_6")),
-
-    # Clean clustering variables
-    site = factor(ab_g_dyn__design_site),
-    family_id = factor(ab_g_stc__design_id__fam),
-
     # Clean outcome variable
     suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)
+  ) %>%
+  # Rename clustering variables
+  rename(
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam
   ) %>%
 
   # Keep only analysis variables

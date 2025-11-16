@@ -150,8 +150,8 @@ df_long <- abcd_data %>%
             labels = c("Baseline", "Year_2", "Year_4", "Year_6")),
         # Create numeric time variable
         time = as.numeric(session_id) - 1,
-        # Clean parent education (remove "Decline to Answer" code)
-        parent_education = na_if(as.numeric(ab_g_dyn__cohort_edu__cgs), 777)
+        # Convert parent education to numeric
+        parent_education = as.numeric(ab_g_dyn__cohort_edu__cgs)
     ) %>%
 
     ### Categorize parent education into 5 levels

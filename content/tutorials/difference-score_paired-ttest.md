@@ -136,7 +136,6 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-00A", "ses-01A")) %>%   # Keep only baseline and year 1 sessions
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),  # Convert participant_id to a factor
     session_id = factor(session_id,
                         levels = c("ses-00A", "ses-01A"),
                         labels = c("Baseline", "Year_1")),  # Label sessions
