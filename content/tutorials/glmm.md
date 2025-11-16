@@ -147,6 +147,7 @@ df_long <- abcd_data %>%
     family_id = ab_g_stc__design_id__fam
   ) %>%
   # Remove participants with any missing substance use reporting across time points
+  group_by(participant_id) %>%
   filter(sum(!is.na(alcohol_use)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
   ungroup() %>%
   drop_na(site, family_id, participant_id, alcohol_use)  # Ensure all remaining rows have complete cases
@@ -270,7 +271,7 @@ diagnostics_table
 
 ## Interpretation {.note}
 
-The Poisson GLMM results indicate a significant increase in alcohol use over time, with the time coefficient of 0.16 (log-scale, 95% CI: 0.14, 0.18, p < 0.001) suggesting an upward trend in consumption across assessments. This corresponds to an incidence rate ratio (IRR) of approximately 1.17 (exp(0.16) ≈ 1.17), meaning alcohol use increases by approximately 17% per assessment wave.
+The Poisson GLMM results indicate a significant increase in alcohol use over time, with the time coefficient of 0.17 (log-scale, 95% CI: 0.15, 0.20, p < 0.001) suggesting an upward trend in consumption across assessments. This corresponds to an incidence rate ratio (IRR) of approximately 1.19 (exp(0.17) ≈ 1.19), meaning alcohol use increases by approximately 19% per assessment wave.
 
 The random intercept variance (σ² = 0.1868) highlights moderate individual differences in baseline alcohol use, reinforcing the importance of accounting for between-person variability.
 
@@ -311,7 +312,7 @@ The predicted trajectories indicate a steady increase in alcohol use across asse
 
 # Discussion
 
-The Poisson GLMM indicated a clear upward shift in alcohol use: the fixed effect for time was 0.16 on the log scale (p < .001), which translates to an incidence-rate ratio of roughly 1.17 per wave. In practical terms, self-reported drinking frequency increased about 17% each assessment, even after adjusting for repeated measures. Visualizations of the fitted trajectories mirrored this monotonic rise.
+The Poisson GLMM indicated a clear upward shift in alcohol use: the fixed effect for time was 0.17 on the log scale (p < .001), which translates to an incidence-rate ratio of roughly 1.19 per wave. In practical terms, self-reported drinking frequency increased about 19% each assessment, even after adjusting for repeated measures. Visualizations of the fitted trajectories mirrored this monotonic rise.
 
 Random intercept variance (σ² = 0.187) remained sizable, indicating that youth entered the study with very different baseline propensities that persisted after conditioning on time. Inspecting predicted versus observed counts showed no systemic bias, suggesting the Poisson mean-variance assumption was adequate for these data. Together, the fixed and random effects illustrate how GLMMs can capture both the population trend and the heterogeneity around it, offering a richer story than either a simple Poisson regression or subject-specific regressions could provide.
 
