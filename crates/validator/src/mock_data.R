@@ -339,6 +339,11 @@ ensure_complete_cases <- function(data, min_complete = 100, education_var = NULL
 #' @param ... Additional arguments (ignored in mock)
 #' @return tibble with mock ABCD data structure
 mock_create_dataset <- function(dir_data, study = "abcd", vars, sessions = NULL, release = "latest", ...) {
+  # Capture additional arguments
+  extra_args <- list(...)
+  categ_to_factor <- if (!is.null(extra_args$categ_to_factor)) extra_args$categ_to_factor else FALSE
+  value_to_na <- if (!is.null(extra_args$value_to_na)) extra_args$value_to_na else FALSE
+
   # If sessions not provided, infer from study type
   # For ABCD: default to annual assessments from years 0-6
   if (is.null(sessions)) {
@@ -482,6 +487,25 @@ mock_create_dataset <- function(dir_data, study = "abcd", vars, sessions = NULL,
   }
 
   data <- ensure_complete_cases(data, min_complete = 250, education_var = education_var)
+
+  # Apply categ_to_factor transformation if requested
+  # This mimics NBDCtools behavior: convert categorical variables (IDs, site, etc.) to factors
+  if (categ_to_factor) {
+    # Convert participant_id to factor (matches real NBDCtools behavior)
+    if ("participant_id" %in% names(data)) {
+      data$participant_id <- factor(data$participant_id)
+    }
+
+    # Convert family ID variables to factors
+    for (col in names(data)) {
+      if (grepl("_id__fam|family_id", col, ignore.case = TRUE) && is.character(data[[col]])) {
+        data[[col]] <- factor(data[[col]])
+      }
+    }
+
+    # Note: session_id and site variables are already factors from generate_mock_var()
+    # so no additional conversion needed
+  }
 
   # Convert to tibble if available
   if (use_tibble) {

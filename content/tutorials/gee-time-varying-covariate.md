@@ -136,23 +136,16 @@ df_long <- abcd_data %>%
   filter(session_id %in% c("ses-00A", "ses-01A", "ses-02A", "ses-03A")) %>%  # Keep Baseline - Year 3
   arrange(participant_id, session_id) %>%
    mutate(
-    participant_id = factor(participant_id), # Convert participant_id to a factor
     session_id = factor(session_id,
                         levels = c("ses-00A", "ses-01A", "ses-02A", "ses-03A"),
                         labels = c("Baseline", "Year_1", "Year_2", "Year_3")),  # Label sessions
-
-    ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-    ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
     sleep_hours = as.numeric(ph_p_sds__dims_001),
-    anxiety = as.numeric(mh_p_cbcl__dsm__anx_tscore)  # Convert to numeric
-  ) %>%
-  filter(sleep_hours != 999, anxiety != 999) %>%  # Remove "Don't know" responses
-  mutate(
+    anxiety = as.numeric(mh_p_cbcl__dsm__anx_tscore),  # Convert to numeric
     sleep_binary = ifelse(sleep_hours == 1, 1, 0)  # Recode: 9-11 hrs = 1, others = 0
-) %>%
+  ) %>%
   rename(  # Rename for simplicity
     site = ab_g_dyn__design_site,
-    family_id = ab_g_stc__design_id__fam,
+    family_id = ab_g_stc__design_id__fam
   ) %>%
   drop_na()  # Remove missing values
 
