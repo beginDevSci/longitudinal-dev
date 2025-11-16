@@ -230,8 +230,8 @@ descriptives_table
 df_wide <- df_wide %>%
   mutate(height_diff = Height_Year_1 - Height_Baseline)  # Difference in height across assessments
 
-# Calculate Cohen's d to
-d_value <- cohens_d(df_wide$height_diff, mu = 0) # derive effect size of the height difference
+# Calculate Cohen's d to derive effect size of the height difference
+d_value <- cohens_d(df_wide$height_diff, mu = 0)
 print(d_value)
 
 # Fit a simple regression predicting height_diff from handedness

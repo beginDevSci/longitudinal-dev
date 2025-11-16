@@ -210,8 +210,8 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "{level}<br>N = {n}") %>%
-  modify_spanning_header(all_stat_cols() ~ "Assessment Wave") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   bold_labels() %>%
   italicize_levels()
 
