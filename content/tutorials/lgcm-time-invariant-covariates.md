@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Load Packages and Import Data {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 # Load required libraries
@@ -132,7 +132,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Create Long Format Dataset {.code}
+
+```r
 # Create longitudinal dataset
 df_long <- abcd_data %>%
   # Filter to ERQ assessment waves (Years 3-6)
@@ -179,7 +183,11 @@ baseline_covariates <- df_long %>%
     income_c = income - mean(income, na.rm = TRUE)
   ) %>%
   select(participant_id, age_c, female, education_c, income_c)
+```
 
+## Reshape to Wide Format for LGCM Analysis {.code}
+
+```r
 # Reshape suppression to wide format
 df_wide <- df_long %>%
   select(participant_id, session_id, suppression, site) %>%

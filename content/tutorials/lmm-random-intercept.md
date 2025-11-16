@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -126,39 +126,28 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
-#  Prepare data for LMM analysis
+## Data Transformation {.code}
+
+```r
+# Prepare data for LMM analysis
 df_long <- abcd_data %>%
-    select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
-    # Filter to include only 4 relevant measurement occasions
-    filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
-    #  Ensure dataset is sorted by participant and session
-    arrange(participant_id, session_id) %>%
-    #  Convert categorical and numerical variables
-    mutate(
-        participant_id = factor(participant_id), # Convert IDs to factors
-        session_id = factor(session_id, # Convert session to a factors
-            levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
-            labels = c("Baseline", "Year_2", "Year_4", "Year_6")
-        ),
-        time = as.numeric(session_id) - 1, # Convert session_id to numeric
-        ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-        ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
-        nc_y_nihtb__comp__cryst__fullcorr_tscore =
-            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2)
-    ) %>%
-    #  Rename variables for clarity
-    rename(
-        site = ab_g_dyn__design_site,
-        family_id = ab_g_stc__design_id__fam,
-        cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
-    ) %>%
-  #  Remove participants with any missing cognition scores across time points
-    group_by(participant_id) %>%
-    group_by(participant_id) %>%
-    filter(sum(!is.na(cognition)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
-    ungroup() %>%
-    drop_na(site, family_id, participant_id, cognition)  # Ensure all remaining rows have complete cases
+  # Filter to available annual assessments using NBDCtools
+  filter_events_abcd(conditions = c("annual")) %>%
+  # Rename variables for clarity
+  rename(
+    site = ab_g_dyn__design_site,              # site already a factor from NBDCtools
+    family_id = ab_g_stc__design_id__fam,
+    cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore  # cognition already numeric from NBDCtools
+  ) %>%
+  # Keep only participants with at least 2 non-missing cognition scores
+  group_by(participant_id) %>%
+  filter(sum(!is.na(cognition)) >= 2) %>%
+  ungroup() %>%
+  drop_na(cognition) %>%  # Remove rows with missing outcome only (lmer handles missing predictors)
+  # Create numeric time variable from session_id
+  mutate(time = as.numeric(session_id) - 1)  # Convert session to numeric time (0, 1, 2, 3...)
 ```
 
 ## Descriptive Statistics {.code}

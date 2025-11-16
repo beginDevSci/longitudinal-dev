@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -106,7 +106,7 @@ library(rstatix)    # Simplifying statistical tests
 library(effectsize) # Calculating effect sizes
 library(broom)      # Organizing model outputs
 
-### Load harmonized ABCD data required for this analysis
+### Specify variables of interest
 requested_vars <- c(
     "ab_g_dyn__design_site",
     "ab_g_stc__design_id__fam",
@@ -114,6 +114,7 @@ requested_vars <- c(
     "ph_y_anthr__height_mean"
 )
 
+### Load harmonized ABCD data
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
 
 abcd_data <- create_dataset(
@@ -127,30 +128,37 @@ abcd_data <- create_dataset(
   add_labels = TRUE          # Add variable and value labels
 )
 
-# Create a long-form dataset with relevant columns
+```
+
+## Create Long Format Dataset {.code}
+
+```r
+# Create long-form dataset with relevant columns
 df_long <- abcd_data %>%
-  select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, nc_y_ehis_score, ph_y_anthr__height_mean) %>%
-  filter(session_id %in% c("ses-00A", "ses-01A")) %>%   # Keep only baseline and year 1 sessions
+  # Keep only baseline and year 1 sessions
+  filter(session_id %in% c("ses-00A", "ses-01A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),           # Convert participant_id to a factor
+    # Relabel session IDs
     session_id = factor(session_id,
                         levels = c("ses-00A", "ses-01A"),
-                        labels = c("Baseline", "Year_1")),  # Label sessions
-    ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-    ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
-    nc_y_ehis_score = factor(nc_y_ehis_score,
-  levels = c("1", "2", "3"),
-  labels = c("Right-handed", "Left-handed", "Mixed-handed")),  # Convert handedness to a factor
-    ph_y_anthr__height_mean = round(as.numeric(ph_y_anthr__height_mean), 2)  # Specify height as numeric
+                        labels = c("Baseline", "Year_1")),
+    # Relabel handedness
+    handedness = factor(nc_y_ehis_score,
+                       levels = c("1", "2", "3"),
+                       labels = c("Right-handed", "Left-handed", "Mixed-handed"))
   ) %>%
-  rename(  # Rename for simplicity
+  # Rename for clarity
+  rename(
     site = ab_g_dyn__design_site,
     family_id = ab_g_stc__design_id__fam,
-    handedness = nc_y_ehis_score,
-    height = ph_y_anthr__height_mean,
+    height = ph_y_anthr__height_mean
   )
+```
 
+## Reshape to Wide Format for Difference Score Analysis {.code}
+
+```r
 # Reshape data from long to wide format for calculating difference score
 # Step 1: Separate time-varying variables (height) from stable variables
 df_timevarying <- df_long %>%
@@ -165,14 +173,13 @@ df_timevarying <- df_long %>%
 df_static <- df_long %>%
   filter(session_id == "Baseline") %>%
   select(participant_id, site, family_id, handedness) %>%
-  filter(handedness != "Mixed-handed") %>%  # Remove "Mixed-handed" rows
-  droplevels()  # Drop unused factor levels
+  filter(handedness != "Mixed-handed") %>%
+  droplevels()
 
 # Step 3: Join time-varying and static data
 df_wide <- df_static %>%
   inner_join(df_timevarying, by = "participant_id") %>%
-  drop_na(Height_Baseline, Height_Year_1)  # Only keep rows with both height measurements
-
+  drop_na(Height_Baseline, Height_Year_1)
 ```
 
 ## Descriptive Statistics {.code}
