@@ -130,7 +130,7 @@ abcd_data <- create_dataset(
 
 ```
 
-## Create Long Format Dataset {.code}
+## Data Transformation {.code}
 
 ```r
 # Create long-form dataset with relevant columns
@@ -156,7 +156,7 @@ df_long <- abcd_data %>%
   )
 ```
 
-## Reshape to Wide Format for Difference Score Analysis {.code}
+## Reshape to Wide Format {.code}
 
 ```r
 # Reshape data from long to wide format for calculating difference score
