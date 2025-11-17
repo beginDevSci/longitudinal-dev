@@ -24,8 +24,12 @@ pub fn SiteLayout(options: leptos::config::LeptosOptions, children: Children) ->
 
     view! {
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="en" data-theme="dracula" class="dark">
             <head>
+                // FOUC prevention: run before any paint to honor user preference
+                <script>
+                    "(function(){const theme=localStorage.getItem('theme')||'dracula';document.documentElement.setAttribute('data-theme',theme);if(theme==='dark'||theme==='dracula'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}})()"
+                </script>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
                 // Always render base tag for consistent path resolution
