@@ -1881,66 +1881,10 @@ body {
   }
 
   /* ========================================
-     DATA ACCESS TABS - CSS-ONLY
-     Radio button technique for interactive tabs
+     DATA ACCESS TABS - Legacy CSS-only system removed
+     Current implementation uses native HTML5 <details>/<summary> elements
+     See: src/sections/data_access_section.rs
      ======================================== */
-
-  /* Hide radio inputs (they're siblings of all other elements) */
-  .da-tab-radio {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Tab label styling */
-  .da-tab-label {
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }
-
-  .da-tab-label:hover {
-    opacity: 0.8;
-  }
-
-  /* Active tab styling - when corresponding radio is checked */
-  /* Using general sibling combinator since radios are siblings of the tab container */
-  #da-method-0:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-0"],
-  #da-method-1:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-1"],
-  #da-method-2:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-2"],
-  #da-method-3:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-3"],
-  #da-method-4:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-4"] {
-    background: linear-gradient(to right, var(--color-accent-600), var(--color-accent-500));
-    color: #ffffff;
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Hide all tab panels by default */
-  .da-tab-panel {
-    display: none;
-  }
-
-  /* Show panel when corresponding radio is checked */
-  #da-method-0:checked ~ #da-panel-0,
-  #da-method-1:checked ~ #da-panel-1,
-  #da-method-2:checked ~ #da-panel-2,
-  #da-method-3:checked ~ #da-panel-3,
-  #da-method-4:checked ~ #da-panel-4 {
-    display: block;
-    animation: fadeIn 0.2s ease-in;
-  }
-
-  /* Smooth fade-in for tab content */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
   /* ========================================
      COLLAPSIBLE CODE BLOCKS
@@ -2194,14 +2138,7 @@ body {
     color: #ffffff;
   }
 
-  /* Data Access tab panel visibility (CSS-only tabs)
-     Note: Complex :has() selectors may show Tailwind optimizer warnings
-     These are cosmetic - the CSS works correctly */
-  [class~="[&:has(~#da-tab-cli:checked)]:block"]:has(~#da-tab-cli:checked) { display: block; }
-  [class~="[&:has(~#da-tab-api:checked)]:block"]:has(~#da-tab-api:checked) { display: block; }
-  [class~="[&:has(~#da-tab-files:checked)]:block"]:has(~#da-tab-files:checked) { display: block; }
-  [class~="[&:has(~#da-tab-basics:checked)]:block"]:has(~#da-tab-basics:checked) { display: block; }
-  [class~="[&:has(~#da-tab-limits:checked)]:block"]:has(~#da-tab-limits:checked) { display: block; }
+  /* Legacy Data Access tab selectors removed - unused in current implementation */
 
   /* ========================================
      Output Images - Placeholder Styling
