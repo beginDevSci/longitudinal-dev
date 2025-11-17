@@ -131,7 +131,7 @@ abcd_data <- create_dataset(
 )
 ```
 
-## Create Long Format Dataset {.code}
+## Data Transformation {.code}
 
 ```r
 # Create longitudinal dataset with cleaned variables
@@ -164,7 +164,7 @@ df_long <- abcd_data %>%
   droplevels()
 ```
 
-## Reshape to Wide Format for Multigroup LGCM {.code}
+## Reshape to Wide Format {.code}
 
 ```r
 # Reshape data from long to wide format
@@ -195,7 +195,7 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "{level}<br>N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "Assessment Wave") %>%
   bold_labels() %>%
   italicize_levels()
@@ -222,10 +222,9 @@ descriptives_table
 
 This tutorial employs a multigroup latent growth curve modeling approach to test measurement invariance across sex groups. Measurement invariance testing evaluates whether the same construct is being measured equivalently across groups - a prerequisite for valid group comparisons. We fit a series of increasingly constrained models (M1-M4) that test different levels of equivalence: M1 tests full equality across groups, M2 relaxes latent mean constraints, M3 further relaxes variance/covariance constraints, and M4 (the least constrained) only constrains factor loadings to be equal across groups. By comparing model fit across these nested models, we can determine the appropriate level of invariance and whether observed group differences in trajectories reflect genuine developmental differences rather than measurement artifacts.
 
-## Fit Model {.code}
+## Define and Fit Multigroup Models {.code}
 
 ```r
-
 # Define Latent Growth Model (LGCM)
 lgcm_model <- "
   # Latent Growth Model
@@ -267,12 +266,17 @@ print(anova_results)
 
 # Print summary of the most constrained model (M4)
 summary(fit$M4, fit.measures = TRUE)
+```
 
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary for M4
 model_summary <- summary(fit$M4, fit.measures = TRUE)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit$M4) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
@@ -281,14 +285,18 @@ model_summary_table <- broom::tidy(fit$M4) %>%
     decimals = 3
   )
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices for M4 (most constrained model)
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices for M4 (most constrained model)
 fit_indices <- fitMeasures(fit$M4, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -303,13 +311,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output-1 {.output}
@@ -369,10 +376,6 @@ The multigroup LGCM found meaningful between-person variability in both baseline
 set.seed(123)  # For reproducibility
 selected_ids <- sample(unique(df_long$participant_id), 250)
 df_long_selected <- df_long %>% filter(participant_id %in% selected_ids)
-
-# Ensure 'sex' is a factor with meaningful labels
-df_long_selected <- df_long_selected %>%
-  mutate(sex = factor(sex, labels = c("Male", "Female")))
 
 # Plot memory growth by sex group
 visualization <- ggplot(df_long_selected, aes(x = session_id, y = memory, group = participant_id, color = sex)) +

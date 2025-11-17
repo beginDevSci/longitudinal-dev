@@ -65,25 +65,9 @@
     "content_blocks": [
       {
         "data": {
-          "content": "### Load necessary libraries\nlibrary(NBDCtools)    # ABCD data access helper\nlibrary(tidyverse)    # Data manipulation and visualization\nlibrary(arrow)        # For reading Parquet files\nlibrary(gtsummary)    # Publication-ready descriptive tables\nlibrary(gt)           # Table formatting\nlibrary(lavaan)       # Structural equation modeling\nlibrary(semPlot)      # Path diagram visualization\n\n# Set random seed for reproducible family member selection\nset.seed(123)\n\n### Load harmonized ABCD data required for this analysis\nrequested_vars <- c(\n    \"ab_g_dyn__design_site\",\n    \"ab_g_stc__design_id__fam\",\n    \"ab_g_stc__cohort_sex\",\n    \"ab_g_dyn__visit_age\",\n    \"nc_y_nihtb__picsq__agecor_score\"\n)\n\ndata_dir <- Sys.getenv(\"ABCD_DATA_PATH\", \"/path/to/abcd/6_0/phenotype\")\n\nabcd_data <- create_dataset(\n  dir_data = data_dir,\n  study = \"abcd\",\n  vars = requested_vars,\n  release = \"6.0\",\n  format = \"parquet\",\n  categ_to_factor = TRUE,   # Convert categorical variables to factors\n  value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA\n  add_labels = TRUE          # Add variable and value labels\n)",
+          "content": "### Load necessary libraries\nlibrary(NBDCtools)    # ABCD data access helper\nlibrary(tidyverse)    # Data manipulation and visualization\nlibrary(arrow)        # For reading Parquet files\nlibrary(gtsummary)    # Publication-ready descriptive tables\nlibrary(gt)           # Table formatting\nlibrary(lavaan)       # Structural equation modeling\nlibrary(semPlot)      # Path diagram visualization\n\n# Set random seed for reproducible family member selection\nset.seed(123)\n\n### Load harmonized ABCD data required for this analysis\nrequested_vars <- c(\n    \"ab_g_dyn__design_site\",\n    \"ab_g_stc__design_id__fam\",\n    \"ab_g_stc__cohort_sex\",\n    \"ab_g_dyn__visit_age\",\n    \"nc_y_nihtb__picsq__agecor_score\"\n)\n\ndata_dir <- Sys.getenv(\"ABCD_DATA_PATH\", \"/path/to/abcd/6_0/phenotype\")\n\nabcd_data <- create_dataset(\n  dir_data = data_dir,\n  study = \"abcd\",\n  vars = requested_vars,\n  release = \"6.0\",\n  format = \"parquet\",\n  categ_to_factor = TRUE,   # Convert categorical variables to factors\n  value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA\n  add_labels = TRUE          # Add variable and value labels\n)\n\n# Create longitudinal dataset with cleaned variables\ndf_long <- abcd_data %>%\n  # Select memory assessment waves\n  filter(session_id %in% c(\"ses-00A\", \"ses-02A\", \"ses-04A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id) %>%\n  mutate(\n    # Convert IDs to factors\n    participant_id = factor(participant_id),\n\n    # Create meaningful wave labels\n    session_id = factor(session_id,\n                        levels = c(\"ses-00A\", \"ses-02A\", \"ses-04A\", \"ses-06A\"),\n                        labels = c(\"Year_0\", \"Year_2\", \"Year_4\", \"Year_6\")),\n\n    # Clean grouping and clustering variables\n    site = factor(ab_g_dyn__design_site),\n    family_id = factor(ab_g_stc__design_id__fam),\n\n    # Create sex grouping variable with meaningful labels\n    sex = case_when(\n      ab_g_stc__cohort_sex == 1 ~ \"Male\",\n      ab_g_stc__cohort_sex == 2 ~ \"Female\",\n      TRUE ~ NA_character_\n    ),\n    sex = factor(sex),\n    age = as.numeric(ab_g_dyn__visit_age),\n    memory = as.numeric(nc_y_nihtb__picsq__agecor_score)\n  ) %>%\n  # Remove invalid memory scores and missing sex data\n  filter(memory > 1, !is.na(sex)) %>%\n\n  # Keep only analysis variables\n  select(participant_id, session_id, site, family_id, age, sex, memory) %>%\n  droplevels()\n\n# Reshape data from long to wide format\ndf_wide <- df_long %>%\n  pivot_wider(\n    names_from = session_id,\n    values_from = c(memory, age, sex, family_id),\n    names_sep = \"_\"\n  ) %>%\n  # Clean column names by removing prefix\n  rename_with(~ str_replace_all(., \"Year_\", \"\"), everything()) %>%\n  # Use sex from baseline for grouping\n  mutate(sex_group = sex_0) %>%\n  # Remove cases with missing memory data\n  drop_na(starts_with(\"memory_\"))",
           "language": "r",
-          "title": "NBDCtools Setup and Data Loading"
-        },
-        "type": "code"
-      },
-      {
-        "data": {
-          "content": "# Create longitudinal dataset with cleaned variables\ndf_long <- abcd_data %>%\n  # Select memory assessment waves\n  filter(session_id %in% c(\"ses-00A\", \"ses-02A\", \"ses-04A\", \"ses-06A\")) %>%\n  arrange(participant_id, session_id) %>%\n  mutate(\n    # Relabel session IDs for clarity\n    session_id = factor(session_id,\n                        levels = c(\"ses-00A\", \"ses-02A\", \"ses-04A\", \"ses-06A\"),\n                        labels = c(\"Year_0\", \"Year_2\", \"Year_4\", \"Year_6\")),\n    # Create sex grouping variable with meaningful labels\n    sex = factor(case_when(\n      ab_g_stc__cohort_sex == 1 ~ \"Male\",\n      ab_g_stc__cohort_sex == 2 ~ \"Female\",\n      TRUE ~ NA_character_\n    ))\n  ) %>%\n  # Rename for clarity\n  rename(\n    site = ab_g_dyn__design_site,\n    family_id = ab_g_stc__design_id__fam,\n    age = ab_g_dyn__visit_age,\n    memory = nc_y_nihtb__picsq__agecor_score\n  ) %>%\n  # Remove invalid memory scores and missing sex data\n  filter(memory > 1, !is.na(sex)) %>%\n  select(participant_id, session_id, site, family_id, age, sex, memory) %>%\n  droplevels()",
-          "language": "r",
-          "title": "Create Long Format Dataset"
-        },
-        "type": "code"
-      },
-      {
-        "data": {
-          "content": "# Reshape data from long to wide format\ndf_wide <- df_long %>%\n  pivot_wider(\n    names_from = session_id,\n    values_from = c(memory, age, sex, family_id),\n    names_sep = \"_\"\n  ) %>%\n  # Clean column names by removing prefix\n  rename_with(~ str_replace_all(., \"Year_\", \"\"), everything()) %>%\n  # Use sex from baseline for grouping\n  mutate(sex_group = sex_0) %>%\n  # Remove cases with missing memory data\n  drop_na(starts_with(\"memory_\"))",
-          "language": "r",
-          "title": "Reshape to Wide Format for Multigroup LGCM"
+          "title": "Loading and Initial Processing"
         },
         "type": "code"
       },
@@ -116,7 +100,7 @@
     "covariates": "None",
     "data_prep_status": "unknown",
     "description": "Compare latent growth trajectories between groups using multigroup LGCM, testing memory development differences while accounting for related ABCD participants.",
-    "execution_time_ms": 6548,
+    "execution_time_ms": 6343,
     "method_family": "LGCM",
     "method_family_label": "Latent Growth Curve Models (LGCM)",
     "outcome_type": "Continuous",
@@ -127,7 +111,7 @@
       "group-comparison"
     ],
     "updated_at": "2025-11-05",
-    "validated_at": "2025-11-16T01:43:28.733087+00:00",
+    "validated_at": "2025-11-17T01:16:18.761892+00:00",
     "validator_version": "1.0.0",
     "warnings": 1
   },

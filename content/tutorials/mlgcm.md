@@ -133,6 +133,7 @@ abcd_data <- create_dataset(
 ### Clean and transform variables for analysis
 df_long <- abcd_data %>%
   # Filter to baseline through Year 3
+  # Note: Both "ses-00" and "ses-00A" are included as baseline to capture all available baseline data
   filter(session_id %in% c("ses-00", "ses-00A", "ses-01A", "ses-02A", "ses-03A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
@@ -165,8 +166,6 @@ df_wide <- df_long %>%
 ## Descriptive Statistics {.code}
 
 ```r
-### [Descriptives.r]
-
 ### Create descriptive summary table
 descriptives_table <- df_long %>%
   select(session_id, externalizing, internalizing) %>%
@@ -204,11 +203,10 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Multivariate Model {.code}
+## Define and Fit Multivariate LGCM {.code}
 
 ```r
-#[Model.r]
-
+# Define multivariate growth model
 model <- "
   # Growth model for externalizing
   i_var1 =~ 1*externalizing_Baseline + 1*externalizing_Year_1 + 1*externalizing_Year_2 + 1*externalizing_Year_3
@@ -218,13 +216,14 @@ model <- "
   i_var2 =~ 1*internalizing_Baseline + 1*internalizing_Year_1 + 1*internalizing_Year_2 + 1*internalizing_Year_3
   s_var2 =~ 0*internalizing_Baseline + 1*internalizing_Year_1 + 2*internalizing_Year_2 + 3*internalizing_Year_3
 
-  # ✅ Estimate latent means
+  # Estimate latent means
   i_var1 ~ 1
   s_var1 ~ 1
   i_var2 ~ 1
   s_var2 ~ 1
 
-  # ✅ Fix observed variable intercepts to 0 for identification
+  # Fix observed variable intercepts to 0 for identification
+  # This ensures the latent growth factors carry all the mean structure
   externalizing_Baseline ~ 0*1
   externalizing_Year_1   ~ 0*1
   externalizing_Year_2   ~ 0*1
@@ -236,30 +235,39 @@ model <- "
   internalizing_Year_3   ~ 0*1
 "
 
-### Fit the model using ML for handling missing data
+# Fit the model using ML for handling missing data
 fit <- sem(model, data = df_wide, missing = "ml")
 
-### Check the summary to identify potential issues
+# Display summary with fit measures
 summary(fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+```
 
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert output to a tidy dataframe and then to gt table
+# Convert output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Multivariate LGCM Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -274,13 +282,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}
@@ -314,7 +321,7 @@ mean_internalizing_long <- pivot_longer(mean_internalizing, cols = everything(),
 
 ### Plot the mean trajectories for externalizing
 externalizing_plot <- ggplot(mean_externalizing_long, aes(x = Time, y = Mean_externalizing, group = 1)) +
-    geom_line(color = "blue", size = 1.2) +
+    geom_line(color = "blue", linewidth = 1.2) +
     geom_point(color = "blue") +
     labs(title = "Mean Growth Trajectory for externalizing", y = "Mean externalizing", x = "Time Point") +
     theme_minimal() +
@@ -322,7 +329,7 @@ externalizing_plot <- ggplot(mean_externalizing_long, aes(x = Time, y = Mean_ext
 
 ### Plot the mean trajectories for internalizing
 internalizing_plot <- ggplot(mean_internalizing_long, aes(x = Time, y = Mean_internalizing, group = 1)) +
-    geom_line(color = "red", size = 1.2) +
+    geom_line(color = "red", linewidth = 1.2) +
     geom_point(color = "red") +
     labs(title = "Mean Growth Trajectory for internalizing", y = "Mean internalizing", x = "Time Point") +
     theme_minimal() +
