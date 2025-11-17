@@ -129,11 +129,8 @@ fn build_ssg(outdir: &str) -> ExitCode {
         return ExitCode::FAILURE;
     }
 
-    // Step 8: Inject FOUC prevention script
-    if let Err(e) = inject_fouc_script(outdir) {
-        eprintln!("{e}");
-        return ExitCode::FAILURE;
-    }
+    // Step 8: FOUC prevention is now handled in SiteLayout component (no post-processing needed)
+    println!("🎨 FOUC prevention handled in SiteLayout component");
 
     // Step 9: Print summary
     print_summary(outdir);
@@ -404,40 +401,8 @@ fn compress_assets(outdir: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn inject_fouc_script(outdir: &str) -> Result<(), String> {
-    println!("🎨 Skipping theme FOUC injection (now handled in SiteLayout component)...");
-
-    // FOUC prevention is now handled directly in SiteLayout component
-    // This avoids double-injection and ensures consistency
-
-    Ok(())
-}
-
-fn inject_script_recursive(dir: &Path, script: &str) -> Result<(), String> {
-    for entry in fs::read_dir(dir).map_err(|e| format!("Failed to read directory: {e}"))? {
-        let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
-        let path = entry.path();
-
-        if path.is_dir() {
-            inject_script_recursive(&path, script)?;
-        } else if path.extension().and_then(|s| s.to_str()) == Some("html") {
-            inject_script_into_file(&path, script)?;
-        }
-    }
-    Ok(())
-}
-
-fn inject_script_into_file(path: &Path, script: &str) -> Result<(), String> {
-    let content =
-        fs::read_to_string(path).map_err(|e| format!("Failed to read {}: {e}", path.display()))?;
-
-    // Replace <head> with <head><script>
-    let modified = content.replace("<head>", &format!("<head>{script}"));
-
-    fs::write(path, modified).map_err(|e| format!("Failed to write {}: {e}", path.display()))?;
-
-    Ok(())
-}
+// FOUC prevention is now handled directly in SiteLayout component via inline <script> tag
+// No post-processing injection needed
 
 fn print_summary(outdir: &str) {
     println!("\n✅ SSG build complete! Output in {outdir}/");
