@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 @source "./src/**/*.rs";
-@source "./dist/**/*.html";
+
+/* Configure dark: variant to work with data-theme="dark" OR data-theme="dracula" */
+@variant dark (:is([data-theme="dark"], [data-theme="dracula"]) &);
 
 /* Design Tokens - Dark-mode ready structure */
 @theme {
@@ -1090,6 +1092,15 @@ body {
 
   .border-accent {
     border-color: var(--color-border-accent);
+  }
+
+  /* ========================================
+     HERO GRADIENT
+     Theme-aware gradient background for landing pages
+     ======================================== */
+
+  .hero-gradient {
+    background: linear-gradient(to bottom right, var(--color-bg-surface), var(--color-bg-subtle), var(--color-bg-accent-subtle));
   }
 
   /* ========================================
