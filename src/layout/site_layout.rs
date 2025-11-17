@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 
 use crate::base_path;
+use crate::layout::TopNav;
 
 /// Global site wrapper providing HTML shell, head, and body structure.
 ///
@@ -10,12 +11,19 @@ use crate::base_path;
 /// - Contains no client code or islands
 /// - Accepts children to render in the <body>
 ///
+/// Set `fixed_nav_colors=true` for landing page (fixed teal colors).
+///
 /// Usage:
 /// ```rust,ignore
 /// view! { <SiteLayout options><PostLayout post/></SiteLayout> }
 /// ```
 #[component]
-pub fn SiteLayout(options: leptos::config::LeptosOptions, children: Children) -> impl IntoView {
+pub fn SiteLayout(
+    options: leptos::config::LeptosOptions,
+    children: Children,
+    #[prop(default = false)]
+    fixed_nav_colors: bool
+) -> impl IntoView {
     // Always compute base path (defaults to "/" if SITE_BASE_PATH not set)
     let base = base_path::base_path();
     let base_trimmed = base_path::base_path_trimmed();
@@ -23,8 +31,12 @@ pub fn SiteLayout(options: leptos::config::LeptosOptions, children: Children) ->
 
     view! {
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="en" data-theme="dracula" class="dark">
             <head>
+                // FOUC prevention: run before any paint to honor user preference
+                <script>
+                    "(function(){const theme=localStorage.getItem('theme')||'dracula';document.documentElement.setAttribute('data-theme',theme);if(theme==='dark'||theme==='dracula'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}})()"
+                </script>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
                 // Always render base tag for consistent path resolution
@@ -36,7 +48,12 @@ pub fn SiteLayout(options: leptos::config::LeptosOptions, children: Children) ->
                 <HydrationScripts options islands=true root=base_trimmed/>
             </head>
             <body>
-                {children()}
+                <div class="min-h-screen flex flex-col">
+                    <TopNav fixed_colors=fixed_nav_colors/>
+                    <div class="flex-1 flex flex-col">
+                        {children()}
+                    </div>
+                </div>
             </body>
         </html>
     }

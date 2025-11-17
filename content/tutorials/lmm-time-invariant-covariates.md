@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -128,55 +128,52 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
-# Prepare data for LMM analysis with time-invariant covariate
+## Filter and Process Time-Invariant Covariates {.code}
+
+```r
+# Filter sessions and forward-fill time-invariant covariates
 df_long <- abcd_data %>%
-    select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ab_g_dyn__cohort_edu__cgs, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
-    # Filter to include only 4 relevant measurement occasions
-    filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
-    # Forward fill parental education (time-invariant covariate)
-    group_by(participant_id) %>%
-    fill(ab_g_dyn__cohort_edu__cgs, .direction = "down") %>%
-    ungroup() %>%
-    # Ensure dataset is sorted by participant and session
-    arrange(participant_id, session_id) %>%
-    # Convert categorical and numerical variables
-    mutate(
-        participant_id = factor(participant_id), # Convert IDs to factors
-        session_id = factor(session_id, # Convert session to a factors
-            levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
-            labels = c("Baseline", "Year_2", "Year_4", "Year_6")
-        ),
-        time = as.numeric(session_id) - 1, # Convert session_id to numeric
-        ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-        ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
-        # Convert and clean parent education variable
-        parent_education = as.numeric(ab_g_dyn__cohort_edu__cgs),
-        parent_education = na_if(parent_education, 777),  # Set "Decline to Answer" as NA
-        # Categorize parent education levels
-        parent_education_cat = case_when(
-          parent_education <= 12 ~ "Less than HS",
-          parent_education %in% 13:14 ~ "HS Diploma/GED",
-          parent_education %in% 15:17 ~ "Some College/Associate",
-          parent_education == 18 ~ "Bachelor's Degree",
-          parent_education %in% 19:21 ~ "Graduate Degree",
-          TRUE ~ NA_character_
-        ) %>% factor(levels = c("Less than HS", "HS Diploma/GED",
-                                 "Some College/Associate", "Bachelor's Degree", "Graduate Degree")),
-        nc_y_nihtb__comp__cryst__fullcorr_tscore =
-            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2)
-    ) %>%
-    # Rename variables for clarity
-    rename(
-        site = ab_g_dyn__design_site,
-        family_id = ab_g_stc__design_id__fam,
-        cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
-    ) %>%
-    # Remove participants with any missing cognition scores across time points
-    group_by(participant_id) %>%
-    filter(sum(!is.na(cognition)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
-    ungroup() %>%
-    drop_na(site, family_id, participant_id, cognition)  # Ensure all remaining rows have complete cases
+  filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
+  group_by(participant_id) %>%
+  fill(ab_g_dyn__cohort_edu__cgs, .direction = "down") %>%
+  ungroup() %>%
+  arrange(participant_id, session_id) %>%
+  mutate(
+    session_id = factor(session_id,
+      levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
+      labels = c("Baseline", "Year_2", "Year_4", "Year_6")),
+    time = as.numeric(session_id) - 1,
+    parent_education = as.numeric(ab_g_dyn__cohort_edu__cgs)
+  )
+```
+
+## Categorize Education and Finalize Dataset {.code}
+
+```r
+# Categorize parent education and prepare final dataset
+df_long <- df_long %>%
+  mutate(
+    parent_education_cat = factor(case_when(
+      parent_education <= 12 ~ "Less than HS",
+      parent_education %in% 13:14 ~ "HS Diploma/GED",
+      parent_education %in% 15:17 ~ "Some College/Associate",
+      parent_education == 18 ~ "Bachelor's Degree",
+      parent_education %in% 19:21 ~ "Graduate Degree",
+      TRUE ~ NA_character_
+    ), levels = c("Less than HS", "HS Diploma/GED",
+                  "Some College/Associate", "Bachelor's Degree", "Graduate Degree"))
+  ) %>%
+  rename(
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam,
+    cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
+  ) %>%
+  group_by(participant_id) %>%
+  filter(sum(!is.na(cognition)) >= 2) %>%
+  ungroup() %>%
+  drop_na(site, family_id, participant_id, cognition)
 ```
 
 ## Descriptive Statistics {.code}
@@ -194,7 +191,7 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "**{level}**N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   bold_labels() %>%
   italicize_levels()
@@ -217,26 +214,26 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Fit LMM and Generate Summary Tables {.code}
 
 ```r
-# Fit a Linear Mixed Model (LMM) to with random intercepts and slopes
+# Fit a Linear Mixed Model with random intercepts and slopes
 model <- lmerTest::lmer(
-    cognition ~ time + parent_education + (1 + time | site:family_id:participant_id) , # Fixed effect (time), random intercept & slope (participant_id)
-    data = df_long # Dataset containing repeated measures of cognition
+  cognition ~ time + parent_education + (1 + time | site:family_id:participant_id),
+  data = df_long
 )
 
-# Generate a summary table for the LMM model
+# Generate summary table for the LMM model
 model_summary <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
+  digits = 3,
+  intercept = TRUE
 ) %>%
   gtsummary::as_gt()
 
 # Display model summary
 model_summary
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary,
   filename = "model_summary_table.html",
@@ -245,49 +242,51 @@ gt::gtsave(
 
 # Generate comprehensive diagnostics with sjPlot
 sjPlot::tab_model(model,
-    show.se = TRUE, show.df = FALSE, show.ci = FALSE,
-    digits = 3,
-    pred.labels = c("Intercept", "Time", "Parent Education"),
-    dv.labels = c("LMM Model (lme4)"),
-    string.se = "SE",
-    string.p = "P-Value",
-    file = "lmm_model_results.html"
+  show.se = TRUE, show.df = FALSE, show.ci = FALSE,
+  digits = 3,
+  pred.labels = c("Intercept", "Time", "Parent Education"),
+  dv.labels = c("LMM Model (lme4)"),
+  string.se = "SE",
+  string.p = "P-Value",
+  file = "lmm_model_results.html"
 )
+```
 
-# Test interaction between education and time
+## Test Education × Time Interaction {.code}
+
+```r
+# Fit interaction model
 model_interaction <- lmer(
-    cognition ~ time * parent_education + (1 + time | participant_id),
-    data = df_long
+  cognition ~ time * parent_education + (1 + time | participant_id),
+  data = df_long
 )
 
-# Compare models
+# Compare models with ANOVA
 anova_output <- anova(model, model_interaction)
 
-# 1. Convert the data frame to a gt object
+# Convert to gt table
 anova_gt_table <- gt::gt(
-    data = anova_output,
-    rownames_to_stub = TRUE # This keeps the model comparison info in the first column
+  data = anova_output,
+  rownames_to_stub = TRUE
 ) %>%
-    # Optional: Customize the table (e.g., format p-values)
-    gt::fmt_number(
-        columns = everything(),
-        decimals = 3
-    ) %>%
-    gt::fmt_scientific(
-        columns = tidyselect::all_of(c("Chisq", "Pr(>Chisq)")),
-        decimals = 4
-    ) %>%
-    gt::tab_header(
-        title = "ANOVA Model Comparison"
-    )
+  gt::fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  gt::fmt_scientific(
+    columns = tidyselect::all_of(c("Chisq", "Pr(>Chisq)")),
+    decimals = 4
+  ) %>%
+  gt::tab_header(
+    title = "ANOVA Model Comparison"
+  )
 
-# 2. Save the gt table as HTML
+# Save the gt table as HTML
 gt::gtsave(
-    data = anova_gt_table,
-    filename = "anova_model_comparison.html",
-    inline_css = FALSE
+  data = anova_gt_table,
+  filename = "anova_model_comparison.html",
+  inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output-1 {.output}

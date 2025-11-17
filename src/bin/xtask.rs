@@ -405,12 +405,10 @@ fn compress_assets(outdir: &str) -> Result<(), String> {
 }
 
 fn inject_fouc_script(outdir: &str) -> Result<(), String> {
-    println!("🎨 Injecting theme FOUC prevention script...");
+    println!("🎨 Skipping theme FOUC injection (now handled in SiteLayout component)...");
 
-    let theme_script = r#"<script>(function(){const theme=localStorage.getItem("theme")||"dracula";document.documentElement.setAttribute("data-theme",theme)})()</script>"#;
-
-    // Find all HTML files recursively
-    inject_script_recursive(Path::new(outdir), theme_script)?;
+    // FOUC prevention is now handled directly in SiteLayout component
+    // This avoids double-injection and ensures consistency
 
     Ok(())
 }

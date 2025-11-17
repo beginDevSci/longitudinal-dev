@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -125,14 +125,17 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Prepare data for analysis by selecting relevant columns, filtering sessions, and cleaning
 df_long <- abcd_data %>%
   select(participant_id, session_id, ph_y_anthr__height_mean) %>%
   filter(session_id %in% c("ses-00A", "ses-01A")) %>%   # Keep only baseline and year 1 sessions
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),  # Convert participant_id to a factor
     session_id = factor(session_id,
                         levels = c("ses-00A", "ses-01A"),
                         labels = c("Baseline", "Year_1")),  # Label sessions
@@ -191,7 +194,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Run Analysis {.code}
 
 ```r
 
@@ -199,17 +202,23 @@ descriptives_table
 df_wide <- df_wide %>%
   mutate(height_diff = Height_Year_1 - Height_Baseline)  # Difference in height across assessments
 
-# Calculate Cohen's d
-d_value <- cohens_d(df_wide$height_diff, mu = 0) # derive effect size of the height difference
+# Calculate Cohen's d effect size
+d_value <- cohens_d(df_wide$height_diff, mu = 0)
 print(d_value)
 
-# 1. Fit a Paired T-test
+# Fit paired t-test
 model <- t.test(df_wide$height_diff, mu = 0)  # tests if mean difference ≠ 0
 
-# 2. Convert test results into a tidy dataframe
+# Convert test results to tidy dataframe
 tidy_model <- broom::tidy(model)
 
-# 3. Create a styled gt table with improved formatting
+```
+
+## Format Results Table {.code}
+
+```r
+
+# Create styled gt table with improved formatting
 model_summary <- tidy_model %>%
   gt() %>%
   tab_header(title = "T-Test Summary Table") %>%
@@ -250,7 +259,6 @@ model_summary <- tidy_model %>%
 model_summary
 
 # Save as HTML with controlled dimensions
-# Use gtsave() (or save_gt()) for HTML, RTF, LaTeX, and image saving
 model_summary %>%
   gtsave(filename = "model_summary.html")
 

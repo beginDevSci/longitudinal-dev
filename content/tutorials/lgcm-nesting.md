@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Load Packages {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -127,27 +127,28 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Create longitudinal dataset with cleaned variables
 df_long <- abcd_data %>%
   # Filter to ERQ assessment waves (Years 3-6)
   filter(session_id %in% c("ses-03A", "ses-04A", "ses-05A", "ses-06A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    # Convert IDs to factors for proper handling
-    participant_id = factor(participant_id),
-
-    # Create meaningful wave labels
+    # Relabel sessions
     session_id = factor(session_id,
                         levels = c("ses-03A", "ses-04A", "ses-05A", "ses-06A"),
                         labels = c("Year_3", "Year_4", "Year_5", "Year_6")),
-
-    # Clean clustering variables
-    site = factor(ab_g_dyn__design_site),
-    family_id = factor(ab_g_stc__design_id__fam),
-
     # Clean outcome variable
     suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)
+  ) %>%
+  # Rename clustering variables
+  rename(
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam
   ) %>%
 
   # Keep only analysis variables
@@ -182,7 +183,7 @@ descriptives_table <- df_long %>%
     statistic = list(all_continuous() ~ "{mean} ({sd})"),
     digits = all_continuous() ~ 2
   ) %>%
-  modify_header(all_stat_cols() ~ "**{level}**N = {n}") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
   modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   add_overall(last = TRUE) %>%
   bold_labels()
@@ -205,7 +206,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Define Latent Growth Curve Model {.code}
+## Define and Fit Nested LGCM {.code}
 
 ```r
 # Define LGCM specification with explicit residual variance labels
@@ -228,36 +229,45 @@ model <- "
   Suppression_Year_6 ~~ var_y6*Suppression_Year_6
 "
 
-### Fit the model
+# Fit the model with nested clustering
 fit <- growth(
   model,
   data = df_wide,
-  cluster = c("site", "family_id"),  # Account for site and family-level dependencies
-  missing = "fiml",           # Full information maximum likelihood for missing data
-  se = "robust"               # Robust (sandwich) standard errors
+  cluster = c("site", "family_id"),
+  missing = "fiml",
+  se = "robust"
 )
 
 # Display model summary with fit indices
 summary(fit, fit.measures = TRUE, standardized = TRUE)
+```
 
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -272,13 +282,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}

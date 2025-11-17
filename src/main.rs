@@ -42,8 +42,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let post_count = all_posts.len();
 
     let index_html = view! {
-        <SiteLayout options=opts.clone()>
-            <main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 px-4">
+        <SiteLayout options=opts.clone() fixed_nav_colors=true>
+            <main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 px-4">
                 <div class="text-center max-w-4xl mx-auto">
                     <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
                         <span class="text-white">"A "</span>
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
                             href={base_path::join("posts/")}
-                            class="px-8 py-3 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                            class="px-8 py-3 bg-teal-400 hover:bg-teal-500 text-slate-900 font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                         >
                             "ABCD Examples"
                         </a>
@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tutorial_catalog_html = view! {
         <SiteLayout options=opts.clone()>
             <main class="min-h-screen bg-surface">
-                <section class="relative overflow-hidden bg-gradient-to-br from-surface via-elevated to-accent/5">
+                <section class="relative overflow-hidden bg-subtle">
                     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
                         <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Examples"</h1>
                         <p class="mt-3 text-lg md:text-xl text-secondary">
@@ -100,7 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             <a href="#catalog" class="inline-block px-6 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors">
                                 "Browse Examples"
                             </a>
-                            <a href={base_path::join("")} class="inline-block px-6 py-3 rounded-lg border border-stroke text-primary hover:bg-elevated transition-colors">
+                            <a href={base_path::join("")} class="inline-block px-6 py-3 rounded-lg border border-default text-primary hover:bg-accent-subtle transition-colors">
                                 "Back to Home"
                             </a>
                         </div>

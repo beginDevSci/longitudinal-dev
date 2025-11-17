@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -126,7 +126,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Data wrangling: clean, restructure, and recode sleep variable
 df_long <- abcd_data %>%
   filter(session_id %in% c("ses-00A", "ses-01A", "ses-02A", "ses-03A")) %>%  # Keep Baseline - Year 3
@@ -196,20 +200,21 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Fit GEE Model with Time-Varying Covariate {.code}
 
 ```r
-
+# Fit GEE model with time-varying anxiety covariate
 model <- geeglm(sleep_binary ~ session_id + site + anxiety,
-                    id = participant_id,
-                    data = df_long,
-                    family = binomial(link = "logit"),
-                    corstr = "exchangeable")
+  id = participant_id,
+  data = df_long,
+  family = binomial(link = "logit"),
+  corstr = "exchangeable"
+)
 
-# Generate a summary table for the GEE model
+# Generate summary table
 model_summary <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
+  digits = 3,
+  intercept = TRUE
 ) %>%
   gtsummary::as_gt()
 
@@ -221,8 +226,12 @@ gt::gtsave(
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-# GEE Model Diagnostics
+## Create Model Diagnostics Table {.code}
+
+```r
+# Create GEE diagnostics data
 diagnostics_data <- data.frame(
   Characteristic = c(
     "Correlation Structure",
@@ -240,14 +249,15 @@ diagnostics_data <- data.frame(
   )
 )
 
+# Format diagnostics table
 diagnostics_table <- diagnostics_data %>%
   gt::gt() %>%
   gt::tab_header(title = "GEE Model Diagnostics")
 
 diagnostics_table
 
+# Save diagnostics table
 gt::gtsave(diagnostics_table, filename = "model_diagnostics.html")
-
 ```
 
 ## Model Summary Output {.output}

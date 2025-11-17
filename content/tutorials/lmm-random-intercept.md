@@ -93,12 +93,11 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
 library(NBDCtools)    # ABCD data access helper
-### Load necessary libraries
 library(arrow)       # For reading Parquet files
 library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
@@ -126,39 +125,28 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
-#  Prepare data for LMM analysis
+## Data Transformation {.code}
+
+```r
+# Prepare data for LMM analysis
 df_long <- abcd_data %>%
-    select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, nc_y_nihtb__comp__cryst__fullcorr_tscore) %>%
-    # Filter to include only 4 relevant measurement occasions
-    filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
-    #  Ensure dataset is sorted by participant and session
-    arrange(participant_id, session_id) %>%
-    #  Convert categorical and numerical variables
-    mutate(
-        participant_id = factor(participant_id), # Convert IDs to factors
-        session_id = factor(session_id, # Convert session to a factors
-            levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
-            labels = c("Baseline", "Year_2", "Year_4", "Year_6")
-        ),
-        time = as.numeric(session_id) - 1, # Convert session_id to numeric
-        ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-        ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
-        nc_y_nihtb__comp__cryst__fullcorr_tscore =
-            round(as.numeric(nc_y_nihtb__comp__cryst__fullcorr_tscore), 2)
-    ) %>%
-    #  Rename variables for clarity
-    rename(
-        site = ab_g_dyn__design_site,
-        family_id = ab_g_stc__design_id__fam,
-        cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
-    ) %>%
-  #  Remove participants with any missing cognition scores across time points
-    group_by(participant_id) %>%
-    group_by(participant_id) %>%
-    filter(sum(!is.na(cognition)) >= 2) %>%  # Keep only participants with at least 2 non-missing cognition scores
-    ungroup() %>%
-    drop_na(site, family_id, participant_id, cognition)  # Ensure all remaining rows have complete cases
+  # Filter to available annual assessments using NBDCtools
+  filter_events_abcd(conditions = c("annual")) %>%
+  # Rename variables for clarity
+  rename(
+    site = ab_g_dyn__design_site,              # site already a factor from NBDCtools
+    family_id = ab_g_stc__design_id__fam,
+    cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore  # cognition already numeric from NBDCtools
+  ) %>%
+  # Keep only participants with at least 2 non-missing cognition scores
+  group_by(participant_id) %>%
+  filter(sum(!is.na(cognition)) >= 2) %>%
+  ungroup() %>%
+  drop_na(cognition) %>%  # Remove rows with missing outcome only (lmer handles missing predictors)
+  # Create numeric time variable from session_id
+  mutate(time = as.numeric(session_id) - 1)  # Convert session to numeric time (0, 1, 2, 3...)
 ```
 
 ## Descriptive Statistics {.code}
@@ -222,7 +210,8 @@ gt::gtsave(
   inline_css = FALSE
 )
 
-# Generate a summary table for the LMM model
+# Generate alternative summary table with variance components (sjPlot format)
+# This provides additional details on random effects not shown in gtsummary
 sjPlot::tab_model(model,
     show.se = TRUE, show.df = FALSE, show.ci = FALSE,
     digits = 3, pred.labels = c("Intercept", "Time"),
@@ -247,76 +236,70 @@ The **fixed effects estimates** indicate that the average baseline cognition sco
 
 The **random intercept variance (τ₀₀ = 83.20)** suggests substantial individual differences in baseline cognition scores, reinforcing the need to account for between-person variability. The intraclass correlation (ICC = 0.69) indicates that a large proportion (69%) of the total variance in cognition scores is attributable to differences between-individuals rather than within-person fluctuations over time. Since **no random slope is included**, this model assumes a common rate of cognitive decline across all participants, capturing individual differences only in their starting cognition levels.
 
-## Visualization {.code}
+## Prepare Data and Generate Predictions {.code}
 
 ```r
-#  Ensure there are no missing values in site, family_id, or participant_id
-df_long <- df_long %>%
-  filter(!is.na(site), !is.na(family_id), !is.na(participant_id))  # Remove rows with missing nesting variables
-
-#  Ensure factor levels match those used in model fitting
+# Generate model predictions for visualization
 df_long <- df_long %>%
   mutate(
-    site = factor(site, levels = unique(df_long$site)),
-    family_id = factor(family_id, levels = unique(df_long$family_id)),
-    participant_id = factor(participant_id, levels = unique(df_long$participant_id))
+    predicted_fixed = predict(model, re.form = NA),
+    predicted_random = predict(model, re.form = ~ (1 | site:family_id:participant_id),
+                                allow.new.levels = TRUE)
   )
 
-#  Generate model predictions
-df_long$predicted_fixed <- predict(model, newdata = df_long, re.form = NA)
-# ✅ Fixed effects only: Represents the overall population-level trajectory
+# Select a subset of participant IDs for visualization
+set.seed(321)
+sample_ids <- sample(unique(df_long$participant_id),
+                     size = min(250, length(unique(df_long$participant_id))))
 
-df_long$predicted_random <- predict(model, newdata = df_long, re.form = ~ (1 | site:family_id:participant_id), allow.new.levels = TRUE)
-# ✅ Includes individual-specific random effects: Allows for variation across participants
-
-#  Select a subset of participant IDs for visualization
-set.seed(321)  # ✅ Set seed for reproducibility
-sample_ids <- sample(unique(df_long$participant_id), size = min(250, length(unique(df_long$participant_id))))  # ✅ Randomly select up to 250 participants
-
-#  Filter dataset to include only sampled participants
+# Filter dataset to include only sampled participants
 df_long_sub <- df_long %>%
-    filter(participant_id %in% sample_ids)  # ✅ Retain only selected participant IDs
+  filter(participant_id %in% sample_ids)
+```
 
-#  Create the visualization of individual and overall cognition trajectories
-visualization <- ggplot(df_long_sub, aes(x = time, y = cognition, group = participant_id)) +  # ✅ Use `time` for x-axis
+## Create Trajectory Visualization {.code}
 
-    #  Plot observed data (individual trajectories)
-    geom_line(aes(color = "Actual Data"), alpha = 0.3) +
-    geom_point(alpha = 0.3) +
+```r
+# Create the visualization of individual and overall cognition trajectories
+visualization <- ggplot(df_long_sub, aes(x = time, y = cognition, group = participant_id)) +
 
-    #  Plot model-predicted values
-    geom_line(aes(y = predicted_random, color = "Random Intercept"), alpha = 0.7) +
-    geom_line(aes(y = predicted_fixed, group = 1, color = "Fixed Effect Mean"), linewidth = 1.2) +
+  # Plot observed data (individual trajectories)
+  geom_line(aes(color = "Observed Data"), alpha = 0.3) +
+  geom_point(alpha = 0.3) +
 
-    #  Customize colors for clarity
-    scale_color_manual(values = c(
-        "Actual Data" = "red",
-        "Random Intercept" = "grey40",
-        "Fixed Effect Mean" = "blue"
-    )) +
+  # Plot model-predicted values with random intercepts
+  geom_line(aes(y = predicted_random, color = "Model Predictions"), alpha = 0.7) +
+  geom_line(aes(y = predicted_fixed, group = 1, color = "Population Mean"), linewidth = 1.2) +
 
-    #  Format x-axis labels to reflect `session_id`
-    scale_x_continuous(
-      breaks = 0:3,  # Assuming time is coded as 0,1,2,3
-      labels = c("Baseline", "Year 2", "Year 4", "Year 6")
-    ) +
+  # Customize colors for clarity
+  scale_color_manual(values = c(
+    "Observed Data" = "red",
+    "Model Predictions" = "grey40",
+    "Population Mean" = "blue"
+  )) +
 
-    #  Add labels and title
-    labs(
-        title = "Random-Intercept LMM: Individual vs. Overall Cognition Trajectories",
-        x = "Assessment Wave",
-        y = "Cognition",
-        color = "Trajectory Type"
-    ) +
+  # Format x-axis labels
+  scale_x_continuous(
+    breaks = 0:3,
+    labels = c("Baseline", "Year 2", "Year 4", "Year 6")
+  ) +
 
-    #  Apply a minimalistic theme for clarity
-    theme_minimal() +
-    theme(legend.position = "bottom")  # ✅ Move legend below the plot
+  # Add labels and title
+  labs(
+    title = "Random-Intercept Model: Individual Trajectories",
+    x = "Assessment Wave",
+    y = "Cognition",
+    color = "Trajectory Type"
+  ) +
 
-### Display the plot
+  # Apply theme
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# Display the plot
 visualization
 
-### Save the plot
+# Save the plot
 ggsave(
   filename = "visualization.png",
   plot = visualization,

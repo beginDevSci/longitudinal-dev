@@ -18,17 +18,27 @@ pub fn ThemeToggle() -> impl IntoView {
             if let Some(window) = window() {
                 if let Some(document) = window.document() {
                     if let Some(html) = document.document_element() {
+                        let class_list = html.class_list();
+
                         // Try to read from localStorage
                         if let Ok(Some(storage)) = window.local_storage() {
                             if let Ok(Some(stored_theme)) = storage.get_item("theme") {
                                 set_current_theme.set(stored_theme.clone());
                                 let _ = html.set_attribute("data-theme", &stored_theme);
+
+                                // Set dark class if needed
+                                if stored_theme == "dark" || stored_theme == "dracula" {
+                                    let _ = class_list.add_1("dark");
+                                } else {
+                                    let _ = class_list.remove_1("dark");
+                                }
                                 return;
                             }
                         }
 
                         // Default to dracula if no stored preference
                         let _ = html.set_attribute("data-theme", "dracula");
+                        let _ = class_list.add_1("dark");
                         set_current_theme.set("dracula".to_string());
                     }
                 }
@@ -47,6 +57,14 @@ pub fn ThemeToggle() -> impl IntoView {
                     if let Some(html) = document.document_element() {
                         // Update HTML attribute
                         let _ = html.set_attribute("data-theme", new_theme);
+
+                        // Also set/remove dark class for Tailwind dark: variant support
+                        let class_list = html.class_list();
+                        if new_theme == "dark" || new_theme == "dracula" {
+                            let _ = class_list.add_1("dark");
+                        } else {
+                            let _ = class_list.remove_1("dark");
+                        }
 
                         // Save to localStorage
                         if let Ok(Some(storage)) = window.local_storage() {

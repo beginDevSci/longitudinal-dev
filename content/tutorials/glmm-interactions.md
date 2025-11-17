@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -128,7 +128,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Data wrangling: clean, restructure, and filter data
 df_long <- abcd_data %>%
   filter(session_id %in% c("ses-01A", "ses-02A", "ses-03A", "ses-04A")) %>%
@@ -138,15 +142,13 @@ df_long <- abcd_data %>%
     session_id = factor(session_id, levels = c("ses-01A", "ses-02A", "ses-03A", "ses-04A"),
                    labels = c("Year_1", "Year_2", "Year_3", "Year_4")),  # Rename sessions for clarity
     time = as.numeric(session_id) - 1,  # Converts factor to 0,1,2,3
-    ab_g_dyn__design_site = factor(ab_g_dyn__design_site),  # Convert site to a factor
-    ab_g_stc__design_id__fam = factor(ab_g_stc__design_id__fam), # Convert family id to a factor
     alcohol_use = as.numeric(su_y_lowuse__isip_001__l),  # Ensure alcohol use is numeric
     family_conflict = as.numeric(fc_p_fes__confl_mean)
   ) %>%
   filter(alcohol_use >= 0 & alcohol_use <= 10) %>%  # Keep only valid alcohol use values
   rename(  # Rename for simplicity
     site = ab_g_dyn__design_site,
-    family_id = ab_g_stc__design_id__fam,
+    family_id = ab_g_stc__design_id__fam
   ) %>%
   # Remove participants with any missing substance use reporting across time points
   group_by(participant_id) %>%
@@ -192,17 +194,17 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Fit GLMM with Interaction {.code}
 
 ```r
-# Fit a Negative Binomial GLMM with Time × Family Conflict Interaction
+# Fit Negative Binomial GLMM with Time × Family Conflict Interaction
 model <- glmmTMB(
   alcohol_use ~ time * family_conflict + (1 + time | site:family_id:participant_id),
-  family = nbinom2,  # Negative Binomial for overdispersed count data
+  family = nbinom2,
   data = df_long
 )
 
-# Extract the fixed effects and format the output
+# Extract and format fixed effects
 coef_summary <- broom.mixed::tidy(model, effects = "fixed") %>%
   dplyr::select(
     Term = term,
@@ -216,20 +218,16 @@ coef_summary <- broom.mixed::tidy(model, effects = "fixed") %>%
       Term == "time" ~ "Time",
       Term == "family_conflict" ~ "Family Conflict",
       Term == "time:family_conflict" ~ "Time × Family Conflict",
-      TRUE ~ Term # Keep other terms as is
+      TRUE ~ Term
     )
   )
 
-# Create the gt table from the tidied data frame
+# Create summary table
 model_summary_table <- coef_summary %>%
   gt::gt() %>%
   gt::tab_header(title = "GLMM Model Summary") %>%
-  # Format Estimate and SE to 3 decimals
-  gt::fmt_number(columns = c(Estimate, SE), decimals = 3) %>%
-  # Format p_value column
-  gt::fmt_number(columns = p_value, decimals = 3)
+  gt::fmt_number(columns = c(Estimate, SE, p_value), decimals = 3)
 
-# Display model summary (optional)
 model_summary_table
 
 # Save as standalone HTML
@@ -238,25 +236,22 @@ gt::gtsave(
   filename = "model_summary.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Output {.output}
 
 /stage4-artifacts/glmm-interactions/model_summary.html
 
-## Model Diagnostics {.code}
+## Extract Model Diagnostics {.code}
 
 ```r
-# Extract random effects variance and model diagnostics
+# Extract random effects variance
 re_var <- VarCorr(model)
 re_var_cond <- re_var$cond$`site:family_id:participant_id`
+var_intercept <- re_var_cond[1, 1]
+var_slope <- re_var_cond[2, 2]
 
-# Extract variances
-var_intercept <- re_var_cond[1, 1]  # Intercept variance
-var_slope <- re_var_cond[2, 2]      # Slope variance
-
-# Create diagnostics table
+# Create diagnostics data
 diagnostics_data <- data.frame(
   Diagnostic = c(
     "Family",
@@ -276,7 +271,7 @@ diagnostics_data <- data.frame(
   )
 )
 
-# Create gt table
+# Format diagnostics table
 diagnostics_table <- diagnostics_data %>%
   gt::gt() %>%
   gt::tab_header(title = "GLMM Model Diagnostics") %>%
@@ -286,11 +281,10 @@ diagnostics_table <- diagnostics_data %>%
   ) %>%
   gt::tab_options(table.font.size = 12)
 
+diagnostics_table
+
 # Save diagnostics table
 gt::gtsave(diagnostics_table, filename = "model_diagnostics.html")
-
-# Display table
-diagnostics_table
 ```
 
 ## Model Diagnostics Output {.output}
@@ -305,46 +299,53 @@ Family conflict does not significantly predict overall alcohol use (p = 0.659), 
 
 These findings highlight that while alcohol use tends to increase over time, the role of family conflict in drinking trajectories remains unclear.
 
-## Model Visualization and Predicted Values {.code}
+## Create Interaction Plot {.code}
 
 ```r
-# Generate predicted values for visualization
+# Generate predicted values for interaction visualization
 preds <- ggpredict(model, terms = c("time", "family_conflict"))
 
 # Plot interaction effect
 visualization <- ggplot(preds, aes(x = x, y = predicted, color = group, group = group)) +
   geom_point(size = 3) +
-  geom_line() +  # Ensure lines connect points within groups
-  labs(title = "Interaction: Family Conflict & Alcohol Use Over Time",
-       x = "Time",
-       y = "Predicted Alcohol Use",
-       color = "Family Conflict Level") +
+  geom_line() +
+  labs(
+    title = "Interaction: Family Conflict & Alcohol Use Over Time",
+    x = "Time",
+    y = "Predicted Alcohol Use",
+    color = "Family Conflict Level"
+  ) +
   theme_minimal()
 
-# Display the interaction plot
 visualization
 
-# Save the interaction plot
+# Save interaction plot
 ggsave(
   filename = "visualization.png",
   plot = visualization,
   width = 8, height = 6, dpi = 300
 )
+```
 
-# Create predicted vs observed plot
+## Create Predicted vs Observed Plot {.code}
+
+```r
+# Generate predictions and create diagnostic plot
 df_long$predicted <- predict(model, type = "response")
+
 visualization2 <- ggplot(df_long, aes(x = predicted, y = alcohol_use)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +
-  labs(title = "Predicted vs. Observed Alcohol Use",
-       x = "Predicted Alcohol Use",
-       y = "Observed Alcohol Use") +
+  labs(
+    title = "Predicted vs. Observed Alcohol Use",
+    x = "Predicted Alcohol Use",
+    y = "Observed Alcohol Use"
+  ) +
   theme_minimal()
 
-# Display the predicted vs observed plot
 visualization2
 
-# Save the predicted vs observed plot
+# Save predicted vs observed plot
 ggsave(
   filename = "visualization2.png",
   plot = visualization2,

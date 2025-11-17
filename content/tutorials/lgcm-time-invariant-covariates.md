@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Load Packages and Import Data {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 # Load required libraries
@@ -132,7 +132,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 # Create longitudinal dataset
 df_long <- abcd_data %>%
   # Filter to ERQ assessment waves (Years 3-6)
@@ -159,11 +163,6 @@ df_long <- df_long %>%
     income = as.numeric(ab_g_dyn__cohort_income__hhold__3lvl),
     suppression = round(as.numeric(mh_y_erq__suppr_mean), 2)
   ) %>%
-  # Clean income coding (777 and 999 are missing codes)
-  mutate(
-    income = na_if(income, 777),
-    income = na_if(income, 999)
-  ) %>%
   # Select analysis variables
   select(participant_id, session_id, site, family_id, age, sex, race, education, income, suppression) %>%
   drop_na()
@@ -179,7 +178,11 @@ baseline_covariates <- df_long %>%
     income_c = income - mean(income, na.rm = TRUE)
   ) %>%
   select(participant_id, age_c, female, education_c, income_c)
+```
 
+## Reshape to Wide Format {.code}
+
+```r
 # Reshape suppression to wide format
 df_wide <- df_long %>%
   select(participant_id, session_id, suppression, site) %>%
@@ -207,8 +210,8 @@ descriptives_table <- df_long %>%
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
-  modify_header(all_stat_cols() ~ "{level}<br>N = {n}") %>%
-  modify_spanning_header(all_stat_cols() ~ "Assessment Wave") %>%
+  modify_header(all_stat_cols() ~ "**{level}**<br>N = {n}") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Assessment Wave**") %>%
   bold_labels() %>%
   italicize_levels()
 
@@ -231,7 +234,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Model Fit {.code}
+## Define and Fit LGCM with Covariates {.code}
 
 ```r
 # Specify LGCM with time-invariant covariates
@@ -266,28 +269,40 @@ model <- "
 fit <- lavaan(
   model,
   data = df_wide,
-  missing = "fiml",        # Handle missing data
-  cluster = "site"         # Cluster-robust SEs for site effects
+  missing = "fiml",
+  cluster = "site"
 )
 
+# Display model summary
+summary(fit)
+```
+
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -302,13 +317,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}

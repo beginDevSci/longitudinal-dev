@@ -19,7 +19,7 @@ description: Introduce latent growth curve modeling to estimate average emotiona
 
 ## Summary {.summary}
 
-Latentzz Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
+Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
 
 ## Features {.features}
 
@@ -93,7 +93,7 @@ For more details on using NBDCtools:
 
 # Data Preparation
 
-## Loading and Initial Processing {.code}
+## NBDCtools Setup and Data Loading {.code}
 
 ```r
 ### Load necessary libraries
@@ -124,7 +124,11 @@ abcd_data <- create_dataset(
   value_to_na = TRUE,        # Convert missing codes (222, 333, etc.) to NA
   add_labels = TRUE          # Add variable and value labels
 )
+```
 
+## Data Transformation {.code}
+
+```r
 ### Create a long-form dataset with relevant columns
 df_long <- abcd_data %>%
   select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, mh_y_erq__suppr_mean) %>%
@@ -132,15 +136,14 @@ df_long <- abcd_data %>%
   filter_events_abcd(conditions = c("annual", ">=3", "<=6")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
-    participant_id = factor(participant_id),           # Convert participant_id to a factor
     session_id = factor(session_id,
                         levels = c("ses-03A", "ses-04A", "ses-05A", "ses-06A"),
-                        labels = c("Year_3", "Year_4", "Year_5", "Year_6")),  # Relabel sessions for clarity
-    family_id = factor(ab_g_stc__design_id__fam)      # Convert family id to a factor
+                        labels = c("Year_3", "Year_4", "Year_5", "Year_6"))  # Relabel sessions for clarity
   ) %>%
   rename(  # Rename for simplicity
-    site = ab_g_dyn__design_site,                      # site already a factor from NBDCtools
-    suppression = mh_y_erq__suppr_mean                 # suppression already numeric from NBDCtools
+    site = ab_g_dyn__design_site,
+    family_id = ab_g_stc__design_id__fam,
+    suppression = mh_y_erq__suppr_mean
   ) %>%
   droplevels() %>%                                     # Drop unused factor levels
   drop_na(suppression)                                 # Remove rows with missing outcome data
@@ -158,7 +161,6 @@ df_wide <- df_long %>%
 ## Descriptive Statistics {.code}
 
 ```r
-### Descriptives
 ### Create descriptive summary table
 descriptives_table <- df_long %>%
   select(session_id, suppression) %>%
@@ -194,43 +196,58 @@ descriptives_table
 
 # Statistical Analysis
 
-## Fit Model {.code}
+## Define and Fit Basic LGCM {.code}
 
 ```r
 # Define model specification
-model <- " i =~ 1*Suppression_Year_3 + 1*Suppression_Year_4 + 1*Suppression_Year_5 + 1*Suppression_Year_6
-           s =~ 0*Suppression_Year_3 + 1*Suppression_Year_4 + 2*Suppression_Year_5 + 3*Suppression_Year_6
+model <- "
+  i =~ 1*Suppression_Year_3 + 1*Suppression_Year_4 + 1*Suppression_Year_5 + 1*Suppression_Year_6
+  s =~ 0*Suppression_Year_3 + 1*Suppression_Year_4 + 2*Suppression_Year_5 + 3*Suppression_Year_6
 
-           # Intercept and slope variances
-           i ~~ i
-           s ~~ s
+  # Intercept and slope variances
+  i ~~ i
+  s ~~ s
 
-           # Residual variances for each observed variable
-           Suppression_Year_3 ~~ var_baseline*Suppression_Year_3
-           Suppression_Year_4 ~~ var_year1*Suppression_Year_4
-           Suppression_Year_5 ~~ var_year2*Suppression_Year_5
-           Suppression_Year_6 ~~ var_year3*Suppression_Year_6
+  # Residual variances for each observed variable
+  Suppression_Year_3 ~~ var_baseline*Suppression_Year_3
+  Suppression_Year_4 ~~ var_year1*Suppression_Year_4
+  Suppression_Year_5 ~~ var_year2*Suppression_Year_5
+  Suppression_Year_6 ~~ var_year3*Suppression_Year_6
 "
 
+# Fit the growth model
 fit <- growth(model, data = df_wide, missing = "ml")
+
+# Display model summary
+summary(fit)
+```
+
+## Format Model Summary Table {.code}
+
+```r
+# Extract model summary
 model_summary <- summary(fit)
 
 model_summary
 
-### Convert lavaan output to a tidy dataframe and then to gt table
+# Convert lavaan output to a tidy dataframe and then to gt table
 model_summary_table <- broom::tidy(fit) %>%
   gt() %>%
   tab_header(title = "Latent Growth Curve Model Results") %>%
   fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
 
-### Save the gt table
+# Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
   inline_css = FALSE
 )
+```
 
-### Extract and save model fit indices
+## Format Model Fit Indices Table {.code}
+
+```r
+# Extract and save model fit indices
 fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
 
 fit_indices_table <- data.frame(
@@ -245,13 +262,12 @@ fit_indices_table <- data.frame(
     Value = "Value"
   )
 
-### Save fit indices table
+# Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
   inline_css = FALSE
 )
-
 ```
 
 ## Model Summary Output {.output}
@@ -269,7 +285,6 @@ The LGCM fit was generally strong (CFI = 0.949, TLI = 0.938, SRMR = 0.045), with
 ## Visualization {.code}
 
 ```r
-### Visualization
 ### Select a subset of participants
 n_sample <- min(150, length(unique(df_long$participant_id)))
 selected_ids <- sample(unique(df_long$participant_id), n_sample)
