@@ -34,10 +34,10 @@ Create a KV namespace for rate limiting:
 
 ```bash
 # Production namespace
-wrangler kv:namespace create "RATE_LIMIT"
+wrangler kv namespace create RATE_LIMIT
 
 # Preview namespace (for testing)
-wrangler kv:namespace create "RATE_LIMIT" --preview
+wrangler kv namespace create RATE_LIMIT --preview
 ```
 
 This will output namespace IDs like:
@@ -261,10 +261,10 @@ wrangler tail suggestions-api
 
 ```bash
 # List all keys in the RATE_LIMIT namespace
-wrangler kv:key list --binding RATE_LIMIT
+wrangler kv key list --binding RATE_LIMIT
 
 # Get a specific rate limit entry
-wrangler kv:key get "ratelimit:1.2.3.4" --binding RATE_LIMIT
+wrangler kv key get "ratelimit:1.2.3.4" --binding RATE_LIMIT
 ```
 
 ### Metrics
@@ -304,8 +304,8 @@ View metrics in Cloudflare Dashboard:
 ### Rate Limit Issues
 
 - Check KV namespace is created and IDs are correct in `wrangler.toml`
-- View rate limit entries: `wrangler kv:key list --binding RATE_LIMIT`
-- Manually delete rate limit for testing: `wrangler kv:key delete "ratelimit:IP" --binding RATE_LIMIT`
+- View rate limit entries: `wrangler kv key list --binding RATE_LIMIT`
+- Manually delete rate limit for testing: `wrangler kv key delete "ratelimit:IP" --binding RATE_LIMIT`
 
 ### CORS Errors in Browser
 

@@ -49,10 +49,10 @@ Successfully logged in.
 cd workers/suggestions
 
 # Create production KV namespace
-wrangler kv:namespace create "RATE_LIMIT"
+wrangler kv namespace create RATE_LIMIT
 
 # Create preview KV namespace (for local testing)
-wrangler kv:namespace create "RATE_LIMIT" --preview
+wrangler kv namespace create RATE_LIMIT --preview
 ```
 
 **Expected output:**
@@ -401,10 +401,10 @@ This shows real-time logs of all requests hitting your Worker.
 
 ```bash
 # List all rate limit keys
-wrangler kv:key list --binding RATE_LIMIT
+wrangler kv key list --binding RATE_LIMIT
 
 # Check a specific IP's rate limit
-wrangler kv:key get "ratelimit:1.2.3.4" --binding RATE_LIMIT
+wrangler kv key get "ratelimit:1.2.3.4" --binding RATE_LIMIT
 ```
 
 ### View Worker Metrics
@@ -511,7 +511,7 @@ Redeploy Worker: `npm run deploy`
 
 **Solution:** Clear rate limit data:
 ```bash
-wrangler kv:key delete "ratelimit:unknown" --binding RATE_LIMIT
+wrangler kv key delete "ratelimit:unknown" --binding RATE_LIMIT
 ```
 
 ---
@@ -589,7 +589,7 @@ curl -X POST "YOUR_WORKER_URL/api/suggestions" \
 cd ../../ && make ssg
 
 # Clear rate limit (for testing)
-wrangler kv:key delete "ratelimit:unknown" --binding RATE_LIMIT
+wrangler kv key delete "ratelimit:unknown" --binding RATE_LIMIT
 
 # Check secrets
 wrangler secret list

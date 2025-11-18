@@ -204,7 +204,7 @@ All components wired with necessary props:
 
 **Deployment Steps** (from README):
 1. Install dependencies: `npm install`
-2. Create KV namespace: `wrangler kv:namespace create "RATE_LIMIT"`
+2. Create KV namespace: `wrangler kv namespace create RATE_LIMIT`
 3. Update `wrangler.toml` with KV namespace IDs
 4. Create GitHub token with `repo` scope
 5. Set secret: `wrangler secret put GITHUB_TOKEN`
