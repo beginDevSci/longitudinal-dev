@@ -1,0 +1,19 @@
+name = "suggestions-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV namespace for rate limiting
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "YOUR_KV_NAMESPACE_ID"
+preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+
+# Secrets (set via: wrangler secret put GITHUB_TOKEN)
+# GITHUB_TOKEN - GitHub Personal Access Token with repo scope
+
+[vars]
+GITHUB_OWNER = "swhawes"
+GITHUB_REPO = "leptos-test"
+ALLOWED_ORIGIN = "https://swhawes.github.io"
+MAX_SIZE_BYTES = 51200  # 50 KB
+RATE_LIMIT_PER_HOUR = 10

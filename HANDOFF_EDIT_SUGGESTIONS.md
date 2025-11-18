@@ -1,8 +1,30 @@
 # 🔄 HANDOFF: Edit Page Suggestions Feature
 
 **Branch**: `feature/edit-page-suggestions`
-**Status**: Steps 1-5 Complete ✅ | Steps 6-8 Remaining
+**Status**: Steps 1-6 Complete ✅ | Steps 7-8 Remaining (Deployment & Testing)
 **Last Updated**: 2025-11-18
+
+---
+
+## 📋 Quick Summary
+
+**What's Complete:**
+- ✅ Frontend: Modal UI, validation, autosave, prefill from SSG
+- ✅ Backend: Cloudflare Worker with validation, rate limiting, GitHub Issues integration
+- ✅ Infrastructure: Feature flag, documentation, test scripts
+
+**What's Remaining:**
+- ⏳ Deploy Worker to Cloudflare (requires account)
+- ⏳ Update frontend with Worker URL
+- ⏳ End-to-end testing
+- ⏳ Comprehensive test suite (Step 8)
+
+**To Continue:**
+1. Deploy Worker: `cd workers/suggestions && npm install && npm run deploy`
+2. Get Worker URL from deployment output
+3. Update `src/editor_modal_island.rs:210` with Worker URL
+4. Rebuild frontend: `make ssg`
+5. Test end-to-end from live site
 
 ---
 
@@ -10,8 +32,10 @@
 
 ```bash
 git checkout feature/edit-page-suggestions
-git log --oneline | head -5
+git log --oneline | head -6
 # Should show:
+# XXXXXX Step 6: Implement Cloudflare Worker for suggestions API
+# e392981 Add comprehensive handoff documentation
 # 4c2de5f Steps 3-5: Complete implementation with fixes
 # c526579 Amend Step 2: Use rendered HTML for prefill and baseline hash
 # aba4186 Step 2: Implement prefill generation during SSG
@@ -137,65 +161,104 @@ All components wired with necessary props:
 
 ---
 
-## 🚧 Remaining Work (Steps 6-8)
+---
 
-### Step 6: Cloudflare Worker (Not Started)
+### Step 6: Cloudflare Worker ✅
+**Status**: Complete (Not Deployed)
 
-**Location**: `workers/suggestions/` (to be created)
+**Implementation** (`workers/suggestions/`):
 
-**Requirements**:
+✅ **All files created:**
+- `src/index.ts` - Main Worker implementation (270 lines)
+- `wrangler.toml` - Cloudflare configuration
+- `package.json` - Dependencies (Wrangler, TypeScript, Octokit)
+- `tsconfig.json` - TypeScript configuration
+- `README.md` - Comprehensive setup guide (400+ lines)
+- `.gitignore` - Excludes node_modules, .dev.vars, .wrangler
+- `test-local.sh` - Local testing script
 
-1. **Route**: `POST /api/suggestions`
-
-2. **Validation**:
-   - Origin check (only allow from your domain)
-   - Honeypot: `website` field must be empty
-   - Size limit: ≤ 50 KB
-   - Required: `edits` field non-empty
-
-3. **Rate Limiting**:
+✅ **Features implemented:**
+1. **CORS support** - Preflight handling, origin validation
+2. **Request validation**:
+   - Honeypot check (`website` field must be empty)
+   - Required fields: `slug`, `page_url`, `edits`
+   - Slug format: `^[a-z0-9-]+$`
+   - Size limit: 50 KB (51,200 bytes)
+3. **Rate limiting**:
    - 10 submissions per IP per hour
-   - Consider using Cloudflare KV or Durable Objects
+   - KV storage with rolling window
+   - 2-hour TTL on rate limit data
+4. **GitHub Issues integration**:
+   - Creates issue with title `[Suggestion] {slug}`
+   - Labels: `suggestion`, `user-submitted`
+   - Formatted markdown body with all fields
+5. **Error handling**:
+   - Proper HTTP status codes
+   - Descriptive error messages
+   - CORS headers on all responses
 
-4. **File Storage**:
-   - Path: `suggestions/{slug}/{timestamp}-{short-hash}.md`
-   - Format:
-     ```markdown
-     slug: {slug}
-     page_url: {url}
-     submitted_at: {iso8601}
-     contact: {optional}
-     baseline_hash: {optional}
-     user_agent: {from Worker}
-     ---
-     ## Suggested changes
-     {edits}
+**Key Files**:
+- `workers/suggestions/src/index.ts:1-270` - Worker logic
+- `workers/suggestions/wrangler.toml:1-20` - Configuration
+- `workers/suggestions/README.md:1-400+` - Setup documentation
 
-     ## Notes
-     {notes}
-     ```
+**Deployment Steps** (from README):
+1. Install dependencies: `npm install`
+2. Create KV namespace: `wrangler kv:namespace create "RATE_LIMIT"`
+3. Update `wrangler.toml` with KV namespace IDs
+4. Create GitHub token with `repo` scope
+5. Set secret: `wrangler secret put GITHUB_TOKEN`
+6. Deploy: `npm run deploy`
+7. Update frontend with Worker URL (see Step 7 below)
 
-5. **GitHub Integration**:
-   - **Option A (Recommended)**: Create GitHub Issue
-     - POST to `/repos/swhawes/leptos-test/issues`
-     - Label: `suggestion`
-     - Body: formatted suggestion
-   - **Option B**: Direct commit to `suggestions/` branch
-     - PUT to `/repos/swhawes/leptos-test/contents/{path}`
-     - Commit message: `chore: suggestion {slug} {timestamp}`
+**Next Actions**:
+- [ ] Deploy Worker to Cloudflare (requires Cloudflare account)
+- [ ] Set up KV namespace
+- [ ] Configure GitHub token secret
+- [ ] Get Worker URL from deployment
+- [ ] Update frontend to use Worker URL
 
-6. **Secrets Needed**:
-   - `GITHUB_TOKEN` with `contents:write` and `issues:write` scopes
+---
 
-7. **Response**:
-   - Success: `{"ok": true}`
-   - Error: `{"error": "descriptive message"}`
+## 🚧 Remaining Work (Steps 7-8)
 
-**Deliverables**:
-- `workers/suggestions/wrangler.toml`
-- `workers/suggestions/src/index.ts` (or `.js`)
-- `workers/suggestions/README.md` (setup instructions)
-- Secret configuration notes
+### Step 7: Frontend Integration (Not Started)
+
+**After deploying the Worker**, update the frontend to use the Worker URL:
+
+**File to modify**: `src/editor_modal_island.rs:210`
+
+**Current code**:
+```rust
+let request = leptos::web_sys::Request::new_with_str_and_init("/api/suggestions", &opts)?;
+```
+
+**Update to**:
+```rust
+// Option A: Use your Worker URL directly
+let request = leptos::web_sys::Request::new_with_str_and_init(
+    "https://suggestions-api.YOUR-SUBDOMAIN.workers.dev/api/suggestions",
+    &opts
+)?;
+
+// Option B: Use custom route (if configured in Cloudflare)
+let request = leptos::web_sys::Request::new_with_str_and_init("/api/suggestions", &opts)?;
+```
+
+**Also update CORS origin** in `workers/suggestions/wrangler.toml`:
+```toml
+ALLOWED_ORIGIN = "https://swhawes.github.io"
+```
+
+**Testing checklist**:
+- [ ] Deploy Worker and get URL
+- [ ] Update frontend with Worker URL
+- [ ] Rebuild and deploy frontend: `make ssg`
+- [ ] Test end-to-end from live site
+- [ ] Verify GitHub issue created
+- [ ] Test rate limiting (11+ submissions)
+- [ ] Test honeypot protection
+- [ ] Test modal auto-close on success
 
 ---
 
@@ -238,13 +301,17 @@ All components wired with necessary props:
 | `src/main.rs` | SSG generation | 148-176 (read & hash markdown) |
 | `Cargo.toml` | Dependencies | 52-53, 109-111 (sha2, pulldown-cmark) |
 
-### Backend (To Be Created)
+### Backend (Cloudflare Worker)
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `workers/suggestions/wrangler.toml` | Cloudflare config | ❌ Not created |
-| `workers/suggestions/src/index.ts` | Worker logic | ❌ Not created |
-| `workers/suggestions/README.md` | Setup docs | ❌ Not created |
+| `workers/suggestions/wrangler.toml` | Cloudflare config | ✅ Created |
+| `workers/suggestions/src/index.ts` | Worker logic | ✅ Created (270 lines) |
+| `workers/suggestions/package.json` | Dependencies | ✅ Created |
+| `workers/suggestions/tsconfig.json` | TypeScript config | ✅ Created |
+| `workers/suggestions/README.md` | Setup docs | ✅ Created (400+ lines) |
+| `workers/suggestions/test-local.sh` | Test script | ✅ Created |
+| `workers/suggestions/.gitignore` | Git ignore | ✅ Created |
 
 ---
 
