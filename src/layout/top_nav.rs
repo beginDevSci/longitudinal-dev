@@ -13,17 +13,21 @@ pub fn TopNav() -> impl IntoView {
     let about_href = base_path::join("about/");
 
     view! {
-        <header class="sticky top-0 z-50 w-full border-b border-default bg-surface/95 backdrop-blur-md shadow-sm">
+        <header class="sticky top-0 z-50 w-full border-b border-default bg-surface shadow-sm">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
-                <a href=home_href.clone() class="text-lg font-bold tracking-tight text-primary hover:text-accent transition-colors">
+                <a
+                    href=home_href.clone()
+                    class="text-xl font-extrabold tracking-tight text-accent hover:brightness-110 transition-all duration-200"
+                    style="text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);"
+                >
                     "Longitudinal.dev"
                 </a>
 
                 <nav class="flex items-center gap-2 text-sm font-medium">
-                    <a href=home_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Home"</a>
-                    <a href=tutorials_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Tutorials"</a>
-                    <a href=about_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"About"</a>
-                    <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-40" title="Coming soon">"Writer"</span>
+                    <a href=home_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Home"</a>
+                    <a href=tutorials_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Tutorials"</a>
+                    <a href=about_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"About"</a>
+                    <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-50" title="Coming soon">"Writer"</span>
 
                     // Social icons
                     <div class="ml-2 flex items-center gap-1">
@@ -31,7 +35,7 @@ pub fn TopNav() -> impl IntoView {
                             href="https://github.com/beginDevSci/longitudinal-dev"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-lg p-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200"
+                            class="rounded-lg p-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200"
                             title="View on GitHub"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -42,7 +46,7 @@ pub fn TopNav() -> impl IntoView {
                             href="https://discord.gg/WXMv25rf"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-lg p-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200"
+                            class="rounded-lg p-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200"
                             title="Join our Discord"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
