@@ -107,37 +107,8 @@ pub fn TableOfContents(
                                 {if !repo_url.is_empty() {
                                     view! {
                                         <>
-                                            {if crate::config::ENABLE_SUGGESTIONS {
-                                                view! {
-                                                    <li>
-                                                        <EditPageButton slug=slug.clone()/>
-                                                    </li>
-                                                }.into_any()
-                                            } else {
-                                                ().into_any()
-                                            }}
                                             <li>
-                                                <a
-                                                    href="https://github.com/beginDevSci/longitudinal-dev/discussions"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    class="aside-action w-full text-left"
-                                                >
-                                                    <svg
-                                                        class="aside-action-icon"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="1.8"
-                                                            d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8-1.084 0-2.12-.172-3.082-.488L3 20l1.488-5.918C4.172 13.12 4 12.084 4 11c0-4.418 4.03-8 9-8s9 3.582 9 9z"
-                                                        />
-                                                    </svg>
-                                                    <span>"Join the discussion"</span>
-                                                </a>
+                                                <EditPageButton slug=slug.clone()/>
                                             </li>
                                         </>
                                     }.into_any()
