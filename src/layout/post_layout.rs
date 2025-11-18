@@ -5,7 +5,6 @@ use crate::layout::{CodeDownloadData, LeftNav, NavCategory, TableOfContents, Toc
 use crate::models::post::Post;
 use crate::sections::*;
 use crate::EditorModalIsland;
-use crate::ThemeToggle;
 
 /// Extract code blocks from a post for downloads.
 ///
@@ -159,25 +158,19 @@ pub fn PostLayout(post: Post) -> impl IntoView {
                 <header class="px-6 pt-4 pb-2">
                     <div class="flex flex-col gap-4 lg:gap-6 hero-header">
                         <div class="flex flex-col gap-2 lg:flex-1 lg:min-w-0">
-                            <div class="flex items-center justify-between gap-3">
-                                {metadata.as_ref().and_then(|meta| {
-                                    meta
-                                        .method_family_label
-                                        .as_ref()
-                                        .filter(|label| !label.is_empty())
-                                        .map(|label| {
-                                            view! {
-                                                <p class="hero-kicker">
-                                                    {label.clone()}
-                                                </p>
-                                            }
-                                        })
-                                })}
-
-                                <div class="hidden lg:block">
-                                    <ThemeToggle/>
-                                </div>
-                            </div>
+                            {metadata.as_ref().and_then(|meta| {
+                                meta
+                                    .method_family_label
+                                    .as_ref()
+                                    .filter(|label| !label.is_empty())
+                                    .map(|label| {
+                                        view! {
+                                            <p class="hero-kicker">
+                                                {label.clone()}
+                                            </p>
+                                        }
+                                    })
+                            })}
 
                             <h1 class="post-title">
                                 {match title.split_once(':') {
@@ -257,11 +250,6 @@ pub fn PostLayout(post: Post) -> impl IntoView {
                                     </div>
                                 }
                             })}
-                        </div>
-
-                        // Theme toggle - right-aligned on desktop
-                        <div class="self-end lg:hidden">
-                            <ThemeToggle/>
                         </div>
                     </div>
 

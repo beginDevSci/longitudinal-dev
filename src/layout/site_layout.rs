@@ -11,8 +11,6 @@ use crate::layout::TopNav;
 /// - Contains no client code or islands
 /// - Accepts children to render in the <body>
 ///
-/// Set `fixed_nav_colors=true` for landing page (fixed teal colors).
-///
 /// Usage:
 /// ```rust,ignore
 /// view! { <SiteLayout options><PostLayout post/></SiteLayout> }
@@ -21,8 +19,6 @@ use crate::layout::TopNav;
 pub fn SiteLayout(
     options: leptos::config::LeptosOptions,
     children: Children,
-    #[prop(default = false)]
-    fixed_nav_colors: bool
 ) -> impl IntoView {
     // Always compute base path (defaults to "/" if SITE_BASE_PATH not set)
     let base = base_path::base_path();
@@ -49,7 +45,7 @@ pub fn SiteLayout(
             </head>
             <body>
                 <div class="min-h-screen flex flex-col">
-                    <TopNav fixed_colors=fixed_nav_colors/>
+                    <TopNav/>
                     <div class="flex-1 flex flex-col">
                         {children()}
                     </div>

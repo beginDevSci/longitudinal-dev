@@ -1,55 +1,32 @@
 use leptos::prelude::*;
 
 use crate::base_path;
+use crate::ThemeToggle;
 
 /// Simple top navigation rendered on every page (SSR-only).
 ///
-/// Set `fixed_colors=true` to use hardcoded colors (for landing page)
-/// or `fixed_colors=false` to use theme-aware semantic tokens (default).
+/// Uses theme-aware semantic tokens that respond to the theme picker.
 #[component]
-pub fn TopNav(
-    #[prop(default = false)]
-    fixed_colors: bool
-) -> impl IntoView {
+pub fn TopNav() -> impl IntoView {
     let home_href = base_path::base_path();
     let tutorials_href = base_path::join("tutorials/");
     let about_href = base_path::join("about/");
 
-    if fixed_colors {
-        // Landing page: fixed colors (not theme-aware)
-        view! {
-            <header class="sticky top-0 z-50 w-full border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-md shadow-sm">
-                <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
-                    <a href=home_href.clone() class="text-base font-bold tracking-tight text-white hover:text-teal-400 transition-colors">
-                        "Longitudinal.dev"
-                    </a>
+    view! {
+        <header class="sticky top-0 z-50 w-full border-b border-default bg-surface backdrop-blur-md shadow-sm">
+            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
+                <a href=home_href.clone() class="text-base font-bold tracking-tight text-primary hover:text-accent transition-colors">
+                    "Longitudinal.dev"
+                </a>
 
-                    <nav class="flex items-center gap-1 text-sm font-medium">
-                        <a href=home_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Home"</a>
-                        <a href=tutorials_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Tutorials"</a>
-                        <a href=about_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"About"</a>
-                        <span class="rounded-lg px-4 py-2 text-slate-500 cursor-not-allowed" title="Coming soon">"Writer"</span>
-                    </nav>
-                </div>
-            </header>
-        }
-    } else {
-        // Other pages: theme-aware semantic tokens
-        view! {
-            <header class="sticky top-0 z-50 w-full border-b border-default bg-surface backdrop-blur-md shadow-sm">
-                <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
-                    <a href=home_href.clone() class="text-base font-bold tracking-tight text-primary hover:text-accent transition-colors">
-                        "Longitudinal.dev"
-                    </a>
-
-                    <nav class="flex items-center gap-1 text-sm font-medium">
-                        <a href=home_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Home"</a>
-                        <a href=tutorials_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Tutorials"</a>
-                        <a href=about_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"About"</a>
-                        <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-50" title="Coming soon">"Writer"</span>
-                    </nav>
-                </div>
-            </header>
-        }
+                <nav class="flex items-center gap-1 text-sm font-medium">
+                    <a href=home_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Home"</a>
+                    <a href=tutorials_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Tutorials"</a>
+                    <a href=about_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"About"</a>
+                    <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-50" title="Coming soon">"Writer"</span>
+                    <ThemeToggle/>
+                </nav>
+            </div>
+        </header>
     }
 }
