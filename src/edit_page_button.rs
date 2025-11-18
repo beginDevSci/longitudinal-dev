@@ -52,9 +52,22 @@ pub fn EditPageButton(
                 href={github_edit_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="aside-action w-full text-left text-xs text-muted hover:text-primary transition-colors pl-9"
+                class="aside-action w-full text-left"
             >
-                "(or edit directly on GitHub)"
+                <svg
+                    class="aside-action-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                </svg>
+                <span>"Edit on GitHub"</span>
             </a>
         </>
     }

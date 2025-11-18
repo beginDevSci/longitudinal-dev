@@ -117,12 +117,11 @@ pub fn TableOfContents(
                                                 ().into_any()
                                             }}
                                             <li>
-                                                <button
-                                                    type="button"
-                                                    class="aside-action aside-action--disabled"
-                                                    disabled
-                                                    aria-disabled="true"
-                                                    title="Discussion forum coming soon"
+                                                <a
+                                                    href="https://github.com/beginDevSci/longitudinal-dev/discussions"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="aside-action w-full text-left"
                                                 >
                                                     <svg
                                                         class="aside-action-icon"
@@ -138,7 +137,7 @@ pub fn TableOfContents(
                                                         />
                                                     </svg>
                                                     <span>"Join the discussion"</span>
-                                                </button>
+                                                </a>
                                             </li>
                                         </>
                                     }.into_any()
