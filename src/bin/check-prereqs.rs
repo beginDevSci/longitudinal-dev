@@ -116,12 +116,10 @@ fn run_checks(args: Args) -> ExitCode {
 
                 if args.dry_run {
                     println!("  Would run: {}", cmd);
+                } else if install_prerequisite(cmd, &check.name) {
+                    println!("  ✓ {} installed successfully", check.name);
                 } else {
-                    if install_prerequisite(cmd, &check.name) {
-                        println!("  ✓ {} installed successfully", check.name);
-                    } else {
-                        println!("  ✗ Failed to install {}", check.name);
-                    }
+                    println!("  ✗ Failed to install {}", check.name);
                 }
             }
         }
@@ -368,9 +366,9 @@ fn check_abcd_data_path() -> PrereqCheck {
 fn check_r_packages() -> Vec<PrereqCheck> {
     println!("\nChecking R packages...");
 
-    let core_packages = vec!["tidyverse", "arrow", "gtsummary", "rstatix"];
-    let analysis_packages = vec!["lme4", "lmerTest", "lavaan", "geepack", "lcmm", "glmmTMB"];
-    let utility_packages = vec!["ggeffects", "performance", "sjPlot", "kableExtra", "gt"];
+    let core_packages = ["tidyverse", "arrow", "gtsummary", "rstatix"];
+    let analysis_packages = ["lme4", "lmerTest", "lavaan", "geepack", "lcmm", "glmmTMB"];
+    let utility_packages = ["ggeffects", "performance", "sjPlot", "kableExtra", "gt"];
 
     let mut all_packages: Vec<&str> = Vec::new();
     all_packages.extend(core_packages.iter());
