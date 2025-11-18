@@ -18,10 +18,13 @@ scripts/
 - `deploy_github_pages.sh` – Builds with the correct base path and pushes the site to `gh-pages`.
 
 ## dev/
-- `bootstrap.sh` – Verifies prerequisites (Rust target, wasm-bindgen CLI, npm deps) and installs missing pieces.
 - `check.sh` – Main preflight entry point (fmt, clippy, tests, optional SSG build, tutorial validation).
 - `dev.sh` – Convenience launcher for the multi-terminal dev environment.
 
-**Note:** For prerequisite checking only (without installation), use `cargo run --bin check-prereqs` directly.
+**Note:** For prerequisite checking and installation, use:
+- `cargo run --bin check-prereqs` - Check only
+- `cargo run --bin check-prereqs --install` - Check and install missing prerequisites
+- `cargo run --bin check-prereqs --dry-run` - Preview what would be installed
+- `make bootstrap` - Recommended setup command (runs check-prereqs --install)
 
 Most workflows also have Make targets (`make watch`, `make ssg`, `make serve`). Use the scripts directly when you need the raw helper.

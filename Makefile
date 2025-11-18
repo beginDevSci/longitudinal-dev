@@ -85,7 +85,7 @@ deploy:
 
 # Bootstrap: check prerequisites and install tools
 bootstrap:
-	@./scripts/dev/bootstrap.sh
+	@cargo run --features ssr --bin check-prereqs -- --install
 
 # Watch mode: run development server with live reload
 watch:

@@ -1,76 +1,271 @@
-//! Prerequisites checker for Leptos SSG blog project
+//! Prerequisites checker and installer for Leptos SSG blog project
 //!
-//! Verifies all required tools and dependencies are installed:
-//! - R/Rscript
-//! - Python 3
-//! - Rust/Cargo
-//! - Git
-//! - NBDCtools R package
-//! - Common R packages used in tutorials
-//! - ABCD_DATA_PATH environment variable
+//! Verifies all required tools and dependencies are installed, and optionally installs them.
 //!
-//! Usage: cargo run --bin check-prereqs
+//! Usage:
+//!   cargo run --bin check-prereqs                 # Check only
+//!   cargo run --bin check-prereqs --install       # Check and install missing
+//!   cargo run --bin check-prereqs --dry-run       # Preview what would be installed
+//!   cargo run --bin check-prereqs --install --dry-run  # Preview install actions
 
 use std::env;
 use std::path::Path;
 use std::process::{Command, ExitCode};
 
-#[allow(dead_code)]
+#[cfg(feature = "ssr")]
+use clap::Parser;
+
+#[cfg(feature = "ssr")]
+#[derive(Parser)]
+#[command(name = "check-prereqs")]
+#[command(about = "Check and install prerequisites for longitudinal-dev")]
+struct Args {
+    /// Install missing prerequisites
+    #[arg(long)]
+    install: bool,
+
+    /// Show what would be installed without actually installing
+    #[arg(long)]
+    dry_run: bool,
+}
+
 struct PrereqCheck {
     name: String,
     passed: bool,
     message: String,
+    install_cmd: Option<String>,
 }
 
 fn main() -> ExitCode {
+    #[cfg(not(feature = "ssr"))]
+    {
+        eprintln!("This binary requires the 'ssr' feature");
+        return ExitCode::FAILURE;
+    }
+
+    #[cfg(feature = "ssr")]
+    {
+        let args = Args::parse();
+        run_checks(args)
+    }
+}
+
+#[cfg(feature = "ssr")]
+fn run_checks(args: Args) -> ExitCode {
     println!("=== Checking Prerequisites ===\n");
 
+    if args.dry_run {
+        println!("🔍 DRY RUN MODE - No installations will be performed\n");
+    }
+
     let mut checks = vec![
-        // Check R/Rscript
-        check_command("Rscript", &["--version"]),
-        // Check Python 3
-        check_command("python3", &["--version"]),
-        // Check Rust/Cargo
-        check_command("cargo", &["--version"]),
-        // Check Git
-        check_command("git", &["--version"]),
+        // Core tools
+        check_rust(),
+        check_cargo(),
+        check_wasm_target(),
+        check_wasm_bindgen(),
+        check_node(),
+        check_npm(),
+        check_git(),
+        // Optional tools
+        check_command("Rscript", &["--version"], "R for tutorial validation"),
+        check_command("python3", &["--version"], "Python 3"),
     ];
 
-    // Check NBDCtools (requires R)
+    // Check R packages if R is available
     if checks.iter().any(|c| c.name == "Rscript" && c.passed) {
-        checks.push(check_nbdctools());
-
-        // Check common R packages used in tutorials
         checks.extend(check_r_packages());
-    } else {
-        checks.push(PrereqCheck {
-            name: "NBDCtools".to_string(),
-            passed: false,
-            message: "⚠  Skipping (R not available)".to_string(),
-        });
     }
 
     // Check ABCD_DATA_PATH
     checks.push(check_abcd_data_path());
 
+    // Separate checks into passed and failed
+    let failed_checks: Vec<_> = checks.iter().filter(|c| !c.passed).collect();
+    let installable: Vec<_> = failed_checks
+        .iter()
+        .filter(|c| c.install_cmd.is_some())
+        .collect();
+
     // Print summary
     println!("\n=== Summary ===\n");
+    let error_count = failed_checks.len();
 
-    let errors = checks.iter().filter(|c| !c.passed).count();
-
-    if errors == 0 {
+    if error_count == 0 {
         println!("✓ All prerequisites met!\n");
-        println!("You can proceed with building and testing.");
+
+        // Run npm install if --install flag is set
+        if args.install && !args.dry_run {
+            println!("📦 Installing npm dependencies...");
+            install_npm_deps();
+        } else if args.install && args.dry_run {
+            println!("Would run: npm install");
+        }
+
+        return ExitCode::SUCCESS;
+    }
+
+    println!("✗ {error_count} prerequisite(s) missing\n");
+
+    if args.install && !installable.is_empty() {
+        println!("🔧 Installing missing prerequisites...\n");
+
+        for check in installable {
+            if let Some(cmd) = &check.install_cmd {
+                println!("Installing {}...", check.name);
+
+                if args.dry_run {
+                    println!("  Would run: {}", cmd);
+                } else {
+                    if install_prerequisite(cmd, &check.name) {
+                        println!("  ✓ {} installed successfully", check.name);
+                    } else {
+                        println!("  ✗ Failed to install {}", check.name);
+                    }
+                }
+            }
+        }
+
+        // Install npm deps after tools are ready
+        if !args.dry_run {
+            println!("\n📦 Installing npm dependencies...");
+            install_npm_deps();
+        } else {
+            println!("\nWould run: npm install");
+        }
+
+        println!("\n✨ Installation complete!");
+        println!("Run 'cargo run --bin check-prereqs' to verify.");
         ExitCode::SUCCESS
+    } else if args.install {
+        println!("No installable prerequisites found.");
+        println!("Please install the following manually:");
+        for check in &failed_checks {
+            println!("  - {}: {}", check.name, check.message);
+        }
+        ExitCode::FAILURE
     } else {
-        println!("✗ {errors} error(s) found\n");
-        println!("Please resolve the errors above before proceeding.");
+        println!("Run with --install to automatically install missing prerequisites:");
+        println!("  cargo run --bin check-prereqs --install");
+        println!("\nOr install manually:");
+        for check in &failed_checks {
+            println!("  - {}: {}", check.name, check.message);
+        }
         ExitCode::FAILURE
     }
 }
 
-fn check_command(cmd: &str, args: &[&str]) -> PrereqCheck {
-    print!("Checking {cmd}... ");
+fn check_rust() -> PrereqCheck {
+    check_command("rustc", &["--version"], "Rust compiler")
+}
+
+fn check_cargo() -> PrereqCheck {
+    check_command("cargo", &["--version"], "Cargo package manager")
+}
+
+fn check_wasm_target() -> PrereqCheck {
+    print!("Checking wasm32-unknown-unknown target... ");
+
+    match Command::new("rustup")
+        .args(["target", "list", "--installed"])
+        .output()
+    {
+        Ok(output) => {
+            let installed = String::from_utf8_lossy(&output.stdout);
+            if installed.contains("wasm32-unknown-unknown") {
+                println!("✓");
+                PrereqCheck {
+                    name: "wasm32-unknown-unknown".to_string(),
+                    passed: true,
+                    message: "✓ WASM target installed".to_string(),
+                    install_cmd: None,
+                }
+            } else {
+                println!("✗ MISSING");
+                PrereqCheck {
+                    name: "wasm32-unknown-unknown".to_string(),
+                    passed: false,
+                    message: "✗ WASM target not installed".to_string(),
+                    install_cmd: Some("rustup target add wasm32-unknown-unknown".to_string()),
+                }
+            }
+        }
+        Err(_) => {
+            println!("✗ FAILED");
+            PrereqCheck {
+                name: "wasm32-unknown-unknown".to_string(),
+                passed: false,
+                message: "✗ Failed to check WASM target (rustup not found?)".to_string(),
+                install_cmd: None,
+            }
+        }
+    }
+}
+
+fn check_wasm_bindgen() -> PrereqCheck {
+    print!("Checking wasm-bindgen-cli... ");
+
+    const REQUIRED_VERSION: &str = "0.2.104";
+
+    match Command::new("wasm-bindgen").arg("--version").output() {
+        Ok(output) => {
+            let version_output = String::from_utf8_lossy(&output.stdout);
+            if let Some(version) = version_output.split_whitespace().nth(1) {
+                if version == REQUIRED_VERSION {
+                    println!("✓");
+                    println!("  Version {} (matches Cargo.toml)", version);
+                    PrereqCheck {
+                        name: "wasm-bindgen-cli".to_string(),
+                        passed: true,
+                        message: format!("✓ wasm-bindgen-cli {}", version),
+                        install_cmd: None,
+                    }
+                } else {
+                    println!("⚠ VERSION MISMATCH");
+                    println!("  Found: {}, Required: {}", version, REQUIRED_VERSION);
+                    PrereqCheck {
+                        name: "wasm-bindgen-cli".to_string(),
+                        passed: false,
+                        message: format!("⚠ Version mismatch: {} (need {})", version, REQUIRED_VERSION),
+                        install_cmd: Some(format!("cargo install wasm-bindgen-cli --version {} --force", REQUIRED_VERSION)),
+                    }
+                }
+            } else {
+                println!("✗ UNKNOWN VERSION");
+                PrereqCheck {
+                    name: "wasm-bindgen-cli".to_string(),
+                    passed: false,
+                    message: "✗ Could not determine version".to_string(),
+                    install_cmd: Some(format!("cargo install wasm-bindgen-cli --version {}", REQUIRED_VERSION)),
+                }
+            }
+        }
+        Err(_) => {
+            println!("✗ NOT FOUND");
+            PrereqCheck {
+                name: "wasm-bindgen-cli".to_string(),
+                passed: false,
+                message: "✗ wasm-bindgen-cli not installed".to_string(),
+                install_cmd: Some(format!("cargo install wasm-bindgen-cli --version {}", REQUIRED_VERSION)),
+            }
+        }
+    }
+}
+
+fn check_node() -> PrereqCheck {
+    check_command("node", &["--version"], "Node.js")
+}
+
+fn check_npm() -> PrereqCheck {
+    check_command("npm", &["--version"], "npm package manager")
+}
+
+fn check_git() -> PrereqCheck {
+    check_command("git", &["--version"], "Git version control")
+}
+
+fn check_command(cmd: &str, args: &[&str], description: &str) -> PrereqCheck {
+    print!("Checking {}... ", description);
 
     match Command::new(cmd).args(args).output() {
         Ok(output) => {
@@ -93,74 +288,39 @@ fn check_command(cmd: &str, args: &[&str]) -> PrereqCheck {
                 };
 
                 println!("✓");
-                println!("  {version}");
+                println!("  {}", version);
                 PrereqCheck {
                     name: cmd.to_string(),
                     passed: true,
-                    message: format!("✓ {cmd}: {version}"),
+                    message: format!("✓ {}: {}", cmd, version),
+                    install_cmd: None,
                 }
             } else {
                 println!("✗ FAILED");
-                println!("  {cmd} found but returned error");
                 PrereqCheck {
                     name: cmd.to_string(),
                     passed: false,
-                    message: format!("✗ {cmd}: command failed"),
+                    message: format!("✗ {}: command failed", cmd),
+                    install_cmd: None,
                 }
             }
         }
         Err(_) => {
-            println!("✗ FAILED");
+            println!("✗ NOT FOUND");
             let help_msg = match cmd {
-                "Rscript" => "  Install R from https://www.r-project.org/ or:\n    macOS: brew install r\n    Ubuntu: sudo apt-get install r-base r-base-dev",
-                "python3" => "  Install Python 3 from https://www.python.org/",
-                "cargo" => "  Install Rust from https://rustup.rs/",
-                "git" => "  Install Git from https://git-scm.com/",
-                _ => "  Command not found in PATH",
+                "Rscript" => "Install R from https://www.r-project.org/",
+                "python3" => "Install Python from https://www.python.org/",
+                "node" => "Install Node.js from https://nodejs.org/",
+                "npm" => "Install Node.js from https://nodejs.org/",
+                "git" => "Install Git from https://git-scm.com/",
+                _ => "Command not found in PATH",
             };
-            println!("{help_msg}");
+            println!("  {}", help_msg);
             PrereqCheck {
                 name: cmd.to_string(),
                 passed: false,
-                message: format!("✗ {cmd}: not found"),
-            }
-        }
-    }
-}
-
-fn check_nbdctools() -> PrereqCheck {
-    print!("Checking NBDCtools package... ");
-
-    match Command::new("Rscript")
-        .args(["-e", "library(NBDCtools)"])
-        .output()
-    {
-        Ok(output) => {
-            if output.status.success() {
-                println!("✓");
-                println!("  NBDCtools is installed and accessible");
-                PrereqCheck {
-                    name: "NBDCtools".to_string(),
-                    passed: true,
-                    message: "✓ NBDCtools: installed".to_string(),
-                }
-            } else {
-                println!("✗ FAILED");
-                println!("  NBDCtools not found - contact repo maintainer for installation");
-                PrereqCheck {
-                    name: "NBDCtools".to_string(),
-                    passed: false,
-                    message: "✗ NBDCtools: not installed".to_string(),
-                }
-            }
-        }
-        Err(e) => {
-            println!("✗ FAILED");
-            println!("  Error checking NBDCtools: {e}");
-            PrereqCheck {
-                name: "NBDCtools".to_string(),
-                passed: false,
-                message: format!("✗ NBDCtools: check failed - {e}"),
+                message: format!("✗ {}: {}", cmd, help_msg),
+                install_cmd: None,
             }
         }
     }
@@ -172,134 +332,141 @@ fn check_abcd_data_path() -> PrereqCheck {
     match env::var("ABCD_DATA_PATH") {
         Ok(path) => {
             println!("✓");
-            println!("  Set to: {path}");
+            println!("  Set to: {}", path);
 
-            // Check if path exists
             if Path::new(&path).exists() {
                 println!("  Directory exists: ✓");
-
-                // Check if directory has files
-                if let Ok(entries) = std::fs::read_dir(&path) {
-                    let file_count = entries.count();
-                    if file_count > 0 {
-                        println!("  Contains {file_count} files");
-                    } else {
-                        println!("  ⚠  Directory is empty");
-                    }
-                }
-
                 PrereqCheck {
                     name: "ABCD_DATA_PATH".to_string(),
                     passed: true,
-                    message: format!("✓ ABCD_DATA_PATH: {path}"),
+                    message: format!("✓ ABCD_DATA_PATH: {}", path),
+                    install_cmd: None,
                 }
             } else {
                 println!("  ✗ Directory does not exist");
-                println!("  Update ABCD_DATA_PATH to point to your ABCD phenotype directory");
                 PrereqCheck {
                     name: "ABCD_DATA_PATH".to_string(),
                     passed: false,
-                    message: format!("✗ ABCD_DATA_PATH: directory not found - {path}"),
+                    message: format!("✗ ABCD_DATA_PATH: directory not found - {}", path),
+                    install_cmd: None,
                 }
             }
         }
         Err(_) => {
-            println!("⚠  NOT SET");
-            println!("  ABCD_DATA_PATH environment variable not set");
-            println!("  Set it with: export ABCD_DATA_PATH=/path/to/abcd/phenotype");
-            println!("  Code will fall back to default: /Users/shawes/abcd/6_0/phenotype");
+            println!("⚠ NOT SET");
+            println!("  Will use fallback path");
             PrereqCheck {
                 name: "ABCD_DATA_PATH".to_string(),
-                passed: true, // Not a hard failure - has fallback
+                passed: true, // Not a hard failure
                 message: "⚠ ABCD_DATA_PATH: not set (using fallback)".to_string(),
+                install_cmd: None,
             }
         }
     }
 }
 
 fn check_r_packages() -> Vec<PrereqCheck> {
-    println!("\nChecking R packages used in tutorials...");
+    println!("\nChecking R packages...");
 
-    // Core packages that are critical for most tutorials
     let core_packages = vec!["tidyverse", "arrow", "gtsummary", "rstatix"];
-
-    // Statistical analysis packages
-    let analysis_packages = vec![
-        "lme4",     // Linear mixed models
-        "lmerTest", // Tests for lme4
-        "lavaan",   // SEM and latent growth models
-        "geepack",  // Generalized estimating equations
-        "lcmm",     // Growth mixture models
-        "glmmTMB",  // GLMMs
-    ];
-
-    // Visualization and output packages
+    let analysis_packages = vec!["lme4", "lmerTest", "lavaan", "geepack", "lcmm", "glmmTMB"];
     let utility_packages = vec!["ggeffects", "performance", "sjPlot", "kableExtra", "gt"];
 
-    let mut checks = Vec::new();
-    let mut all_packages = Vec::new();
-    all_packages.extend(core_packages.clone());
-    all_packages.extend(analysis_packages.clone());
-    all_packages.extend(utility_packages.clone());
+    let mut all_packages: Vec<&str> = Vec::new();
+    all_packages.extend(core_packages.iter());
+    all_packages.extend(analysis_packages.iter());
+    all_packages.extend(utility_packages.iter());
 
-    println!("  Scanning for installed packages...\n");
+    let mut checks = Vec::new();
 
     for package in &all_packages {
         let check = check_r_package(package);
-
-        // Only show warnings for failed core packages
         if !check.passed && core_packages.contains(package) {
-            println!("  ⚠  {package} is missing (used by multiple tutorials)");
-        } else if !check.passed && analysis_packages.contains(package) {
-            println!("  ℹ  {package} is optional (used by specific tutorial types)");
+            println!("  ⚠ {} is missing (used by multiple tutorials)", package);
         }
-
         checks.push(check);
     }
 
     let installed = checks.iter().filter(|c| c.passed).count();
-    let missing = checks.len() - installed;
-
-    println!(
-        "\n  Summary: {}/{} packages installed",
-        installed,
-        checks.len()
-    );
-
-    if missing > 0 {
-        println!("  Missing {missing} package(s) - some tutorials may fail Stage 3");
-        println!("  Install missing packages with: install.packages(c(...))\n");
-    } else {
-        println!("  All packages available! ✓\n");
-    }
+    println!("\n  R packages: {}/{} installed", installed, checks.len());
 
     checks
 }
 
 fn check_r_package(package: &str) -> PrereqCheck {
     match Command::new("Rscript")
-        .args(["-e", &format!("library({package})")])
+        .args(["-e", &format!("library({})", package)])
         .output()
     {
         Ok(output) => {
             if output.status.success() {
                 PrereqCheck {
-                    name: format!("R:{package}"),
+                    name: format!("R:{}", package),
                     passed: true,
-                    message: format!("✓ R package: {package}"),
+                    message: format!("✓ R package: {}", package),
+                    install_cmd: None,
                 }
             } else {
                 PrereqCheck {
-                    name: format!("R:{package}"),
+                    name: format!("R:{}", package),
                     passed: false,
-                    message: format!("✗ R package: {package} not installed"),
+                    message: format!("✗ R package {} not installed", package),
+                    install_cmd: None, // R packages need manual install
                 }
             }
         }
         Err(e) => PrereqCheck {
-            name: format!("R:{package}"),
+            name: format!("R:{}", package),
             passed: false,
-            message: format!("✗ R package {package}: check failed - {e}"),
+            message: format!("✗ R package {}: check failed - {}", package, e),
+            install_cmd: None,
         },
+    }
+}
+
+fn install_prerequisite(cmd: &str, name: &str) -> bool {
+    println!("  Running: {}", cmd);
+
+    let parts: Vec<&str> = cmd.split_whitespace().collect();
+    if parts.is_empty() {
+        return false;
+    }
+
+    let status = Command::new(parts[0])
+        .args(&parts[1..])
+        .status();
+
+    match status {
+        Ok(exit_status) => {
+            if exit_status.success() {
+                true
+            } else {
+                eprintln!("  ✗ Installation failed for {}", name);
+                false
+            }
+        }
+        Err(e) => {
+            eprintln!("  ✗ Failed to run installation command: {}", e);
+            false
+        }
+    }
+}
+
+fn install_npm_deps() {
+    let status = Command::new("npm")
+        .arg("install")
+        .status();
+
+    match status {
+        Ok(exit_status) => {
+            if exit_status.success() {
+                println!("  ✓ npm dependencies installed");
+            } else {
+                println!("  ✗ npm install failed");
+            }
+        }
+        Err(e) => {
+            println!("  ✗ Failed to run npm install: {}", e);
+        }
     }
 }
