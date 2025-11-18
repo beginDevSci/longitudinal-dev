@@ -386,7 +386,8 @@ Examples:
                             type="text"
                             name="website"
                             tabindex="-1"
-                            autocomplete="off"
+                            autocomplete="new-password"
+                            aria-hidden="true"
                             style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                             prop:value=move || honeypot.get()
                             on:input=move |ev| {
