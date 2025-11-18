@@ -1,62 +1,36 @@
 # Longitudinal.dev
 
-The repo is in an early public state—expect rough edges while the launch is prepared.
+Welcome! 👋
 
-Additional helpers live under `scripts/` (see `scripts/README.md` for details on the `build/`, `deploy/`, and `dev/` subfolders).
+**Longitudinal.dev** is a community-driven, open-source resource hub for longitudinal data science. We're building a platform with tutorials, tools, code examples, and documentation to help researchers and practitioners work with longitudinal data.
 
-## Git Workflow
+## 🚧 Early Days
 
-This project uses **Git Flow** for development:
+This project is actively under development—expect new content, features, and improvements to roll out regularly. Things might shift around as we find the best ways to serve the community. Your patience and feedback are greatly appreciated!
 
-- **`main`** - Production branch. Pushes automatically deploy to GitHub Pages & Cloudflare.
-- **`dev`** - Long-running integration branch. Push here for cloud backup without deploying.
-- **Feature branches** - Short-lived branches for specific changes.
+## 🤝 Get Involved
 
-### Daily Workflow
+We believe open knowledge drives innovation and scientific progress. This platform thrives on community contributions:
 
-**Start new work:**
-```bash
-git checkout dev                    # Switch to dev
-git checkout -b feature/my-change   # Create feature branch from dev
-```
+- **Share your expertise** - Submit tutorials, tools, or research insights
+- **Suggest improvements** - Found a typo? Have an idea? Use the "Suggest changes" button on any tutorial page
+- **Join the discussion** - Connect with us on [GitHub Discussions](https://github.com/beginDevSci/longitudinal-dev/discussions) or [Discord](https://discord.gg/WXMv25rf)
 
-**Work and save:**
-```bash
-# Make changes, test locally with: make serve
-git commit -am "Description"        # Commit to feature branch
-```
+Whether you're an experienced researcher or just getting started with longitudinal analysis, your contributions help everyone learn and grow.
 
-**Integrate to dev:**
-```bash
-git checkout dev                    # Switch to dev
-git merge feature/my-change         # Merge feature
-git branch -d feature/my-change     # Delete feature branch
-git push origin dev                 # Backup to GitHub (doesn't deploy)
-```
+## 📬 Contact
 
-**Deploy to production:**
-```bash
-git checkout main                   # Switch to main
-git merge dev                       # Merge all changes from dev
-git push                            # Deploy live
-```
+Questions, suggestions, or just want to say hi?
 
-### Branch Naming Conventions
+- **Email:** support@longitudinal.dev
+- **GitHub:** [github.com/beginDevSci/longitudinal-dev](https://github.com/beginDevSci/longitudinal-dev)
+- **Discussions:** [Join the conversation](https://github.com/beginDevSci/longitudinal-dev/discussions)
+- **Discord:** [Join our community](https://discord.gg/WXMv25rf)
 
-- `feature/` - New functionality (e.g., `feature/add-search`)
-- `content/` - Tutorial/content updates (e.g., `content/update-lgcm`)
-- `fix/` - Bug fixes (e.g., `fix/mobile-layout`)
-- `experiment/` - Trying new ideas (e.g., `experiment/redesign`)
+## 🙏 Thank You
 
-### Why This Workflow?
+A huge thanks to all contributors and supporters—your involvement makes this project possible!
 
-- **`dev` branch** allows accumulating multiple changes before deploying
-- **Cloud backup** without triggering live deployment
-- **`main` stays stable** - always matches production site
-- **Feature branches** keep work organized and isolated
+---
 
-## Documentation
-
-Lightweight notes live under `docs/`:
-
-- `docs/TESTING.md` – how to run the preflight script (`CHECK_SSG=true ./scripts/dev/check.sh`).
+**For developers and contributors:** Technical documentation, build instructions, and development workflows can be found in the `docs/` directory.
