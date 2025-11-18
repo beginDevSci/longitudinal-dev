@@ -26,7 +26,7 @@ content: build test clippy
 # Build the project
 build:
 	@echo "🔨 Building project..."
-	cargo build --locked
+	cargo build --locked --lib --bin check-prereqs --bin test_tutorials --bin xtask --features ssr
 
 # Run tests with SSR feature
 test:
@@ -36,7 +36,7 @@ test:
 # Run clippy with strict warnings
 clippy:
 	@echo "📎 Running clippy..."
-	cargo clippy --locked -- -D warnings
+	cargo clippy --locked --lib --bin check-prereqs --bin test_tutorials --bin xtask --features ssr -- -D warnings
 
 # Fast JSON syntax validation with Rust validator
 validate-json:
@@ -85,7 +85,7 @@ deploy:
 
 # Bootstrap: check prerequisites and install tools
 bootstrap:
-	@./scripts/dev/bootstrap.sh
+	@cargo run --features ssr --bin check-prereqs -- --install
 
 # Watch mode: run development server with live reload
 watch:

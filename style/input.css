@@ -578,28 +578,9 @@ body {
 
   /* ========================================
      DISCUSSION PULL QUOTE
-     For highlighting key quotes in discussion sections
      ======================================== */
 
-  .discussion-pull-quote {
-    border-left: 4px solid var(--color-border-accent);
-    padding-left: var(--spacing-4);
-    margin: var(--spacing-6) 0;
-    font-style: italic;
-    font-size: 1.125rem;  /* Slightly larger than body text */
-    line-height: var(--leading-longform);
-    color: var(--color-text-secondary);
-  }
-
-  .discussion-pull-quote::before {
-    content: '"';
-    font-size: 2rem;
-    color: var(--color-text-accent);
-    font-weight: var(--font-weight-semibold);
-    line-height: 0;
-    vertical-align: -0.4em;
-    margin-right: 0.25rem;
-  }
+  /* .discussion-pull-quote removed - not used in current implementation */
 
   /* ========================================
      CARD HOVER UTILITY - Interactive Depth Effect
@@ -675,18 +656,7 @@ body {
     text-align: center;
   }
 
-  /* Optional: Auto-numbering for figures
-     Apply .figure-numbered to parent container to enable */
-  .figure-numbered {
-    counter-reset: figure;
-  }
-
-  .figure-numbered .figure-caption::before {
-    counter-increment: figure;
-    content: "Figure " counter(figure) ": ";
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-  }
+  /* Auto-numbering for figures removed - not used in current implementation */
 
   /* Pill/badge for labels and tags */
   .pill {
@@ -731,30 +701,8 @@ body {
      LAYOUT SPACING UTILITIES
      ======================================== */
 
-  /* Vertical section padding */
-  .section-padding {
-    padding-top: var(--spacing-12);
-    padding-bottom: var(--spacing-12);
-  }
-
-  .section-padding-sm {
-    padding-top: var(--spacing-6);
-    padding-bottom: var(--spacing-6);
-  }
-
-  .section-padding-xs {
-    padding-top: var(--spacing-4);
-    padding-bottom: var(--spacing-4);
-  }
-
-  /* Component gap spacing */
-  .gap-section {
-    gap: var(--spacing-8);
-  }
-
-  .gap-component {
-    gap: var(--spacing-6);
-  }
+  /* Spacing utilities removed - use Tailwind's built-in utilities instead
+     (e.g., py-12, py-6, gap-8, gap-6) */
 
   /* Button/control base */
   .control {
@@ -971,18 +919,7 @@ body {
     font-weight: var(--font-weight-medium) !important;
   }
 
-  /* Table utilities (legacy - kept for compatibility) */
-  .border-table {
-    border-color: var(--color-border-accent);
-  }
-
-  .border-table-row {
-    border-color: var(--color-border-subtle);
-  }
-
-  .table-cell {
-    padding: var(--spacing-2) var(--spacing-4);
-  }
+  /* Legacy table utilities removed - not used in current implementation */
 
   /* Code block styling with semantic tokens */
   pre {
@@ -1012,27 +949,8 @@ body {
      ICON & BADGE COMPONENTS
      ======================================== */
 
-  /* Circular icon container */
-  .icon-circle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 2.5rem; /* h-10 */
-    width: 2.5rem; /* w-10 */
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border-default);
-  }
-
-  /* Small badge/label (similar to .pill but smaller) */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border-default);
-    padding: var(--spacing-1) var(--spacing-3);
-    font-size: 0.75rem; /* text-xs */
-    color: var(--color-text-muted);
-  }
+  /* NOTE: .icon-circle is defined earlier in the components layer (line ~632)
+     This duplicate section has been removed to eliminate conflicting definitions */
 
   /* ========================================
      SEMANTIC TEXT UTILITIES
@@ -1096,12 +1014,9 @@ body {
 
   /* ========================================
      HERO GRADIENT
-     Theme-aware gradient background for landing pages
      ======================================== */
 
-  .hero-gradient {
-    background: linear-gradient(to bottom right, var(--color-bg-surface), var(--color-bg-subtle), var(--color-bg-accent-subtle));
-  }
+  /* .hero-gradient removed - landing page uses fixed Tailwind gradient */
 
   /* ========================================
      TYPOGRAPHY CLASSES
@@ -1186,25 +1101,7 @@ body {
     border-radius: var(--radius-md);
   }
 
-  /* Hover elevate - Subtle lift effect with shadow increase */
-  .hover-elevate {
-    transition: transform 180ms ease, box-shadow 180ms ease;
-  }
-
-  .hover-elevate:hover,
-  .hover-elevate:focus-within {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Respect reduced-motion preference */
-  @media (prefers-reduced-motion: reduce) {
-    .hover-elevate,
-    .hover-elevate:hover,
-    .hover-elevate:focus-within {
-      transform: none;
-    }
-  }
+  /* Hover elevate effect removed - use .card-hover instead */
 
   /* ========================================
      ASIDE/TABLE OF CONTENTS COMPONENTS
@@ -1984,66 +1881,10 @@ body {
   }
 
   /* ========================================
-     DATA ACCESS TABS - CSS-ONLY
-     Radio button technique for interactive tabs
+     DATA ACCESS TABS - Legacy CSS-only system removed
+     Current implementation uses native HTML5 <details>/<summary> elements
+     See: src/sections/data_access_section.rs
      ======================================== */
-
-  /* Hide radio inputs (they're siblings of all other elements) */
-  .da-tab-radio {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Tab label styling */
-  .da-tab-label {
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }
-
-  .da-tab-label:hover {
-    opacity: 0.8;
-  }
-
-  /* Active tab styling - when corresponding radio is checked */
-  /* Using general sibling combinator since radios are siblings of the tab container */
-  #da-method-0:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-0"],
-  #da-method-1:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-1"],
-  #da-method-2:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-2"],
-  #da-method-3:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-3"],
-  #da-method-4:checked ~ [data-testid="da:tabs"] .da-tab-label[for="da-method-4"] {
-    background: linear-gradient(to right, var(--color-accent-600), var(--color-accent-500));
-    color: #ffffff;
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Hide all tab panels by default */
-  .da-tab-panel {
-    display: none;
-  }
-
-  /* Show panel when corresponding radio is checked */
-  #da-method-0:checked ~ #da-panel-0,
-  #da-method-1:checked ~ #da-panel-1,
-  #da-method-2:checked ~ #da-panel-2,
-  #da-method-3:checked ~ #da-panel-3,
-  #da-method-4:checked ~ #da-panel-4 {
-    display: block;
-    animation: fadeIn 0.2s ease-in;
-  }
-
-  /* Smooth fade-in for tab content */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
   /* ========================================
      COLLAPSIBLE CODE BLOCKS
@@ -2297,14 +2138,7 @@ body {
     color: #ffffff;
   }
 
-  /* Data Access tab panel visibility (CSS-only tabs)
-     Note: Complex :has() selectors may show Tailwind optimizer warnings
-     These are cosmetic - the CSS works correctly */
-  [class~="[&:has(~#da-tab-cli:checked)]:block"]:has(~#da-tab-cli:checked) { display: block; }
-  [class~="[&:has(~#da-tab-api:checked)]:block"]:has(~#da-tab-api:checked) { display: block; }
-  [class~="[&:has(~#da-tab-files:checked)]:block"]:has(~#da-tab-files:checked) { display: block; }
-  [class~="[&:has(~#da-tab-basics:checked)]:block"]:has(~#da-tab-basics:checked) { display: block; }
-  [class~="[&:has(~#da-tab-limits:checked)]:block"]:has(~#da-tab-limits:checked) { display: block; }
+  /* Legacy Data Access tab selectors removed - unused in current implementation */
 
   /* ========================================
      Output Images - Placeholder Styling
@@ -2335,16 +2169,8 @@ body {
     display: block; /* Center the image */
   }
 
-  /* Make tables expand to fill their container */
-  .card table {
-    width: 100% !important; /* Force tables to fill container width */
-    font-size: 0.875rem; /* 14px - slightly smaller for readability */
-  }
-
-  /* Ensure table headers remain readable */
-  .card table thead th {
-    font-size: 0.875rem; /* 14px - match body text */
-  }
+  /* Table styling consolidated with main .card table rules above (line ~809)
+     Duplicate width declaration removed to avoid redundancy */
 
   /* ========================================
      DATA ACCESS CONTENT STYLING

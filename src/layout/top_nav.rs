@@ -13,9 +13,7 @@ pub fn TopNav(
 ) -> impl IntoView {
     let home_href = base_path::base_path();
     let tutorials_href = base_path::join("tutorials/");
-    let posts_href = base_path::join("posts/");
     let about_href = base_path::join("about/");
-    let writer_href = base_path::join("writer/");
 
     if fixed_colors {
         // Landing page: fixed colors (not theme-aware)
@@ -29,9 +27,8 @@ pub fn TopNav(
                     <nav class="flex items-center gap-1 text-sm font-medium">
                         <a href=home_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Home"</a>
                         <a href=tutorials_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Tutorials"</a>
-                        <a href=posts_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Posts"</a>
                         <a href=about_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"About"</a>
-                        <a href=writer_href class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">"Writer"</a>
+                        <span class="rounded-lg px-4 py-2 text-slate-500 cursor-not-allowed" title="Coming soon">"Writer"</span>
                     </nav>
                 </div>
             </header>
@@ -48,9 +45,8 @@ pub fn TopNav(
                     <nav class="flex items-center gap-1 text-sm font-medium">
                         <a href=home_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Home"</a>
                         <a href=tutorials_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Tutorials"</a>
-                        <a href=posts_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Posts"</a>
                         <a href=about_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"About"</a>
-                        <a href=writer_href class="rounded-lg px-4 py-2 text-secondary hover:text-primary hover:bg-subtle transition-all duration-200">"Writer"</a>
+                        <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-50" title="Coming soon">"Writer"</span>
                     </nav>
                 </div>
             </header>
