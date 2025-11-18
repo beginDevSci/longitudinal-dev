@@ -18,6 +18,6 @@ preview_id = "93e61827bd9143e394acd70618a61480"  # Replace with preview KV names
 [vars]
 GITHUB_OWNER = "beginDevSci"
 GITHUB_REPO = "longitudinal-dev"
-ALLOWED_ORIGIN = "https://swhawes.github.io"
+ALLOWED_ORIGIN = "https://begindevsci.github.io"
 MAX_SIZE_BYTES = 51200  # 50 KB
 RATE_LIMIT_PER_HOUR = 10
