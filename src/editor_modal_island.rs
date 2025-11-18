@@ -14,7 +14,9 @@ use leptos::prelude::*;
 pub fn EditorModalIsland(
     slug: String,
     page_url: String,
+    #[cfg_attr(not(target_arch = "wasm32"), allow(unused_variables))]
     prefill_markdown: String,
+    #[cfg_attr(not(target_arch = "wasm32"), allow(unused_variables))]
     baseline_hash: String,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = signal(false);
@@ -148,8 +150,11 @@ pub fn EditorModalIsland(
     let baseline_hash_for_action = baseline_hash.clone();
 
     let submit_action = Action::new(move |_: &()| {
+        #[cfg(target_arch = "wasm32")]
         let slug_submit = slug_for_action.clone();
+        #[cfg(target_arch = "wasm32")]
         let page_url_submit = page_url_for_action.clone();
+        #[cfg(target_arch = "wasm32")]
         let baseline_hash_submit = baseline_hash_for_action.clone();
         let edits_val = edits.get().trim().to_string();
 
