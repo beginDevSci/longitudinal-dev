@@ -1556,6 +1556,7 @@ dependencies = [
  "longitudinal_parser",
  "longitudinal_writer",
  "once_cell",
+ "pulldown-cmark",
  "regex",
  "serde",
  "serde_json",
