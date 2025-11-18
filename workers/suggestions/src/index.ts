@@ -10,7 +10,7 @@ interface Env {
   GITHUB_TOKEN: string;
   GITHUB_OWNER: string;
   GITHUB_REPO: string;
-  ALLOWED_ORIGIN: string;
+  ALLOWED_ORIGINS: string; // Comma-separated list of allowed origins
   MAX_SIZE_BYTES: string; // Cloudflare injects env vars as strings
   RATE_LIMIT_PER_HOUR: string; // Cloudflare injects env vars as strings
 }
@@ -28,14 +28,16 @@ interface SuggestionPayload {
 /**
  * CORS headers for preflight and responses
  */
-function getCorsHeaders(origin: string, allowedOrigin: string): Record<string, string> {
+function getCorsHeaders(origin: string, allowedOrigins: string): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
   };
 
-  if (origin === allowedOrigin) {
+  // Check if origin is in the comma-separated list of allowed origins
+  const allowedOriginsList = allowedOrigins.split(',').map(o => o.trim());
+  if (allowedOriginsList.includes(origin)) {
     headers['Access-Control-Allow-Origin'] = origin;
   }
 
@@ -206,7 +208,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
-    const corsHeaders = getCorsHeaders(origin, env.ALLOWED_ORIGIN);
+    const corsHeaders = getCorsHeaders(origin, env.ALLOWED_ORIGINS);
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
@@ -218,8 +220,9 @@ export default {
       return errorResponse('Not found', 404, corsHeaders);
     }
 
-    // Verify origin
-    if (origin !== env.ALLOWED_ORIGIN) {
+    // Verify origin is in allowed list
+    const allowedOriginsList = env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+    if (!allowedOriginsList.includes(origin)) {
       return errorResponse('Origin not allowed', 403, corsHeaders);
     }
 
