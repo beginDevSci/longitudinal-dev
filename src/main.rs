@@ -11,7 +11,6 @@ use longitudinal_dev::posts::posts;
 use longitudinal_dev::tutorial_catalog::{TutorialCatalog, TutorialData};
 use longitudinal_writer::WriterApp;
 use pages::about::AboutPage;
-use pulldown_cmark::{html, Options, Parser};
 use sha2::{Digest, Sha256};
 use std::fs::{create_dir_all, read_to_string, write};
 use std::path::PathBuf;
@@ -145,25 +144,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for post in all_posts.into_iter() {
         let slug = post.slug.to_string(); // capture before moving into the view
 
-        // Read the original markdown file and render it to HTML for prefill
+        // Read the original markdown file for prefill
         let markdown_path = PathBuf::from("content/tutorials").join(format!("{}.md", slug));
         let (prefill_markdown, baseline_hash) = if markdown_path.exists() {
             match read_to_string(&markdown_path) {
                 Ok(markdown) => {
-                    // Render markdown to HTML with tables and strikethrough enabled
-                    let mut opts = Options::empty();
-                    opts.insert(Options::ENABLE_TABLES);
-                    opts.insert(Options::ENABLE_STRIKETHROUGH);
-                    let parser = Parser::new_ext(&markdown, opts);
-                    let mut rendered = String::new();
-                    html::push_html(&mut rendered, parser);
-
-                    // Generate SHA-256 hash of the rendered HTML content
+                    // Generate SHA-256 hash of the raw markdown content
                     let mut hasher = Sha256::new();
-                    hasher.update(rendered.as_bytes());
+                    hasher.update(markdown.as_bytes());
                     let hash = format!("{:x}", hasher.finalize());
 
-                    (rendered, hash)
+                    // Pass raw markdown for user-friendly editing
+                    (markdown, hash)
                 }
                 Err(e) => {
                     eprintln!("Warning: Failed to read {}: {}", markdown_path.display(), e);

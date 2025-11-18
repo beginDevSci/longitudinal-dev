@@ -74,26 +74,26 @@ All components wired with necessary props:
 ---
 
 ### Step 2: Prefill Generation During SSG ✅
-**Commits**: `aba4186`, `c526579`
+**Commits**: `aba4186`, `c526579`, Updated
 
-**Implementation** (`src/main.rs:14-16, 148-176`):
-- Added dependencies: `sha2`, `pulldown-cmark`
-- Reads markdown from `content/tutorials/{slug}.md`
-- Renders markdown to HTML using pulldown-cmark
-  - Options: `ENABLE_TABLES`, `ENABLE_STRIKETHROUGH`
-- Generates SHA-256 hash of rendered HTML
-- Passes both to PostLayout during SSG
+**Implementation** (`src/main.rs:14-16, 148-169`):
+- Added dependency: `sha2`
+- Reads raw markdown from `content/tutorials/{slug}.md`
+- Generates SHA-256 hash of raw markdown content
+- Passes markdown and hash to PostLayout during SSG
+- **Changed**: Now uses raw markdown instead of rendered HTML for better editing UX
 
 **Key Files**:
-- `Cargo.toml:52-53, 109-111` - Dependencies added
-- `src/main.rs:148-176` - SSG generation loop
+- `Cargo.toml:52, 115` - SHA-256 dependency
+- `src/main.rs:148-169` - SSG generation loop (reads markdown, hashes it)
 - `src/lib.rs:43-52` - App component hydration fallback
+- `src/editor_modal_island.rs:73` - Status message updated to "Showing page markdown"
 
-**Verification**:
-```bash
-# Hash of gee.md rendered content:
-# 5551e2e30ace6706251b1119083489c5dd609d79c5066cdc118bc0c28c1bf002
-```
+**Rationale for Markdown**:
+- Users can edit in familiar markdown syntax
+- Easier to see structure and make changes
+- Baseline hash tracks markdown content changes
+- More intuitive than editing rendered HTML
 
 ---
 
@@ -109,7 +109,7 @@ All components wired with necessary props:
 **File**: `src/edit_page_button.rs:17-61`
 
 #### Step 4: Modal UI Fields
-- ✅ **Edits textarea** (required) - **NOW PREFILLED** with rendered HTML
+- ✅ **Edits textarea** (required) - **NOW PREFILLED** with raw markdown
 - ✅ Notes textarea (optional)
 - ✅ Contact input (optional)
 - ✅ Honeypot field "website" (hidden, must be empty)
@@ -118,8 +118,8 @@ All components wired with necessary props:
 - ✅ Submit disabled when edits empty
 - ✅ Prefill behavior:
   - If localStorage draft exists → use draft
-  - Else → use prefill_markdown (rendered HTML from SSG)
-  - Status message shows which source
+  - Else → use prefill_markdown (raw markdown from SSG)
+  - Status message shows which source ("Showing page markdown - edit as needed")
 
 **File**: `src/editor_modal_island.rs:53-88, 290-364`
 
@@ -367,14 +367,15 @@ let request = leptos::web_sys::Request::new_with_str_and_init(
 
 ## 🎯 Design Decisions Locked In
 
-1. **Prefill Content**: Rendered HTML (not raw markdown)
-2. **Storage**: `suggestions/{slug}/` or GitHub Issues
-3. **Rate Limits**: 50 KB max, 10 submissions/IP/hour
-4. **Honeypot**: Field named `website`, must be empty
-5. **No Email Notifications**: GitHub issues/files only
-6. **GitHub Edit**: `https://github.com/swhawes/leptos-test/edit/main/content/tutorials/{slug}.md`
-7. **Auto-close**: Modal closes 2s after success
-8. **Prefill Priority**: localStorage draft > prefill_markdown
+1. **Prefill Content**: Raw markdown (for user-friendly editing)
+2. **Baseline Hash**: SHA-256 of raw markdown content
+3. **Storage**: GitHub Issues (recommended) or `suggestions/{slug}/` branch
+4. **Rate Limits**: 50 KB max, 10 submissions/IP/hour
+5. **Honeypot**: Field named `website`, must be empty
+6. **No Email Notifications**: GitHub issues/files only
+7. **GitHub Edit**: `https://github.com/swhawes/leptos-test/edit/main/content/tutorials/{slug}.md`
+8. **Auto-close**: Modal closes 2s after success
+9. **Prefill Priority**: localStorage draft > prefill_markdown
 
 ---
 

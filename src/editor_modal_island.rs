@@ -70,7 +70,7 @@ pub fn EditorModalIsland(
                         } else {
                             // Use prefill markdown if no saved draft
                             set_edits.set(prefill_clone.clone());
-                            set_status_message.set("Showing rendered page content - edit as needed".to_string());
+                            set_status_message.set("Showing page markdown - edit as needed".to_string());
                         }
 
                         // Load notes
