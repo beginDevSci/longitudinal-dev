@@ -424,7 +424,7 @@ Examples:
                             </button>
                             <Show when=move || submission_state.get() != "success">
                                 <button
-                                    class="px-6 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+                                    class="px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg transition-colors shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 dark:disabled:hover:bg-blue-500"
                                     on:click=move |_| { let _ = submit_action.dispatch(()); }
                                     disabled=submit_disabled
                                 >
