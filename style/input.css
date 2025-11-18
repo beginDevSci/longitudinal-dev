@@ -2318,18 +2318,17 @@ body {
   }
 
   /* ========================================
-     WORK IN PROGRESS BADGE - Collapsible notice
+     WORK IN PROGRESS BADGE - Tooltip on hover
      ======================================== */
 
-  /* Container for badge and expanded details */
+  /* Container */
   .wip-badge-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: inline-flex;
   }
 
-  /* Badge button - matches hero-pill styling */
+  /* Badge with tooltip - purple/pink color scheme */
   .wip-badge {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -2339,37 +2338,37 @@ body {
     font-weight: 600;
     letter-spacing: 0.025em;
     transition: all 0.2s;
-    cursor: pointer;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    background-color: rgba(59, 130, 246, 0.1);
-    color: rgb(37, 99, 235);
+    cursor: help;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    background-color: rgba(168, 85, 247, 0.1);
+    color: rgb(126, 34, 206);
   }
 
   .wip-badge:hover {
-    background-color: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.4);
+    background-color: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.4);
   }
 
   [data-theme="dark"] .wip-badge {
-    border-color: rgba(96, 165, 250, 0.3);
-    background-color: rgba(96, 165, 250, 0.1);
-    color: rgb(147, 197, 253);
+    border-color: rgba(192, 132, 252, 0.3);
+    background-color: rgba(192, 132, 252, 0.1);
+    color: rgb(216, 180, 254);
   }
 
   [data-theme="dark"] .wip-badge:hover {
-    background-color: rgba(96, 165, 250, 0.15);
-    border-color: rgba(96, 165, 250, 0.4);
+    background-color: rgba(192, 132, 252, 0.15);
+    border-color: rgba(192, 132, 252, 0.4);
   }
 
   [data-theme="dracula"] .wip-badge {
-    border-color: rgba(139, 233, 253, 0.3);
-    background-color: rgba(139, 233, 253, 0.1);
-    color: rgb(139, 233, 253);
+    border-color: rgba(189, 147, 249, 0.3);
+    background-color: rgba(189, 147, 249, 0.1);
+    color: rgb(189, 147, 249);
   }
 
   [data-theme="dracula"] .wip-badge:hover {
-    background-color: rgba(139, 233, 253, 0.15);
-    border-color: rgba(139, 233, 253, 0.4);
+    background-color: rgba(189, 147, 249, 0.15);
+    border-color: rgba(189, 147, 249, 0.4);
   }
 
   /* Info icon */
@@ -2384,62 +2383,84 @@ body {
     white-space: nowrap;
   }
 
-  /* Chevron icon */
-  .wip-badge-chevron {
-    width: 0.875rem;
-    height: 0.875rem;
-    flex-shrink: 0;
-    transition: transform 0.2s;
-  }
-
-  .wip-badge-chevron--expanded {
-    transform: rotate(180deg);
-  }
-
-  /* Expanded details panel */
-  .wip-badge-details {
-    margin-top: 0.5rem;
-    padding: 0.875rem 1rem;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    background-color: rgba(59, 130, 246, 0.05);
-    animation: slideDown 0.2s ease-out;
-  }
-
-  [data-theme="dark"] .wip-badge-details {
-    border-color: rgba(96, 165, 250, 0.2);
-    background-color: rgba(96, 165, 250, 0.05);
-  }
-
-  [data-theme="dracula"] .wip-badge-details {
-    border-color: rgba(139, 233, 253, 0.2);
-    background-color: rgba(139, 233, 253, 0.05);
-  }
-
-  /* Details text */
-  .wip-badge-text {
+  /* Tooltip - hidden by default */
+  .wip-badge-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-0.5rem);
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: rgb(17, 24, 39);
+    color: rgb(243, 244, 246);
     font-size: 0.875rem;
+    font-weight: 400;
     line-height: 1.5;
-    color: rgb(71, 85, 105);
+    white-space: normal;
+    width: max-content;
+    max-width: 20rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 50;
   }
 
-  [data-theme="dark"] .wip-badge-text {
-    color: rgb(203, 213, 225);
+  /* Tooltip arrow */
+  .wip-badge-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 0.375rem solid transparent;
+    border-top-color: rgb(17, 24, 39);
   }
 
-  [data-theme="dracula"] .wip-badge-text {
+  /* Show tooltip on hover */
+  .wip-badge:hover .wip-badge-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Dark mode tooltip */
+  [data-theme="dark"] .wip-badge-tooltip {
+    background-color: rgb(31, 41, 55);
+    color: rgb(229, 231, 235);
+  }
+
+  [data-theme="dark"] .wip-badge-tooltip::after {
+    border-top-color: rgb(31, 41, 55);
+  }
+
+  /* Dracula theme tooltip */
+  [data-theme="dracula"] .wip-badge-tooltip {
+    background-color: rgb(40, 42, 54);
     color: rgb(248, 248, 242);
   }
 
-  /* Slide down animation */
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-0.5rem);
+  [data-theme="dracula"] .wip-badge-tooltip::after {
+    border-top-color: rgb(40, 42, 54);
+  }
+
+  /* Mobile: Adjust tooltip positioning and width */
+  @media (max-width: 640px) {
+    .wip-badge-tooltip {
+      max-width: 16rem;
+      left: 0;
+      right: 0;
+      transform: translateX(0) translateY(-0.5rem);
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    .wip-badge:hover .wip-badge-tooltip {
+      transform: translateX(0) translateY(0);
+    }
+
+    .wip-badge-tooltip::after {
+      left: 1.5rem;
     }
   }
 }
