@@ -109,7 +109,7 @@ pub fn ThemeToggle() -> impl IntoView {
         <div class="relative inline-block text-left">
             <button
                 type="button"
-                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-default bg-surface hover:bg-subtle transition-all duration-200"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-default/60 bg-transparent hover:text-primary hover:bg-subtle transition-all duration-200"
                 on:click=move |_| set_menu_open.update(|open| *open = !*open)
                 aria-haspopup="true"
                 aria-expanded=move || menu_open.get()
@@ -117,7 +117,7 @@ pub fn ThemeToggle() -> impl IntoView {
                 <span class="text-base">{move || theme_icon(&current_theme.get())}</span>
                 <span class="text-secondary">{move || theme_label(&current_theme.get())}</span>
                 <svg
-                    class="w-4 h-4 transition-transform duration-200"
+                    class="w-4 h-4 text-secondary transition-transform duration-200"
                     class:rotate-180=move || menu_open.get()
                     fill="none"
                     stroke="currentColor"
