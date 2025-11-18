@@ -9,6 +9,7 @@ mod edit_page_button;
 mod editor_modal_island;
 mod section_container;
 mod theme_toggle;
+mod work_in_progress_badge;
 
 // New architecture modules
 pub mod layout;
@@ -29,6 +30,7 @@ pub use editor_modal_island::EditorModalIsland;
 pub use layout::{PostLayout, SiteLayout};
 pub use section_container::SectionContainer;
 pub use theme_toggle::ThemeToggle;
+pub use work_in_progress_badge::WorkInProgressBadge;
 
 /// The application root: render the fixed-layout post (legacy single-page mode)
 ///

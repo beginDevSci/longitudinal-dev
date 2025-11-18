@@ -5,6 +5,7 @@ use crate::layout::{CodeDownloadData, LeftNav, NavCategory, TableOfContents, Toc
 use crate::models::post::Post;
 use crate::sections::*;
 use crate::EditorModalIsland;
+use crate::WorkInProgressBadge;
 
 /// Extract code blocks from a post for downloads.
 ///
@@ -253,19 +254,14 @@ pub fn PostLayout(
 
                                                 pills.into_iter().collect_view()
                                             }}
+
+                                            // Work-in-progress notice badge (collapsible)
+                                            <WorkInProgressBadge/>
                                         </div>
                                     </div>
                                 }
                             })}
                         </div>
-                    </div>
-
-                    // Draft banner shown on every tutorial page until content is finalized
-                    <div class="draft-banner">
-                        <span class="draft-banner-pulse" aria-hidden="true"></span>
-                        <p class="leading-relaxed whitespace-nowrap">
-                            "Examples are a work in progress—please share feedback if you spot gaps."
-                        </p>
                     </div>
                 </header>
 
