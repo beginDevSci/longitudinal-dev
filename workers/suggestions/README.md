@@ -354,9 +354,9 @@ npm run tail
 | Variable | Type | Description | Example |
 |----------|------|-------------|---------|
 | `GITHUB_TOKEN` | Secret | GitHub PAT with repo scope | `ghp_xxxx...` |
-| `GITHUB_OWNER` | Var | GitHub username/org | `swhawes` |
-| `GITHUB_REPO` | Var | Repository name | `leptos-test` |
-| `ALLOWED_ORIGIN` | Var | Allowed request origin | `https://swhawes.github.io` |
+| `GITHUB_OWNER` | Var | GitHub username/org | `beginDevSci` |
+| `GITHUB_REPO` | Var | Repository name | `longitudinal-dev` |
+| `ALLOWED_ORIGINS` | Var | Allowed request origins (comma-separated) | `https://longitudinal.dev,https://begindevsci.github.io` |
 | `MAX_SIZE_BYTES` | Var | Max request size (number) | `51200` (50 KB) |
 | `RATE_LIMIT_PER_HOUR` | Var | Submissions per IP/hour (number) | `10` |
 
