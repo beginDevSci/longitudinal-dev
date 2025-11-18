@@ -83,7 +83,11 @@ fn extract_code_downloads(post: &Post) -> CodeDownloadData {
 /// The six SectionContainer calls are hard-coded here. The typed models
 /// provide compile-time safety for content shape.
 #[component]
-pub fn PostLayout(post: Post) -> impl IntoView {
+pub fn PostLayout(
+    post: Post,
+    #[prop(into)] prefill_markdown: String,
+    #[prop(into)] baseline_hash: String,
+) -> impl IntoView {
     // Extract code for downloads before moving post fields
     let code_downloads = extract_code_downloads(&post);
 
@@ -96,11 +100,6 @@ pub fn PostLayout(post: Post) -> impl IntoView {
 
     // Generate page URL for suggestions
     let page_url = format!("https://swhawes.github.io/longitudinal-dev/posts/{}/", current_slug);
-
-    // TODO: In next step, generate actual prefill_markdown and baseline_hash during SSG
-    // For now, use placeholders
-    let prefill_markdown = String::from("# Placeholder\n\nMarkdown content will be generated during SSG.");
-    let baseline_hash = String::from("placeholder_hash");
 
     // Move fields out before view! to own the data
     let title = post.title;

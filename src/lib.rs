@@ -39,7 +39,17 @@ pub fn App() -> impl IntoView {
         .into_iter()
         .next()
         .expect("at least one post required");
-    view! { <PostLayout post=first_post/> }
+
+    // Note: This App component is used for hydration only.
+    // In SSG mode, prefill_markdown and baseline_hash are provided by main.rs.
+    // For hydration, we use empty strings as these values are embedded in the HTML.
+    view! {
+        <PostLayout
+            post=first_post
+            prefill_markdown=""
+            baseline_hash=""
+        />
+    }
 }
 
 // ---- Client entry (WASM) ----

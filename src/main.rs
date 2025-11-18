@@ -11,7 +11,8 @@ use longitudinal_dev::posts::posts;
 use longitudinal_dev::tutorial_catalog::{TutorialCatalog, TutorialData};
 use longitudinal_writer::WriterApp;
 use pages::about::AboutPage;
-use std::fs::{create_dir_all, write};
+use sha2::{Digest, Sha256};
+use std::fs::{create_dir_all, read_to_string, write};
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -142,9 +143,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 4. Generate one page per post at /posts/<slug>/index.html
     for post in all_posts.into_iter() {
         let slug = post.slug.to_string(); // capture before moving into the view
+
+        // Read the original markdown file for prefill
+        let markdown_path = PathBuf::from("content/tutorials").join(format!("{}.md", slug));
+        let (prefill_markdown, baseline_hash) = if markdown_path.exists() {
+            match read_to_string(&markdown_path) {
+                Ok(content) => {
+                    // Generate SHA-256 hash of the markdown content
+                    let mut hasher = Sha256::new();
+                    hasher.update(content.as_bytes());
+                    let hash = format!("{:x}", hasher.finalize());
+                    (content, hash)
+                }
+                Err(e) => {
+                    eprintln!("Warning: Failed to read {}: {}", markdown_path.display(), e);
+                    (String::new(), String::new())
+                }
+            }
+        } else {
+            eprintln!("Warning: Markdown file not found: {}", markdown_path.display());
+            (String::new(), String::new())
+        };
+
         let html = view! {
             <SiteLayout options=opts.clone()>
-                <PostLayout post/>
+                <PostLayout post prefill_markdown baseline_hash/>
             </SiteLayout>
         }
         .to_html();
