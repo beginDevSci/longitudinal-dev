@@ -2386,10 +2386,9 @@ body {
   /* Tooltip - hidden by default */
   .wip-badge-tooltip {
     position: absolute;
-    bottom: 100%;
+    bottom: calc(100% + 0.5rem);
     left: 50%;
-    transform: translateX(-50%) translateY(-0.5rem);
-    margin-bottom: 0.5rem;
+    transform: translateX(-50%);
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     background-color: rgb(17, 24, 39);
@@ -2400,12 +2399,12 @@ body {
     white-space: normal;
     width: max-content;
     max-width: 20rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+    transition: opacity 0.25s ease-in-out, visibility 0.25s ease-in-out;
     pointer-events: none;
-    z-index: 50;
+    z-index: 9999;
   }
 
   /* Tooltip arrow */
@@ -2423,7 +2422,6 @@ body {
   .wip-badge:hover .wip-badge-tooltip {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(0);
   }
 
   /* Dark mode tooltip */
@@ -2450,17 +2448,8 @@ body {
   @media (max-width: 640px) {
     .wip-badge-tooltip {
       max-width: 16rem;
-      left: 0;
-      right: 0;
-      transform: translateX(0) translateY(-0.5rem);
-    }
-
-    .wip-badge:hover .wip-badge-tooltip {
-      transform: translateX(0) translateY(0);
-    }
-
-    .wip-badge-tooltip::after {
-      left: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 }
