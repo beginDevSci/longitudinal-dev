@@ -9,15 +9,15 @@ compatibility_date = "2024-01-01"
 # Copy the IDs from the output and replace the placeholders below
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "YOUR_KV_NAMESPACE_ID"              # Replace with production KV namespace ID
-preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"  # Replace with preview KV namespace ID
+id = "2f22ef4c53424abc9331e18a56b8a108"              # Replace with production KV namespace ID
+preview_id = "93e61827bd9143e394acd70618a61480"  # Replace with preview KV namespace ID
 
 # Secrets (set via: wrangler secret put GITHUB_TOKEN)
 # GITHUB_TOKEN - GitHub Personal Access Token with repo scope
 
 [vars]
-GITHUB_OWNER = "swhawes"
-GITHUB_REPO = "leptos-test"
+GITHUB_OWNER = "beginDevSci"
+GITHUB_REPO = "longitudinal-dev"
 ALLOWED_ORIGIN = "https://swhawes.github.io"
 MAX_SIZE_BYTES = 51200  # 50 KB
 RATE_LIMIT_PER_HOUR = 10

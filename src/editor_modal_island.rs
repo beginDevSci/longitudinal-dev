@@ -207,7 +207,10 @@ pub fn EditorModalIsland(
                     let body_str = JsValue::from_str(&payload.to_string());
                     opts.set_body(&body_str);
 
-                    let request = leptos::web_sys::Request::new_with_str_and_init("/api/suggestions", &opts)?;
+                    let request = leptos::web_sys::Request::new_with_str_and_init(
+                        "https://suggestions-api.swh004.workers.dev/api/suggestions",
+                        &opts
+                    )?;
 
                     let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
                     let resp: leptos::web_sys::Response = resp_value.dyn_into()?;
