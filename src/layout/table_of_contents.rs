@@ -39,6 +39,7 @@ pub fn TableOfContents(
     toc_items: Vec<TocItem>,
     #[prop(optional)] download_data: Option<CodeDownloadData>,
     #[prop(optional)] repo_url: Option<String>,
+    slug: String,
 ) -> impl IntoView {
     let download_data = download_data.unwrap_or_default();
     let repo_url = repo_url.unwrap_or_default();
@@ -107,7 +108,7 @@ pub fn TableOfContents(
                                     view! {
                                         <>
                                             <li>
-                                                <EditPageButton/>
+                                                <EditPageButton slug=slug.clone()/>
                                             </li>
                                             <li>
                                                 <button

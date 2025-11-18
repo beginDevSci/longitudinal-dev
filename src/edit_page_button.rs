@@ -4,8 +4,15 @@ use leptos::prelude::*;
 ///
 /// This is a separate island from the modal so it can be rendered
 /// in the aside while the modal appears at the page level.
+///
+/// Props:
+/// - slug: Tutorial slug for the GitHub edit link
 #[island]
-pub fn EditPageButton() -> impl IntoView {
+pub fn EditPageButton(
+    slug: String,
+) -> impl IntoView {
+    let github_edit_url = format!("https://github.com/swhawes/leptos-test/edit/main/content/tutorials/{}.md", slug);
+
     view! {
         <button
             class="aside-action w-full text-left"

@@ -4,10 +4,23 @@ use leptos::prelude::*;
 ///
 /// Listens for "open-editor-modal" custom event from EditPageButton.
 /// Renders with fixed positioning at the document root level for proper centering.
+///
+/// Props:
+/// - slug: Tutorial slug for identification
+/// - page_url: Full URL of the page being edited
+/// - prefill_markdown: Rendered markdown content to prefill the editor
+/// - baseline_hash: Hash of the prefilled content for change detection
 #[island]
-pub fn EditorModalIsland() -> impl IntoView {
+pub fn EditorModalIsland(
+    slug: String,
+    page_url: String,
+    prefill_markdown: String,
+    baseline_hash: String,
+) -> impl IntoView {
     let (show_modal, set_show_modal) = signal(false);
     let (content, set_content) = signal(String::new());
+    let (notes, set_notes) = signal(String::new());
+    let (contact, set_contact) = signal(String::new());
     let (status, set_status) = signal(String::from("Ready"));
 
     // Listen for custom event to open modal
@@ -34,21 +47,34 @@ pub fn EditorModalIsland() -> impl IntoView {
         });
     }
 
-    // Load from localStorage when modal opens
+    // Load from localStorage or prefill when modal opens
+    let prefill = prefill_markdown.clone();
     #[cfg(target_arch = "wasm32")]
     {
         Effect::new(move |_| {
             if show_modal.get() {
                 if let Some(win) = web_sys::window() {
                     if let Ok(Some(storage)) = win.local_storage() {
+                        // Try to load from localStorage first (for draft recovery)
                         if let Ok(Some(saved)) = storage.get_item("blog_editor_content") {
                             set_content.set(saved);
                             set_status.set("Loaded from auto-save".to_string());
+                            return;
                         }
                     }
                 }
+                // Otherwise prefill with the rendered markdown
+                set_content.set(prefill.clone());
+                set_status.set("Ready to edit".to_string());
             }
         });
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        // SSR: just set prefill
+        let _ = show_modal.get(); // track dependency
+        set_content.set(prefill.clone());
     }
 
     // Auto-save to localStorage as user types

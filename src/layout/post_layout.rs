@@ -94,6 +94,14 @@ pub fn PostLayout(post: Post) -> impl IntoView {
     // Store current post slug for active highlighting
     let current_slug = post.slug.to_string();
 
+    // Generate page URL for suggestions
+    let page_url = format!("https://swhawes.github.io/longitudinal-dev/posts/{}/", current_slug);
+
+    // TODO: In next step, generate actual prefill_markdown and baseline_hash during SSG
+    // For now, use placeholders
+    let prefill_markdown = String::from("# Placeholder\n\nMarkdown content will be generated during SSG.");
+    let baseline_hash = String::from("placeholder_hash");
+
     // Move fields out before view! to own the data
     let title = post.title;
     let metadata = post.metadata;
@@ -290,12 +298,18 @@ pub fn PostLayout(post: Post) -> impl IntoView {
                     toc_items=toc_items
                     download_data=code_downloads
                     repo_url="https://github.com/swhawes/leptos-test".to_string()
+                    slug=current_slug.clone()
                 />
             </div>
         </div>
 
         // Editor modal rendered at page level (outside aside container) for proper centering
-        <EditorModalIsland/>
+        <EditorModalIsland
+            slug=current_slug
+            page_url=page_url
+            prefill_markdown=prefill_markdown
+            baseline_hash=baseline_hash
+        />
         </>
     }
 }
