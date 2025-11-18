@@ -3,6 +3,7 @@
 use leptos::prelude::*;
 
 pub mod base_path;
+pub mod config;
 mod copy_code_button;
 mod edit_page_button;
 mod editor_modal_island;

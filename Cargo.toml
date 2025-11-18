@@ -70,7 +70,13 @@ web-sys = { version = "0.3", features = [
     "EventTarget",
     "Clipboard",
     "Navigator",
+    "Request",
+    "RequestInit",
+    "RequestMode",
+    "Response",
+    "Headers",
 ] }
+wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 # Pin to 0.2.x to avoid getrandom 0.3.3 compilation issues in CI
 # See: https://github.com/rust-random/getrandom/issues/448

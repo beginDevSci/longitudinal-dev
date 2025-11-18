@@ -107,9 +107,15 @@ pub fn TableOfContents(
                                 {if !repo_url.is_empty() {
                                     view! {
                                         <>
-                                            <li>
-                                                <EditPageButton slug=slug.clone()/>
-                                            </li>
+                                            {if crate::config::ENABLE_SUGGESTIONS {
+                                                view! {
+                                                    <li>
+                                                        <EditPageButton slug=slug.clone()/>
+                                                    </li>
+                                                }.into_any()
+                                            } else {
+                                                ().into_any()
+                                            }}
                                             <li>
                                                 <button
                                                     type="button"

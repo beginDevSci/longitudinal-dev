@@ -303,12 +303,18 @@ pub fn PostLayout(
         </div>
 
         // Editor modal rendered at page level (outside aside container) for proper centering
-        <EditorModalIsland
-            slug=current_slug
-            page_url=page_url
-            prefill_markdown=prefill_markdown
-            baseline_hash=baseline_hash
-        />
+        {if crate::config::ENABLE_SUGGESTIONS {
+            view! {
+                <EditorModalIsland
+                    slug=current_slug
+                    page_url=page_url
+                    prefill_markdown=prefill_markdown
+                    baseline_hash=baseline_hash
+                />
+            }.into_any()
+        } else {
+            ().into_any()
+        }}
         </>
     }
 }
