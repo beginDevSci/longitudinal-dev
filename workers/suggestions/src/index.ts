@@ -11,8 +11,8 @@ interface Env {
   GITHUB_OWNER: string;
   GITHUB_REPO: string;
   ALLOWED_ORIGIN: string;
-  MAX_SIZE_BYTES: number;
-  RATE_LIMIT_PER_HOUR: number;
+  MAX_SIZE_BYTES: string; // Cloudflare injects env vars as strings
+  RATE_LIMIT_PER_HOUR: string; // Cloudflare injects env vars as strings
 }
 
 interface SuggestionPayload {
@@ -97,8 +97,9 @@ async function checkRateLimit(
   // Filter out timestamps older than 1 hour
   timestamps = timestamps.filter(ts => ts > hourAgo);
 
-  // Check if limit exceeded
-  if (timestamps.length >= env.RATE_LIMIT_PER_HOUR) {
+  // Check if limit exceeded (parse env var as number)
+  const rateLimit = Number(env.RATE_LIMIT_PER_HOUR);
+  if (timestamps.length >= rateLimit) {
     return true;
   }
 
@@ -242,9 +243,10 @@ export default {
     try {
       const text = await request.text();
 
-      // Check size limit
+      // Check size limit (parse env var as number)
+      const maxSizeBytes = Number(env.MAX_SIZE_BYTES);
       const sizeBytes = new TextEncoder().encode(text).length;
-      if (sizeBytes > env.MAX_SIZE_BYTES) {
+      if (sizeBytes > maxSizeBytes) {
         return errorResponse(
           'Request too large (max 50 KB)',
           413,

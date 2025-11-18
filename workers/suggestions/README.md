@@ -281,9 +281,18 @@ View metrics in Cloudflare Dashboard:
 
 ### "Origin not allowed" Error
 
-- Verify `ALLOWED_ORIGIN` in `wrangler.toml` matches your site exactly
+- Verify `ALLOWED_ORIGIN` in `wrangler.toml` matches your site exactly (including https://)
 - Check that the frontend is sending the correct `Origin` header
 - For local testing, temporarily update `ALLOWED_ORIGIN` to `http://localhost:3000`
+- Origin validation is strict - must be an exact match (case-sensitive)
+
+### Rate Limiting Behavior
+
+- Rate limits are tracked per IP address using `CF-Connecting-IP` header (Cloudflare-specific)
+- Falls back to `X-Forwarded-For` header if `CF-Connecting-IP` is not available
+- If both headers are missing, all requests are grouped under IP `'unknown'` (may cluster many clients)
+- For production use behind Cloudflare, `CF-Connecting-IP` will always be present
+- During local testing (`wrangler dev`), IP will fallback to `'unknown'`
 
 ### "Failed to create GitHub issue" Error
 
@@ -348,8 +357,10 @@ npm run tail
 | `GITHUB_OWNER` | Var | GitHub username/org | `swhawes` |
 | `GITHUB_REPO` | Var | Repository name | `leptos-test` |
 | `ALLOWED_ORIGIN` | Var | Allowed request origin | `https://swhawes.github.io` |
-| `MAX_SIZE_BYTES` | Var | Max request size | `51200` (50 KB) |
-| `RATE_LIMIT_PER_HOUR` | Var | Submissions per IP/hour | `10` |
+| `MAX_SIZE_BYTES` | Var | Max request size (number) | `51200` (50 KB) |
+| `RATE_LIMIT_PER_HOUR` | Var | Submissions per IP/hour (number) | `10` |
+
+**Note on Numeric Variables:** Cloudflare Workers inject environment variables as strings, even when defined as numbers in `wrangler.toml`. The Worker code explicitly parses `MAX_SIZE_BYTES` and `RATE_LIMIT_PER_HOUR` using `Number()` to ensure proper numeric comparison.
 
 ## Files
 

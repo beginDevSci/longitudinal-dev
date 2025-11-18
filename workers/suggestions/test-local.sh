@@ -1,12 +1,26 @@
 #!/bin/bash
 # Test script for local Worker development
-# Usage: ./test-local.sh
+# Usage: ./test-local.sh [worker-url] [origin]
+#
+# Examples:
+#   ./test-local.sh                                    # Uses defaults
+#   ./test-local.sh http://localhost:8787              # Custom worker URL
+#   ./test-local.sh http://localhost:8787 http://localhost:3000  # Custom worker and origin
 
-WORKER_URL="http://localhost:8787/api/suggestions"
-ORIGIN="https://swhawes.github.io"
+# Default values
+WORKER_URL="${1:-http://localhost:8787}/api/suggestions"
+ORIGIN="${2:-https://swhawes.github.io}"
+
+# Remove duplicate /api/suggestions if provided in URL
+WORKER_URL="${WORKER_URL%/api/suggestions}/api/suggestions"
 
 echo "Testing Suggestions API Worker"
 echo "================================"
+echo "Worker URL: $WORKER_URL"
+echo "Origin: $ORIGIN"
+echo ""
+echo "NOTE: For local testing, you may need to temporarily update"
+echo "ALLOWED_ORIGIN in wrangler.toml to match your origin."
 echo ""
 
 # Test 1: Valid submission
