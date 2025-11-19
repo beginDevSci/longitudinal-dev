@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
-                            href={base_path::join("posts/")}
+                            href={base_path::join("tutorials/")}
                             class="px-8 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                         >
                             "ABCD Examples"
@@ -121,11 +121,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
     eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
 
-    // Also write the same catalog to /posts/index.html to replace directory listing
+    // Ensure /posts directory exists for individual tutorials
     let posts_dir = site_root.join("posts");
     create_dir_all(&posts_dir)?;
-    write(posts_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", posts_dir.join("index.html").display());
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
@@ -174,7 +172,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .to_html();
 
-        let post_dir = site_root.join("posts").join(&slug);
+        let post_dir = posts_dir.join(&slug);
         create_dir_all(&post_dir)?;
         write(post_dir.join("index.html"), html)?;
         eprintln!("Wrote {}", post_dir.join("index.html").display());
@@ -193,6 +191,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(writer_dir.join("index.html"), &writer_html)?;
     eprintln!("Wrote {}", writer_dir.join("index.html").display());
 
-    eprintln!("\n✅ Generated {post_count} posts + index page + about page + writer");
+    eprintln!("\n✅ Generated {post_count} posts + home + tutorials + about + writer");
     Ok(())
 }
