@@ -1,13 +1,11 @@
 ---
-title: "Latent Growth Curve Models: A Practical Tutorial"
+title: "Latent Growth Curve Models"
 slug: "lgcm"
 description: "Learn to model individual trajectories over time using SEM-based growth curves in R with lavaan."
 category: "growth-models"
 tags: ["LGCM", "SEM", "longitudinal", "lavaan", "growth-curves"]
 r_packages: ["lavaan", "tidyverse", "MASS"]
 ---
-
-# Latent Growth Curve Models: A Practical Tutorial
 
 ## Overview
 
@@ -137,6 +135,61 @@ Evaluate model fit using multiple indices:
 > [!important]
 > Always report multiple fit indices. A model can have good CFI but poor RMSEA, or vice versa. The pattern of indices tells the full story.
 
+## Interpretation
+
+### Understanding Model Output
+
+When you run `summary(fit, fit.measures = TRUE)` in lavaan, focus on these key sections:
+
+**Latent Variable Means**
+
+```
+Intercepts:
+                   Estimate  Std.Err  z-value  P(>|z|)
+    i                50.123    0.712   70.412    0.000
+    s                 2.987    0.142   21.035    0.000
+```
+
+- **Intercept mean (i)**: Average starting value across all individuals
+- **Slope mean (s)**: Average rate of change per time unit
+
+**Latent Variable Variances**
+
+```
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+    i               102.456   12.345    8.299    0.000
+    s                 4.123    0.567    7.273    0.000
+```
+
+- **Intercept variance**: Individual differences in starting points
+- **Slope variance**: Individual differences in rates of change
+- Significant variance means people differ meaningfully
+
+**Covariances**
+
+```
+Covariances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+  i ~~
+    s                -3.245    1.234   -2.630    0.009
+```
+
+- **Negative covariance**: Those who start higher tend to change more slowly
+- **Positive covariance**: Those who start higher tend to change faster
+- Common in developmental data (regression to the mean)
+
+### Effect Sizes and Practical Significance
+
+Beyond statistical significance, consider:
+
+1. **Mean slope magnitude**: Is the average change practically meaningful?
+2. **Variance proportions**: What fraction of total variance is between-person vs. within-person?
+3. **Predicted trajectories**: Plot model-implied trajectories to visualize the range of individual differences
+
+> [!tip]
+> Use `lavPredict(fit)` to extract individual factor scores for plotting person-specific trajectories.
+
 ## Worked Example
 
 This section provides a complete, runnable R workflow demonstrating LGCM analysis.
@@ -220,14 +273,17 @@ fit <- growth(lgcm_model, data = data)
 summary(fit, fit.measures = TRUE, standardized = TRUE)
 ```
 
-### Interpret Results
+### Check Parameter Recovery
 
-Key output to examine:
+Compare estimated parameters to true simulation values:
 
-1. **Latent Means**: Compare estimated intercept and slope means to true values (50, 3)
-2. **Latent Variances**: Check variance estimates against true values (100, 4)
-3. **Covariance**: Compare to true value (5)
-4. **Fit Indices**: Ensure model fits the data well
+| Parameter | True Value | Interpretation |
+|-----------|------------|----------------|
+| Intercept mean | 50 | Average starting point |
+| Slope mean | 3 | Average change per time unit |
+| Intercept variance | 100 | Individual differences in start |
+| Slope variance | 4 | Individual differences in change |
+| Covariance | 5 | Start-change relationship |
 
 ## Reference & Resources
 
