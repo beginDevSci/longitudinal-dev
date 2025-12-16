@@ -6,7 +6,10 @@ use leptos::config::get_configuration;
 use leptos::prelude::*;
 use leptos::tachys::view::RenderHtml;
 use longitudinal_dev::base_path;
-use longitudinal_dev::layout::{PostLayout, SiteLayout};
+use longitudinal_dev::guide_catalog::GuideCatalog;
+use longitudinal_dev::guides::guides;
+use longitudinal_dev::layout::{GuideLayout, PostLayout, SiteLayout};
+use longitudinal_dev::models::guide::GuideCatalogItem;
 use longitudinal_dev::posts::posts;
 use longitudinal_dev::tutorial_catalog::{TutorialCatalog, TutorialData};
 use longitudinal_writer::WriterApp;
@@ -60,10 +63,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
-                            href={base_path::join("posts/")}
+                            href={base_path::join("tutorials/")}
                             class="px-8 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                         >
                             "ABCD Examples"
+                        </a>
+                        <a
+                            href={base_path::join("guides/")}
+                            class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                        >
+                            "Method Guides"
                         </a>
                     </div>
                 </div>
@@ -193,6 +202,65 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(writer_dir.join("index.html"), &writer_html)?;
     eprintln!("Wrote {}", writer_dir.join("index.html").display());
 
-    eprintln!("\n✅ Generated {post_count} posts + index page + about page + writer");
+    // 6. Generate Method Guides catalog page at /guides/index.html
+    let all_guides = guides();
+    let guide_count = all_guides.len();
+
+    let guide_catalog_items: Vec<GuideCatalogItem> = all_guides
+        .iter()
+        .map(GuideCatalogItem::from_guide)
+        .collect();
+
+    let guides_catalog_html = view! {
+        <SiteLayout options=opts.clone()>
+            <main class="min-h-screen bg-surface">
+                <section class="relative overflow-hidden bg-subtle">
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                        <h1 class="text-4xl md:text-5xl font-bold text-primary">"Method Guides"</h1>
+                        <p class="mt-3 text-lg md:text-xl text-secondary">
+                            "Comprehensive tutorials on longitudinal analysis methods with simulated data examples."
+                        </p>
+                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                            <a href="#catalog" class="inline-block px-6 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors">
+                                "Browse Guides"
+                            </a>
+                            <a href={base_path::join("")} class="inline-block px-6 py-3 rounded-lg border border-default text-primary hover:bg-accent-subtle transition-colors">
+                                "Back to Home"
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-10">
+                    <GuideCatalog guides=guide_catalog_items.clone() />
+                </section>
+            </main>
+        </SiteLayout>
+    }
+    .to_html();
+
+    let guides_dir = site_root.join("guides");
+    create_dir_all(&guides_dir)?;
+    write(guides_dir.join("index.html"), &guides_catalog_html)?;
+    eprintln!("Wrote {}", guides_dir.join("index.html").display());
+
+    // 7. Generate one page per guide at /guides/<slug>/index.html
+    for guide in all_guides.into_iter() {
+        let slug = guide.slug.to_string();
+
+        let html = view! {
+            <SiteLayout options=opts.clone()>
+                <GuideLayout guide />
+            </SiteLayout>
+        }
+        .to_html();
+
+        let guide_dir = site_root.join("guides").join(&slug);
+        create_dir_all(&guide_dir)?;
+        write(guide_dir.join("index.html"), html)?;
+        eprintln!("Wrote {}", guide_dir.join("index.html").display());
+    }
+
+    eprintln!("\n✅ Generated {post_count} posts + {guide_count} guides + index page + about page + writer");
     Ok(())
 }

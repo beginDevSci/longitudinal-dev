@@ -35,6 +35,11 @@ wasm-bindgen = { version = "=0.2.104", optional = true }
 # JSON Schema content authoring
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_yaml = "0.9"
+# Markdown parsing for guides
+pulldown-cmark = "0.10"
+# KaTeX math rendering (SSR only - uses embedded QuickJS)
+katex = { version = "0.4", optional = true }
 # Syntax highlighting at build time (SSR only, not in WASM)
 syntect = { version = "5.2", optional = true, default-features = false, features = ["default-fancy"] }
 # Tutorial Writer package
@@ -74,6 +79,14 @@ web-sys = { version = "0.3", features = [
     "RequestMode",
     "Response",
     "Headers",
+    # Guide interactivity features
+    "Location",
+    "History",
+    "NodeList",
+    "ScrollIntoViewOptions",
+    "ScrollBehavior",
+    "ScrollLogicalPosition",
+    "MediaQueryList",
 ] }
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
@@ -106,6 +119,7 @@ ssr = [
     "leptos/islands",
     "leptos_meta/ssr",
     "syntect",
+    "katex",
     "dep:chrono",
     "dep:clap",
     "dep:anyhow",

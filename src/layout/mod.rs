@@ -2,12 +2,14 @@
 //!
 //! This module contains the global site layout and post layout components.
 
+mod guide_layout;
 mod left_nav;
 mod post_layout;
 mod site_layout;
 mod top_nav;
 mod table_of_contents;
 
+pub use guide_layout::GuideLayout;
 pub use left_nav::{LeftNav, NavCategory, NavItem};
 pub use post_layout::PostLayout;
 pub use site_layout::SiteLayout;

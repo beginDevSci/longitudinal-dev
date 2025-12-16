@@ -4,6 +4,7 @@ pub mod additional_resources;
 pub mod data_access;
 pub mod data_preparation;
 pub mod discussion;
+pub mod guide;
 pub mod overview;
 pub mod post;
 pub mod statistical_analysis;

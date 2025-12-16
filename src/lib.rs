@@ -7,6 +7,7 @@ pub mod config;
 mod copy_code_button;
 mod edit_page_button;
 mod editor_modal_island;
+mod guide_interactivity;
 mod section_container;
 mod theme_toggle;
 mod work_in_progress_badge;
@@ -21,13 +22,22 @@ pub mod ui;
 pub mod posts;
 pub mod tutorial_catalog;
 
+// Method guides modules
+pub mod guide_catalog;
+pub mod guides;
+
 // Syntax highlighting (SSR only)
 pub mod syntax_highlight;
+
+// Markdown transformation pipeline
+pub mod markdown;
 
 pub use copy_code_button::CopyCodeButton;
 pub use edit_page_button::EditPageButton;
 pub use editor_modal_island::EditorModalIsland;
-pub use layout::{PostLayout, SiteLayout};
+pub use guide_catalog::GuideCatalog;
+pub use guide_interactivity::GuideInteractivity;
+pub use layout::{GuideLayout, PostLayout, SiteLayout};
 pub use section_container::SectionContainer;
 pub use theme_toggle::ThemeToggle;
 pub use work_in_progress_badge::WorkInProgressBadge;

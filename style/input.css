@@ -1375,6 +1375,280 @@ body {
   }
 
   /* ========================================
+     GUIDE CODE BLOCK STYLES
+     Styling for code blocks in method guides
+     ======================================== */
+
+  /* Wrapper for code blocks with copy buttons */
+  .code-block-wrapper {
+    position: relative;
+    margin: var(--spacing-4) 0;
+  }
+
+  /* Position copy button in the top-right corner */
+  .code-block-wrapper .guide-copy-btn {
+    position: absolute;
+    top: var(--spacing-2);
+    right: var(--spacing-2);
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .code-block-wrapper:hover .guide-copy-btn {
+    opacity: 1;
+  }
+
+  /* Code block styling within wrapper */
+  .code-block-wrapper pre {
+    margin: 0;
+    padding: var(--spacing-4);
+    padding-top: calc(var(--spacing-4) + 2.5rem); /* Make room for copy button */
+    background-color: var(--color-elevated-bg);
+    border: 1px solid var(--color-border-stroke);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .code-block-wrapper pre code {
+    font-family: var(--font-mono);
+    background: transparent;
+    padding: 0;
+  }
+
+  /* ========================================
+     TUTORIAL MODULE (COLLAPSIBLE SECTIONS)
+     Styling for collapsible H2 sections in guides
+     ======================================== */
+
+  .tutorial-module {
+    margin: var(--spacing-6) 0;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .tutorial-module summary {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-5);
+    background-color: var(--color-bg-subtle);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    user-select: none;
+    list-style: none; /* Remove default marker */
+    transition: background-color 0.2s ease;
+  }
+
+  .tutorial-module summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tutorial-module summary::before {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: var(--spacing-3);
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+  }
+
+  .tutorial-module[open] summary::before {
+    transform: rotate(45deg);
+  }
+
+  .tutorial-module summary:hover {
+    background-color: var(--color-bg-elevated);
+  }
+
+  .tutorial-module summary:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: -2px;
+  }
+
+  .tutorial-module .module-content {
+    padding: var(--spacing-5);
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  /* ========================================
+     CALLOUT STYLES
+     Styling for callout boxes in guides
+     ======================================== */
+
+  .callout {
+    margin: var(--spacing-4) 0;
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid;
+  }
+
+  .callout-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .callout-content > :first-child {
+    margin-top: 0;
+  }
+
+  .callout-content > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* Tip callout - green */
+  .callout-tip {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-emerald-500);
+  }
+
+  .callout-tip .callout-title {
+    color: var(--color-emerald-600);
+  }
+
+  /* Warning callout - amber */
+  .callout-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: var(--color-amber-500);
+  }
+
+  .callout-warning .callout-title {
+    color: var(--color-amber-600);
+  }
+
+  /* Note callout - blue */
+  .callout-note {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: var(--color-blue-500);
+  }
+
+  .callout-note .callout-title {
+    color: var(--color-blue-600);
+  }
+
+  /* Pitfall callout - red */
+  .callout-pitfall {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--color-red-500);
+  }
+
+  .callout-pitfall .callout-title {
+    color: var(--color-red-600);
+  }
+
+  /* Info callout - purple */
+  .callout-info {
+    background-color: rgba(139, 92, 246, 0.1);
+    border-color: var(--color-violet-500);
+  }
+
+  .callout-info .callout-title {
+    color: var(--color-violet-600);
+  }
+
+  /* Didactic callout - cyan */
+  .callout-didactic {
+    background-color: rgba(6, 182, 212, 0.1);
+    border-color: var(--color-cyan-500);
+  }
+
+  .callout-didactic .callout-title {
+    color: var(--color-cyan-600);
+  }
+
+  /* ========================================
+     TABLE WRAPPER STYLES
+     Responsive table styling for guides
+     ======================================== */
+
+  .table-wrapper {
+    margin: var(--spacing-4) 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-container {
+    min-width: 100%;
+  }
+
+  /* ========================================
+     PRINT STYLES FOR GUIDES
+     Ensure guides print correctly
+     ======================================== */
+
+  @media print {
+    /* Hide copy buttons in print */
+    .copy-btn,
+    .guide-copy-btn {
+      display: none !important;
+    }
+
+    /* Force collapsible modules open in print */
+    .tutorial-module {
+      border: none;
+    }
+
+    .tutorial-module[open],
+    .tutorial-module:not([open]) {
+      /* Force display of content regardless of open state */
+    }
+
+    .tutorial-module summary {
+      /* Style as a regular heading in print */
+      background: none;
+      padding: 0;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tutorial-module summary::before {
+      /* Hide the chevron in print */
+      display: none;
+    }
+
+    .tutorial-module .module-content {
+      display: block !important;
+      border-top: none;
+      padding: 0;
+    }
+
+    /* Ensure code blocks are legible */
+    .code-block-wrapper pre {
+      padding: var(--spacing-3);
+      padding-top: var(--spacing-3); /* Override extra padding for copy button */
+      background-color: #f5f5f5 !important;
+      border: 1px solid #ddd !important;
+      font-size: 0.75rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Callouts - simplify for print */
+    .callout {
+      background-color: #f9f9f9 !important;
+      border-left-width: 3px;
+      page-break-inside: avoid;
+    }
+
+    /* Avoid page breaks inside modules and callouts */
+    .tutorial-module,
+    .callout,
+    .code-block-wrapper {
+      page-break-inside: avoid;
+    }
+  }
+
+  /* ========================================
      LEFT NAVIGATION COMPONENTS
      Dark sidebar matching right aside theme
      ======================================== */
