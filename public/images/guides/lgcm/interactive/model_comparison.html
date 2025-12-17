@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LGCM Model Comparison</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const normalRandom = (mean, sd, seed1, seed2) => {
+      const u1 = seededRandom(seed1);
+      const u2 = seededRandom(seed2);
+      const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return mean + sd * z;
+    };
+
+    function ModelComparison() {
+      const [activeModel, setActiveModel] = useState('linear');
+      const [animationProgress, setAnimationProgress] = useState(1);
+      const [isAnimating, setIsAnimating] = useState(false);
+      
+      const baseData = useMemo(() => {
+        const data = [];
+        for (let i = 0; i < 40; i++) {
+          const indIntercept = normalRandom(50, 10, i * 100 + 1, i * 100 + 2);
+          const indSlope = normalRandom(2, 1, i * 100 + 3, i * 100 + 4);
+          const points = [0, 1, 2, 3, 4].map((t, j) => {
+            const residual = normalRandom(0, 5, i * 100 + j * 10 + 5, i * 100 + j * 10 + 6);
+            return { 
+              time: t, 
+              linearScore: indIntercept + indSlope * t + residual, 
+              interceptScore: indIntercept + residual 
+            };
+          });
+          data.push({ id: i, points });
+        }
+        return data;
+      }, []);
+      
+      useEffect(() => {
+        if (!isAnimating) return;
+        const startTime = Date.now();
+        const duration = 1200;
+        const startValue = activeModel === 'linear' ? 0 : 1;
+        const endValue = activeModel === 'linear' ? 1 : 0;
+        
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+          setAnimationProgress(startValue + (endValue - startValue) * eased);
+          if (progress < 1) requestAnimationFrame(animate);
+          else setIsAnimating(false);
+        };
+        requestAnimationFrame(animate);
+      }, [isAnimating, activeModel]);
+      
+      const switchModel = (model) => {
+        if (model === activeModel || isAnimating) return;
+        setActiveModel(model);
+        setIsAnimating(true);
+      };
+      
+      const width = 520, height = 320;
+      const margin = { top: 35, right: 25, bottom: 45, left: 50 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+      
+      const xScale = (t) => margin.left + (t / 4) * innerWidth;
+      const yScale = (score) => margin.top + innerHeight - ((score - 15) / 75) * innerHeight;
+      
+      const getPath = (points) => points.map((p, i) => {
+        const score = p.interceptScore + (p.linearScore - p.interceptScore) * animationProgress;
+        return `${i === 0 ? 'M' : 'L'} ${xScale(p.time)} ${yScale(score)}`;
+      }).join(' ');
+      
+      const getMeanPath = () => [0, 1, 2, 3, 4].map((t, i) => {
+        const y = 50 + 2 * t * animationProgress;
+        return `${i === 0 ? 'M' : 'L'} ${xScale(t)} ${yScale(y)}`;
+      }).join(' ');
+
+      const modelColor = animationProgress > 0.5 ? '#2563eb' : '#7c3aed';
+
+      return (
+        <div className="p-4 bg-slate-50 min-h-screen">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-xl font-bold text-slate-800 mb-1">Model Comparison: Intercept-Only vs. Linear Growth</h1>
+            <p className="text-slate-600 text-sm mb-4">See how adding a slope factor transforms the model. Click buttons to animate.</p>
+            
+            <div className="flex justify-center gap-3 mb-4">
+              <button onClick={() => switchModel('intercept')} disabled={isAnimating}
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  activeModel === 'intercept' && !isAnimating 
+                    ? 'bg-purple-600 text-white shadow-lg' 
+                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400'
+                } ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                Intercept-Only
+              </button>
+              <button onClick={() => switchModel('linear')} disabled={isAnimating}
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  activeModel === 'linear' && !isAnimating 
+                    ? 'bg-blue-600 text-white shadow-lg' 
+                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400'
+                } ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                Linear Growth
+              </button>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow p-4">
+              <svg width={width} height={height} style={{maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto'}}>
+                <rect x={margin.left} y={margin.top} width={innerWidth} height={innerHeight} fill="#f8fafc" />
+                {[0, 1, 2, 3, 4].map(t => <line key={t} x1={xScale(t)} y1={margin.top} x2={xScale(t)} y2={margin.top + innerHeight} stroke="#e2e8f0" strokeWidth="1" />)}
+                
+                {baseData.map((traj) => (
+                  <path key={traj.id} d={getPath(traj.points)} fill="none" stroke="#94a3b8" strokeWidth="1.5" opacity="0.35" />
+                ))}
+                
+                <path d={getMeanPath()} fill="none" stroke={modelColor} strokeWidth="4" strokeLinecap="round" />
+                {[0, 1, 2, 3, 4].map((t) => {
+                  const y = 50 + 2 * t * animationProgress;
+                  return <circle key={t} cx={xScale(t)} cy={yScale(y)} r="6" fill={modelColor} />;
+                })}
+                
+                <line x1={margin.left} y1={margin.top + innerHeight} x2={margin.left + innerWidth} y2={margin.top + innerHeight} stroke="#334155" strokeWidth="2" />
+                <line x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + innerHeight} stroke="#334155" strokeWidth="2" />
+                {[0, 1, 2, 3, 4].map(t => <text key={t} x={xScale(t)} y={margin.top + innerHeight + 20} textAnchor="middle" fontSize="12" fill="#334155">Wave {t + 1}</text>)}
+                <text x={margin.left + innerWidth / 2} y={height - 5} textAnchor="middle" fontSize="13" fill="#334155">Time</text>
+                <text x={16} y={margin.top + innerHeight / 2} textAnchor="middle" fontSize="13" fill="#334155" transform={`rotate(-90, 16, ${margin.top + innerHeight / 2})`}>Score</text>
+                
+                <text x={margin.left + innerWidth / 2} y={margin.top - 12} textAnchor="middle" fontSize="15" fontWeight="bold" fill={modelColor}>
+                  {isAnimating ? '● Transitioning...' : animationProgress > 0.5 ? 'Linear Growth Model' : 'Intercept-Only Model'}
+                </text>
+              </svg>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className={`p-3 rounded-lg border-2 transition-all ${
+                animationProgress < 0.5 ? 'border-purple-400 bg-purple-50 shadow' : 'border-slate-200 bg-white'
+              }`}>
+                <h3 className="font-bold text-purple-800 text-sm mb-2">Intercept-Only Model</h3>
+                <div className="text-xs text-slate-700 space-y-1">
+                  <p><strong>Assumes:</strong> No systematic change</p>
+                  <p className="text-slate-600">• Intercept mean = 50</p>
+                  <p className="text-slate-600">• Intercept variance = 100</p>
+                  <p className="text-slate-600">• Residual variance = 25</p>
+                  <p className="mt-2 text-purple-700 font-medium">df = 13 (more constrained)</p>
+                </div>
+              </div>
+              
+              <div className={`p-3 rounded-lg border-2 transition-all ${
+                animationProgress >= 0.5 ? 'border-blue-400 bg-blue-50 shadow' : 'border-slate-200 bg-white'
+              }`}>
+                <h3 className="font-bold text-blue-800 text-sm mb-2">Linear Growth Model</h3>
+                <div className="text-xs text-slate-700 space-y-1">
+                  <p><strong>Assumes:</strong> Linear change over time</p>
+                  <p className="text-slate-600">• Intercept mean = 50</p>
+                  <p className="text-blue-600 font-medium">• Slope mean = 2 ← NEW</p>
+                  <p className="text-blue-600 font-medium">• Slope variance = 1 ← NEW</p>
+                  <p className="mt-2 text-blue-700 font-medium">df = 10 (more flexible)</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <h3 className="font-semibold text-amber-800 text-sm mb-1">💡 Key Insight</h3>
+              <p className="text-xs text-amber-900">
+                The <strong>intercept-only model</strong> forces trajectories to be flat on average—any change is just noise. 
+                The <strong>linear growth model</strong> adds slope parameters, allowing systematic upward or downward trends.
+                Compare models using a <strong>likelihood ratio test</strong> (Δdf = 3) to see if growth is statistically significant.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ModelComparison />);
+  </script>
+</body>
+</html>

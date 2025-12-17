@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive LGCM Trajectory Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const normalRandom = (mean, sd, seed1, seed2) => {
+      const u1 = seededRandom(seed1);
+      const u2 = seededRandom(seed2);
+      const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return mean + sd * z;
+    };
+
+    function TrajectoryExplorer() {
+      const [interceptMean, setInterceptMean] = useState(50);
+      const [interceptSD, setInterceptSD] = useState(10);
+      const [slopeMean, setSlopeMean] = useState(2);
+      const [slopeSD, setSlopeSD] = useState(1);
+      const [residualSD, setResidualSD] = useState(5);
+      const [nParticipants, setNParticipants] = useState(50);
+      const [showMean, setShowMean] = useState(true);
+      
+      const trajectories = useMemo(() => {
+        const data = [];
+        for (let i = 0; i < nParticipants; i++) {
+          const indIntercept = normalRandom(interceptMean, interceptSD, i * 100 + 1, i * 100 + 2);
+          const indSlope = normalRandom(slopeMean, slopeSD, i * 100 + 3, i * 100 + 4);
+          const trajectory = [0, 1, 2, 3, 4].map((t, j) => {
+            const trueScore = indIntercept + indSlope * t;
+            const residual = normalRandom(0, residualSD, i * 100 + j * 10 + 5, i * 100 + j * 10 + 6);
+            return { time: t, score: trueScore + residual };
+          });
+          data.push({ id: i, points: trajectory });
+        }
+        return data;
+      }, [interceptMean, interceptSD, slopeMean, slopeSD, residualSD, nParticipants]);
+      
+      const meanTrajectory = useMemo(() => {
+        return [0, 1, 2, 3, 4].map(t => ({ time: t, score: interceptMean + slopeMean * t }));
+      }, [interceptMean, slopeMean]);
+      
+      const width = 420, height = 300;
+      const margin = { top: 15, right: 25, bottom: 35, left: 45 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+      
+      const xScale = (t) => margin.left + (t / 4) * innerWidth;
+      const yMin = Math.min(0, interceptMean - 3 * interceptSD - 10);
+      const yMax = Math.max(100, interceptMean + 4 * Math.abs(slopeMean) + 3 * interceptSD + 3 * Math.abs(slopeSD) * 4 + 10);
+      const yScale = (score) => margin.top + innerHeight - ((score - yMin) / (yMax - yMin)) * innerHeight;
+      
+      const getPath = (points) => points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.time)} ${yScale(p.score)}`).join(' ');
+
+      return (
+        <div className="p-4 bg-slate-50 min-h-screen">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-xl font-bold text-slate-800 mb-1">Interactive LGCM Trajectory Explorer</h1>
+            <p className="text-slate-600 text-sm mb-4">Adjust parameters to see how they affect individual growth trajectories.</p>
+            
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="bg-white rounded-lg shadow p-4 lg:w-80">
+                <h2 className="text-base font-semibold text-slate-700 mb-3">Model Parameters</h2>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-blue-700">Intercept Mean (μ₁)</label>
+                    <span className="text-xs font-mono text-slate-600">{interceptMean}</span>
+                  </div>
+                  <input type="range" min="20" max="80" value={interceptMean} onChange={(e) => setInterceptMean(Number(e.target.value))} className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                  <p className="text-xs text-slate-500">Average starting level</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-blue-700">Intercept SD (√ψ₁₁)</label>
+                    <span className="text-xs font-mono text-slate-600">{interceptSD}</span>
+                  </div>
+                  <input type="range" min="0" max="20" value={interceptSD} onChange={(e) => setInterceptSD(Number(e.target.value))} className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                  <p className="text-xs text-slate-500">Individual differences in starting level</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-orange-700">Slope Mean (μ₂)</label>
+                    <span className="text-xs font-mono text-slate-600">{slopeMean}</span>
+                  </div>
+                  <input type="range" min="-5" max="10" step="0.5" value={slopeMean} onChange={(e) => setSlopeMean(Number(e.target.value))} className="w-full h-2 bg-orange-100 rounded-lg cursor-pointer accent-orange-500" />
+                  <p className="text-xs text-slate-500">Average rate of change per wave</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-orange-700">Slope SD (√ψ₂₂)</label>
+                    <span className="text-xs font-mono text-slate-600">{slopeSD}</span>
+                  </div>
+                  <input type="range" min="0" max="4" step="0.25" value={slopeSD} onChange={(e) => setSlopeSD(Number(e.target.value))} className="w-full h-2 bg-orange-100 rounded-lg cursor-pointer accent-orange-500" />
+                  <p className="text-xs text-slate-500">Individual differences in change rate</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-slate-700">Residual SD (√θ)</label>
+                    <span className="text-xs font-mono text-slate-600">{residualSD}</span>
+                  </div>
+                  <input type="range" min="0" max="15" value={residualSD} onChange={(e) => setResidualSD(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-slate-500" />
+                  <p className="text-xs text-slate-500">Noise around trajectories</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-xs font-medium text-slate-700">N Participants</label>
+                    <span className="text-xs font-mono text-slate-600">{nParticipants}</span>
+                  </div>
+                  <input type="range" min="10" max="100" step="10" value={nParticipants} onChange={(e) => setNParticipants(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-slate-500" />
+                </div>
+                
+                <div className="flex items-center mt-3 pt-2 border-t border-slate-100">
+                  <input type="checkbox" id="showMean" checked={showMean} onChange={(e) => setShowMean(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
+                  <label htmlFor="showMean" className="ml-2 text-sm text-slate-700">Show mean trajectory</label>
+                </div>
+              </div>
+              
+              <div className="flex-1 bg-white rounded-lg shadow p-4">
+                <h2 className="text-base font-semibold text-slate-700 mb-2">Trajectories</h2>
+                <svg width={width} height={height} style={{maxWidth: '100%', height: 'auto'}}>
+                  <rect x={margin.left} y={margin.top} width={innerWidth} height={innerHeight} fill="#f8fafc" />
+                  {[0, 1, 2, 3, 4].map(t => <line key={t} x1={xScale(t)} y1={margin.top} x2={xScale(t)} y2={margin.top + innerHeight} stroke="#e2e8f0" strokeWidth="1" />)}
+                  {trajectories.map((traj) => <path key={traj.id} d={getPath(traj.points)} fill="none" stroke="#94a3b8" strokeWidth="1.5" opacity="0.4" />)}
+                  {showMean && <path d={getPath(meanTrajectory)} fill="none" stroke="#2563eb" strokeWidth="3" />}
+                  {showMean && meanTrajectory.map((p, i) => <circle key={i} cx={xScale(p.time)} cy={yScale(p.score)} r="5" fill="#2563eb" />)}
+                  <line x1={margin.left} y1={margin.top + innerHeight} x2={margin.left + innerWidth} y2={margin.top + innerHeight} stroke="#334155" strokeWidth="2" />
+                  <line x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + innerHeight} stroke="#334155" strokeWidth="2" />
+                  {[0, 1, 2, 3, 4].map(t => <text key={t} x={xScale(t)} y={margin.top + innerHeight + 18} textAnchor="middle" fontSize="11" fill="#334155">Wave {t + 1}</text>)}
+                  <text x={margin.left + innerWidth / 2} y={height - 3} textAnchor="middle" fontSize="12" fill="#334155">Time</text>
+                  <text x={14} y={margin.top + innerHeight / 2} textAnchor="middle" fontSize="12" fill="#334155" transform={`rotate(-90, 14, ${margin.top + innerHeight / 2})`}>Score</text>
+                </svg>
+                
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
+                  <p className="font-medium text-blue-800 mb-1">Current Model:</p>
+                  <p className="text-blue-700">
+                    Average trajectory: starts at <strong>{interceptMean}</strong> and 
+                    {slopeMean >= 0 ? ' increases' : ' decreases'} by <strong>{Math.abs(slopeMean)}</strong> per wave.
+                  </p>
+                  <p className="text-blue-700 mt-1">
+                    {interceptSD > 0 ? `Starting levels vary (SD = ${interceptSD}). ` : 'Everyone starts at same level. '}
+                    {slopeSD > 0 ? `Growth rates vary (SD = ${slopeSD}).` : 'Everyone changes at same rate.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 bg-white rounded-lg shadow p-4">
+              <h3 className="font-semibold text-slate-700 mb-2">💡 Things to Try:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-600">
+                <div>• Set <strong>Slope SD = 0</strong> → everyone changes at the same rate</div>
+                <div>• Set <strong>Slope Mean = 0</strong> → intercept-only model (no growth)</div>
+                <div>• Increase <strong>Slope SD</strong> → watch the "fan pattern" emerge</div>
+                <div>• Set <strong>Residual SD = 0</strong> → perfectly smooth trajectories</div>
+                <div>• Try <strong>negative slopes</strong> → model decline over time</div>
+                <div>• Set <strong>Intercept SD = 0</strong> → everyone starts at same level</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<TrajectoryExplorer />);
+  </script>
+</body>
+</html>

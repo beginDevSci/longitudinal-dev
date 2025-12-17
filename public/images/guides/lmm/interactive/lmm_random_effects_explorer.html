@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive LMM Random Effects Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // Seeded random number generator for reproducibility
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
+    // Box-Muller transform for normal random numbers
+    const normalRandom = (mean, sd, seed1, seed2) => {
+      const u1 = seededRandom(seed1);
+      const u2 = seededRandom(seed2);
+      const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return mean + sd * z;
+    };
+
+    // Generate correlated random effects
+    const generateCorrelatedPair = (sd1, sd2, corr, seed1, seed2, seed3) => {
+      const z1 = normalRandom(0, 1, seed1, seed2);
+      const z2 = normalRandom(0, 1, seed2, seed3);
+      const u1 = sd1 * z1;
+      const u2 = sd2 * (corr * z1 + Math.sqrt(1 - corr * corr) * z2);
+      return [u1, u2];
+    };
+
+    function LMMExplorer() {
+      // Fixed effects
+      const [interceptMean, setInterceptMean] = useState(50);
+      const [slopeMean, setSlopeMean] = useState(2);
+
+      // Random effects
+      const [interceptSD, setInterceptSD] = useState(10);
+      const [slopeSD, setSlopeSD] = useState(1);
+      const [correlation, setCorrelation] = useState(-0.2);
+
+      // Residual
+      const [residualSD, setResidualSD] = useState(5);
+
+      // Display options
+      const [nParticipants, setNParticipants] = useState(30);
+      const [showMean, setShowMean] = useState(true);
+      const [showShrinkage, setShowShrinkage] = useState(false);
+      const [selectedPerson, setSelectedPerson] = useState(null);
+
+      // Generate trajectories
+      const { trajectories, olsEstimates, blupEstimates } = useMemo(() => {
+        const trajs = [];
+        const ols = [];
+        const blups = [];
+
+        for (let i = 0; i < nParticipants; i++) {
+          // Generate correlated random effects
+          const [u0, u1] = generateCorrelatedPair(
+            interceptSD, slopeSD, correlation,
+            i * 1000 + 1, i * 1000 + 2, i * 1000 + 3
+          );
+
+          const trueIntercept = interceptMean + u0;
+          const trueSlope = slopeMean + u1;
+
+          // Generate observations
+          const points = [0, 1, 2, 3, 4].map((t, j) => {
+            const trueY = trueIntercept + trueSlope * t;
+            const residual = normalRandom(0, residualSD, i * 1000 + j * 10 + 100, i * 1000 + j * 10 + 101);
+            return { time: t, y: trueY + residual, trueY };
+          });
+
+          trajs.push({
+            id: i,
+            points,
+            trueIntercept,
+            trueSlope,
+            u0,
+            u1
+          });
+
+          // Compute OLS estimate for this person
+          const n = points.length;
+          const sumX = points.reduce((s, p) => s + p.time, 0);
+          const sumY = points.reduce((s, p) => s + p.y, 0);
+          const sumXY = points.reduce((s, p) => s + p.time * p.y, 0);
+          const sumX2 = points.reduce((s, p) => s + p.time * p.time, 0);
+
+          const olsSlope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+          const olsIntercept = (sumY - olsSlope * sumX) / n;
+
+          ols.push({ id: i, intercept: olsIntercept, slope: olsSlope });
+
+          // BLUP is shrunk toward grand mean (simplified shrinkage)
+          const shrinkageInt = interceptSD * interceptSD / (interceptSD * interceptSD + residualSD * residualSD / n);
+          const shrinkageSlp = slopeSD * slopeSD / (slopeSD * slopeSD + residualSD * residualSD / 2);
+
+          const blupIntercept = interceptMean + shrinkageInt * (olsIntercept - interceptMean);
+          const blupSlope = slopeMean + shrinkageSlp * (olsSlope - slopeMean);
+
+          blups.push({ id: i, intercept: blupIntercept, slope: blupSlope });
+        }
+
+        return { trajectories: trajs, olsEstimates: ols, blupEstimates: blups };
+      }, [interceptMean, slopeMean, interceptSD, slopeSD, correlation, residualSD, nParticipants]);
+
+      // Calculate ICC
+      const icc = useMemo(() => {
+        const totalVar = interceptSD * interceptSD + residualSD * residualSD;
+        return interceptSD * interceptSD / totalVar;
+      }, [interceptSD, residualSD]);
+
+      // SVG dimensions
+      const width = 450, height = 320;
+      const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      // Scales
+      const xScale = (t) => margin.left + (t / 4) * innerWidth;
+
+      const yExtent = useMemo(() => {
+        let allY = trajectories.flatMap(t => t.points.map(p => p.y));
+        const yMin = Math.min(...allY, interceptMean - 3 * interceptSD);
+        const yMax = Math.max(...allY, interceptMean + 4 * slopeMean + 3 * interceptSD);
+        return [yMin - 5, yMax + 5];
+      }, [trajectories, interceptMean, interceptSD, slopeMean]);
+
+      const yScale = (y) => margin.top + innerHeight - ((y - yExtent[0]) / (yExtent[1] - yExtent[0])) * innerHeight;
+
+      const getPath = (points, useTrue = false) => {
+        return points.map((p, i) => {
+          const y = useTrue ? p.trueY : p.y;
+          return `${i === 0 ? 'M' : 'L'} ${xScale(p.time)} ${yScale(y)}`;
+        }).join(' ');
+      };
+
+      // Mean trajectory path
+      const meanPath = [0, 1, 2, 3, 4].map((t, i) => {
+        const y = interceptMean + slopeMean * t;
+        return `${i === 0 ? 'M' : 'L'} ${xScale(t)} ${yScale(y)}`;
+      }).join(' ');
+
+      return (
+        <div className="p-4 bg-slate-50 min-h-screen">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-xl font-bold text-slate-800 mb-1">LMM Random Effects Explorer</h1>
+            <p className="text-slate-600 text-sm mb-4">
+              Explore how fixed effects, random effects, and residuals shape individual trajectories.
+            </p>
+
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Controls Panel */}
+              <div className="bg-white rounded-lg shadow p-4 lg:w-80 space-y-4">
+
+                {/* Fixed Effects */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Fixed Effects (γ)</h2>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-emerald-700">Intercept Mean (γ₀₀)</label>
+                      <span className="text-xs font-mono text-slate-600">{interceptMean}</span>
+                    </div>
+                    <input type="range" min="30" max="70" value={interceptMean}
+                           onChange={(e) => setInterceptMean(Number(e.target.value))}
+                           className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600" />
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-emerald-700">Slope Mean (γ₁₀)</label>
+                      <span className="text-xs font-mono text-slate-600">{slopeMean}</span>
+                    </div>
+                    <input type="range" min="-2" max="5" step="0.5" value={slopeMean}
+                           onChange={(e) => setSlopeMean(Number(e.target.value))}
+                           className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600" />
+                  </div>
+                </div>
+
+                {/* Random Effects */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Random Effects (τ)</h2>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">Intercept SD (√τ₀₀)</label>
+                      <span className="text-xs font-mono text-slate-600">{interceptSD}</span>
+                    </div>
+                    <input type="range" min="0" max="20" value={interceptSD}
+                           onChange={(e) => setInterceptSD(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">Individual differences in starting level</p>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">Slope SD (√τ₁₁)</label>
+                      <span className="text-xs font-mono text-slate-600">{slopeSD}</span>
+                    </div>
+                    <input type="range" min="0" max="3" step="0.1" value={slopeSD}
+                           onChange={(e) => setSlopeSD(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">Individual differences in change rate</p>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">I-S Correlation (ρ)</label>
+                      <span className="text-xs font-mono text-slate-600">{correlation.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min="-0.9" max="0.9" step="0.1" value={correlation}
+                           onChange={(e) => setCorrelation(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">
+                      {correlation < 0 ? "High starters grow slower" : correlation > 0 ? "High starters grow faster" : "No relationship"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Residual */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Residual (σ)</h2>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-orange-700">Residual SD (σ)</label>
+                      <span className="text-xs font-mono text-slate-600">{residualSD}</span>
+                    </div>
+                    <input type="range" min="0" max="15" value={residualSD}
+                           onChange={(e) => setResidualSD(Number(e.target.value))}
+                           className="w-full h-2 bg-orange-100 rounded-lg cursor-pointer accent-orange-600" />
+                    <p className="text-xs text-slate-500">Occasion-specific noise</p>
+                  </div>
+                </div>
+
+                {/* Display Options */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Display</h2>
+
+                  <div className="mb-2">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-700">Participants</label>
+                      <span className="text-xs font-mono text-slate-600">{nParticipants}</span>
+                    </div>
+                    <input type="range" min="5" max="100" value={nParticipants}
+                           onChange={(e) => setNParticipants(Number(e.target.value))}
+                           className="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-slate-600" />
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-2">
+                    <label className="flex items-center text-xs">
+                      <input type="checkbox" checked={showMean} onChange={(e) => setShowMean(e.target.checked)}
+                             className="mr-1" />
+                      Show mean
+                    </label>
+                    <label className="flex items-center text-xs">
+                      <input type="checkbox" checked={showShrinkage} onChange={(e) => setShowShrinkage(e.target.checked)}
+                             className="mr-1" />
+                      Show shrinkage
+                    </label>
+                  </div>
+                </div>
+
+                {/* ICC Display */}
+                <div className="bg-slate-100 rounded p-3">
+                  <div className="text-xs font-semibold text-slate-700 mb-1">Intraclass Correlation (ICC)</div>
+                  <div className="text-2xl font-bold text-slate-800">{(icc * 100).toFixed(1)}%</div>
+                  <div className="text-xs text-slate-500">of variance is between persons</div>
+                  <div className="mt-2 h-2 bg-orange-200 rounded overflow-hidden">
+                    <div className="h-full bg-blue-500" style={{ width: `${icc * 100}%` }}></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-500 mt-1">
+                    <span>Between</span>
+                    <span>Within</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visualization Panel */}
+              <div className="flex-1 space-y-4">
+                {/* Main trajectory plot */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">Individual Trajectories</h3>
+                  <svg width={width} height={height} className="w-full" viewBox={`0 0 ${width} ${height}`}>
+                    {/* Grid lines */}
+                    {[0, 1, 2, 3, 4].map(t => (
+                      <line key={`grid-${t}`} x1={xScale(t)} y1={margin.top} x2={xScale(t)} y2={height - margin.bottom}
+                            stroke="#e2e8f0" strokeWidth="1" />
+                    ))}
+
+                    {/* Individual trajectories */}
+                    {trajectories.map((traj, i) => (
+                      <g key={traj.id}>
+                        <path
+                          d={getPath(traj.points)}
+                          fill="none"
+                          stroke={selectedPerson === i ? "#2563eb" : "#94a3b8"}
+                          strokeWidth={selectedPerson === i ? 2 : 1}
+                          opacity={selectedPerson === null ? 0.4 : selectedPerson === i ? 1 : 0.15}
+                          onMouseEnter={() => setSelectedPerson(i)}
+                          onMouseLeave={() => setSelectedPerson(null)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        {/* Data points */}
+                        {traj.points.map((p, j) => (
+                          <circle key={j} cx={xScale(p.time)} cy={yScale(p.y)} r={2}
+                                  fill={selectedPerson === i ? "#2563eb" : "#94a3b8"}
+                                  opacity={selectedPerson === null ? 0.3 : selectedPerson === i ? 1 : 0.1} />
+                        ))}
+                      </g>
+                    ))}
+
+                    {/* Mean trajectory */}
+                    {showMean && (
+                      <path d={meanPath} fill="none" stroke="#dc2626" strokeWidth="3" strokeDasharray="8,4" />
+                    )}
+
+                    {/* Axes */}
+                    <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom}
+                          stroke="#334155" strokeWidth="1" />
+                    <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom}
+                          stroke="#334155" strokeWidth="1" />
+
+                    {/* X-axis labels */}
+                    {[0, 1, 2, 3, 4].map(t => (
+                      <text key={t} x={xScale(t)} y={height - margin.bottom + 20} textAnchor="middle"
+                            className="text-xs fill-slate-600">Time {t}</text>
+                    ))}
+
+                    {/* Y-axis label */}
+                    <text x={15} y={height / 2} textAnchor="middle" transform={`rotate(-90, 15, ${height/2})`}
+                          className="text-xs fill-slate-600">Score</text>
+                  </svg>
+
+                  {/* Selected person info */}
+                  {selectedPerson !== null && (
+                    <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                      <span className="font-semibold">Person {selectedPerson + 1}:</span>
+                      {' '}Intercept = {trajectories[selectedPerson].trueIntercept.toFixed(1)},
+                      {' '}Slope = {trajectories[selectedPerson].trueSlope.toFixed(2)}
+                      {' '}(u₀ = {trajectories[selectedPerson].u0.toFixed(1)},
+                      {' '}u₁ = {trajectories[selectedPerson].u1.toFixed(2)})
+                    </div>
+                  )}
+                </div>
+
+                {/* Shrinkage plot (optional) */}
+                {showShrinkage && (
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-2">Shrinkage: OLS vs BLUP Estimates</h3>
+                    <div className="flex gap-4">
+                      {/* Intercept shrinkage */}
+                      <svg width={220} height={200} viewBox="0 0 220 200">
+                        <text x={110} y={15} textAnchor="middle" className="text-xs fill-slate-600 font-semibold">Intercepts</text>
+
+                        {/* Reference lines */}
+                        <line x1={20} y1={20} x2={200} y2={200} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,4" />
+                        <line x1={110} y1={20} x2={110} y2={200} stroke="#dc2626" strokeWidth="1" strokeDasharray="2,2" opacity="0.5" />
+                        <line x1={20} y1={110} x2={200} y2={110} stroke="#dc2626" strokeWidth="1" strokeDasharray="2,2" opacity="0.5" />
+
+                        {/* Points with shrinkage arrows */}
+                        {olsEstimates.map((ols, i) => {
+                          const blup = blupEstimates[i];
+                          const xOls = 20 + (ols.intercept - (interceptMean - 30)) / 60 * 180;
+                          const yOls = 200 - (ols.intercept - (interceptMean - 30)) / 60 * 180;
+                          const xBlup = 20 + (blup.intercept - (interceptMean - 30)) / 60 * 180;
+                          const yBlup = 200 - (blup.intercept - (interceptMean - 30)) / 60 * 180;
+
+                          return (
+                            <g key={i}>
+                              <line x1={xOls} y1={yOls} x2={xOls} y2={yBlup} stroke="#3b82f6" strokeWidth="1" opacity="0.3" />
+                              <circle cx={xOls} cy={yBlup} r={3} fill="#3b82f6" opacity="0.6" />
+                            </g>
+                          );
+                        })}
+
+                        <text x={110} y={195} textAnchor="middle" className="text-xs fill-slate-500">OLS</text>
+                        <text x={12} y={110} textAnchor="middle" transform="rotate(-90, 12, 110)" className="text-xs fill-slate-500">BLUP</text>
+                      </svg>
+
+                      {/* Slope shrinkage */}
+                      <svg width={220} height={200} viewBox="0 0 220 200">
+                        <text x={110} y={15} textAnchor="middle" className="text-xs fill-slate-600 font-semibold">Slopes</text>
+
+                        <line x1={20} y1={20} x2={200} y2={200} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,4" />
+                        <line x1={110} y1={20} x2={110} y2={200} stroke="#dc2626" strokeWidth="1" strokeDasharray="2,2" opacity="0.5" />
+                        <line x1={20} y1={110} x2={200} y2={110} stroke="#dc2626" strokeWidth="1" strokeDasharray="2,2" opacity="0.5" />
+
+                        {olsEstimates.map((ols, i) => {
+                          const blup = blupEstimates[i];
+                          const slopeRange = 8;
+                          const xOls = 20 + (ols.slope - (slopeMean - slopeRange/2)) / slopeRange * 180;
+                          const yOls = 200 - (ols.slope - (slopeMean - slopeRange/2)) / slopeRange * 180;
+                          const xBlup = 20 + (blup.slope - (slopeMean - slopeRange/2)) / slopeRange * 180;
+                          const yBlup = 200 - (blup.slope - (slopeMean - slopeRange/2)) / slopeRange * 180;
+
+                          return (
+                            <g key={i}>
+                              <line x1={xOls} y1={yOls} x2={xOls} y2={yBlup} stroke="#f97316" strokeWidth="1" opacity="0.3" />
+                              <circle cx={xOls} cy={yBlup} r={3} fill="#f97316" opacity="0.6" />
+                            </g>
+                          );
+                        })}
+
+                        <text x={110} y={195} textAnchor="middle" className="text-xs fill-slate-500">OLS</text>
+                        <text x={12} y={110} textAnchor="middle" transform="rotate(-90, 12, 110)" className="text-xs fill-slate-500">BLUP</text>
+                      </svg>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">
+                      Points below the diagonal are shrunk toward the grand mean (red lines).
+                      Vertical lines show the amount of shrinkage.
+                    </p>
+                  </div>
+                )}
+
+                {/* Equation display */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">Current Model</h3>
+                  <div className="font-mono text-sm bg-slate-100 p-3 rounded">
+                    <div className="text-slate-700">
+                      y<sub>it</sub> = <span className="text-emerald-600">{interceptMean}</span> +
+                      <span className="text-emerald-600">{slopeMean}</span>(Time) +
+                      <span className="text-blue-600">u<sub>0i</sub></span> +
+                      <span className="text-blue-600">u<sub>1i</sub></span>(Time) +
+                      <span className="text-orange-600">ε<sub>it</sub></span>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-500">
+                      <span className="text-emerald-600">■</span> Fixed effects |
+                      <span className="text-blue-600"> ■</span> Random effects (SD: {interceptSD}, {slopeSD}; ρ={correlation.toFixed(1)}) |
+                      <span className="text-orange-600"> ■</span> Residual (SD: {residualSD})
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="mt-4 text-xs text-slate-500 bg-slate-100 p-3 rounded">
+              <strong>Tips:</strong>
+              Set Slope SD = 0 to see parallel lines (random intercept only).
+              Increase Residual SD to see more noise around each trajectory.
+              Toggle "Show shrinkage" to see how extreme estimates are pulled toward the mean.
+              Hover over trajectories to see individual parameters.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<LMMExplorer />);
+  </script>
+</body>
+</html>
