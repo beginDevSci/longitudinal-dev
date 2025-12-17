@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#fafafa"/>
+  
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Linear Latent Growth Curve Model</text>
+  
+  <!-- Latent Factors (Ellipses) -->
+  <!-- Intercept -->
+  <ellipse cx="200" cy="100" rx="70" ry="40" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="200" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e40af">Intercept</text>
+  <text x="200" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1e40af">(η₁)</text>
+  
+  <!-- Slope -->
+  <ellipse cx="500" cy="100" rx="70" ry="40" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+  <text x="500" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c2410c">Slope</text>
+  <text x="500" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#c2410c">(η₂)</text>
+  
+  <!-- Covariance double-headed arrow between factors -->
+  <path d="M 270 100 C 320 60, 380 60, 430 100" fill="none" stroke="#6b7280" stroke-width="2"/>
+  <circle cx="270" cy="100" r="4" fill="#6b7280"/>
+  <circle cx="430" cy="100" r="4" fill="#6b7280"/>
+  <text x="350" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6b7280">ψ₁₂</text>
+  
+  <!-- Observed Variables (Rectangles) -->
+  <rect x="70" y="280" width="60" height="40" fill="white" stroke="#374151" stroke-width="2" rx="3"/>
+  <text x="100" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#374151">y₁</text>
+  
+  <rect x="170" y="280" width="60" height="40" fill="white" stroke="#374151" stroke-width="2" rx="3"/>
+  <text x="200" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#374151">y₂</text>
+  
+  <rect x="270" y="280" width="60" height="40" fill="white" stroke="#374151" stroke-width="2" rx="3"/>
+  <text x="300" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#374151">y₃</text>
+  
+  <rect x="370" y="280" width="60" height="40" fill="white" stroke="#374151" stroke-width="2" rx="3"/>
+  <text x="400" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#374151">y₄</text>
+  
+  <rect x="470" y="280" width="60" height="40" fill="white" stroke="#374151" stroke-width="2" rx="3"/>
+  <text x="500" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#374151">y₅</text>
+  
+  <!-- Arrows from Intercept to observed variables -->
+  <line x1="200" y1="140" x2="100" y2="275" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+  <line x1="200" y1="140" x2="200" y2="275" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+  <line x1="200" y1="140" x2="300" y2="275" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+  <line x1="200" y1="140" x2="400" y2="275" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+  <line x1="200" y1="140" x2="500" y2="275" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+  
+  <!-- Intercept loading labels -->
+  <text x="135" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2563eb">1</text>
+  <text x="185" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2563eb">1</text>
+  <text x="250" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2563eb">1</text>
+  <text x="310" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2563eb">1</text>
+  <text x="365" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2563eb">1</text>
+  
+  <!-- Arrows from Slope to observed variables -->
+  <line x1="500" y1="140" x2="100" y2="275" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+  <line x1="500" y1="140" x2="200" y2="275" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+  <line x1="500" y1="140" x2="300" y2="275" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+  <line x1="500" y1="140" x2="400" y2="275" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+  <line x1="500" y1="140" x2="500" y2="275" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+  
+  <!-- Slope loading labels -->
+  <text x="285" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea580c">0</text>
+  <text x="335" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea580c">1</text>
+  <text x="390" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea580c">2</text>
+  <text x="445" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea580c">3</text>
+  <text x="515" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea580c">4</text>
+  
+  <!-- Residual variances -->
+  <circle cx="100" cy="350" r="15" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="100" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">ε₁</text>
+  <line x1="100" y1="335" x2="100" y2="322" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  
+  <circle cx="200" cy="350" r="15" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="200" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">ε₂</text>
+  <line x1="200" y1="335" x2="200" y2="322" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  
+  <circle cx="300" cy="350" r="15" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="300" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">ε₃</text>
+  <line x1="300" y1="335" x2="300" y2="322" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  
+  <circle cx="400" cy="350" r="15" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="400" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">ε₄</text>
+  <line x1="400" y1="335" x2="400" y2="322" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  
+  <circle cx="500" cy="350" r="15" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="500" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">ε₅</text>
+  <line x1="500" y1="335" x2="500" y2="322" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  
+  <!-- Legend -->
+  <rect x="560" y="250" width="130" height="100" fill="white" stroke="#e5e7eb" stroke-width="1" rx="5"/>
+  <text x="625" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">Legend</text>
+  
+  <ellipse cx="580" cy="290" rx="12" ry="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+  <text x="625" y="294" text-anchor="start" font-family="Arial, sans-serif" font-size="10" fill="#374151">Latent factor</text>
+  
+  <rect x="568" y="305" width="24" height="14" fill="white" stroke="#374151" stroke-width="1" rx="2"/>
+  <text x="625" y="316" text-anchor="start" font-family="Arial, sans-serif" font-size="10" fill="#374151">Observed var</text>
+  
+  <circle cx="580" cy="335" r="8" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1"/>
+  <text x="625" y="339" text-anchor="start" font-family="Arial, sans-serif" font-size="10" fill="#374151">Residual</text>
+  
+</svg>
