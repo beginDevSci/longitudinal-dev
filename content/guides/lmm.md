@@ -59,17 +59,17 @@ LMM partitions variation into:
 
 ### The Basic LMM Equation
 
-For a simple random intercept model, the outcome $y_{ij}$ for observation $i$ in cluster $j$ is:
+For a simple random intercept model, the outcome \(y_{ij}\) for observation \(i\) in cluster \(j\) is:
 
 $$
 y_{ij} = \beta_0 + \beta_1 x_{ij} + u_{0j} + \epsilon_{ij}
 $$
 
 Where:
-- $\beta_0$ = population intercept (fixed effect)
-- $\beta_1$ = population slope (fixed effect)
-- $u_{0j}$ = cluster $j$'s deviation from population intercept (random effect)
-- $\epsilon_{ij}$ = residual error
+- \(\beta_0\) = population intercept (fixed effect)
+- \(\beta_1\) = population slope (fixed effect)
+- \(u_{0j}\) = cluster \(j\)'s deviation from population intercept (random effect)
+- \(\epsilon_{ij}\) = residual error
 
 Random effects are assumed normally distributed:
 $$
@@ -77,7 +77,7 @@ u_{0j} \sim N(0, \tau^2_{00})
 $$
 
 > [!warning]
-> The random effects represent *deviations from* the fixed effects, not the cluster-specific values themselves. The cluster-specific intercept is $\beta_0 + u_{0j}$.
+> The random effects represent *deviations from* the fixed effects, not the cluster-specific values themselves. The cluster-specific intercept is \(\beta_0 + u_{0j}\).
 
 ### Adding Random Slopes
 
@@ -87,7 +87,7 @@ $$
 y_{ij} = \beta_0 + \beta_1 x_{ij} + u_{0j} + u_{1j} x_{ij} + \epsilon_{ij}
 $$
 
-Now both intercept ($u_{0j}$) and slope ($u_{1j}$) vary by cluster. The random effects have a covariance structure:
+Now both intercept (\(u_{0j}\)) and slope (\(u_{1j}\)) vary by cluster. The random effects have a covariance structure:
 
 $$
 \begin{pmatrix} u_{0j} \\ u_{1j} \end{pmatrix} \sim N\left(\begin{pmatrix} 0 \\ 0 \end{pmatrix}, \begin{pmatrix} \tau^2_{00} & \tau_{01} \\ \tau_{01} & \tau^2_{11} \end{pmatrix}\right)

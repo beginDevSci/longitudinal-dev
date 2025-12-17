@@ -81,10 +81,53 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                 </div>
             </header>
 
+            // Inline TOC - horizontal section navigation
+            <nav class="guide-toc border-b border-default bg-surface/80 backdrop-blur-sm sticky top-0 z-40">
+                <div class="max-w-4xl mx-auto px-6">
+                    <ul class="flex gap-1 overflow-x-auto py-3 text-sm font-medium scrollbar-hide">
+                        <li>
+                            <a href="#overview" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Overview"
+                            </a>
+                        </li>
+                        <li class="text-muted flex items-center">"•"</li>
+                        <li>
+                            <a href="#conceptual-foundations" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Concepts"
+                            </a>
+                        </li>
+                        <li class="text-muted flex items-center">"•"</li>
+                        <li>
+                            <a href="#model-specification-fit" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Spec & Fit"
+                            </a>
+                        </li>
+                        <li class="text-muted flex items-center">"•"</li>
+                        <li>
+                            <a href="#interpretation" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Interpretation"
+                            </a>
+                        </li>
+                        <li class="text-muted flex items-center">"•"</li>
+                        <li>
+                            <a href="#worked-example" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Example"
+                            </a>
+                        </li>
+                        <li class="text-muted flex items-center">"•"</li>
+                        <li>
+                            <a href="#reference-resources" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                "Reference"
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
             // Main content
             <main class="max-w-4xl mx-auto px-6 py-8 lg:py-12">
                 <article
-                    class="prose prose-slate dark:prose-invert max-w-none
+                    class="guide-content prose prose-slate dark:prose-invert max-w-none
                            prose-headings:text-primary prose-p:text-secondary
                            prose-a:text-accent prose-a:no-underline hover:prose-a:underline
                            prose-code:text-accent prose-code:bg-subtle prose-code:px-1 prose-code:py-0.5 prose-code:rounded

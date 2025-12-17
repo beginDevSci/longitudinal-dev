@@ -39,6 +39,8 @@ pub fn SiteLayout(
                 <base href=base/>
                 // Use base path for stylesheet URL
                 <link rel="stylesheet" href=css_url/>
+                // KaTeX CSS for math rendering (guides use server-side KaTeX)
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous"/>
                 <AutoReload options=options.clone()/>
                 // Pass trimmed base path to HydrationScripts for modulepreload/WASM URLs
                 <HydrationScripts options islands=true root=base_trimmed/>

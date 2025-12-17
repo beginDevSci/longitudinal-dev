@@ -67,20 +67,20 @@ LGCM is mathematically equivalent to a two-level model:
 
 ### The Basic LGCM Equation
 
-For a linear growth model, the observed score $y_{it}$ for person $i$ at time $t$ is:
+For a linear growth model, the observed score \(y_{it}\) for person \(i\) at time \(t\) is:
 
 $$
 y_{it} = \eta_{0i} + \eta_{1i} \cdot \lambda_t + \epsilon_{it}
 $$
 
 Where:
-- $\eta_{0i}$ = person $i$'s intercept (latent)
-- $\eta_{1i}$ = person $i$'s slope (latent)
-- $\lambda_t$ = time score at occasion $t$ (fixed, e.g., 0, 1, 2, 3)
-- $\epsilon_{it}$ = residual error
+- \(\eta_{0i}\) = person \(i\)'s intercept (latent)
+- \(\eta_{1i}\) = person \(i\)'s slope (latent)
+- \(\lambda_t\) = time score at occasion \(t\) (fixed, e.g., 0, 1, 2, 3)
+- \(\epsilon_{it}\) = residual error
 
 > [!warning]
-> The time scores ($\lambda_t$) must be chosen carefully. They define what "one unit of change" means in your model.
+> The time scores (\(\lambda_t\)) must be chosen carefully. They define what "one unit of change" means in your model.
 
 ### Key Components of Linear LGCM
 

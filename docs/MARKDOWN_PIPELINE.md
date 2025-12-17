@@ -443,8 +443,41 @@ pub fn transform_markdown_events(events: Vec<Event<'_>>) -> Vec<Event<'_>> {
 - Inline math does not span across newlines
 
 **Known limitations:**
-- Display math (`$$...$$`) parsing is simple; very complex edge cases may fail
 - Error handling shows LaTeX source in `<code>` on KaTeX parse failure
+
+### Authoring Requirements for Math
+
+**Inline Math: Use `\(...\)` Delimiters**
+
+For inline math with subscripts, use LaTeX parenthesis delimiters `\(...\)` instead of `$...$`:
+
+```markdown
+<!-- ❌ WRONG - $...$ with underscores gets corrupted -->
+$y_{it}$ for person $i$
+
+<!-- ✅ CORRECT - use \(...\) for inline math with subscripts -->
+\(y_{it}\) for person \(i\)
+```
+
+**Why?** The `$...$` syntax conflicts with markdown's underscore emphasis parsing. The `\(...\)` delimiters are pre-processed before markdown runs, preventing this issue.
+
+**Common patterns:**
+- `\(y_{ij}\)` (subscripts)
+- `\(\beta_0\)` (Greek with subscript)
+- `\(\eta_{0i}\)` (nested subscripts)
+- `\(\lambda_t\)` (Greek with subscript)
+- `\(\epsilon_{it}\)` (error terms)
+
+**Display math** (`$$...$$` on separate lines) works correctly without special handling:
+
+```markdown
+$$
+y_{it} = \eta_{0i} + \eta_{1i} \cdot \lambda_t + \epsilon_{it}
+$$
+```
+
+**Simple inline math** without underscores can still use `$...$`:
+- `$x$`, `$i$`, `$t$` - all work fine with `$...$`
 
 ### Integration Point
 

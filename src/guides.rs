@@ -3,7 +3,7 @@
 //! Loads guide markdown files from `content/guides/*.md`, parses frontmatter,
 //! and renders markdown to HTML.
 
-use crate::markdown::transform_markdown_events;
+use crate::markdown::{preprocess_inline_math, transform_markdown_events};
 use crate::models::guide::{Guide, GuideCatalogItem, GuideFrontmatter};
 use pulldown_cmark::{html, Event, Options, Parser};
 use std::borrow::Cow;
@@ -36,6 +36,7 @@ fn parse_frontmatter(content: &str) -> Option<(GuideFrontmatter, &str)> {
 /// Render markdown content to HTML.
 ///
 /// Applies the transformation pipeline:
+/// 0. Pre-process `\(...\)` inline math (before markdown parsing)
 /// 1. Parse markdown with pulldown-cmark
 /// 2. Transform callouts (blockquotes with markers)
 /// 3. Wrap tables for responsive scrolling
@@ -43,12 +44,16 @@ fn parse_frontmatter(content: &str) -> Option<(GuideFrontmatter, &str)> {
 /// 5. Render math expressions via KaTeX
 /// 6. Convert events to HTML
 fn render_markdown_to_html(content: &str) -> String {
+    // Pre-process inline math with \(...\) delimiters before markdown parsing
+    // This prevents markdown from consuming the backslash escapes
+    let content = preprocess_inline_math(content);
+
     let mut options = Options::empty();
     options.insert(Options::ENABLE_TABLES);
     options.insert(Options::ENABLE_STRIKETHROUGH);
     options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
 
-    let parser = Parser::new_ext(content, options);
+    let parser = Parser::new_ext(&content, options);
 
     // Collect events and apply transformations
     let events: Vec<Event> = parser.collect();

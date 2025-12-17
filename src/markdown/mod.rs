@@ -10,6 +10,7 @@
 //! - **Modules**: Wrap specific H2 sections in collapsible `<details>` elements
 //! - **Math**: Render LaTeX math via KaTeX (server-side)
 //! - **Code Blocks**: Add unique IDs for copy button support
+//! - **Headings**: Add IDs to H2/H3 for anchor navigation
 //!
 //! ## Usage
 //!
@@ -24,9 +25,11 @@
 
 mod callouts;
 mod code_blocks;
+mod headings;
 mod math;
 mod modules;
 mod tables;
 mod transform;
 
+pub use math::preprocess_inline_math;
 pub use transform::transform_markdown_events;

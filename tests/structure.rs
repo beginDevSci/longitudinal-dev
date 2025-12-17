@@ -8,40 +8,40 @@ use std::path::Path;
 
 #[test]
 fn test_html_structure_integrity() {
-    // NOTE: This test now checks the landing page (index.html)
-    // Individual post structure is tested in test_each_post_has_fixed_structure
-    let html_path = Path::new("target/site/index.html");
+    // NOTE: This test checks the landing page (index.html)
+    // SSG output goes to dist/, not target/site/
+    let html_path = Path::new("dist/index.html");
 
     // Skip test if HTML not yet generated (pre-build)
     if !html_path.exists() {
-        println!("SKIP: target/site/index.html not found (run build first)");
+        println!("SKIP: dist/index.html not found (run `make ssg` first)");
         return;
     }
 
     let html = fs::read_to_string(html_path).expect("Failed to read generated HTML");
 
-    // Landing page should have 1 h1 (Blog Index title)
+    // Landing page should have 1 h1 (site title)
     let h1_count = html.matches("<h1").count();
     assert_eq!(
         h1_count, 1,
-        "Expected exactly 1 <h1> tag (index page title), found {h1_count}"
+        "Expected exactly 1 <h1> tag (site title), found {h1_count}"
     );
 
-    // Verify the page contains links to posts section
-    assert!(html.contains("/posts/"), "Missing posts section link");
+    // Verify the page contains links to tutorials section (renamed from /posts/)
+    assert!(html.contains("/tutorials/"), "Missing tutorials section link");
 
     println!("✅ Landing page structure verified:");
     println!("   - <h1> tags: {h1_count}");
-    println!("   - Posts section link: present");
+    println!("   - Tutorials section link: present");
 }
 
 #[test]
 fn test_islands_hydration_wiring() {
-    let html_path = Path::new("target/site/index.html");
+    let html_path = Path::new("dist/index.html");
 
     // Skip if not built
     if !html_path.exists() {
-        println!("SKIP: target/site/index.html not found (run build first)");
+        println!("SKIP: dist/index.html not found (run `make ssg` first)");
         return;
     }
 
@@ -72,32 +72,32 @@ fn test_islands_hydration_wiring() {
     println!("   - WASM references: present");
 }
 
-/// Multi-post structure test
+/// Multi-tutorial structure test
 ///
-/// Verifies that each generated post maintains the strict 1+6 structure
+/// Verifies that each generated tutorial maintains the strict 1+6 structure
 #[test]
-fn test_each_post_has_fixed_structure() {
-    let site_root = Path::new("target/site");
-    // Use actual tutorial posts
-    let post_slugs = ["lgcm-basic", "lmm-random-slopes", "mlgcm"];
+fn test_each_tutorial_has_fixed_structure() {
+    let site_root = Path::new("dist");
+    // Use actual tutorial slugs
+    let tutorial_slugs = ["lgcm-basic", "lmm-random-slopes", "mlgcm"];
 
-    for slug in post_slugs {
-        let post_path = site_root.join("posts").join(slug).join("index.html");
+    for slug in tutorial_slugs {
+        let tutorial_path = site_root.join("tutorials").join(slug).join("index.html");
 
         // Skip if not built yet
-        if !post_path.exists() {
-            println!("SKIP: {} not found (run build first)", post_path.display());
+        if !tutorial_path.exists() {
+            println!("SKIP: {} not found (run `make ssg` first)", tutorial_path.display());
             continue;
         }
 
-        let html = fs::read_to_string(&post_path)
-            .unwrap_or_else(|_| panic!("Failed to read: {}", post_path.display()));
+        let html = fs::read_to_string(&tutorial_path)
+            .unwrap_or_else(|_| panic!("Failed to read: {}", tutorial_path.display()));
 
         // Count h1 tags
         let h1_count = html.matches("<h1").count();
         assert_eq!(
             h1_count, 1,
-            "Post '{slug}' should have exactly 1 <h1>, found {h1_count}"
+            "Tutorial '{slug}' should have exactly 1 <h1>, found {h1_count}"
         );
 
         // Count section tags
@@ -109,26 +109,26 @@ fn test_each_post_has_fixed_structure() {
 
         assert_eq!(
             section_count, expected_sections,
-            "Post '{slug}' should have exactly {expected_sections} <section> tags (6 required sections), found {section_count}"
+            "Tutorial '{slug}' should have exactly {expected_sections} <section> tags (6 required sections), found {section_count}"
         );
 
-        println!("✅ Post '{slug}' structure verified (1 h1, {section_count} sections)");
+        println!("✅ Tutorial '{slug}' structure verified (1 h1, {section_count} sections)");
     }
 }
 
 /// Data Access section test
 ///
-/// Verifies that tutorial posts have the Data Access section
+/// Verifies that tutorials have the Data Access section
 #[test]
 fn test_data_access_section_present() {
-    let html_path = Path::new("target/site/posts/lgcm-basic/index.html");
+    let html_path = Path::new("dist/tutorials/lgcm-basic/index.html");
 
     if !html_path.exists() {
-        println!("SKIP: lgcm-basic post not found (run build first)");
+        println!("SKIP: lgcm-basic tutorial not found (run `make ssg` first)");
         return;
     }
 
-    let html = fs::read_to_string(html_path).expect("Failed to read lgcm-basic post");
+    let html = fs::read_to_string(html_path).expect("Failed to read lgcm-basic tutorial");
 
     // Data Access section exists
     assert!(

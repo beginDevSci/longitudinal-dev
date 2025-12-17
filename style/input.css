@@ -1375,6 +1375,108 @@ body {
   }
 
   /* ========================================
+     GUIDE TOC (Inline Navigation)
+     Horizontal section navigation bar
+     ======================================== */
+
+  .guide-toc {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .guide-toc::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .guide-toc-link {
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .guide-toc-link.active {
+    color: var(--color-text-accent);
+    background-color: rgba(6, 182, 212, 0.1);
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ========================================
+     GUIDE CONTENT TYPOGRAPHY
+     Section hierarchy and vertical rhythm
+     ======================================== */
+
+  /* Main H2 sections - visually dominant anchors */
+  .guide-content > h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-accent);
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border-subtle);
+    scroll-margin-top: 6rem;
+  }
+
+  /* First H2 doesn't need top border */
+  .guide-content > h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  /* Subsection H3s - demoted, lighter weight */
+  .guide-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    scroll-margin-top: 6rem;
+  }
+
+  /* H4s - even more subtle */
+  .guide-content h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Paragraphs within guide */
+  .guide-content p {
+    margin-bottom: 1rem;
+    line-height: 1.75;
+  }
+
+  /* Lists */
+  .guide-content ul,
+  .guide-content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .guide-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* Horizontal rules as subtle section breaks */
+  .guide-content hr {
+    border: none;
+    height: 1px;
+    background: var(--color-border-subtle);
+    margin: 2.5rem 0;
+  }
+
+  /* ========================================
      GUIDE CODE BLOCK STYLES
      Styling for code blocks in method guides
      ======================================== */
@@ -1484,8 +1586,8 @@ body {
      ======================================== */
 
   .callout {
-    margin: var(--spacing-4) 0;
-    padding: var(--spacing-4);
+    margin: var(--spacing-5) 0;
+    padding: var(--spacing-4) var(--spacing-5);
     border-radius: var(--radius-lg);
     border-left: 4px solid;
   }
@@ -1494,8 +1596,24 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-2);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--spacing-2);
+    font-weight: var(--font-weight-bold);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .callout-body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .callout-body > :first-child {
+    margin-top: 0;
+  }
+
+  .callout-body > :last-child {
+    margin-bottom: 0;
   }
 
   .callout-content > :first-child {
@@ -1579,6 +1697,45 @@ body {
 
   .table-container {
     min-width: 100%;
+  }
+
+  /* Table element styling for guides */
+  .table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-bg-surface);
+    font-size: 0.875rem;
+  }
+
+  .table-wrapper th,
+  .table-wrapper td {
+    padding: var(--spacing-3) var(--spacing-4);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .table-wrapper thead th {
+    background: var(--color-bg-accent-subtle);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--color-text-accent);
+    border-bottom: 2px solid var(--color-border-accent);
+  }
+
+  .table-wrapper tbody tr:hover {
+    background: var(--color-bg-hover);
+  }
+
+  /* Numeric table styling - for fit indices, stats tables */
+  .table-wrapper td:nth-child(n+2) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* First column often has labels - keep left aligned */
+  .table-wrapper td:first-child {
+    font-weight: 500;
   }
 
   /* ========================================

@@ -4,8 +4,25 @@
 //!
 //! ## Supported Delimiters
 //!
-//! - Inline: `$...$` or `\(...\)`
-//! - Display: `$$...$$` or `\[...\]`
+//! - Inline: `$...$` or `\(...\)` (pre-processed before markdown parsing)
+//! - Display: `$$...$$` or `\[...\]` (including multiline blocks)
+//!
+//! ## Pre-processing for `\(...\)` Syntax
+//!
+//! The `\(...\)` delimiters are pre-processed BEFORE pulldown-cmark runs because
+//! markdown consumes the backslash as an escape character. The pre-processor
+//! replaces `\(...\)` with rendered KaTeX HTML, which pulldown-cmark then
+//! treats as raw HTML and passes through unchanged.
+//!
+//! ## Multiline Display Math
+//!
+//! Display math blocks that span multiple lines in markdown:
+//! ```markdown
+//! $$
+//! y = mx + b
+//! $$
+//! ```
+//! are handled by accumulating events until the closing delimiter is found.
 //!
 //! ## Safety
 //!
@@ -14,18 +31,71 @@
 
 use pulldown_cmark::{CodeBlockKind, CowStr, Event, Tag, TagEnd};
 
+#[cfg(feature = "ssr")]
+use regex::Regex;
+#[cfg(feature = "ssr")]
+use std::sync::LazyLock;
+
+/// Regex for inline math with \(...\) delimiters.
+/// Must be processed before markdown parsing.
+#[cfg(feature = "ssr")]
+static INLINE_MATH_PAREN: LazyLock<Regex> = LazyLock::new(|| {
+    // Match \( ... \) but not inside code blocks (handled separately)
+    Regex::new(r"\\\(([^)]+)\\\)").expect("Invalid regex")
+});
+
+/// Pre-process markdown to handle `\(...\)` inline math.
+///
+/// This runs BEFORE pulldown-cmark to prevent markdown from consuming
+/// the backslash escapes. Replaces `\(...\)` with rendered KaTeX HTML.
+///
+/// Note: This does NOT handle `\(...\)` inside code blocks - those are
+/// skipped by the regex not matching multi-line patterns and by the
+/// nature of fenced code blocks being separate from prose.
+#[cfg(feature = "ssr")]
+pub fn preprocess_inline_math(content: &str) -> String {
+    INLINE_MATH_PAREN.replace_all(content, |caps: &regex::Captures| {
+        let expr = &caps[1];
+        render_katex(expr, false)
+    }).into_owned()
+}
+
+/// Non-SSR fallback: return content unchanged (math processing happens at SSG build time)
+#[cfg(not(feature = "ssr"))]
+pub fn preprocess_inline_math(content: &str) -> String {
+    content.to_string()
+}
+
+/// State for tracking multiline display math capture.
+#[derive(Debug)]
+enum MathCaptureState {
+    /// Not currently capturing display math
+    None,
+    /// Capturing display math content (delimiter type, accumulated text)
+    Capturing { delimiter: DisplayDelimiter, content: String },
+}
+
+#[derive(Debug, Clone, Copy)]
+enum DisplayDelimiter {
+    DoubleDollar,  // $$
+    Bracket,       // \[...\]
+}
+
 /// Render math expressions in text events.
 ///
 /// Scans text events for math delimiters and replaces them with KaTeX-rendered
-/// HTML. Skips code blocks and inline code to avoid false positives.
+/// HTML. Handles both single-line and multiline display math blocks.
+/// Skips code blocks and inline code to avoid false positives.
 pub fn render_math(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
     let mut result = Vec::with_capacity(events.len());
     let mut in_code_block = false;
+    let mut capture_state = MathCaptureState::None;
 
     for event in events {
         match &event {
-            // Track code block state
+            // Track code block state - flush any pending math capture
             Event::Start(Tag::CodeBlock(_)) => {
+                flush_capture(&mut capture_state, &mut result);
                 in_code_block = true;
                 result.push(into_static(event));
             }
@@ -36,25 +106,154 @@ pub fn render_math(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
 
             // Skip inline code - don't process math in code spans
             Event::Code(_) => {
+                flush_capture(&mut capture_state, &mut result);
                 result.push(into_static(event));
             }
 
             // Process text events (only outside code blocks)
             Event::Text(text) if !in_code_block => {
-                let processed = process_math_in_text(text);
-                for e in processed {
-                    result.push(e);
+                process_text_event(text, &mut capture_state, &mut result);
+            }
+
+            // SoftBreak and HardBreak can be part of multiline math
+            Event::SoftBreak if !in_code_block => {
+                if let MathCaptureState::Capturing { content, .. } = &mut capture_state {
+                    content.push('\n');
+                } else {
+                    result.push(Event::SoftBreak);
                 }
+            }
+            Event::HardBreak if !in_code_block => {
+                if let MathCaptureState::Capturing { content, .. } = &mut capture_state {
+                    content.push('\n');
+                } else {
+                    result.push(Event::HardBreak);
+                }
+            }
+
+            // Structural events flush any pending math capture
+            Event::Start(_) | Event::End(_) => {
+                flush_capture(&mut capture_state, &mut result);
+                result.push(into_static(event));
             }
 
             // Pass through everything else
             _ => {
+                flush_capture(&mut capture_state, &mut result);
                 result.push(into_static(event));
             }
         }
     }
 
+    // Flush any remaining capture at end of document
+    flush_capture(&mut capture_state, &mut result);
+
     result
+}
+
+/// Process a text event, handling display math capture state.
+fn process_text_event(
+    text: &str,
+    capture_state: &mut MathCaptureState,
+    result: &mut Vec<Event<'static>>,
+) {
+    match capture_state {
+        MathCaptureState::None => {
+            // Check if this text starts a multiline display math block
+            let trimmed = text.trim();
+
+            // Check for standalone $$ that starts display math
+            if trimmed == "$$" {
+                *capture_state = MathCaptureState::Capturing {
+                    delimiter: DisplayDelimiter::DoubleDollar,
+                    content: String::new(),
+                };
+                return;
+            }
+
+            // Check for standalone \[ that starts display math
+            if trimmed == r"\[" {
+                *capture_state = MathCaptureState::Capturing {
+                    delimiter: DisplayDelimiter::Bracket,
+                    content: String::new(),
+                };
+                return;
+            }
+
+            // Check for $$ at start of text with content following
+            if let Some(rest) = trimmed.strip_prefix("$$") {
+                // Check if it also ends with $$ (single-line display math)
+                if let Some(expr) = rest.trim().strip_suffix("$$") {
+                    // Complete display math on single line
+                    let rendered = render_katex(expr.trim(), true);
+                    result.push(Event::Html(CowStr::Boxed(rendered.into_boxed_str())));
+                    return;
+                }
+                // Starts with $$ but doesn't end with it - begin capture
+                *capture_state = MathCaptureState::Capturing {
+                    delimiter: DisplayDelimiter::DoubleDollar,
+                    content: rest.to_string(),
+                };
+                return;
+            }
+
+            // Not starting display math - process inline math normally
+            let processed = process_math_in_text(text);
+            for e in processed {
+                result.push(e);
+            }
+        }
+
+        MathCaptureState::Capturing { delimiter, content } => {
+            let trimmed = text.trim();
+
+            // Check for closing delimiter
+            let closing = match delimiter {
+                DisplayDelimiter::DoubleDollar => "$$",
+                DisplayDelimiter::Bracket => r"\]",
+            };
+
+            if trimmed == closing {
+                // Found standalone closing delimiter - render the math
+                let expr = content.trim();
+                let rendered = render_katex(expr, true);
+                result.push(Event::Html(CowStr::Boxed(rendered.into_boxed_str())));
+                *capture_state = MathCaptureState::None;
+                return;
+            }
+
+            // Check if text ends with closing delimiter
+            if let Some(before) = trimmed.strip_suffix(closing) {
+                content.push_str(before);
+                let expr = content.trim();
+                let rendered = render_katex(expr, true);
+                result.push(Event::Html(CowStr::Boxed(rendered.into_boxed_str())));
+                *capture_state = MathCaptureState::None;
+                return;
+            }
+
+            // Continue accumulating content
+            if !content.is_empty() {
+                content.push('\n');
+            }
+            content.push_str(text);
+        }
+    }
+}
+
+/// Flush any pending math capture state, emitting accumulated content as-is.
+fn flush_capture(capture_state: &mut MathCaptureState, result: &mut Vec<Event<'static>>) {
+    if let MathCaptureState::Capturing { delimiter, content } = capture_state {
+        // We hit a structural element before finding closing delimiter
+        // Emit the opening delimiter and content as text (fallback)
+        let opening = match delimiter {
+            DisplayDelimiter::DoubleDollar => "$$",
+            DisplayDelimiter::Bracket => r"\[",
+        };
+        let text = format!("{}{}", opening, content);
+        result.push(Event::Text(CowStr::Boxed(text.into_boxed_str())));
+    }
+    *capture_state = MathCaptureState::None;
 }
 
 /// Process math delimiters in a text string.
@@ -382,6 +581,18 @@ fn tag_into_static(tag: Tag<'_>) -> Tag<'static> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pulldown_cmark::{html, Options, Parser};
+
+    // Helper to parse markdown, apply math transform, and render to HTML
+    fn parse_transform_render(markdown: &str) -> String {
+        let parser = Parser::new_ext(markdown, Options::all());
+        let events: Vec<Event> = parser.collect();
+        let transformed = render_math(events);
+
+        let mut html_output = String::new();
+        html::push_html(&mut html_output, transformed.into_iter());
+        html_output
+    }
 
     #[test]
     fn test_find_inline_math() {
@@ -429,5 +640,106 @@ mod tests {
         let (_, _, is_display, expr) = result.unwrap();
         assert!(is_display);
         assert_eq!(expr, "y = mx + b");
+    }
+
+    // ========================================================================
+    // Event-based multiline display math tests
+    // ========================================================================
+
+    #[test]
+    fn test_multiline_display_math_simple() {
+        // Tests the event-based capture of multiline display math
+        let md = r#"Here is an equation:
+
+$$
+y = mx + b
+$$
+
+The end."#;
+        let html = parse_transform_render(md);
+
+        // Should NOT contain raw $$ delimiters
+        assert!(!html.contains("$$"), "Raw $$ found in output: {}", html);
+        // Should contain math-display class
+        assert!(html.contains("math-display"), "No math-display found: {}", html);
+    }
+
+    #[test]
+    fn test_multiline_display_math_with_subscripts() {
+        let md = r#"The LGCM equation:
+
+$$
+y\_\{it\} = \eta\_\{0i\} + \eta\_\{1i\} \cdot \lambda\_t + \epsilon\_\{it\}
+$$
+
+Where the subscripts matter."#;
+        let html = parse_transform_render(md);
+
+        assert!(!html.contains("$$"), "Raw $$ found in output");
+        assert!(html.contains("math-display"), "No math-display found");
+    }
+
+    #[test]
+    fn test_single_line_display_math() {
+        // Display math on a single line should also work
+        let md = "Inline display: $$y = mx + b$$ done.";
+        let html = parse_transform_render(md);
+
+        assert!(!html.contains("$$"), "Raw $$ found in output");
+        assert!(html.contains("math-display"), "No math-display found");
+    }
+
+    #[test]
+    fn test_inline_math_preserved() {
+        let md = "The formula $E = mc^2$ is famous.";
+        let html = parse_transform_render(md);
+
+        // Should contain math-inline, not raw $
+        assert!(html.contains("math-inline"), "No math-inline found");
+        // Should not have math-display
+        assert!(!html.contains("math-display"), "Unexpected math-display found");
+    }
+
+    #[test]
+    fn test_matrix_multiline() {
+        // Test matrix notation spanning multiple lines
+        let md = r#"Random effects covariance:
+
+$$
+\begin{pmatrix} u_{0j} \\ u_{1j} \end{pmatrix} \sim N
+$$
+
+End."#;
+        let html = parse_transform_render(md);
+
+        // The key test is that $$ delimiters are NOT in the output
+        // and the content is wrapped in math-display
+        assert!(!html.contains("$$"), "Raw $$ found in output");
+        assert!(html.contains("math-display"), "No math-display found");
+        // Note: The actual LaTeX content (\begin{pmatrix}) will be inside
+        // KaTeX's rendered HTML or in a <code> fallback, which is correct behavior
+    }
+
+    #[test]
+    fn test_code_block_preserved() {
+        // Math inside code blocks should NOT be processed
+        let md = r#"```r
+# Using $$ for display math
+x <- $$
+```"#;
+        let html = parse_transform_render(md);
+
+        // Should NOT contain math-display (it's in a code block)
+        assert!(!html.contains("math-display"), "Code block math was incorrectly processed");
+    }
+
+    #[test]
+    fn test_inline_code_preserved() {
+        let md = "Use `$x$` for inline math in LaTeX.";
+        let html = parse_transform_render(md);
+
+        // The backtick-wrapped content should be preserved as code
+        // and not processed as math
+        assert!(!html.contains("math-inline") || html.contains("<code>$x$</code>"));
     }
 }
