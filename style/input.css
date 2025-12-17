@@ -1410,40 +1410,59 @@ body {
   /* ========================================
      GUIDE CONTENT TYPOGRAPHY
      Section hierarchy and vertical rhythm
+     v1.1 Polish: Match gold standard design
      ======================================== */
 
-  /* Main H2 sections - visually dominant anchors */
+  /* Content width for optimal readability */
+  .guide-content {
+    max-width: 75ch;
+  }
+
+  /* Consistent vertical rhythm between all block elements */
+  .guide-content > * + * {
+    margin-top: 1.4rem;
+  }
+
+  /* Main H2 sections - visually dominant chapter markers */
   .guide-content > h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-text-accent);
-    margin-top: 3rem;
+    font-size: 1.875rem;  /* ~30px - larger for clear hierarchy */
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-text-primary);
+    margin-top: 4rem;  /* Strong top separation */
     margin-bottom: 1.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--color-border-subtle);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);  /* Bottom border per gold standard */
     scroll-margin-top: 6rem;
   }
 
-  /* First H2 doesn't need top border */
+  /* First H2 doesn't need excessive top margin */
   .guide-content > h2:first-of-type {
     margin-top: 0;
-    padding-top: 0;
-    border-top: none;
   }
 
-  /* Subsection H3s - demoted, lighter weight */
+  /* Subsection H3s - clear but subordinate to H2 */
   .guide-content h3 {
-    font-size: 1.25rem;
+    font-size: 1.375rem;  /* ~22px */
     font-weight: 600;
     color: var(--color-text-primary);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
     scroll-margin-top: 6rem;
   }
 
-  /* H4s - even more subtle */
+  /* H4s - subtle tertiary level */
   .guide-content h4 {
-    font-size: 1.1rem;
+    font-size: 1.125rem;  /* 18px */
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* H5s - for inline labeled sections */
+  .guide-content h5 {
+    font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-secondary);
     margin-top: 1.5rem;
@@ -1452,28 +1471,41 @@ body {
 
   /* Paragraphs within guide */
   .guide-content p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     line-height: 1.75;
   }
 
   /* Lists */
   .guide-content ul,
   .guide-content ol {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
     padding-left: 1.5rem;
   }
 
   .guide-content li {
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
+    margin-bottom: 0.625rem;
+    line-height: 1.7;
   }
 
-  /* Horizontal rules as subtle section breaks */
+  /* Nested lists */
+  .guide-content li > ul,
+  .guide-content li > ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Horizontal rules - very subtle, only between major conceptual breaks */
   .guide-content hr {
     border: none;
     height: 1px;
-    background: var(--color-border-subtle);
-    margin: 2.5rem 0;
+    background: transparent;  /* Make HR invisible - use H2 borders instead */
+    margin: 1rem 0;
+  }
+
+  /* Strong text emphasis */
+  .guide-content strong {
+    font-weight: 600;
+    color: var(--color-text-primary);
   }
 
   /* ========================================
@@ -1582,30 +1614,33 @@ body {
 
   /* ========================================
      CALLOUT STYLES
-     Styling for callout boxes in guides
+     v1.1 Polish: Full background, rounded corners
+     Match gold standard design
      ======================================== */
 
   .callout {
-    margin: var(--spacing-5) 0;
-    padding: var(--spacing-4) var(--spacing-5);
-    border-radius: var(--radius-lg);
-    border-left: 4px solid;
+    margin: 1.75rem 0;
+    padding: 1.5rem 1.75rem;
+    border-radius: 0.75rem;  /* Smoother corners */
+    border: 1px solid;
+    border-left-width: 4px;
   }
 
   .callout-title {
     display: flex;
     align-items: center;
     gap: var(--spacing-2);
-    font-weight: var(--font-weight-bold);
-    font-size: 0.9rem;
+    font-weight: 700;
+    font-size: 0.875rem;
     text-transform: uppercase;
-    letter-spacing: 0.025em;
-    margin-bottom: var(--spacing-3);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
   }
 
   .callout-body {
-    font-size: 0.95rem;
-    line-height: 1.65;
+    font-size: 1rem;
+    line-height: 1.7;
+    font-style: italic;  /* Match gold standard italic content */
   }
 
   .callout-body > :first-child {
@@ -1624,64 +1659,70 @@ body {
     margin-bottom: 0;
   }
 
-  /* Tip callout - green */
+  /* Tip callout - emerald/green */
   .callout-tip {
-    background-color: rgba(16, 185, 129, 0.1);
-    border-color: var(--color-emerald-500);
+    background-color: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    border-left-color: var(--color-emerald-500);
   }
 
   .callout-tip .callout-title {
-    color: var(--color-emerald-600);
+    color: var(--color-emerald-400);
   }
 
   /* Warning callout - amber */
   .callout-warning {
-    background-color: rgba(245, 158, 11, 0.1);
-    border-color: var(--color-amber-500);
+    background-color: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+    border-left-color: var(--color-amber-500);
   }
 
   .callout-warning .callout-title {
-    color: var(--color-amber-600);
+    color: var(--color-amber-400);
   }
 
-  /* Note callout - blue */
+  /* Note callout - blue (primary callout type) */
   .callout-note {
-    background-color: rgba(59, 130, 246, 0.1);
-    border-color: var(--color-blue-500);
+    background-color: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.25);
+    border-left-color: var(--color-blue-500);
   }
 
   .callout-note .callout-title {
-    color: var(--color-blue-600);
+    color: var(--color-blue-400);
   }
 
   /* Pitfall callout - red */
   .callout-pitfall {
-    background-color: rgba(239, 68, 68, 0.1);
-    border-color: var(--color-red-500);
+    background-color: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.25);
+    border-left-color: var(--color-red-500);
   }
 
   .callout-pitfall .callout-title {
-    color: var(--color-red-600);
+    color: var(--color-red-400);
   }
 
   /* Info callout - purple */
   .callout-info {
-    background-color: rgba(139, 92, 246, 0.1);
-    border-color: var(--color-violet-500);
+    background-color: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.25);
+    border-left-color: var(--color-violet-500);
   }
 
   .callout-info .callout-title {
-    color: var(--color-violet-600);
+    color: var(--color-violet-400);
   }
 
   /* Didactic callout - cyan */
   .callout-didactic {
-    background-color: rgba(6, 182, 212, 0.1);
-    border-color: var(--color-cyan-500);
+    background-color: rgba(6, 182, 212, 0.12);
+    border-color: rgba(6, 182, 212, 0.25);
+    border-left-color: var(--color-cyan-500);
   }
 
   .callout-didactic .callout-title {
-    color: var(--color-cyan-600);
+    color: var(--color-cyan-400);
   }
 
   /* ========================================
