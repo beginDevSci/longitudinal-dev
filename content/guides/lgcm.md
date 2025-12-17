@@ -11,7 +11,7 @@ r_packages: ["lavaan", "tidyverse", "MASS"]
 
 ---
 
-## Why Study Growth?
+### Why Study Growth?
 
 Longitudinal data capture something cross-sectional data cannot: **change**. When you measure the same people over time, you can ask questions that matter:
 
@@ -21,7 +21,7 @@ Longitudinal data capture something cross-sectional data cannot: **change**. Whe
 
 These are questions about **trajectories**—not just whether groups differ, but how individuals change.
 
-### The Limits of Simpler Methods
+#### The Limits of Simpler Methods
 
 Traditional approaches fall short:
 
@@ -33,7 +33,7 @@ Traditional approaches fall short:
 
 These methods answer "Did the group change?" but not "How do individuals differ in their change?"
 
-### What Growth Modeling Adds
+#### What Growth Modeling Adds
 
 Latent Growth Curve Models (LGCM) shift the question from group averages to individual trajectories. Every person gets their own:
 
@@ -44,25 +44,25 @@ The model then asks: How much do people vary in these trajectories? And what pre
 
 ---
 
-## What LGCM Provides
+### What LGCM Provides
 
 LGCM offers four capabilities that simpler methods lack:
 
-### Individual Trajectories
+#### Individual Trajectories
 Each person has their own growth curve. The model estimates not just the average trajectory, but the **variance** around it—how much people differ in starting points and rates of change.
 
-### Flexible Time Structures
+#### Flexible Time Structures
 Waves don't need to be equally spaced. Measure at baseline, 3 months, 6 months, and 2 years? No problem—just code time accordingly. The slope becomes "change per unit time" in whatever metric you choose.
 
-### Missing Data Handling
+#### Missing Data Handling
 Modern estimation (Full Information Maximum Likelihood) uses all available data. Participants who miss a wave still contribute information—no listwise deletion required.
 
-### Testable Model Fit
+#### Testable Model Fit
 Unlike approaches that simply estimate parameters, LGCM produces fit indices. You can ask: Does a linear trajectory actually describe these data? Is a more complex model (quadratic, piecewise) warranted?
 
 ---
 
-## When LGCM is Appropriate
+### When LGCM is Appropriate
 
 LGCM works well when you have:
 
@@ -73,7 +73,7 @@ LGCM works well when you have:
 | **Interest in individual differences** | Not just "did the mean change?" |
 | **Adequate sample** | 100+ for simple models; more for complex |
 
-### When to Consider Alternatives
+#### When to Consider Alternatives
 
 - **Only 2 time points**: LGCM offers little advantage; use change scores, ANCOVA, or autoregressive models instead
 - **Categorical outcomes with few categories**: Consider growth models for categorical data (not covered here)
@@ -82,7 +82,7 @@ LGCM works well when you have:
 
 ---
 
-## What You'll Learn
+### What You'll Learn
 
 By the end of this tutorial, you will be able to:
 
@@ -94,7 +94,7 @@ By the end of this tutorial, you will be able to:
 6. **Interpret** parameters substantively
 7. **Avoid** common pitfalls
 
-### How This Tutorial is Organized
+#### How This Tutorial is Organized
 
 | Section | Purpose | When to Use |
 |---------|---------|-------------|
@@ -114,13 +114,13 @@ This section builds your intuition for what LGCM actually models. Two perspectiv
 
 ---
 
-## Two Ways to Understand LGCM
+### Two Ways to Understand LGCM
 
 LGCM can be understood through two equivalent lenses: as a factor model (SEM perspective) or as a hierarchical model (multilevel perspective). **They describe the same model**—just different intuitions.
 
 ---
 
-### Side-by-Side Comparison
+#### Side-by-Side Comparison
 
 <table>
 <tr>
@@ -234,7 +234,7 @@ Individual intercepts and slopes are draws from a population distribution.
 
 ---
 
-### Parameter Correspondence
+#### Parameter Correspondence
 
 The two framings use different notation for the same quantities:
 
@@ -249,7 +249,7 @@ The two framings use different notation for the same quantities:
 
 ---
 
-### Path Diagram (SEM Representation)
+#### Path Diagram (SEM Representation)
 
 ![LGCM Path Diagram](/images/guides/lgcm/lgcm_path_diagram.svg)
 
@@ -284,7 +284,7 @@ Residual variances omitted for clarity
 
 ---
 
-### Spaghetti Plot (Multilevel Representation)
+#### Spaghetti Plot (Multilevel Representation)
 
 The multilevel perspective naturally leads to visualizing individual trajectories:
 
@@ -298,11 +298,11 @@ The multilevel perspective naturally leads to visualizing individual trajectorie
 
 ---
 
-## Key Components of Linear LGCM
+### Key Components of Linear LGCM
 
 Regardless of which framing you prefer, these are the building blocks:
 
-### The Two Latent Factors
+#### The Two Latent Factors
 
 | Factor | What It Captures | Defined By |
 |--------|------------------|------------|
@@ -311,7 +311,7 @@ Regardless of which framing you prefer, these are the building blocks:
 
 These aren't observed directly—we infer them from the pattern of scores over time.
 
-### Factor Loadings: Encoding Time
+#### Factor Loadings: Encoding Time
 
 In LGCM, loadings are **fixed**, not estimated:
 
@@ -322,7 +322,7 @@ In LGCM, loadings are **fixed**, not estimated:
 
 The loadings 0, 1, 2, 3, 4 assume equally spaced waves with Time 0 at Wave 1. Adjust if your design differs (e.g., for waves at months 0, 3, 6, 12, 24, use loadings 0, 3, 6, 12, 24 so slope = change per month).
 
-### Factor Means: The Average Trajectory
+#### Factor Means: The Average Trajectory
 
 | Parameter | Symbol | Interpretation |
 |-----------|--------|----------------|
@@ -337,7 +337,7 @@ Average score at time t = μ₁ + μ₂ × t
 
 Example: If μ₁ = 50 and μ₂ = 2, the average person starts at 50 and increases by 2 per wave.
 
-### Factor Variances: Individual Differences
+#### Factor Variances: Individual Differences
 
 | Parameter | Symbol | Interpretation |
 |-----------|--------|----------------|
@@ -356,7 +356,7 @@ Example: If μ₁ = 50 and μ₂ = 2, the average person starts at 50 and increa
 
 *Figure: Histograms showing the distribution of individual intercepts (left) and slopes (right) across 400 participants.*
 
-### Factor Covariance: The Intercept-Slope Relationship
+#### Factor Covariance: The Intercept-Slope Relationship
 
 | Sign | Interpretation |
 |------|----------------|
@@ -376,7 +376,7 @@ r = ψ₁₂ / √(ψ₁₁ × ψ₂₂)
 
 A correlation of -0.20 means a modest negative relationship: those who start higher grow slightly slower.
 
-### Residuals: What the Trajectory Doesn't Explain
+#### Residuals: What the Trajectory Doesn't Explain
 
 ```
 Observed = Predicted + Residual
@@ -391,13 +391,13 @@ yᵢₜ = (η₁ᵢ + η₂ᵢ × t) + εᵢₜ
 
 ---
 
-## Choosing Your Framing
+### Choosing Your Framing
 
-### It Doesn't Matter Much
+#### It Doesn't Matter Much
 
 The model is identical—only the intuition differs. Both yield the same parameter estimates.
 
-### Practical Considerations
+#### Practical Considerations
 
 | If you're comfortable with... | Use this framing |
 |------------------------------|------------------|
@@ -405,7 +405,7 @@ The model is identical—only the intuition differs. Both yield the same paramet
 | Mixed models, HLM, lme4 | Multilevel perspective |
 | Neither (new to both) | Multilevel often more intuitive |
 
-### Software Implications
+#### Software Implications
 
 | Framing | Natural Software | Syntax Style |
 |---------|------------------|---------------|
@@ -414,7 +414,7 @@ The model is identical—only the intuition differs. Both yield the same paramet
 
 **This tutorial uses SEM notation and lavaan syntax**, but references the multilevel interpretation when it clarifies a concept.
 
-### Why Both Perspectives Matter
+#### Why Both Perspectives Matter
 
 - **SEM framing** connects LGCM to the broader world of structural equation modeling (mediation, moderation, latent variables)
 - **Multilevel framing** connects to intensive longitudinal data, ecological momentary assessment, and time-series approaches
@@ -422,7 +422,7 @@ The model is identical—only the intuition differs. Both yield the same paramet
 
 ---
 
-### What This Tutorial Does (and Does Not) Cover
+#### What This Tutorial Does (and Does Not) Cover
 
 In this tutorial, we treat each repeated measure (y1–y5) as an observed outcome and focus on a **manifest-variable LGCM**: a growth model for observed scores over time. We are **not** fitting a full longitudinal measurement model (e.g., a factor structure at each wave with multiple indicators) or a longitudinal CFA.
 
@@ -435,7 +435,7 @@ These extensions are beyond the scope of this introductory tutorial. If your dat
 
 ---
 
-### Key Takeaways
+#### Key Takeaways
 
 1. **Two factors** (intercept and slope) with **fixed loadings** that encode time
 
@@ -449,7 +449,7 @@ These extensions are beyond the scope of this introductory tutorial. If your dat
 
 ---
 
-### Interactive Exploration
+#### Interactive Exploration
 
 To build deeper intuition for how LGCM parameters affect trajectories, try the interactive explorer. Adjust the sliders to see how changing the intercept mean, slope variance, and other parameters affects the spaghetti plot in real-time.
 
@@ -480,11 +480,11 @@ This section covers the technical details: what your data need, how to specify t
 
 ---
 
-## Data Requirements
+### Data Requirements
 
 Before fitting an LGCM, verify that your data meet these requirements.
 
-### Minimum Time Points
+#### Minimum Time Points
 
 | Time Points | What You Can Estimate |
 |-------------|----------------------|
@@ -498,7 +498,7 @@ With only two time points, you can estimate mean change and variance of change, 
 
 **Recommendation**: Aim for at least 4 time points. With 3 time points you have only 1 degree of freedom for testing fit (assuming free residual variances), which provides limited power to detect model misspecification.
 
-### Sample Size
+#### Sample Size
 
 Small samples lead to unstable estimates, convergence problems, and improper solutions (e.g., negative variance estimates).
 
@@ -519,7 +519,7 @@ For formal power analysis, consider simulation-based approaches using the `simse
 
 **Reference**: Hertzog, C., Lindenberger, U., Ghisletta, P., & von Oertzen, T. (2006). On the power of multivariate latent growth curve models to detect correlated change. *Psychological Methods, 11*(3), 244–252.
 
-### Missing Data
+#### Missing Data
 
 Real longitudinal data almost always have missing observations. LGCM handles this well—but only under certain conditions.
 
@@ -557,7 +557,7 @@ fit <- growth(model, data = data_wide,
               auxiliary = c("education", "baseline_severity"))
 ```
 
-### Data Format
+#### Data Format
 
 LGCM in lavaan requires **wide format**: each row is a participant, each column is a time point.
 
@@ -578,7 +578,7 @@ data_wide <- data_long %>%
   pivot_wider(names_from = wave, values_from = y, names_prefix = "y")
 ```
 
-### Distributional Considerations
+#### Distributional Considerations
 
 ML estimation assumes multivariate normality. Violations can affect standard errors (underestimated) and chi-square statistics (inflated).
 
@@ -623,7 +623,7 @@ data_wide %>%
 - Severe violations: Consider transformations or robust estimation
 - Categorical outcomes: Use appropriate estimators (WLSMV)
 
-### Pre-Flight Checklist
+#### Pre-Flight Checklist
 
 - [ ] 3+ time points (4+ preferred)
 - [ ] Adequate sample size (100+ for simple models)
@@ -634,9 +634,9 @@ data_wide %>%
 
 ---
 
-## Specifying a Linear LGCM
+### Specifying a Linear LGCM
 
-### Time Coding: The Most Important Decision
+#### Time Coding: The Most Important Decision
 
 Slope factor loadings define how time enters the model. This determines:
 - What the intercept represents
@@ -657,7 +657,7 @@ With this coding:
 - **Intercept** = expected score at Time 0 (Wave 1)
 - **Slope** = expected change per 1-unit increase in time
 
-### Centering at Different Time Points
+#### Centering at Different Time Points
 
 Shift the zero point to change what the intercept represents:
 
@@ -685,7 +685,7 @@ The slope (line angle) is identical in all three; only the intercept reference p
 
 The slope doesn't change—only the intercept shifts. Choose centering that matches your research question.
 
-### Non-Equidistant Time Points
+#### Non-Equidistant Time Points
 
 If waves aren't equally spaced, use actual time values:
 
@@ -699,7 +699,7 @@ Baseline (month 0)  → Loading: 0
 
 Now slope = change per **month**. Rescale for interpretability if needed (e.g., 0, 0.25, 0.5, 1, 2 for years).
 
-### Basic lavaan Syntax
+#### Basic lavaan Syntax
 
 ```r
 library(lavaan)
@@ -720,7 +720,7 @@ The `growth()` function automatically estimates:
 - Factor variances and covariance
 - Residual variances
 
-### Constraining Residual Variances
+#### Constraining Residual Variances
 
 To force equal residual variances, use labels:
 
@@ -740,14 +740,14 @@ model_equal_resid <- '
 
 The label `rv` forces all five residual variances to be estimated as one parameter.
 
-### Residual Variances: Equal vs. Free
+#### Residual Variances: Equal vs. Free
 
 - **Free (default)**: Each time point has its own residual variance. More flexible, uses more parameters.
 - **Equal (constrained)**: All time points share the same residual variance. More parsimonious.
 
 **Recommendation**: Start with free residuals, then test whether equality constraint worsens fit (see Section 3.4).
 
-### Parameter Count
+#### Parameter Count
 
 For a linear LGCM with 5 waves:
 
@@ -770,7 +770,7 @@ The data provide 5 means + 15 unique covariances = 20 pieces of information.
 
 Positive df means the model is testable.
 
-### Identification Requirements
+#### Identification Requirements
 
 A model is identified when there's a unique best-fitting solution. LGCM achieves this through fixed loadings:
 
@@ -779,9 +779,9 @@ A model is identified when there's a unique best-fitting solution. LGCM achieves
 
 ---
 
-## Estimation & Fit Indices
+### Estimation & Fit Indices
 
-### Maximum Likelihood Estimation
+#### Maximum Likelihood Estimation
 
 lavaan uses ML by default: find parameter values that make your observed data most probable.
 
@@ -799,7 +799,7 @@ fit <- growth(model, data = data_wide, estimator = "MLR")
 
 MLR provides robust standard errors and scaled test statistics (Satorra-Bentler correction).
 
-### Running and Viewing Results
+#### Running and Viewing Results
 
 ```r
 # Fit model
@@ -812,9 +812,9 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 fitmeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 ```
 
-### Fit Indices
+#### Fit Indices
 
-#### Chi-Square (χ²)
+##### Chi-Square (χ²)
 
 Tests whether model-implied covariances match observed covariances.
 
@@ -823,7 +823,7 @@ Tests whether model-implied covariances match observed covariances.
 
 **Problem**: Large samples make trivial misfits significant. Don't rely on χ² alone.
 
-#### RMSEA (Root Mean Square Error of Approximation)
+##### RMSEA (Root Mean Square Error of Approximation)
 
 Estimates population misfit, adjusted for parsimony.
 
@@ -835,7 +835,7 @@ Estimates population misfit, adjusted for parsimony.
 
 RMSEA rewards parsimony and provides a 90% confidence interval.
 
-#### CFI (Comparative Fit Index)
+##### CFI (Comparative Fit Index)
 
 Compares your model to a null model (all variables uncorrelated).
 
@@ -845,7 +845,7 @@ Compares your model to a null model (all variables uncorrelated).
 | 0.90–0.95 | Acceptable |
 | < 0.90 | Poor fit |
 
-#### SRMR (Standardized Root Mean Square Residual)
+##### SRMR (Standardized Root Mean Square Residual)
 
 Average discrepancy between observed and implied correlations.
 
@@ -854,7 +854,7 @@ Average discrepancy between observed and implied correlations.
 | < 0.08 | Good fit |
 | > 0.10 | Poor fit |
 
-### Interpreting Multiple Indices
+#### Interpreting Multiple Indices
 
 No single index is definitive. Look for convergence:
 
@@ -864,7 +864,7 @@ No single index is definitive. Look for convergence:
 
 **Reasonable targets** (not hard cutoffs): CFI ≥ 0.95, RMSEA ≤ 0.06, SRMR ≤ 0.08
 
-### Troubleshooting Common lavaan Issues
+#### Troubleshooting Common lavaan Issues
 
 When fitting LGCMs, you may encounter errors or warnings. Here are the most common issues and how to resolve them:
 
@@ -912,14 +912,14 @@ For conceptual pitfalls related to interpretation (rather than estimation), see 
 
 ---
 
-## Model Comparison
+### Model Comparison
 
-### Why Compare Models?
+#### Why Compare Models?
 
 1. **Test hypotheses**: Is there growth? Do people differ?
 2. **Select best model**: Balance fit and parsimony
 
-### Nested vs. Non-Nested Models
+#### Nested vs. Non-Nested Models
 
 **Nested**: One model is a constrained version of another.
 - Intercept-only nested within linear growth
@@ -927,7 +927,7 @@ For conceptual pitfalls related to interpretation (rather than estimation), see 
 
 **Non-nested**: Neither is a special case of the other.
 
-### Likelihood Ratio Test (Nested Models)
+#### Likelihood Ratio Test (Nested Models)
 
 If Model A is nested within Model B:
 
@@ -950,7 +950,7 @@ anova(fit_constrained, fit_unconstrained)
 anova(fit_constrained, fit_unconstrained, method = "satorra.bentler.2001")
 ```
 
-### Information Criteria (Any Models)
+#### Information Criteria (Any Models)
 
 **AIC**: -2×LL + 2×(parameters). Lower = better. Moderate parsimony penalty.
 
@@ -962,9 +962,9 @@ fitmeasures(fit, c("aic", "bic"))
 
 If AIC and BIC agree, you're confident. If they disagree, acknowledge ambiguity.
 
-### Common Comparisons
+#### Common Comparisons
 
-#### Test 1: Is There Growth?
+##### Test 1: Is There Growth?
 
 The most fundamental comparison: does adding a slope factor significantly improve fit?
 
@@ -1002,7 +1002,7 @@ anova(fit_int, fit_lin)
 
 Significant: Yes, there's systematic change.
 
-#### Test 2: Do People Differ in Growth?
+##### Test 2: Do People Differ in Growth?
 
 ```r
 model_fixed <- '
@@ -1026,7 +1026,7 @@ Significant: Yes, individuals differ in change rates.
 
 **Note**: Testing variance = 0 is a boundary test. The p-value is conservative (true p ≈ half the reported value).
 
-#### Test 3: Are Residual Variances Equal?
+##### Test 3: Are Residual Variances Equal?
 
 ```r
 model_free <- '
@@ -1051,7 +1051,7 @@ anova(fit_equal, fit_free)
 
 Non-significant: Equal residuals justified; use simpler model.
 
-### Decision Framework
+#### Decision Framework
 
 1. Fit intercept-only model
 2. Fit linear growth model
@@ -1059,7 +1059,7 @@ Non-significant: Equal residuals justified; use simpler model.
 4. Test equal residual variances
 5. Select final model based on LRT and AIC/BIC
 
-### Reporting
+#### Reporting
 
 Example:
 
@@ -1079,7 +1079,7 @@ This section walks through a complete analysis using simulated data. Run the cod
 
 ---
 
-## Practical Workflow Overview
+### Practical Workflow Overview
 
 ```
 ┌─────────────────────────────────┐
@@ -1120,7 +1120,7 @@ This section walks through a complete analysis using simulated data. Run the cod
 
 ---
 
-## Setup
+### Setup
 
 ```r
 # Load packages
@@ -1134,7 +1134,7 @@ set.seed(2024)
 
 ---
 
-## Simulate/Load Data
+### Simulate/Load Data
 
 We'll simulate data with **known population parameters** so we can verify our estimates:
 
@@ -1204,7 +1204,7 @@ data_wide %>%
 
 ---
 
-## Visualize
+### Visualize
 
 **Always plot before modeling.**
 
@@ -1254,7 +1254,7 @@ ggplot(data_long, aes(x = time, y = y)) +
 
 ---
 
-## Fit Baseline LGCM
+### Fit Baseline LGCM
 
 Start with an **intercept-only model** (no growth)—this is our comparison baseline.
 
@@ -1271,7 +1271,7 @@ This model assumes everyone has a stable mean across time (no systematic change)
 
 ---
 
-## Fit Alternative Model
+### Fit Alternative Model
 
 Now fit the **linear growth model**:
 
@@ -1305,9 +1305,9 @@ fit_linear_eq <- growth(model_linear_eq, data = data_wide)
 
 ---
 
-## Compare Models
+### Compare Models
 
-### Is there growth?
+#### Is there growth?
 
 ```r
 anova(fit_intercept, fit_linear)
@@ -1324,7 +1324,7 @@ fit_intercept  13 11856 11884 638.21     625.86       3  < 2.2e-16 ***
 
 Δχ² is huge and p < .001 → **Linear growth significantly improves fit.**
 
-### Are equal residual variances justified?
+#### Are equal residual variances justified?
 
 ```r
 anova(fit_linear_eq, fit_linear)
@@ -1332,7 +1332,7 @@ anova(fit_linear_eq, fit_linear)
 
 If non-significant, equal residuals are fine—use the simpler model.
 
-### Information criteria
+#### Information criteria
 
 ```r
 data.frame(
@@ -1345,11 +1345,11 @@ data.frame(
 
 ---
 
-## Model Diagnostics
+### Model Diagnostics
 
 Before interpreting results, check for localized misfit and problematic residual patterns.
 
-### Modification indices
+#### Modification indices
 
 Modification indices suggest model improvements. Large values (>10) indicate where freeing a parameter would substantially improve fit.
 
@@ -1364,7 +1364,7 @@ modindices(fit_linear, sort = TRUE, minimum.value = 10)
 
 **If modification indices suggest residual covariances**: Consider whether it's substantively meaningful (e.g., adjacent waves sharing method variance) or a sign of model misspecification.
 
-### Residual correlations
+#### Residual correlations
 
 Examine whether the model adequately reproduces the observed correlations.
 
@@ -1376,7 +1376,7 @@ resid(fit_linear, type = "cor")$cov %>%
 
 **Interpretation**: Values should be close to zero (typically |r| < 0.10). Large residual correlations indicate the model doesn't fully capture the relationship between those variables.
 
-### Check for problematic estimates
+#### Check for problematic estimates
 
 ```r
 # Look for Heywood cases or boundary estimates
@@ -1393,9 +1393,9 @@ parameterEstimates(fit_linear) %>%
 
 ---
 
-## Interpret Results
+### Interpret Results
 
-### Extract fit indices
+#### Extract fit indices
 
 ```r
 fitmeasures(fit_linear, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
@@ -1409,7 +1409,7 @@ Expected (approximately):
 
 All indices indicate good fit.
 
-### Extract parameter estimates
+#### Extract parameter estimates
 
 ```r
 parameterEstimates(fit_linear) %>%
@@ -1419,7 +1419,7 @@ parameterEstimates(fit_linear) %>%
          pvalue = ifelse(pvalue < .001, "<.001", round(pvalue, 3)))
 ```
 
-### Results table
+#### Results table
 
 | Parameter | Estimate | SE | p | True Value |
 |-----------|----------|-----|------|------------|
@@ -1432,7 +1432,7 @@ parameterEstimates(fit_linear) %>%
 
 **The estimates closely recover the true population parameters.**
 
-### Interpreting each parameter
+#### Interpreting each parameter
 
 | Parameter | What it means |
 |-----------|---------------|
@@ -1443,7 +1443,7 @@ parameterEstimates(fit_linear) %>%
 | **I-S covariance = -1.89** | Higher starters grew slightly slower (r ≈ -0.19); see [Pitfall 7](#pitfall-7) for interpretation guidance |
 | **Residual variance = 24.56** | After accounting for trajectories, SD ≈ 5 of unexplained variation |
 
-### Converting to correlation
+#### Converting to correlation
 
 ```r
 # Intercept-slope correlation
@@ -1455,7 +1455,7 @@ r_is <- cov_is / sqrt(var_i * var_s)
 r_is  # ≈ -0.19
 ```
 
-### Proportion with positive slopes
+#### Proportion with positive slopes
 
 ```r
 # What proportion of people are actually improving?
@@ -1467,7 +1467,7 @@ pnorm(0, mean = slope_mean, sd = slope_sd, lower.tail = FALSE)
 # ≈ 0.98 -- almost everyone is improving
 ```
 
-### Effect sizes and variance explained
+#### Effect sizes and variance explained
 
 Beyond raw parameter estimates, effect sizes help communicate the magnitude and practical significance of your findings.
 
@@ -1503,7 +1503,7 @@ For this example:
 - Standardized slope ≈ 2.04 / 0.98 ≈ 2.08 (very large effect—average growth is ~2 SDs of individual differences in growth)
 - I-S correlation ≈ -0.19 (small negative relationship)
 
-### Written summary
+#### Written summary
 
 > We estimated a linear latent growth model for 400 participants across 5 waves. The model fit well (χ²(10) = 12.35, p = .26; CFI = 0.998; RMSEA = 0.024; SRMR = 0.025).
 >
@@ -1513,7 +1513,7 @@ For this example:
 
 ---
 
-## Full Script
+### Full Script
 
 Here's everything in one self-contained block:
 
@@ -1577,7 +1577,7 @@ saveRDS(fit_lin, "lgcm_linear_fit.rds")
 
 ---
 
-## Using This Template With Your Own Data
+### Using This Template With Your Own Data
 
 To adapt this workflow to your own dataset, you mainly need to:
 
@@ -1628,11 +1628,11 @@ This section contains lookup materials—consult as needed rather than reading s
 
 ---
 
-## Mathematical Notes
+### Mathematical Notes
 
 This section provides optional formal notation for readers who want it. The main tutorial is fully self-contained without this material.
 
-### The LGCM Equation
+#### The LGCM Equation
 
 For person *i* at time *t*, the observed score is:
 
@@ -1647,7 +1647,7 @@ Where:
 - `λₜ` = factor loading for time *t* (fixed, not estimated)
 - `εᵢₜ` = residual for person *i* at time *t*
 
-### Distribution of Latent Factors
+#### Distribution of Latent Factors
 
 The intercept and slope are assumed bivariate normal:
 
@@ -1663,7 +1663,7 @@ Where:
 - `ψ₂₂` = slope variance
 - `ψ₁₂ = ψ₂₁` = intercept-slope covariance
 
-### Residual Distribution
+#### Residual Distribution
 
 ```
 εᵢₜ ~ N(0, θₜ)
@@ -1671,7 +1671,7 @@ Where:
 
 Residuals are typically assumed independent across time (no autocorrelation) and independent of the latent factors.
 
-### Model-Implied Covariance Matrix
+#### Model-Implied Covariance Matrix
 
 The model implies a specific covariance structure among observed variables. For 5 waves with loadings λ = [0, 1, 2, 3, 4]:
 
@@ -1684,7 +1684,7 @@ Where:
 - `Ψ` = latent factor covariance matrix (2 × 2)
 - `Θ` = residual covariance matrix (diagonal if residuals uncorrelated)
 
-### Identification
+#### Identification
 
 This section describes identification for a **linear LGCM with two latent factors (intercept and slope)** and **freely estimated residual variances** at each wave. This is the default parameterization in lavaan.
 
@@ -1713,9 +1713,9 @@ A linear LGCM with *T* time points has:
 
 ---
 
-## FAQ & Common Pitfalls
+### FAQ & Common Pitfalls
 
-### Pitfall 1: Misinterpreting the Intercept After Recentering
+#### Pitfall 1: Misinterpreting the Intercept After Recentering
 
 **The mistake**: Changing time coding and forgetting that the intercept now refers to a different time point.
 
@@ -1727,7 +1727,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 2: Ignoring Slope Variance
+#### Pitfall 2: Ignoring Slope Variance
 
 **The mistake**: Reporting only the slope mean and concluding "people improved."
 
@@ -1745,7 +1745,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 3: Confusing Factor Means with Individual Predictions
+#### Pitfall 3: Confusing Factor Means with Individual Predictions
 
 **The mistake**: Treating the intercept mean as every person's starting point.
 
@@ -1757,7 +1757,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 4: Assuming Good Fit = Correct Model
+#### Pitfall 4: Assuming Good Fit = Correct Model
 
 **The mistake**: CFI = 0.98, RMSEA = 0.03, so the model is "correct."
 
@@ -1767,7 +1767,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 5: Ignoring Residual Autocorrelation
+#### Pitfall 5: Ignoring Residual Autocorrelation
 
 **The mistake**: Assuming residuals are independent across time without checking.
 
@@ -1780,7 +1780,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 6: Overfitting with Too Few Time Points
+#### Pitfall 6: Overfitting with Too Few Time Points
 
 **The mistake**: Fitting a quadratic model with 4 time points (0 df) and concluding "quadratic growth."
 
@@ -1790,7 +1790,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 7: Misinterpreting the Intercept-Slope Correlation {#pitfall-7}
+#### Pitfall 7: Misinterpreting the Intercept-Slope Correlation {#pitfall-7}
 
 **The mistake**: Negative correlation means high scorers "decline."
 
@@ -1802,7 +1802,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 8: Not Accounting for Missing Data Mechanism
+#### Pitfall 8: Not Accounting for Missing Data Mechanism
 
 **The mistake**: Using FIML and assuming everything is fine.
 
@@ -1812,7 +1812,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 9: Over-interpreting Non-Significant Variance
+#### Pitfall 9: Over-interpreting Non-Significant Variance
 
 **The mistake**: Slope variance p = .08, so "everyone changes at the same rate."
 
@@ -1822,7 +1822,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pitfall 10: Forgetting to Look at the Data
+#### Pitfall 10: Forgetting to Look at the Data
 
 **The mistake**: Jumping straight to modeling without visualization.
 
@@ -1832,7 +1832,7 @@ A linear LGCM with *T* time points has:
 
 ---
 
-### Pre-Flight Checklist
+#### Pre-Flight Checklist
 
 Before finalizing results:
 
@@ -1847,9 +1847,9 @@ Before finalizing results:
 
 ---
 
-## Cheat Sheet
+### Cheat Sheet
 
-### Model Diagram
+#### Model Diagram
 
 ```
               ┌─────────────┐          ┌─────────────┐
@@ -1873,7 +1873,7 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 ---
 
-### lavaan Syntax Template
+#### lavaan Syntax Template
 
 ```r
 library(lavaan)
@@ -1892,7 +1892,7 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 
 ---
 
-### Parameter Quick Reference
+#### Parameter Quick Reference
 
 | Parameter | Symbol | Meaning |
 |-----------|--------|----------|
@@ -1905,7 +1905,7 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 
 ---
 
-### Fit Index Guidelines
+#### Fit Index Guidelines
 
 | Index | Good | Acceptable |
 |-------|------|------------|
@@ -1918,7 +1918,7 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 
 ---
 
-### Time Coding Options
+#### Time Coding Options
 
 | Centering | Loadings | Intercept Meaning |
 |-----------|----------|-------------------|
@@ -1929,7 +1929,7 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 
 ---
 
-### Minimum Requirements
+#### Minimum Requirements
 
 | Aspect | Requirement |
 |--------|-------------|
@@ -1940,7 +1940,7 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 
 ---
 
-### Common Syntax Variants
+#### Common Syntax Variants
 
 **Equal residual variances:**
 ```r
@@ -1965,7 +1965,7 @@ intercept ~ predictor
 
 ---
 
-### Model Comparison
+#### Model Comparison
 
 ```r
 # Nested models (likelihood ratio test)
@@ -1978,7 +1978,7 @@ BIC(fit1); BIC(fit2)  # Lower = better
 
 ---
 
-### Quick Diagnostics
+#### Quick Diagnostics
 
 ```r
 # Fit indices
@@ -1993,7 +1993,7 @@ modindices(fit, sort = TRUE, minimum.value = 10)
 
 ---
 
-### Checklist: Before Running
+#### Checklist: Before Running
 
 - [ ] Data in wide format
 - [ ] Variable names match syntax
@@ -2001,7 +2001,7 @@ modindices(fit, sort = TRUE, minimum.value = 10)
 - [ ] Missingness examined
 - [ ] Trajectories visualized
 
-### Checklist: Before Reporting
+#### Checklist: Before Reporting
 
 - [ ] Model fit reported (χ², CFI, RMSEA, SRMR)
 - [ ] All parameters reported with SEs
@@ -2011,13 +2011,13 @@ modindices(fit, sort = TRUE, minimum.value = 10)
 
 ---
 
-## Advanced Extensions
+### Advanced Extensions
 
 Linear LGCM is the foundation. These extensions address more complex questions.
 
 ---
 
-### Quadratic Growth
+#### Quadratic Growth
 
 **What**: Adds acceleration/deceleration to the trajectory.
 
@@ -2040,7 +2040,7 @@ model_quad <- '
 
 ---
 
-### Latent Basis (Freed Loading) Models
+#### Latent Basis (Freed Loading) Models
 
 **What**: Let data reveal the shape of change instead of imposing linearity.
 
@@ -2057,7 +2057,7 @@ model_basis <- '
 
 ---
 
-### Piecewise Growth
+#### Piecewise Growth
 
 **What**: Different slopes for different phases.
 
@@ -2073,7 +2073,7 @@ model_piecewise <- '
 
 ---
 
-### Time-Varying Covariates
+#### Time-Varying Covariates
 
 **What**: Predictors measured at each wave affect that wave's outcome.
 
@@ -2083,7 +2083,7 @@ model_piecewise <- '
 
 ---
 
-### Time-Invariant Predictors
+#### Time-Invariant Predictors
 
 **What**: Baseline characteristics predict trajectory parameters.
 
@@ -2137,7 +2137,7 @@ model_multi <- '
 
 ---
 
-### Multigroup LGCM
+#### Multigroup LGCM
 
 **What**: Separate models for different groups; compare parameters.
 
@@ -2147,7 +2147,7 @@ model_multi <- '
 
 ---
 
-### Growth Mixture Models (GMM)
+#### Growth Mixture Models (GMM)
 
 **What**: Identify latent subgroups with different trajectory patterns.
 
@@ -2157,7 +2157,7 @@ model_multi <- '
 
 ---
 
-### Parallel Process Models
+#### Parallel Process Models
 
 **What**: Model two variables' growth simultaneously; relate their trajectories.
 
@@ -2165,7 +2165,7 @@ model_multi <- '
 
 ---
 
-### Latent Change Score Models
+#### Latent Change Score Models
 
 **What**: Focus on change between adjacent time points.
 
@@ -2175,9 +2175,9 @@ model_multi <- '
 
 ---
 
-## Recommended Resources
+### Recommended Resources
 
-### Books
+#### Books
 
 | Book | Focus |
 |------|-------|
@@ -2187,7 +2187,7 @@ model_multi <- '
 | Singer & Willett (2003). *Applied Longitudinal Data Analysis*. Oxford. | MLM perspective, excellent pedagogy |
 | McArdle & Nesselroade (2014). *Longitudinal Data Analysis Using SEM*. APA. | Lifespan developmental focus |
 
-### Key Articles
+#### Key Articles
 
 | Article | Contribution |
 |---------|---------------|
@@ -2196,7 +2196,7 @@ model_multi <- '
 | Preacher, K. J., Wichman, A. L., MacCallum, R. C., & Briggs, N. E. (2008). *Latent growth curve modeling*. Sage. | Practical guidance on centering and time coding |
 | McNeish, D., & Matta, T. (2018). Differentiating between mixed-effects and latent-curve approaches to growth modeling. *Behavior Research Methods, 50*(4), 1398–1414. | Clarifies when approaches differ in practice |
 
-### Online Tutorials
+#### Online Tutorials
 
 - **lavaan**: https://lavaan.ugent.be/tutorial/
 - **Mplus User's Guide**: Chapter on growth models
@@ -2205,9 +2205,9 @@ model_multi <- '
 
 ---
 
-## Software Options
+### Software Options
 
-### R Packages
+#### R Packages
 
 | Package | Strengths | Notes |
 |---------|-----------|-------|
@@ -2217,7 +2217,7 @@ model_multi <- '
 | **nlme** / **lme4** | MLM approach to growth | Equivalent results for basic models |
 | **lcmm** | Latent class / mixture growth models | Specialized |
 
-### Commercial Software
+#### Commercial Software
 
 | Software | Strengths | Notes |
 |----------|-----------|-------|
@@ -2227,14 +2227,14 @@ model_multi <- '
 | **AMOS** | GUI-based, integrates with SPSS | Limited flexibility |
 | **Stata (sem)** | Good documentation, integrated with Stata workflow | Licensed |
 
-### Python
+#### Python
 
 | Package | Notes |
 |---------|-------|
 | **semopy** | SEM in Python, active development |
 | **statsmodels** | Mixed models (MLM approach) |
 
-### Choosing Software
+#### Choosing Software
 
 For learning and most research purposes, **lavaan in R** is the recommended choice:
 - Free and open source

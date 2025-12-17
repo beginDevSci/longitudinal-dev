@@ -1408,9 +1408,193 @@ body {
   }
 
   /* ========================================
+     GUIDE 3-COLUMN LAYOUT
+     Sidebar navigation + main content + right rail
+     ======================================== */
+
+  /* Container for header and footer - aligns with content column */
+  .guide-header-container {
+    max-width: 75ch;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* On larger screens, offset to account for sidebar */
+  @media (min-width: 1280px) {
+    .guide-header-container {
+      max-width: calc(75ch + 16rem);
+      padding-left: calc(16rem + 3rem);
+    }
+  }
+
+  /* 3-column grid container */
+  .guide-layout-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Desktop: show sidebar */
+  @media (min-width: 1280px) {
+    .guide-layout-container {
+      grid-template-columns: 16rem 1fr 4rem;
+      max-width: 90rem;
+      gap: 2rem;
+    }
+  }
+
+  /* Left sidebar column */
+  .guide-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1280px) {
+    .guide-sidebar {
+      display: block;
+      padding: 2rem 0 2rem 1.5rem;
+    }
+  }
+
+  /* Sticky positioning for sidebar content */
+  .guide-sidebar-sticky {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Main content column */
+  .guide-main {
+    padding: 2rem 1.5rem;
+    min-width: 0; /* Allow content to shrink below min-content */
+  }
+
+  @media (min-width: 1280px) {
+    .guide-main {
+      padding: 2rem 0;
+    }
+  }
+
+  /* Right rail (empty for now) */
+  .guide-right-rail {
+    display: none;
+  }
+
+  @media (min-width: 1280px) {
+    .guide-right-rail {
+      display: block;
+    }
+  }
+
+  /* ========================================
+     GUIDE SIDEBAR NAVIGATION
+     Hierarchical outline for intra-guide nav
+     ======================================== */
+
+  .guide-sidebar-nav {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .guide-sidebar-header {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .guide-sidebar-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  .guide-sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Base item styling */
+  .guide-sidebar-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Level-based indentation and styling */
+  .guide-sidebar-item.level-2 {
+    margin-top: 0.5rem;
+  }
+
+  .guide-sidebar-item.level-2:first-child {
+    margin-top: 0;
+  }
+
+  .guide-sidebar-item.level-3 {
+    padding-left: 0.875rem;
+  }
+
+  .guide-sidebar-item.level-4 {
+    padding-left: 1.75rem;
+  }
+
+  /* Link styling */
+  .guide-sidebar-link {
+    display: block;
+    padding: 0.375rem 0.5rem;
+    margin-left: -0.5rem;
+    border-radius: 0.25rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .guide-sidebar-link:hover {
+    color: var(--color-text-accent);
+    background-color: rgba(6, 182, 212, 0.08);
+  }
+
+  /* H2 links are slightly bolder */
+  .guide-sidebar-item.level-2 > .guide-sidebar-link {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .guide-sidebar-item.level-2 > .guide-sidebar-link:hover {
+    color: var(--color-text-accent);
+  }
+
+  /* H3/H4 links are lighter */
+  .guide-sidebar-item.level-3 > .guide-sidebar-link,
+  .guide-sidebar-item.level-4 > .guide-sidebar-link {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* Children list */
+  .guide-sidebar-children {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0 0;
+  }
+
+  /* Active state (for future scrollspy) */
+  .guide-sidebar-link.active {
+    color: var(--color-text-accent);
+    background-color: rgba(6, 182, 212, 0.1);
+    font-weight: 500;
+  }
+
+  /* ========================================
      GUIDE CONTENT TYPOGRAPHY
-     Section hierarchy and vertical rhythm
-     v1.1 Polish: Match gold standard design
+     v1.2: Calmer pacing, guided rhythm
+     - Strong visual pauses at H2/H3
+     - Generous spacing before code blocks
+     - Readable, skimmable prose
      ======================================== */
 
   /* Content width for optimal readability */
@@ -1420,19 +1604,19 @@ body {
 
   /* Consistent vertical rhythm between all block elements */
   .guide-content > * + * {
-    margin-top: 1.4rem;
+    margin-top: 1.5rem;
   }
 
   /* Main H2 sections - visually dominant chapter markers */
   .guide-content > h2 {
     font-size: 1.875rem;  /* ~30px - larger for clear hierarchy */
     font-weight: 600;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
     color: var(--color-text-primary);
-    margin-top: 4rem;  /* Strong top separation */
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border-subtle);  /* Bottom border per gold standard */
+    margin-top: 5rem;  /* Very strong top separation - creates visual "pause" */
+    margin-bottom: 1.75rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid var(--color-border-subtle);
     scroll-margin-top: 6rem;
   }
 
@@ -1445,10 +1629,16 @@ body {
   .guide-content h3 {
     font-size: 1.375rem;  /* ~22px */
     font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--color-text-primary);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+    margin-top: 3.5rem;  /* Increased from 2.5rem - more breathing room */
+    margin-bottom: 1.25rem;
     scroll-margin-top: 6rem;
+  }
+
+  /* H3 after H2 needs less space (already have H2 margin-bottom) */
+  .guide-content h2 + h3 {
+    margin-top: 2rem;
   }
 
   /* H4s - subtle tertiary level */
@@ -1456,8 +1646,14 @@ body {
     font-size: 1.125rem;  /* 18px */
     font-weight: 600;
     color: var(--color-text-secondary);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    scroll-margin-top: 6rem;
+  }
+
+  /* H4 after H3 needs less space */
+  .guide-content h3 + h4 {
+    margin-top: 1.5rem;
   }
 
   /* H5s - for inline labeled sections */
@@ -1465,14 +1661,15 @@ body {
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-secondary);
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    scroll-margin-top: 6rem;
   }
 
-  /* Paragraphs within guide */
+  /* Paragraphs within guide - generous line height for conceptual text */
   .guide-content p {
-    margin-bottom: 1.25rem;
-    line-height: 1.75;
+    margin-bottom: 1.375rem;
+    line-height: 1.8;  /* Increased from 1.75 - more readable for long text */
   }
 
   /* Lists */
@@ -1483,23 +1680,23 @@ body {
   }
 
   .guide-content li {
-    margin-bottom: 0.625rem;
-    line-height: 1.7;
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
   }
 
   /* Nested lists */
   .guide-content li > ul,
   .guide-content li > ol {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.625rem;
+    margin-bottom: 0.625rem;
   }
 
-  /* Horizontal rules - very subtle, only between major conceptual breaks */
+  /* Horizontal rules - very subtle */
   .guide-content hr {
     border: none;
     height: 1px;
-    background: transparent;  /* Make HR invisible - use H2 borders instead */
-    margin: 1rem 0;
+    background: transparent;
+    margin: 1.5rem 0;
   }
 
   /* Strong text emphasis */
@@ -1508,48 +1705,120 @@ body {
     color: var(--color-text-primary);
   }
 
-  /* ========================================
-     GUIDE CODE BLOCK STYLES
-     Styling for code blocks in method guides
-     ======================================== */
-
-  /* Wrapper for code blocks with copy buttons */
-  .code-block-wrapper {
-    position: relative;
-    margin: var(--spacing-4) 0;
+  /* Secondary/muted text - clearly subordinate */
+  .guide-content em {
+    font-style: italic;
+    color: var(--color-text-secondary);
   }
 
-  /* Position copy button in the top-right corner */
+  /* Prose → Code transition spacing */
+  .guide-content p + .code-block-wrapper,
+  .guide-content ul + .code-block-wrapper,
+  .guide-content ol + .code-block-wrapper {
+    margin-top: 2rem;
+  }
+
+  /* Code → Prose transition spacing (slightly less) */
+  .guide-content .code-block-wrapper + p,
+  .guide-content .code-block-wrapper + ul,
+  .guide-content .code-block-wrapper + ol {
+    margin-top: 1.5rem;
+  }
+
+  /* Heading after code block needs extra space */
+  .guide-content .code-block-wrapper + h3,
+  .guide-content .code-block-wrapper + h4 {
+    margin-top: 3rem;
+  }
+
+  /* ========================================
+     GUIDE CODE BLOCK STYLES
+     v1.2: Recessed terminal aesthetic
+     - Darkest surface on the page
+     - Subtle inset framing
+     - Calm, professional appearance
+     ======================================== */
+
+  /* Wrapper for code blocks - creates the outer container */
+  .code-block-wrapper {
+    position: relative;
+    margin: 2rem 0 1.5rem 0;  /* More space before, slightly less after */
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    /* Inset framing effect */
+    box-shadow:
+      inset 0 1px 3px rgba(0, 0, 0, 0.2),
+      0 1px 0 rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+
+  /* Code header bar - language label and copy button */
+  .code-block-wrapper::before {
+    content: attr(data-language);
+    display: block;
+    padding: 0.375rem 0.75rem;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;  /* 11px - very small */
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  /* Hide header for blocks without language */
+  .code-block-wrapper:not([data-language])::before {
+    display: none;
+  }
+
+  /* Position copy button in the header area */
   .code-block-wrapper .guide-copy-btn {
     position: absolute;
-    top: var(--spacing-2);
-    right: var(--spacing-2);
+    top: 0.25rem;
+    right: 0.5rem;
     z-index: 10;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    opacity: 0.5;
+    transition: opacity 0.15s ease;
   }
 
   .code-block-wrapper:hover .guide-copy-btn {
-    opacity: 1;
+    opacity: 0.85;
   }
 
-  /* Code block styling within wrapper */
+  /* Code block body - darkest surface */
   .code-block-wrapper pre {
     margin: 0;
-    padding: var(--spacing-4);
-    padding-top: calc(var(--spacing-4) + 2.5rem); /* Make room for copy button */
-    background-color: var(--color-elevated-bg);
-    border: 1px solid var(--color-border-stroke);
-    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    /* Darkest surface - true recessed terminal look */
+    background-color: #0d1117;  /* GitHub dark bg */
+    border: none;
+    border-radius: 0;
     overflow-x: auto;
-    font-size: var(--font-size-sm);
-    line-height: 1.6;
+    font-size: 0.8125rem;  /* 13px */
+    line-height: 1.65;
+    /* Subtle inner shadow for depth */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Light mode adjustment */
+  :root:not(.dark) .code-block-wrapper pre {
+    background-color: #1e1e1e;  /* VS Code dark */
   }
 
   .code-block-wrapper pre code {
     font-family: var(--font-mono);
     background: transparent;
     padding: 0;
+    color: #e6edf3;  /* Light text on dark bg */
+  }
+
+  /* Ensure code text is always light on dark background */
+  :root:not(.dark) .code-block-wrapper pre code {
+    color: #d4d4d4;
   }
 
   /* ========================================
@@ -1777,6 +2046,99 @@ body {
   /* First column often has labels - keep left aligned */
   .table-wrapper td:first-child {
     font-weight: 500;
+  }
+
+  /* ========================================
+     SIDE-BY-SIDE COMPARISON TABLES
+     v1.2: Layered surface hierarchy
+     - Outer card lifts off page
+     - Inner panels feel inset/embedded
+     - Clear row separation
+     ======================================== */
+
+  /* Comparison tables (2-column conceptual comparisons) */
+  .guide-content table[width="100%"],
+  .guide-content table:has(th[width="50%"]) {
+    /* Outer container - lifts off the page */
+    background: var(--color-bg-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  /* Comparison table headers - column labels */
+  .guide-content table:has(th[width="50%"]) th {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  /* Comparison table cells - inset panel effect */
+  .guide-content table:has(th[width="50%"]) td {
+    background: rgba(0, 0, 0, 0.12);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 1.25rem;
+    vertical-align: top;
+    /* Inset effect for each cell */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Column separator */
+  .guide-content table:has(th[width="50%"]) td:first-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Hover state for rows */
+  .guide-content table:has(th[width="50%"]) tr:hover td {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Last row - no bottom border */
+  .guide-content table:has(th[width="50%"]) tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Light mode adjustments for comparison tables */
+  :root:not(.dark) .guide-content table:has(th[width="50%"]) {
+    background: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  :root:not(.dark) .guide-content table:has(th[width="50%"]) th {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.02) 0%,
+      transparent 100%
+    );
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  :root:not(.dark) .guide-content table:has(th[width="50%"]) td {
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  :root:not(.dark) .guide-content table:has(th[width="50%"]) td:first-child {
+    border-right-color: rgba(0, 0, 0, 0.08);
   }
 
   /* ========================================

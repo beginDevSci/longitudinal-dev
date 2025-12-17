@@ -3,9 +3,9 @@
 //! Loads guide markdown files from `content/guides/*.md`, parses frontmatter,
 //! and renders markdown to HTML.
 
-use crate::markdown::{preprocess_inline_math, transform_markdown_events};
-use crate::models::guide::{Guide, GuideCatalogItem, GuideFrontmatter};
-use pulldown_cmark::{html, Event, Options, Parser};
+use crate::markdown::{preprocess_inline_math, transform_markdown_events_with_outline};
+use crate::models::guide::{Guide, GuideCatalogItem, GuideFrontmatter, OutlineNode};
+use pulldown_cmark::{html, Options, Parser};
 use std::borrow::Cow;
 use std::fs;
 use std::path::Path;
@@ -33,7 +33,13 @@ fn parse_frontmatter(content: &str) -> Option<(GuideFrontmatter, &str)> {
     Some((frontmatter, remaining.trim_start()))
 }
 
-/// Render markdown content to HTML.
+/// Result of rendering markdown: HTML content plus outline.
+struct RenderResult {
+    html: String,
+    outline: Vec<OutlineNode>,
+}
+
+/// Render markdown content to HTML and extract outline.
 ///
 /// Applies the transformation pipeline:
 /// 0. Pre-process `\(...\)` inline math (before markdown parsing)
@@ -43,7 +49,8 @@ fn parse_frontmatter(content: &str) -> Option<(GuideFrontmatter, &str)> {
 /// 4. Wrap designated H2 sections in collapsible modules
 /// 5. Render math expressions via KaTeX
 /// 6. Convert events to HTML
-fn render_markdown_to_html(content: &str) -> String {
+/// 7. Extract hierarchical outline from H2/H3/H4 headings
+fn render_markdown_with_outline(content: &str) -> RenderResult {
     // Pre-process inline math with \(...\) delimiters before markdown parsing
     // This prevents markdown from consuming the backslash escapes
     let content = preprocess_inline_math(content);
@@ -55,14 +62,17 @@ fn render_markdown_to_html(content: &str) -> String {
 
     let parser = Parser::new_ext(&content, options);
 
-    // Collect events and apply transformations
-    let events: Vec<Event> = parser.collect();
-    let transformed = transform_markdown_events(events);
+    // Collect events and apply transformations (with outline extraction)
+    let events: Vec<_> = parser.collect();
+    let transform_result = transform_markdown_events_with_outline(events);
 
     let mut html_output = String::new();
-    html::push_html(&mut html_output, transformed.into_iter());
+    html::push_html(&mut html_output, transform_result.events.into_iter());
 
-    html_output
+    RenderResult {
+        html: html_output,
+        outline: transform_result.outline,
+    }
 }
 
 /// Load a single guide from a markdown file.
@@ -71,12 +81,13 @@ fn load_guide_from_file(path: &Path) -> Option<Guide> {
 
     let (frontmatter, markdown_content) = parse_frontmatter(&content)?;
 
-    let html_content = render_markdown_to_html(markdown_content);
+    let render_result = render_markdown_with_outline(markdown_content);
 
     Some(Guide::from_frontmatter_and_content(
         frontmatter,
         content,
-        html_content,
+        render_result.html,
+        render_result.outline,
     ))
 }
 
@@ -163,7 +174,7 @@ pub fn parse_guide_content(slug: &str, content: &str) -> Option<Guide> {
         );
     }
 
-    let html_content = render_markdown_to_html(markdown_content);
+    let render_result = render_markdown_with_outline(markdown_content);
 
     Some(Guide {
         slug: Cow::Owned(slug.to_string()),
@@ -174,6 +185,7 @@ pub fn parse_guide_content(slug: &str, content: &str) -> Option<Guide> {
         r_packages: frontmatter.r_packages.into_iter().map(Cow::Owned).collect(),
         script_path: frontmatter.script_path.map(Cow::Owned),
         raw_markdown: Cow::Owned(content.to_string()),
-        html_content: Cow::Owned(html_content),
+        html_content: Cow::Owned(render_result.html),
+        outline: render_result.outline,
     })
 }

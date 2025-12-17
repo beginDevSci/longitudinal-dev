@@ -1,21 +1,42 @@
-//! Heading ID generation for anchor navigation.
+//! Heading ID generation and outline extraction for anchor navigation.
 //!
-//! Adds IDs to H2 and H3 headings for anchor linking.
+//! Adds IDs to H2, H3, and H4 headings for anchor linking, and extracts
+//! a hierarchical outline for sidebar navigation.
 
+use crate::models::guide::OutlineNode;
 use pulldown_cmark::{CowStr, Event, HeadingLevel, Tag, TagEnd};
+use std::collections::HashMap;
 
-/// Add IDs to H2 and H3 headings for anchor navigation.
+/// Result of processing headings: transformed events plus extracted outline.
+pub struct HeadingResult {
+    pub events: Vec<Event<'static>>,
+    pub outline: Vec<OutlineNode>,
+}
+
+/// Add IDs to H2, H3, and H4 headings for anchor navigation, and extract outline.
 ///
 /// Transforms headings to include an id attribute based on the heading text.
 /// E.g., "## Conceptual Foundations" becomes `<h2 id="conceptual-foundations">`.
-pub fn add_heading_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
+///
+/// Also builds a hierarchical outline structure for sidebar navigation.
+pub fn add_heading_ids_with_outline(events: Vec<Event<'_>>) -> HeadingResult {
     let mut output = Vec::with_capacity(events.len());
     let mut in_heading: Option<HeadingLevel> = None;
     let mut heading_text = String::new();
 
+    // Track used slugs for disambiguation
+    let mut slug_counts: HashMap<String, u32> = HashMap::new();
+
+    // Flat list of headings, will be converted to tree later
+    let mut headings: Vec<(u8, String, String)> = Vec::new();
+
     for event in events {
         match &event {
-            Event::Start(Tag::Heading { level, .. }) if *level == HeadingLevel::H2 || *level == HeadingLevel::H3 => {
+            Event::Start(Tag::Heading { level, .. })
+                if *level == HeadingLevel::H2
+                    || *level == HeadingLevel::H3
+                    || *level == HeadingLevel::H4 =>
+            {
                 in_heading = Some(*level);
                 heading_text.clear();
                 // Don't emit yet - wait until we have the text
@@ -24,18 +45,25 @@ pub fn add_heading_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
                 heading_text.push_str(text);
             }
             Event::End(TagEnd::Heading(level)) if in_heading == Some(*level) => {
-                // Generate slug from heading text
-                let slug = slugify(&heading_text);
+                // Generate slug from heading text (with disambiguation)
+                let base_slug = slugify(&heading_text);
+                let slug = disambiguate_slug(&base_slug, &mut slug_counts);
 
-                // Emit the heading with ID
                 let level = in_heading.take().unwrap();
-                output.push(Event::Html(CowStr::from(format!(
-                    "<h{} id=\"{}\">",
-                    level_to_num(level),
-                    slug
-                ))));
+                let level_num = level_to_num(level);
+
+                // Collect heading for outline
+                headings.push((level_num, heading_text.clone(), slug.clone()));
+
+                // Emit heading with ID using proper Tag structure (preserves event type for downstream)
+                output.push(Event::Start(Tag::Heading {
+                    level,
+                    id: Some(CowStr::from(slug)),
+                    classes: vec![],
+                    attrs: vec![],
+                }));
                 output.push(Event::Text(CowStr::from(heading_text.clone())));
-                output.push(Event::Html(CowStr::from(format!("</h{}>", level_to_num(level)))));
+                output.push(Event::End(TagEnd::Heading(level)));
                 heading_text.clear();
             }
             _ => {
@@ -57,7 +85,79 @@ pub fn add_heading_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
         }
     }
 
-    output
+    // Build hierarchical outline from flat list
+    let outline = build_outline_tree(headings);
+
+    HeadingResult {
+        events: output,
+        outline,
+    }
+}
+
+/// Add IDs to H2, H3, and H4 headings (without returning outline).
+///
+/// Convenience wrapper for backward compatibility.
+pub fn add_heading_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
+    add_heading_ids_with_outline(events).events
+}
+
+/// Build a hierarchical outline tree from a flat list of headings.
+fn build_outline_tree(headings: Vec<(u8, String, String)>) -> Vec<OutlineNode> {
+    let mut outline: Vec<OutlineNode> = Vec::new();
+
+    for (level, title, id) in headings {
+        let node = OutlineNode {
+            level,
+            title,
+            id,
+            children: Vec::new(),
+        };
+
+        match level {
+            2 => {
+                // H2 is a top-level node
+                outline.push(node);
+            }
+            3 => {
+                // H3 is a child of the last H2
+                if let Some(parent) = outline.last_mut() {
+                    parent.children.push(node);
+                } else {
+                    // No H2 parent, add as top-level (shouldn't happen in well-formed docs)
+                    outline.push(node);
+                }
+            }
+            4 => {
+                // H4 is a child of the last H3
+                if let Some(h2_parent) = outline.last_mut() {
+                    if let Some(h3_parent) = h2_parent.children.last_mut() {
+                        h3_parent.children.push(node);
+                    } else {
+                        // No H3 parent, add under H2
+                        h2_parent.children.push(node);
+                    }
+                } else {
+                    // No parent at all, add as top-level
+                    outline.push(node);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    outline
+}
+
+/// Generate a unique slug by appending -2, -3, etc. for duplicates.
+fn disambiguate_slug(base: &str, counts: &mut HashMap<String, u32>) -> String {
+    let count = counts.entry(base.to_string()).or_insert(0);
+    *count += 1;
+
+    if *count == 1 {
+        base.to_string()
+    } else {
+        format!("{}-{}", base, count)
+    }
 }
 
 /// Convert Event to static lifetime.

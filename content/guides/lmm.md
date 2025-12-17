@@ -11,7 +11,7 @@ r_packages: ["lme4", "lmerTest", "tidyverse", "MASS"]
 
 ---
 
-## Why Mixed Models for Longitudinal Data?
+### Why Mixed Models for Longitudinal Data?
 
 **Quick mental model**: Think of LMM as "fit one regression line per person, then summarize those lines." Each individual gets their own intercept and slope, but these estimates are informed by the whole sample—extreme values get pulled toward the group average, and people with sparse data borrow strength from others. The result is a population-average trend plus a measure of how much individuals vary around it.
 
@@ -24,7 +24,7 @@ When you measure the same people repeatedly, your observations aren't independen
 
 This is exactly what you need for longitudinal data: a way to estimate population-average trends while accounting for individual differences.
 
-### The Nesting Problem
+#### The Nesting Problem
 
 Consider a simple example: 200 participants measured at 5 time points each. You have 1,000 observations, but they're not 1,000 independent pieces of information. The 5 observations from Person 1 are more similar to each other than to observations from Person 47.
 
@@ -39,7 +39,7 @@ Consider a simple example: 200 participants measured at 5 time points each. You 
 > | **Repeated measures ANOVA** | Model time as fixed factor                  | Assumes compound symmetry; limited to balanced data  |
 > | **Mixed models**            | Model between- and within-person variation  | Appropriate standard errors; individual trajectories |
 
-### What Makes LMM "Mixed"?
+#### What Makes LMM "Mixed"?
 
 The model combines two types of effects:
 
@@ -67,15 +67,15 @@ The random effects are assumed to follow a normal distribution with mean 0. We e
 
 ---
 
-## What LMM Provides
+### What LMM Provides
 
 LMM offers several capabilities that make it well-suited for longitudinal analysis:
 
-### Individual Trajectories Within a Unified Model
+#### Individual Trajectories Within a Unified Model
 
 Each person gets their own intercept and slope, but these aren't estimated in isolation. The model "borrows strength" across individuals, leading to more stable estimates—especially for people with few observations or extreme values.
 
-### Handles Unbalanced Data Gracefully
+#### Handles Unbalanced Data Gracefully
 
 Real longitudinal data are messy:
 
@@ -85,7 +85,7 @@ Real longitudinal data are messy:
 
 LMM handles all of this naturally. Unlike repeated measures ANOVA, you don't need complete data from everyone.
 
-### Flexible Time Structures
+#### Flexible Time Structures
 
 Time can be:
 
@@ -97,7 +97,7 @@ Just code time as a continuous variable with appropriate values.
 
 **Handling irregular timing**: LMM naturally handles person-specific measurement schedules. If participants were assessed on different dates, use the actual time values (e.g., months since baseline, or age at each assessment). The model uses each observation's actual time value—no need for everyone to be measured at identical intervals. This is one of LMM's major advantages over repeated measures ANOVA.
 
-### Separates Within- and Between-Person Variation
+#### Separates Within- and Between-Person Variation
 
 LMM explicitly partitions variance into:
 
@@ -106,20 +106,20 @@ LMM explicitly partitions variance into:
 
 This distinction is fundamental to understanding longitudinal change.
 
-### Natural Framework for Predictors
+#### Natural Framework for Predictors
 
 Adding predictors is straightforward:
 
 - **Time-invariant predictors** (e.g., treatment group, gender): Predict individual differences in trajectories
 - **Time-varying predictors** (e.g., daily stress, current medication): Predict occasion-specific deviations
 
-### What You'll Do in R
+#### What You'll Do in R
 
 By the end of this tutorial, you will use `lmer()` from the **lme4** package to estimate growth curves, compare random intercept and random slope models, extract individual trajectories (BLUPs), and visualize how shrinkage pulls extreme estimates toward the group mean. The Worked Example section provides a complete, runnable script you can adapt for your own data.
 
 ---
 
-## When LMM is Appropriate
+### When LMM is Appropriate
 
 LMM works well when you have:
 
@@ -131,13 +131,13 @@ LMM works well when you have:
 | **Interest in change** | Not just "do groups differ?" but "how do individuals change?"                   |
 | **Adequate sample**    | 50+ individuals for simple models; 100+ recommended                             |
 
-### Example Scenarios Where LMM Shines
+#### Example Scenarios Where LMM Shines
 
 - **Therapy outcome study**: 150 clients complete depression inventories at each of 8 weekly sessions. Some clients miss sessions. You want to estimate average symptom reduction and identify who improves faster.
 - **Cognitive aging study**: 300 older adults complete memory tests every 2 years over a decade. Timing varies slightly across participants. You want to model decline trajectories and test whether education predicts slower decline.
 - **Intensive longitudinal diary study**: 80 participants report daily mood for 30 days. You're interested in how daily stress relates to mood fluctuations within persons, while also capturing stable individual differences in average mood.
 
-### When to Consider Alternatives
+#### When to Consider Alternatives
 
 - **Only 2 time points**: Simpler methods (change scores, ANCOVA) may suffice
 - **Categorical outcomes**: Generalized linear mixed models (GLMM)
@@ -149,7 +149,7 @@ LMM works well when you have:
 
 ---
 
-## What You'll Learn
+### What You'll Learn
 
 > [!tip]
 > **Quick start path if you're short on time**
@@ -170,7 +170,7 @@ By the end of this tutorial, you will be able to:
 7. **Extract** and visualize individual trajectories
 8. **Avoid** common pitfalls
 
-### How This Tutorial is Organized
+#### How This Tutorial is Organized
 
 | Section                       | Purpose                | When to Use            |
 | ----------------------------- | ---------------------- | ---------------------- |
@@ -190,7 +190,7 @@ This section builds your intuition for how LMM works. We'll start simple and add
 
 ---
 
-## The Two-Level Structure
+### The Two-Level Structure
 
 LMM simultaneously answers two questions: *How do people change on average?* (the fixed effects) and *How do individuals differ in that change?* (the random effects). The two-level structure makes this possible.
 
@@ -206,7 +206,7 @@ Level 2: Persons (i = 1, 2, ..., N)
 
 **Level 2** describes how people _differ from each other_. This is where individual differences live.
 
-### A Concrete Example
+#### A Concrete Example
 
 Imagine tracking depression symptoms over 5 therapy sessions for 100 clients.
 
@@ -216,7 +216,7 @@ Imagine tracking depression symptoms over 5 therapy sessions for 100 clients.
 
 LMM addresses both simultaneously.
 
-### The Level-1 Model
+#### The Level-1 Model
 
 For person _i_ at time _t_:
 
@@ -226,7 +226,7 @@ yᵢₜ = β₀ᵢ + β₁ᵢ(Timeₜ) + εᵢₜ
 
 Each person has their own intercept (β₀ᵢ) and slope (β₁ᵢ). The residual εᵢₜ captures occasion-specific deviation.
 
-### The Level-2 Model
+#### The Level-2 Model
 
 But where do those person-specific parameters come from? Level 2:
 
@@ -237,7 +237,7 @@ But where do those person-specific parameters come from? Level 2:
 
 Each person's intercept is the average intercept (γ₀₀) plus a person-specific deviation (u₀ᵢ). Same for slope.
 
-### The Combined Model
+#### The Combined Model
 
 Substituting Level 2 into Level 1:
 
@@ -251,11 +251,11 @@ This is the "mixed" model: fixed effects (γ) plus random effects (u) plus resid
 
 ---
 
-## Fixed vs. Random Effects
+### Fixed vs. Random Effects
 
 This distinction is central to mixed models—and a common source of confusion.
 
-### Fixed Effects
+#### Fixed Effects
 
 **What they are**: Population-average parameters. The intercept and slope that describe the "typical" trajectory.
 
@@ -265,7 +265,7 @@ This distinction is central to mixed models—and a common source of confusion.
 
 **In lme4 output**: Listed under "Fixed effects"
 
-### Random Effects
+#### Random Effects
 
 **What they are**: Individual-specific deviations from the fixed effects. Not estimated directly as parameters, but characterized by their variance.
 
@@ -275,7 +275,7 @@ This distinction is central to mixed models—and a common source of confusion.
 
 **In lme4 output**: Listed under "Random effects" as variance components
 
-### The Key Insight
+#### The Key Insight
 
 We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate:
 
@@ -290,7 +290,7 @@ From these, we can derive person-specific estimates (BLUPs—more on this later)
 > The person-specific estimates you extract (BLUPs) are derived quantities with their own uncertainty, not directly estimated coefficients.
 > This matters because BLUPs should not be treated as error-free datapoints in secondary analyses.
 
-### When to Treat an Effect as Random
+#### When to Treat an Effect as Random
 
 | Treat as Fixed                       | Treat as Random                           |
 | ------------------------------------ | ----------------------------------------- |
@@ -303,11 +303,11 @@ In longitudinal analysis, **person** is almost always random (you want to genera
 
 ---
 
-## Building Up: From Intercept to Slope
+### Building Up: From Intercept to Slope
 
 Let's build intuition by starting simple and adding complexity.
 
-### Model 0: Complete Pooling (No Random Effects)
+#### Model 0: Complete Pooling (No Random Effects)
 
 Ignore that observations are nested:
 
@@ -329,7 +329,7 @@ One intercept, one slope for everyone. The residual εᵢₜ captures _all_ devi
 > Model 0 is shown to illustrate what *not* to do. It ignores the nested structure of the data and produces misleading standard errors and p-values.
 > **Do not use a no-random-effects model for longitudinal data in practice.**
 
-### Model 1: Random Intercept Only
+#### Model 1: Random Intercept Only
 
 Allow intercepts to vary:
 
@@ -354,7 +354,7 @@ Each person has their own intercept, but everyone shares the same slope. Lines a
 - Random intercept models allow people to start at different levels but assume a common rate of change.
 - When slopes truly differ, forcing them to be equal pushes that variability into the residual and can hide important heterogeneity.
 
-### Model 2: Random Intercept and Slope
+#### Model 2: Random Intercept and Slope
 
 Allow both to vary:
 
@@ -379,7 +379,7 @@ Each person has their own intercept _and_ slope. Lines can have different starti
 - Random intercept + slope models let both starting point and rate of change vary across people.
 - The intercept–slope correlation tells you whether higher starters tend to change faster, slower, or at the same rate.
 
-### Visualizing the Difference
+#### Visualizing the Difference
 
 ```
 Random Intercept Only          Random Intercept + Slope
@@ -399,17 +399,17 @@ different intercepts             different slopes
 
 ---
 
-## Shrinkage and Partial Pooling
+### Shrinkage and Partial Pooling
 
 This concept is unique to mixed models and represents one of their key advantages.
 
-### The Problem with Extreme Estimates
+#### The Problem with Extreme Estimates
 
 Suppose Person A has only 2 observations, both very high. If we estimate their trajectory independently, we'd get an extreme intercept based on just 2 points.
 
 But we have information from 199 other people. Shouldn't that tell us something?
 
-### What Shrinkage Does
+#### What Shrinkage Does
 
 Mixed models "shrink" extreme individual estimates toward the group mean. The amount of shrinkage depends on:
 
@@ -417,11 +417,11 @@ Mixed models "shrink" extreme individual estimates toward the group mean. The am
 2. **How reliable the person's data are**: Fewer observations = more shrinkage
 3. **How variable the population is**: Less population variability = more shrinkage
 
-### Intuition: "Regression to the Mean, Done Right"
+#### Intuition: "Regression to the Mean, Done Right"
 
 If Person A has an extreme estimated intercept, it's probably partly real and partly noise. Shrinkage gives us a better guess by pulling toward the average—but only as much as warranted by the data.
 
-### Visualizing Shrinkage
+#### Visualizing Shrinkage
 
 ```
                     ○ Person A (raw estimate: very high, n=2)
@@ -437,13 +437,13 @@ If Person A has an extreme estimated intercept, it's probably partly real and pa
 
 Persons with more observations experience less shrinkage—their estimates are more reliable.
 
-### Why This Matters
+#### Why This Matters
 
 1. **Better individual predictions**: Shrunken estimates are typically more accurate than raw OLS estimates for each person
 2. **Handles sparse data**: People with few observations still get reasonable estimates
 3. **Automatic regularization**: Protects against overfitting
 
-### Three Approaches to Individual Estimation
+#### Three Approaches to Individual Estimation
 
 | Approach | What it does | When it struggles |
 |----------|-------------|-------------------|
@@ -462,7 +462,7 @@ Person A's very high OLS intercept is pulled down toward 60; Person B's very low
 
 LMM's partial pooling gives more weight to an individual's data when they have many observations and the data are consistent, and more weight to the group mean when observations are sparse or variable. This adaptive weighting is why mixed models typically outperform both extremes.
 
-### Shrinkage in Practice
+#### Shrinkage in Practice
 
 The figure below demonstrates shrinkage by comparing OLS estimates (computed separately for each person, ignoring others) with BLUP estimates (from the mixed model, borrowing strength across people).
 
@@ -483,11 +483,11 @@ Key observations:
 
 ---
 
-## Choosing Your Random Effects Structure
+### Choosing Your Random Effects Structure
 
 A key modeling decision: which effects should be random?
 
-### The Principle
+#### The Principle
 
 Include random effects for:
 
@@ -495,7 +495,7 @@ Include random effects for:
 - Effects whose variance you **want to estimate**
 - Effects where you have **enough data** to estimate variance
 
-### Common Structures for Longitudinal Data
+#### Common Structures for Longitudinal Data
 
 | Structure                               | lme4 formula | What it assumes |
 | --------------------------------------- | ------------ | --------------- | ----------------------------------------- | ---------------------------- |
@@ -503,7 +503,7 @@ Include random effects for:
 | Random intercept + slope                | `(1 + time   | id)`            | Intercepts and slopes vary, can correlate |
 | Random intercept + slope (uncorrelated) | `(1          | id) + (0 + time | id)`                                      | Both vary, but independently |
 
-### Guidance
+#### Guidance
 
 **Start simple**: Begin with random intercept only. Add random slope if theoretically motivated or if model comparison supports it.
 
@@ -515,7 +515,7 @@ Include random effects for:
 
 **Let theory guide you**: If individual differences in change rate are central to your question, you probably need a random slope.
 
-### The "Keep It Maximal" Debate
+#### The "Keep It Maximal" Debate
 
 Some argue you should include the maximal random effects structure justified by design (Barr et al., 2013). Others argue for parsimony (Matuschek et al., 2017).
 
@@ -523,7 +523,7 @@ For longitudinal data with a continuous time variable, a random slope is often t
 
 ---
 
-## Interactive Exploration
+### Interactive Exploration
 
 > [!info]
 > **Optional: interactive visualization**
@@ -551,9 +551,9 @@ This section covers the technical details: preparing data, specifying models in 
 
 ---
 
-## Data Requirements
+### Data Requirements
 
-### Data Format: Long vs. Wide
+#### Data Format: Long vs. Wide
 
 LMM requires **long format**: one row per observation.
 
@@ -579,7 +579,7 @@ id    time    y
 ...
 ```
 
-### Converting Wide to Long
+#### Converting Wide to Long
 
 ```r
 library(tidyverse)
@@ -594,7 +594,7 @@ data_long <- data_wide %>%
   mutate(time = as.numeric(wave) - 1)  # Code time as 0, 1, 2, 3, 4
 ```
 
-### Time Coding
+#### Time Coding
 
 > [!pitfall]
 > **Time must be numeric for growth models.**
@@ -617,7 +617,7 @@ How you code time affects interpretation:
 
 **Recommendation**: Start with zero at baseline (0, 1, 2, ...). Adjust if your research question focuses on a different time point.
 
-### Sample Size Considerations
+#### Sample Size Considerations
 
 | What you're estimating                | Rough minimum              |
 | ------------------------------------- | -------------------------- |
@@ -628,7 +628,7 @@ How you code time affects interpretation:
 
 More observations per person help estimate within-person effects and random slope variance. More individuals help estimate between-person effects and variance components.
 
-### Missing Data
+#### Missing Data
 
 LMM handles missing observations gracefully:
 
@@ -640,11 +640,11 @@ LMM handles missing observations gracefully:
 
 ---
 
-## Specifying Models in lme4
+### Specifying Models in lme4
 
 The `lme4` package uses a formula syntax that separates fixed and random effects.
 
-### Basic Syntax
+#### Basic Syntax
 
 ```r
 library(lme4)
@@ -652,7 +652,7 @@ library(lme4)
 model <- lmer(y ~ fixed_effects + (random_effects | grouping), data = data)
 ```
 
-### Fixed Effects
+#### Fixed Effects
 
 Specified just like in `lm()`:
 
@@ -663,7 +663,7 @@ y ~ time + treatment     # + treatment effect
 y ~ time * treatment     # + time × treatment interaction
 ```
 
-### Random Effects
+#### Random Effects
 
 Specified in parentheses with `|` indicating the grouping variable:
 
@@ -674,7 +674,7 @@ Specified in parentheses with `|` indicating the grouping variable:
 (1 | id) + (0 + time | id)  # Random intercept and slope, uncorrelated
 ```
 
-### Common Models for Longitudinal Data
+#### Common Models for Longitudinal Data
 
 **Random intercept only**:
 
@@ -702,13 +702,13 @@ mod_int <- lmer(y ~ time * treatment + (1 + time | id), data = data_long)
 
 ---
 
-## Estimation: ML vs. REML
+### Estimation: ML vs. REML
 
 In practice, use ML when comparing models with different fixed effects, then refit your final chosen model with REML for reporting variance components.
 
 lme4 offers two estimation methods:
 
-### Maximum Likelihood (ML)
+#### Maximum Likelihood (ML)
 
 - Estimates fixed effects and variance components simultaneously
 - Variance estimates are slightly **biased downward** (especially with few groups)
@@ -718,7 +718,7 @@ lme4 offers two estimation methods:
 mod_ml <- lmer(y ~ time + (1 | id), data = data, REML = FALSE)
 ```
 
-### Restricted Maximum Likelihood (REML)
+#### Restricted Maximum Likelihood (REML)
 
 - First removes fixed effects, then estimates variance components
 - Variance estimates are **less biased**
@@ -729,7 +729,7 @@ mod_ml <- lmer(y ~ time + (1 | id), data = data, REML = FALSE)
 mod_reml <- lmer(y ~ time + (1 | id), data = data, REML = TRUE)  # default
 ```
 
-### When to Use Which
+#### When to Use Which
 
 | Situation                                                              | Use        |
 | ---------------------------------------------------------------------- | ---------- |
@@ -746,9 +746,9 @@ mod_reml <- lmer(y ~ time + (1 | id), data = data, REML = TRUE)  # default
 
 ---
 
-## Model Comparison
+### Model Comparison
 
-### Likelihood Ratio Test (Nested Models)
+#### Likelihood Ratio Test (Nested Models)
 
 For nested models (one is a constrained version of the other):
 
@@ -763,7 +763,7 @@ The test compares model fit via the change in log-likelihood.
 
 **Note**: Testing whether variance = 0 is a boundary test. The reported p-value is conservative (the true p-value is approximately half).
 
-### Information Criteria
+#### Information Criteria
 
 **AIC** and **BIC** allow comparison of non-nested models:
 
@@ -776,7 +776,7 @@ BIC(mod_ri, mod_rs)
 - AIC favors complexity slightly more than BIC
 - BIC is more conservative (penalizes parameters more)
 
-### Comparing Fixed Effects
+#### Comparing Fixed Effects
 
 To compare models with different fixed effects (e.g., does adding treatment improve fit?):
 
@@ -791,11 +791,11 @@ anova(mod1, mod2)
 
 ---
 
-## Evaluating Model Fit
+### Evaluating Model Fit
 
 Unlike SEM, LMM doesn't produce absolute fit indices like CFI or RMSEA. Instead, we use:
 
-### Variance Explained: R²
+#### Variance Explained: R²
 
 The `performance` package provides pseudo-R² measures:
 
@@ -810,7 +810,7 @@ This returns:
 - **Marginal R²**: Variance explained by fixed effects alone
 - **Conditional R²**: Variance explained by fixed + random effects
 
-### Residual Diagnostics
+#### Residual Diagnostics
 
 Check model assumptions visually:
 
@@ -829,7 +829,7 @@ qqline(ranef(mod_rs)$id[,1])
 
 **Note on Q-Q plots for random effects**: This plot checks whether the BLUPs (person-specific deviations) look approximately normally distributed—a rough diagnostic for the assumption that random effects follow a normal distribution. Mild departures are usually tolerable, especially with large samples. Severe non-normality might indicate model misspecification or suggest exploring alternative distributions.
 
-### What to Look For
+#### What to Look For
 
 | Diagnostic                | Good                    | Problematic                 |
 | ------------------------- | ----------------------- | --------------------------- |
@@ -837,7 +837,7 @@ qqline(ranef(mod_rs)$id[,1])
 | Q-Q plot (residuals)      | Points on line          | Heavy tails, skewness       |
 | Q-Q plot (random effects) | Points on line          | Heavy tails (less critical) |
 
-### Convergence Warnings
+#### Convergence Warnings
 
 lme4 will warn you if:
 
@@ -852,9 +852,9 @@ lme4 will warn you if:
 
 ---
 
-## Inference for Fixed Effects
+### Inference for Fixed Effects
 
-### The p-Value Problem
+#### The p-Value Problem
 
 Unlike `lm()`, `lmer()` does **not** provide p-values by default. Why?
 
@@ -867,7 +867,7 @@ The issue is degrees of freedom. In simple regression, df = n - p. In mixed mode
 > - **Option 3**: Use parametric bootstrap for high-precision tests (slower, but robust).
 > - **Option 4**: Use confidence intervals (profile or bootstrap) when you prefer interval estimates over p-values.
 
-### Solutions
+#### Solutions
 
 **1. lmerTest package** (recommended for most cases):
 
@@ -903,7 +903,7 @@ confint(mod, method = "profile")  # Profile likelihood
 confint(mod, method = "boot")     # Bootstrap
 ```
 
-### Practical Recommendation
+#### Practical Recommendation
 
 Use `lmerTest` with Satterthwaite for routine analyses. For small samples or when precision matters, use Kenward-Roger or bootstrap.
 
@@ -933,7 +933,7 @@ This fits a random intercept and slope model. Keep reading for the full story.
 
 ---
 
-## Practical Workflow Overview
+### Practical Workflow Overview
 
 ```
 ┌─────────────────────────────────┐
@@ -979,7 +979,7 @@ This fits a random intercept and slope model. Keep reading for the full story.
 
 ---
 
-## Setup
+### Setup
 
 ```r
 # Load packages
@@ -994,7 +994,7 @@ set.seed(2024)
 
 ---
 
-## Simulate Data
+### Simulate Data
 
 > [!note]
 > **Already have your own data?**
@@ -1074,7 +1074,7 @@ _Note: Your output will differ slightly due to random sampling, but the structur
 
 ---
 
-## Visualize
+### Visualize
 
 **Always plot before modeling.**
 
@@ -1117,7 +1117,7 @@ ggplot(data_long, aes(x = time, y = y)) +
 
 ---
 
-## Fit Random Intercept Model
+### Fit Random Intercept Model
 
 Start with a baseline model: random intercepts only (slopes fixed across people).
 
@@ -1146,7 +1146,7 @@ time          2.014      0.067  799.00   30.06   <2e-16 ***
 
 ---
 
-## Fit Random Slope Model
+### Fit Random Slope Model
 
 Now allow slopes to vary across individuals.
 
@@ -1191,7 +1191,7 @@ The estimates closely recover the true population parameters.
 
 ---
 
-## Compare Models
+### Compare Models
 
 Is the random slope model significantly better than random intercept only?
 
@@ -1232,9 +1232,9 @@ Both AIC and BIC favor the random slope model.
 
 ---
 
-## Interpret Results
+### Interpret Results
 
-### Fixed Effects
+#### Fixed Effects
 
 ```r
 # Fixed effects with confidence intervals
@@ -1251,7 +1251,7 @@ confint(mod_rs, parm = "beta_", method = "Wald")
 
 "On average, participants started at 49.92 and increased by 2.02 units per time point."
 
-### Variance Components
+#### Variance Components
 
 ```r
 VarCorr(mod_rs)
@@ -1266,7 +1266,7 @@ VarCorr(mod_rs)
 | Correlation | -0.18    | —    | Higher starters grow slightly slower      |
 | Residual    | 24.89    | 4.99 | Occasion-specific noise (SD ≈ 5)          |
 
-### Intraclass Correlation (ICC)
+#### Intraclass Correlation (ICC)
 
 From the random intercept model:
 
@@ -1289,7 +1289,7 @@ The ICC helps you understand:
 - **Whether random intercepts matter**: If ICC ≈ 0, there's little between-person variation to model
 - **What proportion of variance is "stable"**: Higher ICC means more of the total variance reflects enduring individual differences
 
-### Variance Explained (R²)
+#### Variance Explained (R²)
 
 ```r
 r2(mod_rs)
@@ -1300,9 +1300,9 @@ r2(mod_rs)
 
 ---
 
-## Extract and Plot Random Effects
+### Extract and Plot Random Effects
 
-### Best Linear Unbiased Predictors (BLUPs)
+#### Best Linear Unbiased Predictors (BLUPs)
 
 *For conceptual background on BLUPs and shrinkage, see [Shrinkage and Partial Pooling](#shrinkage-and-partial-pooling).*
 
@@ -1324,7 +1324,7 @@ head(re)
 
 These are person-specific **deviations** from the fixed effects.
 
-### Individual Trajectories
+#### Individual Trajectories
 
 ```r
 # Person-specific intercepts and slopes
@@ -1337,7 +1337,7 @@ person_effects <- data.frame(
 head(person_effects)
 ```
 
-### Plotting Individual Predictions
+#### Plotting Individual Predictions
 
 ```r
 # Get fitted values
@@ -1357,7 +1357,7 @@ data_long %>%
   theme_minimal()
 ```
 
-### Shrinkage Visualization
+#### Shrinkage Visualization
 
 > **Optional exploration**: The shrinkage visualization below is useful for building intuition about how LMM borrows strength across individuals, but it's not required for reporting standard results. Skip this section if you just need the basics.
 
@@ -1392,7 +1392,7 @@ ggplot(comparison, aes(x = ols_intercept, y = intercept)) +
 
 ---
 
-## Full Script
+### Full Script
 
 Here's everything in one self-contained block:
 
@@ -1456,9 +1456,9 @@ This section contains lookup materials—consult as needed rather than reading s
 
 ---
 
-## Mathematical Notes
+### Mathematical Notes
 
-### The Two-Level Model (Formal Notation)
+#### The Two-Level Model (Formal Notation)
 
 **Level 1** (within-person):
 
@@ -1482,7 +1482,7 @@ Where:
 [u₁ᵢ] ~ N([0], [τ₁₀  τ₁₁])
 ```
 
-### Combined Model
+#### Combined Model
 
 Substituting Level 2 into Level 1:
 
@@ -1490,7 +1490,7 @@ Substituting Level 2 into Level 1:
 yᵢₜ = γ₀₀ + γ₁₀(Time) + u₀ᵢ + u₁ᵢ(Time) + εᵢₜ
 ```
 
-### Matrix Form
+#### Matrix Form
 
 For all observations from person i:
 
@@ -1507,7 +1507,7 @@ Where:
 - uᵢ = random effects vector for person i
 - εᵢ = residual vector
 
-### Variance of Observations
+#### Variance of Observations
 
 The marginal variance of yᵢₜ:
 
@@ -1523,11 +1523,11 @@ Cov(yᵢₜ, yᵢₜ') = τ₀₀ + (Time + Time')τ₀₁ + (Time × Time')τ�
 
 ---
 
-## LMM vs. LGCM Comparison
+### LMM vs. LGCM Comparison
 
 Linear Mixed Models and Latent Growth Curve Models are mathematically equivalent for basic growth models. Here's how they relate:
 
-### Parameter Correspondence
+#### Parameter Correspondence
 
 | Concept                    | LMM Notation | LGCM Notation                   |
 | -------------------------- | ------------ | ------------------------------- |
@@ -1538,7 +1538,7 @@ Linear Mixed Models and Latent Growth Curve Models are mathematically equivalent
 | Intercept-slope covariance | τ₀₁          | ψᵢₛ (factor covariance)         |
 | Residual variance          | σ²           | θ (residual variance)           |
 
-### Key Differences
+#### Key Differences
 
 | Aspect                       | LMM                            | LGCM                        |
 | ---------------------------- | ------------------------------ | --------------------------- |
@@ -1550,7 +1550,7 @@ Linear Mixed Models and Latent Growth Curve Models are mathematically equivalent
 | **Time-varying covariates**  | Easy to add                    | More complex                |
 | **Autocorrelated residuals** | Supported (nlme)               | Less common                 |
 
-### When They Give Different Results
+#### When They Give Different Results
 
 For the basic random intercept + slope model, LMM and LGCM produce identical estimates. Differences emerge with:
 
@@ -1558,7 +1558,7 @@ For the basic random intercept + slope model, LMM and LGCM produce identical est
 2. **Measurement models**: LGCM naturally incorporates latent variables with multiple indicators
 3. **Missing data handling**: Both use ML/FIML, but implementations may differ slightly
 
-### Choosing Between Them
+#### Choosing Between Them
 
 | Choose LMM when...                      | Choose LGCM when...                |
 | --------------------------------------- | ---------------------------------- |
@@ -1571,7 +1571,7 @@ For a brief non-technical summary of when to choose LMM vs. LGCM, see the [Note 
 
 ---
 
-## FAQ & Common Pitfalls
+### FAQ & Common Pitfalls
 
 **Pitfalls covered in this section**
 
@@ -1586,7 +1586,7 @@ For a brief non-technical summary of when to choose LMM vs. LGCM, see the [Note 
 - [Pitfall 9: Centering Confusion](#pitfall-9-centering-confusion)
 - [Pitfall 10: Conflating Statistical and Practical Significance](#pitfall-10-conflating-statistical-and-practical-significance)
 
-### Pitfall 1: Using REML for Fixed Effects Comparison
+#### Pitfall 1: Using REML for Fixed Effects Comparison
 
 > [!pitfall]
 > **Pitfall: comparing fixed-effects models with REML**
@@ -1613,7 +1613,7 @@ anova(mod1, mod2)  # Valid
 
 ---
 
-### Pitfall 2: Ignoring Singular Fit Warnings
+#### Pitfall 2: Ignoring Singular Fit Warnings
 
 > [!pitfall]
 > **Pitfall: ignoring singular fit warnings**
@@ -1637,7 +1637,7 @@ anova(mod1, mod2)  # Valid
 
 ---
 
-### Pitfall 3: Over-Specifying Random Effects
+#### Pitfall 3: Over-Specifying Random Effects
 
 > [!pitfall]
 > **Pitfall: over-specifying random effects**
@@ -1654,7 +1654,7 @@ mod <- lmer(y ~ time + I(time^2) + (1 + time + I(time^2) | id), data = data)
 
 ---
 
-### Pitfall 4: Treating BLUPs as Data
+#### Pitfall 4: Treating BLUPs as Data
 
 > [!pitfall]
 > **Pitfall: treating BLUPs as error-free data**
@@ -1681,7 +1681,7 @@ This way, the model properly accounts for uncertainty in both the random effects
 
 ---
 
-### Pitfall 5: Forgetting That Time Must Be Numeric
+#### Pitfall 5: Forgetting That Time Must Be Numeric
 
 > [!pitfall]
 > **Pitfall: time coded as factor**
@@ -1703,7 +1703,7 @@ data$time <- as.numeric(data$time)
 
 ---
 
-### Pitfall 6: Misinterpreting ICC
+#### Pitfall 6: Misinterpreting ICC
 
 > [!pitfall]
 > **Pitfall: misinterpreting ICC as variance explained**
@@ -1717,7 +1717,7 @@ data$time <- as.numeric(data$time)
 
 ---
 
-### Pitfall 7: Ignoring Residual Assumptions
+#### Pitfall 7: Ignoring Residual Assumptions
 
 > [!pitfall]
 > **Pitfall: ignoring residual diagnostics**
@@ -1736,7 +1736,7 @@ qqnorm(resid(mod)) # Normality of residuals
 
 ---
 
-### Pitfall 8: Comparing Marginal and Conditional R²
+#### Pitfall 8: Comparing Marginal and Conditional R²
 
 > [!pitfall]
 > **Pitfall: confusing marginal and conditional R²**
@@ -1753,7 +1753,7 @@ qqnorm(resid(mod)) # Normality of residuals
 
 ---
 
-### Pitfall 9: Centering Confusion
+#### Pitfall 9: Centering Confusion
 
 > [!pitfall]
 > **Pitfall: unclear intercept interpretation due to centering**
@@ -1771,7 +1771,7 @@ qqnorm(resid(mod)) # Normality of residuals
 
 ---
 
-### Pitfall 10: Conflating Statistical and Practical Significance
+#### Pitfall 10: Conflating Statistical and Practical Significance
 
 > [!pitfall]
 > **Pitfall: equating statistical significance with practical importance**
@@ -1785,7 +1785,7 @@ qqnorm(resid(mod)) # Normality of residuals
 
 ---
 
-### Pre-Flight Checklist
+#### Pre-Flight Checklist
 
 Before finalizing results:
 
@@ -1800,9 +1800,9 @@ Before finalizing results:
 
 ---
 
-## Cheat Sheet
+### Cheat Sheet
 
-### lme4 Formula Syntax
+#### lme4 Formula Syntax
 
 ```r
 # Random intercept only
@@ -1823,7 +1823,7 @@ lmer(y ~ time * treatment + (1 + time | id), data = data)
 
 ---
 
-### Key Functions
+#### Key Functions
 
 | Task                       | Code                       |
 | -------------------------- | -------------------------- | ----------- |
@@ -1841,7 +1841,7 @@ lmer(y ~ time * treatment + (1 + time | id), data = data)
 
 ---
 
-### Parameter Quick Reference
+#### Parameter Quick Reference
 
 | Parameter          | Symbol | lme4 Location                  |
 | ------------------ | ------ | ------------------------------ |
@@ -1854,7 +1854,7 @@ lmer(y ~ time * treatment + (1 + time | id), data = data)
 
 ---
 
-### ML vs. REML
+#### ML vs. REML
 
 | Use ML when...                                   | Use REML when...                     |
 | ------------------------------------------------ | ------------------------------------ |
@@ -1871,14 +1871,14 @@ lmer(y ~ time + (1 | id), data = data, REML = TRUE)
 
 ---
 
-### Checklist: Before Running
+#### Checklist: Before Running
 
 - [ ] Data in long format
 - [ ] Time coded as numeric
 - [ ] Grouping variable is a factor or character
 - [ ] No missing values in predictors (or handle appropriately)
 
-### Checklist: Before Reporting
+#### Checklist: Before Reporting
 
 - [ ] Model converged without warnings
 - [ ] Residual diagnostics checked
@@ -1890,11 +1890,11 @@ lmer(y ~ time + (1 | id), data = data, REML = TRUE)
 
 ---
 
-## Advanced Extensions
+### Advanced Extensions
 
 > **Optional material**: This section covers extensions beyond basic growth modeling. Feel free to skip if you're just learning the fundamentals—you can always return later when your research requires these techniques.
 
-### Time-Varying Covariates
+#### Time-Varying Covariates
 
 Predictors that change across observations:
 
@@ -1922,7 +1922,7 @@ mod <- lmer(mood ~ time + stress_within + stress_between + (1 + time | id), data
 
 ---
 
-### Cross-Level Interactions
+#### Cross-Level Interactions
 
 Does a between-person variable moderate the slope?
 
@@ -1935,7 +1935,7 @@ mod <- lmer(y ~ time * treatment + (1 + time | id), data = data)
 
 ---
 
-### Non-Linear Growth
+#### Non-Linear Growth
 
 For quadratic growth:
 
@@ -1949,7 +1949,7 @@ mod <- lmer(y ~ time + I(time^2) + (1 + time | id), data = data)
 
 ---
 
-### Autocorrelated Residuals
+#### Autocorrelated Residuals
 
 If residuals are correlated across time (common in closely-spaced longitudinal data), use `nlme`:
 
@@ -1966,7 +1966,7 @@ This models first-order autoregressive residuals.
 
 ---
 
-### Generalized Linear Mixed Models (GLMM)
+#### Generalized Linear Mixed Models (GLMM)
 
 For non-normal outcomes:
 
@@ -1980,7 +1980,7 @@ mod <- glmer(count_y ~ time + (1 | id), data = data, family = poisson)
 
 ---
 
-### Bayesian Mixed Models with brms
+#### Bayesian Mixed Models with brms
 
 For fully Bayesian inference with flexible priors:
 
@@ -2002,9 +2002,9 @@ mod <- brm(y ~ time + (1 + time | id),
 
 ---
 
-## Recommended Resources
+### Recommended Resources
 
-### Books
+#### Books
 
 | Book                                                                                                     | Focus                               |
 | -------------------------------------------------------------------------------------------------------- | ----------------------------------- |
@@ -2014,7 +2014,7 @@ mod <- brm(y ~ time + (1 + time | id),
 | Gelman & Hill (2007). _Data Analysis Using Regression and Multilevel/Hierarchical Models_. Cambridge.    | Practical, Bayesian-friendly        |
 | West, Welch, & Galecki (2014). _Linear Mixed Models: A Practical Guide Using Statistical Software_. CRC. | Software-focused                    |
 
-### Key Articles
+#### Key Articles
 
 | Article                                                                                                                               | Contribution                  |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -2023,7 +2023,7 @@ mod <- brm(y ~ time + (1 + time | id),
 | Matuschek et al. (2017). Balancing Type I error and power in linear mixed models. _Journal of Memory and Language_.                   | Counter to "maximal" approach |
 | Luke (2017). Evaluating significance in linear mixed-effects models in R. _Behavior Research Methods_.                                | p-value methods comparison    |
 
-### Online Tutorials
+#### Online Tutorials
 
 - **lme4 vignette**: `vignette("lmer", package = "lme4")`
 - **UCLA IDRE**: https://stats.oarc.ucla.edu/r/seminars/
@@ -2032,9 +2032,9 @@ mod <- brm(y ~ time + (1 + time | id),
 
 ---
 
-## Software Options
+### Software Options
 
-### R Packages
+#### R Packages
 
 | Package         | Strengths                                      | Notes                    |
 | --------------- | ---------------------------------------------- | ------------------------ |
@@ -2045,7 +2045,7 @@ mod <- brm(y ~ time + (1 + time | id),
 | **glmmTMB**     | Handles complex GLMMs, zero-inflation          | Alternative to lme4      |
 | **performance** | Model diagnostics, R²                          | Companion package        |
 
-### Other Software
+#### Other Software
 
 | Software             | Strengths                               | Notes                            |
 | -------------------- | --------------------------------------- | -------------------------------- |
@@ -2055,7 +2055,7 @@ mod <- brm(y ~ time + (1 + time | id),
 | **HLM**              | Designed for multilevel models          | Separate software                |
 | **MLwiN**            | Specialized for multilevel              | Can interface with R             |
 
-### Choosing Software
+#### Choosing Software
 
 For learning and most research purposes, **lme4 + lmerTest** is recommended:
 

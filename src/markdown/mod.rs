@@ -31,5 +31,6 @@ mod modules;
 mod tables;
 mod transform;
 
+pub use headings::HeadingResult;
 pub use math::preprocess_inline_math;
-pub use transform::transform_markdown_events;
+pub use transform::{transform_markdown_events, transform_markdown_events_with_outline, TransformResult};

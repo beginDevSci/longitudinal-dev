@@ -11,6 +11,27 @@
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
+// ============================================================================
+// Outline model for sidebar navigation
+// ============================================================================
+
+/// A node in the guide outline hierarchy.
+///
+/// Represents H2, H3, or H4 headings extracted from the guide markdown.
+/// The structure is hierarchical: H2 nodes contain H3 children, which contain H4 children.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OutlineNode {
+    /// Heading level (2, 3, or 4)
+    pub level: u8,
+    /// The heading text
+    pub title: String,
+    /// URL-friendly slug for anchor linking (matches the id in rendered HTML)
+    pub id: String,
+    /// Child headings (H3 under H2, H4 under H3)
+    #[serde(default)]
+    pub children: Vec<OutlineNode>,
+}
+
 /// Frontmatter for a guide markdown file.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GuideFrontmatter {
@@ -40,6 +61,8 @@ pub struct Guide {
     pub raw_markdown: Cow<'static, str>,
     /// The rendered HTML content
     pub html_content: Cow<'static, str>,
+    /// Hierarchical outline extracted from H2/H3/H4 headings
+    pub outline: Vec<OutlineNode>,
 }
 
 impl Guide {
@@ -48,6 +71,7 @@ impl Guide {
         frontmatter: GuideFrontmatter,
         raw_markdown: String,
         html_content: String,
+        outline: Vec<OutlineNode>,
     ) -> Self {
         Self {
             slug: Cow::Owned(frontmatter.slug),
@@ -59,6 +83,7 @@ impl Guide {
             script_path: frontmatter.script_path.map(Cow::Owned),
             raw_markdown: Cow::Owned(raw_markdown),
             html_content: Cow::Owned(html_content),
+            outline,
         }
     }
 }

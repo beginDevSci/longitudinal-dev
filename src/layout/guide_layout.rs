@@ -2,23 +2,25 @@
 //!
 //! Renders a guide with:
 //! - Title and metadata header
+//! - Left sidebar with hierarchical outline navigation
 //! - Main content area with rendered HTML
 //! - Interactive behaviors (copy buttons, anchor navigation)
-//! - Optional table of contents (future)
 
 use crate::base_path;
+use crate::layout::GuideSidebarNav;
 use crate::models::guide::Guide;
 use crate::GuideInteractivity;
 use leptos::prelude::*;
 
-/// Renders a single guide page.
+/// Feature flag: set to false to hide the horizontal TOC once sidebar is verified
+const SHOW_HORIZONTAL_TOC: bool = false;
+
+/// Renders a single guide page with sidebar navigation.
 ///
-/// For Phase 1, this is a simple layout that renders the guide HTML.
-/// Future phases will add:
-/// - Collapsible modules for Worked Example and Reference sections
-/// - Table of contents with scrollspy
-/// - Code copy buttons
-/// - Math rendering
+/// Layout:
+/// - Full-width header with title, description, and metadata
+/// - 3-column grid: sidebar | content | (empty right column)
+/// - Full-width footer
 #[component]
 pub fn GuideLayout(guide: Guide) -> impl IntoView {
     let title = guide.title.to_string();
@@ -31,12 +33,13 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
         .map(|p| p.to_string())
         .collect::<Vec<_>>();
     let html_content = guide.html_content.to_string();
+    let outline = guide.outline.clone();
 
     view! {
         <div class="min-h-screen bg-surface">
-            // Header
+            // Header (full-width)
             <header class="border-b border-default bg-subtle">
-                <div class="max-w-4xl mx-auto px-6 py-8 lg:py-12">
+                <div class="guide-header-container">
                     // Breadcrumb
                     <nav class="mb-4 text-sm">
                         <a href={base_path::join("guides/")} class="text-secondary hover:text-accent transition-colors">
@@ -81,66 +84,87 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                 </div>
             </header>
 
-            // Inline TOC - horizontal section navigation
-            <nav class="guide-toc border-b border-default bg-surface/80 backdrop-blur-sm sticky top-0 z-40">
-                <div class="max-w-4xl mx-auto px-6">
-                    <ul class="flex gap-1 overflow-x-auto py-3 text-sm font-medium scrollbar-hide">
-                        <li>
-                            <a href="#overview" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Overview"
-                            </a>
-                        </li>
-                        <li class="text-muted flex items-center">"•"</li>
-                        <li>
-                            <a href="#conceptual-foundations" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Concepts"
-                            </a>
-                        </li>
-                        <li class="text-muted flex items-center">"•"</li>
-                        <li>
-                            <a href="#model-specification-fit" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Spec & Fit"
-                            </a>
-                        </li>
-                        <li class="text-muted flex items-center">"•"</li>
-                        <li>
-                            <a href="#interpretation" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Interpretation"
-                            </a>
-                        </li>
-                        <li class="text-muted flex items-center">"•"</li>
-                        <li>
-                            <a href="#worked-example" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Example"
-                            </a>
-                        </li>
-                        <li class="text-muted flex items-center">"•"</li>
-                        <li>
-                            <a href="#reference-resources" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
-                                "Reference"
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            // Horizontal TOC (feature-flagged, kept for rollback)
+            {if SHOW_HORIZONTAL_TOC {
+                view! {
+                    <nav class="guide-toc border-b border-default bg-surface/80 backdrop-blur-sm sticky top-0 z-40">
+                        <div class="max-w-4xl mx-auto px-6">
+                            <ul class="flex gap-1 overflow-x-auto py-3 text-sm font-medium scrollbar-hide">
+                                <li>
+                                    <a href="#overview" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Overview"
+                                    </a>
+                                </li>
+                                <li class="text-muted flex items-center">"•"</li>
+                                <li>
+                                    <a href="#conceptual-foundations" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Concepts"
+                                    </a>
+                                </li>
+                                <li class="text-muted flex items-center">"•"</li>
+                                <li>
+                                    <a href="#model-specification-fit" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Spec & Fit"
+                                    </a>
+                                </li>
+                                <li class="text-muted flex items-center">"•"</li>
+                                <li>
+                                    <a href="#interpretation" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Interpretation"
+                                    </a>
+                                </li>
+                                <li class="text-muted flex items-center">"•"</li>
+                                <li>
+                                    <a href="#worked-example" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Example"
+                                    </a>
+                                </li>
+                                <li class="text-muted flex items-center">"•"</li>
+                                <li>
+                                    <a href="#reference-resources" class="guide-toc-link px-3 py-1.5 rounded-md text-secondary hover:text-accent hover:bg-accent/10 transition-colors whitespace-nowrap">
+                                        "Reference"
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                }.into_any()
+            } else {
+                view! {}.into_any()
+            }}
 
-            // Main content
-            <main class="max-w-4xl mx-auto px-6 py-8 lg:py-12">
-                <article
-                    class="guide-content prose prose-slate dark:prose-invert max-w-none
-                           prose-headings:text-primary prose-p:text-secondary
-                           prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-                           prose-code:text-accent prose-code:bg-subtle prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                           prose-pre:bg-elevated prose-pre:border prose-pre:border-stroke
-                           prose-table:border-collapse prose-th:border prose-th:border-stroke prose-th:bg-subtle prose-th:px-4 prose-th:py-2
-                           prose-td:border prose-td:border-stroke prose-td:px-4 prose-td:py-2"
-                    inner_html=html_content
-                />
-            </main>
+            // 3-column layout: sidebar | content | empty
+            <div class="guide-layout-container">
+                // Left sidebar (sticky)
+                <aside class="guide-sidebar">
+                    <div class="guide-sidebar-sticky">
+                        <GuideSidebarNav outline=outline />
+                    </div>
+                </aside>
 
-            // Footer navigation
+                // Main content
+                <main class="guide-main">
+                    <article
+                        class="guide-content prose prose-slate dark:prose-invert max-w-none
+                               prose-headings:text-primary prose-p:text-secondary
+                               prose-a:text-accent prose-a:no-underline hover:prose-a:underline
+                               prose-code:text-accent prose-code:bg-subtle prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                               prose-pre:bg-elevated prose-pre:border prose-pre:border-stroke
+                               prose-table:border-collapse prose-th:border prose-th:border-stroke prose-th:bg-subtle prose-th:px-4 prose-th:py-2
+                               prose-td:border prose-td:border-stroke prose-td:px-4 prose-td:py-2"
+                        inner_html=html_content
+                    />
+                </main>
+
+                // Right column (empty for now, could be used for annotations)
+                <aside class="guide-right-rail">
+                    // Reserved for future use
+                </aside>
+            </div>
+
+            // Footer navigation (full-width)
             <footer class="border-t border-default bg-subtle">
-                <div class="max-w-4xl mx-auto px-6 py-6">
+                <div class="guide-header-container py-6">
                     <a
                         href={base_path::join("guides/")}
                         class="inline-flex items-center gap-2 text-secondary hover:text-accent transition-colors"
