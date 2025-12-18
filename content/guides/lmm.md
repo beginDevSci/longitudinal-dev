@@ -139,13 +139,11 @@ LMM works well when you have:
 
 #### When to Consider Alternatives
 
-- **Only 2 time points**: Simpler methods (change scores, ANCOVA) may suffice
-- **Categorical outcomes**: Generalized linear mixed models (GLMM)
-- **Interest in latent variables**: Structural equation modeling (SEM) / LGCM
-- **Complex dependency structures**: Time series models for intensive longitudinal data
-- **Interest in discrete trajectory classes**: Growth mixture models
+> [!note]
+> LMM may not be the best choice when you have: only 2 time points (simpler methods like change scores or ANCOVA may suffice), categorical outcomes (use GLMM), interest in latent variables (consider SEM/LGCM), complex dependency structures (time series models for intensive longitudinal data), or interest in discrete trajectory classes (growth mixture models).
 
-> **Note on LGCM**: A companion tutorial covers **Latent Growth Curve Models (LGCM)**, an SEM-based approach to longitudinal analysis. For basic growth models (random intercept and slope), LMM and LGCM produce mathematically equivalent estimates—the choice often comes down to software preference and whether you need SEM features like latent variables or fit indices. See [LMM vs. LGCM Comparison](#lmm-vs-lgcm-comparison) for details.
+> [!info]
+> **About LGCM**: A companion tutorial covers **Latent Growth Curve Models (LGCM)**, an SEM-based approach to longitudinal analysis. For basic growth models (random intercept and slope), LMM and LGCM produce mathematically equivalent estimates—the choice often comes down to software preference and whether you need SEM features like latent variables or fit indices. See [LMM vs. LGCM Comparison](#lmm-vs-lgcm-comparison) for details.
 
 ---
 

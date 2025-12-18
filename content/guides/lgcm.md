@@ -75,10 +75,8 @@ LGCM works well when you have:
 
 #### When to Consider Alternatives
 
-- **Only 2 time points**: LGCM offers little advantage; use change scores, ANCOVA, or autoregressive models instead
-- **Categorical outcomes with few categories**: Consider growth models for categorical data (not covered here)
-- **Interest only in group means**: Repeated measures ANOVA may suffice
-- **Intensive longitudinal data (100+ waves)**: Consider time-series approaches
+> [!note]
+> LGCM may not be the best choice when you have: only 2 time points (use change scores, ANCOVA, or autoregressive models instead), categorical outcomes with few categories (consider growth models for categorical data), interest only in group means (repeated measures ANOVA may suffice), or intensive longitudinal data with 100+ waves (consider time-series approaches).
 
 ---
 

@@ -1,6 +1,7 @@
-//! Code block ID injection for copy button support.
+//! Code block ID injection and syntax highlighting.
 //!
-//! Adds unique IDs to code blocks so that copy buttons can reference them.
+//! Adds unique IDs to code blocks so that copy buttons can reference them,
+//! and applies syntax highlighting for supported languages.
 //! The IDs follow the pattern `guide-code-{n}` where n is a sequential counter.
 //!
 //! ## Output Structure
@@ -12,11 +13,14 @@
 //!
 //! Into:
 //! ```html
-//! <div class="code-block-wrapper" data-code-id="guide-code-0">
-//!   <pre id="guide-code-0"><code class="language-r">...</code></pre>
+//! <div class="code-block-wrapper" data-code-id="guide-code-0" data-language="r">
+//!   <pre id="guide-code-0"><code class="language-r">
+//!     <span style="color:...">highlighted</span>...
+//!   </code></pre>
 //! </div>
 //! ```
 
+use crate::syntax_highlight::highlight_code;
 use pulldown_cmark::{CodeBlockKind, CowStr, Event, Tag, TagEnd};
 use std::cell::Cell;
 
@@ -30,25 +34,31 @@ pub fn reset_counter() {
     CODE_BLOCK_COUNTER.with(|c| c.set(0));
 }
 
-/// Add unique IDs and wrapper divs to code blocks.
+/// Add unique IDs, wrapper divs, and syntax highlighting to code blocks.
 ///
 /// Wraps each fenced code block in a container div and adds an ID to the pre element.
+/// Applies syntax highlighting for supported languages (R, Python, etc.).
 /// This allows JavaScript/WASM to find and attach copy buttons dynamically.
 pub fn add_code_block_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
     let mut result = Vec::with_capacity(events.len() + 20);
     let mut in_code_block = false;
+    let mut current_language = String::new();
+    let mut current_code_id = String::new();
+    let mut code_buffer = String::new();
 
     for event in events {
         match &event {
             Event::Start(Tag::CodeBlock(kind)) => {
                 in_code_block = true;
-                let language = match kind {
+                code_buffer.clear();
+
+                current_language = match kind {
                     CodeBlockKind::Fenced(lang) => lang.to_string(),
                     CodeBlockKind::Indented => String::new(),
                 };
 
                 // Generate unique ID
-                let code_id = CODE_BLOCK_COUNTER.with(|c| {
+                current_code_id = CODE_BLOCK_COUNTER.with(|c| {
                     let id = c.get();
                     c.set(id + 1);
                     format!("guide-code-{}", id)
@@ -58,20 +68,20 @@ pub fn add_code_block_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
                 result.push(Event::Html(CowStr::Boxed(
                     format!(
                         r#"<div class="code-block-wrapper" data-code-id="{}" data-language="{}">"#,
-                        code_id, language
+                        current_code_id, current_language
                     )
                     .into_boxed_str(),
                 )));
 
                 // Modified pre tag with ID
                 result.push(Event::Html(CowStr::Boxed(
-                    format!(r#"<pre id="{}">"#, code_id).into_boxed_str(),
+                    format!(r#"<pre id="{}">"#, current_code_id).into_boxed_str(),
                 )));
 
                 // Code tag with language class (if available)
-                if !language.is_empty() {
+                if !current_language.is_empty() {
                     result.push(Event::Html(CowStr::Boxed(
-                        format!(r#"<code class="language-{}">"#, language).into_boxed_str(),
+                        format!(r#"<code class="language-{}">"#, current_language).into_boxed_str(),
                     )));
                 } else {
                     result.push(Event::Html(CowStr::Boxed("<code>".to_string().into_boxed_str())));
@@ -80,6 +90,16 @@ pub fn add_code_block_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
 
             Event::End(TagEnd::CodeBlock) => {
                 in_code_block = false;
+
+                // Apply syntax highlighting if language is specified
+                let highlighted = if !current_language.is_empty() {
+                    highlight_code(&code_buffer, &current_language)
+                } else {
+                    html_escape(&code_buffer)
+                };
+
+                result.push(Event::Html(CowStr::Boxed(highlighted.into_boxed_str())));
+
                 // Close code and pre tags
                 result.push(Event::Html(CowStr::Boxed(
                     "</code></pre>".to_string().into_boxed_str(),
@@ -88,12 +108,13 @@ pub fn add_code_block_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
                 result.push(Event::Html(CowStr::Boxed(
                     "</div>".to_string().into_boxed_str(),
                 )));
+
+                code_buffer.clear();
             }
 
             Event::Text(text) if in_code_block => {
-                // HTML-escape the code content
-                let escaped = html_escape(text);
-                result.push(Event::Html(CowStr::Boxed(escaped.into_boxed_str())));
+                // Collect code text for highlighting at end of block
+                code_buffer.push_str(text);
             }
 
             _ => {

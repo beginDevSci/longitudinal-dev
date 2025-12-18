@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @source "./src/**/*.rs";
 
@@ -1497,6 +1498,18 @@ body {
   .guide-sidebar-nav {
     font-size: 0.875rem;
     line-height: 1.5;
+    /* Subtle background to differentiate from main content */
+    background: var(--color-bg-subtle);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  /* Dark mode: slightly lighter than page background */
+  [data-theme="dark"] .guide-sidebar-nav,
+  [data-theme="dracula"] .guide-sidebar-nav {
+    background: rgba(51, 65, 85, 0.3); /* slate-700 at 30% */
+    border-color: rgba(71, 85, 105, 0.3);
   }
 
   .guide-sidebar-header {
@@ -1525,68 +1538,129 @@ body {
     padding: 0;
   }
 
-  /* Level-based indentation and styling */
+  /* ----------------------------------------
+     LEVEL 2 (H2) - Major Section Headers
+     Uppercase labels with visual separation
+     ---------------------------------------- */
   .guide-sidebar-item.level-2 {
-    margin-top: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .guide-sidebar-item.level-2:first-child {
     margin-top: 0;
+    padding-top: 0;
+    border-top: none;
   }
 
-  .guide-sidebar-item.level-3 {
-    padding-left: 0.875rem;
-  }
-
-  .guide-sidebar-item.level-4 {
-    padding-left: 1.75rem;
-  }
-
-  /* Link styling */
-  .guide-sidebar-link {
-    display: block;
-    padding: 0.375rem 0.5rem;
-    margin-left: -0.5rem;
-    border-radius: 0.25rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    transition: color 0.15s ease, background-color 0.15s ease;
-  }
-
-  .guide-sidebar-link:hover {
-    color: var(--color-text-accent);
-    background-color: rgba(6, 182, 212, 0.08);
-  }
-
-  /* H2 links are slightly bolder */
+  /* H2 links styled as section group labels */
   .guide-sidebar-item.level-2 > .guide-sidebar-link {
-    font-weight: 500;
-    color: var(--color-text-primary);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    padding: 0.25rem 0;
+    margin-left: 0;
+    border-radius: 0;
   }
 
   .guide-sidebar-item.level-2 > .guide-sidebar-link:hover {
     color: var(--color-text-accent);
+    background-color: transparent;
   }
 
-  /* H3/H4 links are lighter */
-  .guide-sidebar-item.level-3 > .guide-sidebar-link,
+  /* ----------------------------------------
+     LEVEL 3 (H3) - Primary Navigation Items
+     Main clickable items within sections
+     ---------------------------------------- */
+  .guide-sidebar-item.level-3 {
+    position: relative;
+    margin-left: 0.5rem;
+    padding-left: 0.75rem;
+    /* Slightly de-emphasized inactive rail (85% opacity) */
+    border-left: 2px solid color-mix(in srgb, var(--color-border-subtle) 85%, transparent);
+  }
+
+  .guide-sidebar-item.level-3 > .guide-sidebar-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    padding: 0.375rem 0.5rem;
+    margin-left: -0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .guide-sidebar-item.level-3 > .guide-sidebar-link:hover {
+    color: var(--color-text-accent);
+    background-color: rgba(6, 182, 212, 0.08);
+  }
+
+  /* ----------------------------------------
+     LEVEL 4 (H4) - Secondary Navigation Items
+     Nested items under H3s
+     ---------------------------------------- */
+  .guide-sidebar-item.level-4 {
+    position: relative;
+    margin-left: 0.5rem;
+    padding-left: 0.75rem;
+    /* Slightly de-emphasized inactive rail (85% opacity) */
+    border-left: 2px solid color-mix(in srgb, var(--color-border-subtle) 85%, transparent);
+  }
+
   .guide-sidebar-item.level-4 > .guide-sidebar-link {
     font-size: 0.8125rem;
+    font-weight: 400;
     color: var(--color-text-secondary);
+    padding: 0.25rem 0.5rem;
+    margin-left: -0.5rem;
+    border-radius: 0.25rem;
   }
 
-  /* Children list */
+  .guide-sidebar-item.level-4 > .guide-sidebar-link:hover {
+    color: var(--color-text-accent);
+    background-color: rgba(6, 182, 212, 0.08);
+  }
+
+  /* ----------------------------------------
+     General Link Styling
+     ---------------------------------------- */
+  .guide-sidebar-link {
+    display: block;
+    text-decoration: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  /* Children list container */
   .guide-sidebar-children {
     list-style: none;
     padding: 0;
-    margin: 0.25rem 0 0 0;
+    margin: 0.375rem 0 0.25rem 0;
   }
 
-  /* Active state (for future scrollspy) */
+  /* Remove border-left from first child to avoid double line at top */
+  .guide-sidebar-children > .guide-sidebar-item:first-child {
+    /* Maintains visual continuity */
+  }
+
+  /* ----------------------------------------
+     Active State (Scrollspy)
+     ---------------------------------------- */
   .guide-sidebar-link.active {
     color: var(--color-text-accent);
-    background-color: rgba(6, 182, 212, 0.1);
     font-weight: 500;
+  }
+
+  /* Active indicator for level-3/4 items - accent border */
+  .guide-sidebar-item.level-3:has(> .guide-sidebar-link.active),
+  .guide-sidebar-item.level-4:has(> .guide-sidebar-link.active) {
+    border-left-color: var(--color-accent-500);
+  }
+
+  .guide-sidebar-item.level-3 > .guide-sidebar-link.active,
+  .guide-sidebar-item.level-4 > .guide-sidebar-link.active {
+    background-color: rgba(6, 182, 212, 0.1);
   }
 
   /* ========================================
@@ -1672,31 +1746,82 @@ body {
     line-height: 1.8;  /* Increased from 1.75 - more readable for long text */
   }
 
-  /* Lists */
-  .guide-content ul,
-  .guide-content ol {
+  /* Lists - explicit markers for clarity */
+  .guide-content ul {
+    list-style-type: disc;
     margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
+    padding-left: 1.75rem;
+  }
+
+  .guide-content ol {
+    list-style-type: decimal;
+    margin-bottom: 1.5rem;
+    padding-left: 1.75rem;
   }
 
   .guide-content li {
     margin-bottom: 0.75rem;
     line-height: 1.75;
+    padding-left: 0.25rem;
+  }
+
+  /* List marker styling - uses accent color for visual interest */
+  .guide-content ul > li::marker {
+    color: var(--color-accent-500);
+  }
+
+  .guide-content ol > li::marker {
+    color: var(--color-text-secondary);
+    font-weight: 500;
   }
 
   /* Nested lists */
-  .guide-content li > ul,
-  .guide-content li > ol {
+  .guide-content li > ul {
+    list-style-type: circle;
     margin-top: 0.625rem;
     margin-bottom: 0.625rem;
   }
 
-  /* Horizontal rules - very subtle */
+  .guide-content li > ol {
+    list-style-type: lower-alpha;
+    margin-top: 0.625rem;
+    margin-bottom: 0.625rem;
+  }
+
+  /* Second level nesting */
+  .guide-content li > ul > li > ul {
+    list-style-type: square;
+  }
+
+  /* Horizontal rules - subtle dividers for section rhythm */
   .guide-content hr {
     border: none;
     height: 1px;
-    background: transparent;
-    margin: 1.5rem 0;
+    background: var(--color-border-subtle);
+    margin: 2.5rem 0;
+    opacity: 0.6;
+  }
+
+  /* Faded bookend variant - softer edges for conceptual transitions */
+  .guide-content hr.faded,
+  .guide-content h2 + hr,
+  .guide-content h3 + hr {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-border-subtle) 15%,
+      var(--color-border-subtle) 85%,
+      transparent 100%
+    );
+    opacity: 0.5;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Stronger rule after major sections (before h2) */
+  .guide-content hr + h2 {
+    margin-top: 3rem;
   }
 
   /* Strong text emphasis */
@@ -1732,6 +1857,73 @@ body {
   }
 
   /* ========================================
+     PROSE OVERRIDES
+     Harmonize @tailwindcss/typography with our design tokens.
+     Our .guide-content rules take precedence for most typography,
+     but prose provides good defaults for elements we don't explicitly style.
+     ======================================== */
+
+  /* Ensure prose uses our color tokens */
+  .guide-content.prose {
+    --tw-prose-body: var(--color-text-secondary);
+    --tw-prose-headings: var(--color-text-primary);
+    --tw-prose-links: var(--color-accent-500);
+    --tw-prose-bold: var(--color-text-primary);
+    --tw-prose-counters: var(--color-text-secondary);
+    --tw-prose-bullets: var(--color-accent-500);
+    --tw-prose-hr: var(--color-border-subtle);
+    --tw-prose-quotes: var(--color-text-secondary);
+    --tw-prose-quote-borders: var(--color-accent-500);
+    --tw-prose-captions: var(--color-text-muted);
+    --tw-prose-code: var(--color-accent-500);
+    --tw-prose-pre-code: var(--color-neutral-100);
+    --tw-prose-pre-bg: var(--color-code-bg);
+    --tw-prose-th-borders: var(--color-border-default);
+    --tw-prose-td-borders: var(--color-border-subtle);
+  }
+
+  /* Dark mode prose overrides */
+  [data-theme="dark"] .guide-content.prose,
+  [data-theme="dracula"] .guide-content.prose {
+    --tw-prose-body: var(--color-text-secondary);
+    --tw-prose-headings: var(--color-text-primary);
+    --tw-prose-links: var(--color-accent-400);
+    --tw-prose-bold: var(--color-text-primary);
+    --tw-prose-counters: var(--color-text-secondary);
+    --tw-prose-bullets: var(--color-accent-400);
+    --tw-prose-hr: var(--color-border-subtle);
+    --tw-prose-quotes: var(--color-text-secondary);
+    --tw-prose-quote-borders: var(--color-accent-400);
+    --tw-prose-captions: var(--color-text-muted);
+    --tw-prose-code: var(--color-accent-400);
+    --tw-prose-pre-code: var(--color-neutral-100);
+    --tw-prose-pre-bg: var(--color-code-bg);
+    --tw-prose-th-borders: var(--color-border-default);
+    --tw-prose-td-borders: var(--color-border-subtle);
+  }
+
+  /* Blockquotes - styled as emphasis panels */
+  .guide-content blockquote {
+    border-left: 4px solid var(--color-accent-500);
+    background: var(--color-bg-accent-subtle);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-style: italic;
+    color: var(--color-text-secondary);
+  }
+
+  .guide-content blockquote p {
+    margin-bottom: 0;
+  }
+
+  [data-theme="dark"] .guide-content blockquote,
+  [data-theme="dracula"] .guide-content blockquote {
+    border-left-color: var(--color-accent-400);
+    background: rgba(6, 182, 212, 0.1);
+  }
+
+  /* ========================================
      GUIDE CODE BLOCK STYLES
      v1.2: Recessed terminal aesthetic
      - Darkest surface on the page
@@ -1756,37 +1948,59 @@ body {
   .code-block-wrapper::before {
     content: attr(data-language);
     display: block;
-    padding: 0.375rem 0.75rem;
-    background: rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 1rem;
+    /* More visible header - slightly elevated from code area */
+    background: linear-gradient(
+      180deg,
+      rgba(30, 41, 59, 0.95) 0%,
+      rgba(30, 41, 59, 0.85) 100%
+    );
+    border-bottom: 1px solid rgba(6, 182, 212, 0.3);
     font-family: var(--font-mono);
-    font-size: 0.6875rem;  /* 11px - very small */
-    font-weight: 500;
-    letter-spacing: 0.03em;
+    font-size: 0.75rem;  /* 12px - more readable */
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--color-text-muted);
-    opacity: 0.7;
+    color: var(--color-accent-400);
   }
 
-  /* Hide header for blocks without language */
+  /* Hide header entirely for blocks without language */
+  .code-block-wrapper[data-language=""]::before,
   .code-block-wrapper:not([data-language])::before {
     display: none;
+  }
+
+  /* Remove top padding when no header */
+  .code-block-wrapper[data-language=""] pre,
+  .code-block-wrapper:not([data-language]) pre {
+    border-radius: var(--radius-lg);
   }
 
   /* Position copy button in the header area */
   .code-block-wrapper .guide-copy-btn {
     position: absolute;
-    top: 0.25rem;
-    right: 0.5rem;
+    top: 0.375rem;
+    right: 0.75rem;
     z-index: 10;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.6875rem;
-    opacity: 0.5;
-    transition: opacity 0.15s ease;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-400);
+    opacity: 0.7;
+    transition: all 0.15s ease;
   }
 
   .code-block-wrapper:hover .guide-copy-btn {
-    opacity: 0.85;
+    opacity: 1;
+    background: rgba(6, 182, 212, 0.25);
+  }
+
+  .code-block-wrapper .guide-copy-btn:hover {
+    background: rgba(6, 182, 212, 0.35);
+    border-color: var(--color-accent-400);
   }
 
   /* Code block body - darkest surface */
@@ -1807,6 +2021,55 @@ body {
   /* Light mode adjustment */
   :root:not(.dark) .code-block-wrapper pre {
     background-color: #1e1e1e;  /* VS Code dark */
+  }
+
+  /* ========================================
+     SYNTAX HIGHLIGHTING COLORS
+     Vibrant, engaging palette inspired by
+     Dracula/One Dark with teal accents
+     ======================================== */
+
+  /* Comments - muted but readable */
+  .code-block-wrapper .syn-comment {
+    color: #6272a4;
+    font-style: italic;
+  }
+
+  /* Strings - vibrant green */
+  .code-block-wrapper .syn-string {
+    color: #50fa7b;
+  }
+
+  /* Numbers - warm orange */
+  .code-block-wrapper .syn-number {
+    color: #ffb86c;
+  }
+
+  /* Keywords - vibrant pink/magenta */
+  .code-block-wrapper .syn-keyword {
+    color: #ff79c6;
+    font-weight: 500;
+  }
+
+  /* Functions - cyan/teal (matches site accent) */
+  .code-block-wrapper .syn-function {
+    color: #8be9fd;
+  }
+
+  /* Types - purple */
+  .code-block-wrapper .syn-type {
+    color: #bd93f9;
+  }
+
+  /* Variables - light foreground */
+  .code-block-wrapper .syn-variable {
+    color: #f8f8f2;
+  }
+
+  /* Operators & punctuation - slightly muted */
+  .code-block-wrapper .syn-operator,
+  .code-block-wrapper .syn-punctuation {
+    color: #ff79c6;
   }
 
   .code-block-wrapper pre code {
@@ -2050,25 +2313,35 @@ body {
 
   /* ========================================
      SIDE-BY-SIDE COMPARISON TABLES
-     v1.2: Layered surface hierarchy
-     - Outer card lifts off page
-     - Inner panels feel inset/embedded
-     - Clear row separation
+     v1.3: Enhanced visual distinction
+     - Prominent accent border for clear separation
+     - Elevated surface with stronger lift
+     - Generous spacing from surrounding content
      ======================================== */
 
   /* Comparison tables (2-column conceptual comparisons) */
   .guide-content table[width="100%"],
   .guide-content table:has(th[width="50%"]) {
-    /* Outer container - lifts off the page */
+    /* Outer container - lifts off the page with accent border */
     background: var(--color-bg-elevated);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 2px solid var(--color-accent-500);
     border-radius: var(--radius-xl);
     box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      0 6px 20px rgba(0, 0, 0, 0.2),
+      0 2px 6px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
     overflow: hidden;
-    margin: 2rem 0;
+    margin: 2.5rem 0;
+  }
+
+  /* Accent glow effect for dark mode */
+  [data-theme="dark"] .guide-content table:has(th[width="50%"]),
+  [data-theme="dracula"] .guide-content table:has(th[width="50%"]) {
+    box-shadow:
+      0 0 0 1px rgba(6, 182, 212, 0.2),
+      0 6px 20px rgba(0, 0, 0, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
   /* Comparison table headers - column labels */
@@ -2115,11 +2388,11 @@ body {
 
   /* Light mode adjustments for comparison tables */
   :root:not(.dark) .guide-content table:has(th[width="50%"]) {
-    background: #f8f9fa;
-    border-color: rgba(0, 0, 0, 0.08);
+    background: #f8fafc;
+    border: 2px solid var(--color-accent-600);
     box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.08),
-      0 1px 3px rgba(0, 0, 0, 0.05);
+      0 6px 20px rgba(0, 0, 0, 0.1),
+      0 2px 6px rgba(0, 0, 0, 0.06);
   }
 
   :root:not(.dark) .guide-content table:has(th[width="50%"]) th {
