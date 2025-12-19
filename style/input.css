@@ -1948,14 +1948,15 @@ body {
   .code-block-wrapper::before {
     content: attr(data-language);
     display: block;
-    padding: 0.5rem 1rem;
-    /* More visible header - slightly elevated from code area */
+    padding: 0.625rem 1rem;  /* Sized to fit copy button */
+    /* Gradient that fades into code background for seamless look */
     background: linear-gradient(
       180deg,
-      rgba(30, 41, 59, 0.95) 0%,
-      rgba(30, 41, 59, 0.85) 100%
+      rgba(30, 41, 59, 0.7) 0%,
+      rgba(13, 17, 23, 1) 100%  /* Matches code bg #0d1117 */
     );
-    border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+    /* No border - seamless transition to code area */
+    border: none;
     font-family: var(--font-mono);
     font-size: 0.75rem;  /* 12px - more readable */
     font-weight: 600;
@@ -1964,30 +1965,26 @@ body {
     color: var(--color-accent-400);
   }
 
-  /* Hide header entirely for blocks without language */
+  /* Minimal header for blocks without language - still show bar for copy button context */
   .code-block-wrapper[data-language=""]::before,
   .code-block-wrapper:not([data-language])::before {
-    display: none;
-  }
-
-  /* Remove top padding when no header */
-  .code-block-wrapper[data-language=""] pre,
-  .code-block-wrapper:not([data-language]) pre {
-    border-radius: var(--radius-lg);
+    /* Match height of language headers for button alignment */
+    padding: 0.625rem 1rem;
+    min-height: 1rem;  /* Ensure consistent height even with no content */
   }
 
   /* Position copy button in the header area */
   .code-block-wrapper .guide-copy-btn {
     position: absolute;
-    top: 0.375rem;
-    right: 0.75rem;
+    top: 0.375rem;  /* Positioned to center in header */
+    right: 1rem;
     z-index: 10;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;  /* 11px */
     font-weight: 500;
     background: rgba(6, 182, 212, 0.15);
     border: 1px solid rgba(6, 182, 212, 0.3);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     color: var(--color-accent-400);
     opacity: 0.7;
     transition: all 0.15s ease;
@@ -2009,13 +2006,15 @@ body {
     padding: 1rem 1.25rem;
     /* Darkest surface - true recessed terminal look */
     background-color: #0d1117;  /* GitHub dark bg */
-    border: none;
-    border-radius: 0;
+    /* Force no border - override any inherited styles */
+    border: none !important;
+    border-radius: 0 !important;
+    outline: none !important;
     overflow-x: auto;
     font-size: 0.8125rem;  /* 13px */
     line-height: 1.65;
-    /* Subtle inner shadow for depth */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    /* Remove inner shadow for cleaner look */
+    box-shadow: none;
   }
 
   /* Light mode adjustment */
