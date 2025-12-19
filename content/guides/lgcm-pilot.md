@@ -85,7 +85,6 @@ LGCM works well when you have:
 > [!note]
 > LGCM may not be the best choice when you have:
 >
-> - **Only 2 time points** — Use change scores, ANCOVA, or autoregressive models
 > - **Categorical outcomes with few categories** — Consider growth models for categorical data
 > - **Interest only in group means** — Repeated measures ANOVA may suffice
 > - **Intensive longitudinal data (100+ waves)** — Consider time-series approaches
@@ -116,7 +115,7 @@ In LGCM, loadings are **fixed**, not estimated:
 | Intercept | 1, 1, 1, 1, 1 | Contributes equally at every time point |
 | Slope | 0, 1, 2, 3, 4 | Encodes time; contribution grows linearly |
 
-The loadings 0, 1, 2, 3, 4 assume equally spaced waves with Time 0 at Wave 1. Adjust if your design differs (e.g., for waves at months 0, 3, 6, 12, 24, use loadings 0, 3, 6, 12, 24 so slope = change per month).
+The loadings 0, 1, 2, 3, 4 assume equally spaced waves with Time 0 at Wave 1. See [Time Coding](#time-coding) for centering options and unequal spacing.
 
 ### Factor Means: The Average Trajectory
 
@@ -344,7 +343,7 @@ Maximum likelihood estimation assumes multivariate normality. Violations can aff
 
 ---
 
-## Time Coding: The Most Important Decision
+## Time Coding
 
 Slope factor loadings define how time enters the model. This determines:
 
@@ -445,13 +444,6 @@ The data provide 5 means + 15 unique covariances = 20 pieces of information.
 | Equal residuals | 6 | 14 |
 
 Positive degrees of freedom means the model is testable.
-
-### Identification Requirements
-
-A model is identified when there's a unique best-fitting solution. LGCM achieves this through fixed loadings:
-
-- **Linear growth**: 3+ time points (just-identified at 3, testable at 4+)
-- **Quadratic growth**: 4+ time points (just-identified at 4, testable at 5+)
 
 ---
 
