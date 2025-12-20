@@ -4,7 +4,7 @@ slug: "lgcm-pilot"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
 tags: ["LGCM", "SEM", "longitudinal", "growth-curves"]
-r_packages: ["lavaan", "tidyverse", "MASS"]
+r_packages: ["lavaan", "tidyverse"]
 ---
 
 ## Why Study Growth?
@@ -32,6 +32,13 @@ The average tells you "the group improved"—but the real questions are:
 - Are these two things related? (Do high starters change faster or slower?)
 
 **Latent Growth Curve Models (LGCM)** answer exactly these questions. Every person gets their own trajectory—a starting point (intercept) and rate of change (slope)—and the model quantifies how much people vary in these trajectories.
+
+> [!info] **About This Guide**
+>
+> This page explains *what* LGCM is and *why* it works—building conceptual understanding before implementation.
+>
+> - **Ready to see code?** → [Tutorial: Worked Example](/guides/lgcm-pilot-tutorial)
+> - **Need syntax or fit index thresholds?** → [Quick Reference](/guides/lgcm-pilot-reference)
 
 ---
 
@@ -80,15 +87,6 @@ LGCM works well when you have:
 | **Interest in individual differences** | Not just "did the mean change?" |
 | **Adequate sample** | 100+ for simple models; more for complex |
 
-### When to Consider Alternatives
-
-> [!note]
-> LGCM may not be the best choice when you have:
->
-> - **Categorical outcomes with few categories** — Consider growth models for categorical data
-> - **Interest only in group means** — Repeated measures ANOVA may suffice
-> - **Intensive longitudinal data (100+ waves)** — Consider time-series approaches
-
 ---
 
 ## Key Components of Linear LGCM
@@ -105,6 +103,8 @@ Every person in your study has two numbers you can't directly observe:
 | **Slope (η₂)** | Each person's rate of change per time unit | Constant in linear model |
 
 These aren't measured directly—LGCM infers them from the pattern of observed scores across time.
+
+**A useful analogy**: In traditional factor analysis, multiple *items* measure one latent construct. In LGCM, multiple *time points* measure two latent constructs—where you start and how you change. The key difference is that LGCM's factor loadings aren't estimated from data; they're fixed to encode your time structure.
 
 ### Factor Loadings: Encoding Time
 
@@ -268,78 +268,19 @@ To build deeper intuition for how LGCM parameters affect trajectories, use the i
   title="Interactive LGCM Trajectory Explorer">
 </iframe>
 
-**Experiments to try:**
-
-1. **Set Slope SD = 0**: Watch all lines become parallel. No slope variance = everyone changes at exactly the same rate.
-
-2. **Set Slope SD = 2**: Watch the "fan pattern" emerge. High slope variance = some people change rapidly, others slowly.
-
-3. **Set Intercept-Slope Correlation = -0.8**: Notice how high starters now tend to have flatter slopes. This is regression to the mean.
-
-4. **Set Intercept-Slope Correlation = +0.8**: Now high starters grow even faster. This is the "rich get richer" pattern.
-
-5. **Increase Residual SD**: Watch individual trajectories become noisier while the underlying pattern remains.
-
 ---
 
-## Data Requirements
+## Practical Considerations
 
-Before fitting an LGCM, verify that your data meet these requirements.
+### How Many Time Points?
 
-### Minimum Time Points
-
-| Time Points | What You Can Estimate |
-|-------------|----------------------|
-| 2 | LGCM offers little advantage; use change scores, ANCOVA, or regression instead |
-| 3 | Linear growth with minimal testable fit (df = 1 with free residuals) |
-| 4 | Linear growth with good testable fit (df = 5) |
-| 4 | Quadratic growth (just-identified) |
-| 5+ | Linear or quadratic with robust testable fit |
-
-With only two time points, you can estimate mean change and variance of change, but a latent growth curve model does not offer meaningful advantages over simpler approaches.
-
-**Recommendation**: Aim for at least 4 time points. With 3 time points you have only 1 degree of freedom for testing fit (assuming free residual variances), which provides limited power to detect model misspecification.
+LGCM requires at least **3 time points** for linear growth, with **4+ preferred**. With only two waves, simpler approaches (change scores, ANCOVA) work just as well. More waves provide better power to detect individual differences in growth and to test whether linear trajectories actually fit.
 
 ### Missing Data
 
-Real longitudinal data almost always have missing observations. LGCM handles this well—but only under certain conditions.
+Real longitudinal data almost always have missing observations. LGCM handles this gracefully through **Full Information Maximum Likelihood (FIML)**, which uses all available data without listwise deletion.
 
-**Full Information Maximum Likelihood (FIML)**: Modern SEM software uses FIML by default. It uses all available data from each participant without imputation or deletion.
-
-**The MAR Assumption**: FIML assumes data are Missing At Random—missingness can depend on observed variables but not on the missing values themselves.
-
-- *MAR example*: Participants with lower baseline scores drop out more often. (Baseline was observed.)
-- *MNAR example*: Participants drop out because their current unobserved score is extreme. (Estimates may be biased.)
-
-**Problematic patterns**:
-- Sporadic missingness (random waves missing): Generally fine
-- Monotone dropout: Fine under MAR, though you're extrapolating
-- Systematic dropout related to trajectory: Potentially problematic
-
-**Auxiliary variables**: Including variables that predict missingness (but aren't part of your main model) can make MAR more plausible and improve estimation. For example, if participants with lower education drop out more, including education as an auxiliary variable helps FIML "borrow" information appropriately.
-
-### Distributional Considerations
-
-Maximum likelihood estimation assumes multivariate normality. Violations can affect standard errors (underestimated) and chi-square statistics (inflated).
-
-**What to check**: Skewness, kurtosis, outliers, floor/ceiling effects at each wave.
-
-**Guidelines**:
-- Skewness: |skew| < 2 is generally acceptable
-- Kurtosis: |kurt| < 7 is generally acceptable
-- For violations, use robust standard errors (MLR estimator)
-
-**What to do**:
-- Mild violations: Use robust standard errors
-- Severe violations: Consider transformations or robust estimation
-- Categorical outcomes: Use appropriate estimators (WLSMV)
-
-### Pre-Flight Checklist
-
-- [ ] 3+ time points (4+ preferred)
-- [ ] Missingness examined and plausibly MAR
-- [ ] Distributions checked
-- [ ] Time structure known (spacing between waves)
+The key assumption is **Missing At Random (MAR)**: missingness can depend on *observed* variables, but not on the missing values themselves. If participants drop out *because* their unobserved scores are extreme (Missing Not At Random), estimates may be biased. Understanding this distinction helps you evaluate whether your missing data pattern is problematic.
 
 ---
 
@@ -413,189 +354,28 @@ Now slope = change per **month**. Rescale for interpretability if needed (e.g., 
 
 ---
 
-## Model Specification
+## Summary
 
-### Residual Variances: Equal vs. Free
+You now have the conceptual foundation for understanding LGCM:
 
-- **Free (default)**: Each time point has its own residual variance. More flexible, uses more parameters.
-- **Equal (constrained)**: All time points share the same residual variance. More parsimonious.
+- **Two latent factors**—intercept and slope—capture each person's starting level and rate of change
+- **Factor variances** quantify individual differences; the **covariance** reveals whether high starters grow faster or slower
+- **Time coding** determines what the intercept means and must match your study design
+- **LGCM produces testable fit**, allowing you to evaluate whether linear growth actually describes your data
 
-**Recommendation**: Start with free residuals, then test whether equality constraint worsens fit.
-
-### Parameter Count
-
-For a linear LGCM with 5 waves:
-
-| Parameter | Free Residuals | Equal Residuals |
-|-----------|---------------|------------------|
-| Intercept mean | 1 | 1 |
-| Slope mean | 1 | 1 |
-| Intercept variance | 1 | 1 |
-| Slope variance | 1 | 1 |
-| I-S covariance | 1 | 1 |
-| Residual variances | 5 | 1 |
-| **Total** | **10** | **6** |
-
-The data provide 5 means + 15 unique covariances = 20 pieces of information.
-
-| Model | Parameters | df |
-|-------|------------|-----|
-| Free residuals | 10 | 10 |
-| Equal residuals | 6 | 14 |
-
-Positive degrees of freedom means the model is testable.
+This is enough to understand what an LGCM does and why. To actually *fit* one, continue to the worked example.
 
 ---
 
-## Estimation & Fit Indices
+## Next Steps
 
-### Maximum Likelihood Estimation
+<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
 
-ML estimation:
-- Uses observed means and covariances
-- Assumes multivariate normality
-- Handles missing data via FIML
-- Produces standard errors for inference
+**[Tutorial: Worked Example →](/guides/lgcm-pilot-tutorial)**
+Step-by-step R code to simulate data, fit models, and interpret results.
 
-If concerned about non-normality, use robust estimation (MLR) which provides robust standard errors and scaled test statistics (Satorra-Bentler correction).
+**[Quick Reference →](/guides/lgcm-pilot-reference)**
+Syntax patterns, fit index thresholds, and troubleshooting.
 
-### Fit Indices
+</div>
 
-#### Chi-Square (χ²)
-
-Tests whether model-implied covariances match observed covariances.
-
-- Non-significant p (> .05): Model fits adequately
-- Significant p (< .05): Model doesn't fit perfectly
-
-**Problem**: Large samples make trivial misfits significant. Don't rely on χ² alone.
-
-#### RMSEA (Root Mean Square Error of Approximation)
-
-Estimates population misfit, adjusted for parsimony.
-
-| Value | Interpretation |
-|-------|----------------|
-| < 0.05 | Close fit |
-| 0.05–0.08 | Reasonable fit |
-| > 0.10 | Poor fit |
-
-RMSEA rewards parsimony and provides a 90% confidence interval.
-
-#### CFI (Comparative Fit Index)
-
-Compares your model to a null model (all variables uncorrelated).
-
-| Value | Interpretation |
-|-------|----------------|
-| > 0.95 | Good fit |
-| 0.90–0.95 | Acceptable |
-| < 0.90 | Poor fit |
-
-#### SRMR (Standardized Root Mean Square Residual)
-
-Average discrepancy between observed and implied correlations.
-
-| Value | Interpretation |
-|-------|----------------|
-| < 0.08 | Good fit |
-| > 0.10 | Poor fit |
-
-### Interpreting Multiple Indices
-
-No single index is definitive. Look for convergence:
-
-- All indices suggest good fit → Confident
-- Indices disagree → Investigate further
-- Most indices suggest poor fit → Revise model
-
-**Reasonable targets** (not hard cutoffs): CFI ≥ 0.95, RMSEA ≤ 0.06, SRMR ≤ 0.08
-
----
-
-## Model Comparison
-
-### Why Compare Models?
-
-1. **Test hypotheses**: Is there growth? Do people differ?
-2. **Select best model**: Balance fit and parsimony
-
-### Nested vs. Non-Nested Models
-
-**Nested**: One model is a constrained version of another.
-- Intercept-only nested within linear growth
-- Equal residuals nested within free residuals
-
-**Non-nested**: Neither is a special case of the other.
-
-### Likelihood Ratio Test (Nested Models)
-
-If Model A is nested within Model B:
-
-```
-Δχ² = χ²(constrained) - χ²(unconstrained)
-Δdf = df(constrained) - df(unconstrained)
-```
-
-Significant Δχ²: The constraints worsen fit; reject the simpler model.
-
-### Information Criteria (Any Models)
-
-**AIC**: -2×LL + 2×(parameters). Lower = better. Moderate parsimony penalty.
-
-**BIC**: -2×LL + log(N)×(parameters). Lower = better. Stronger parsimony penalty.
-
-If AIC and BIC agree, you're confident. If they disagree, acknowledge ambiguity.
-
-### Common Comparisons
-
-#### Test 1: Is There Growth?
-
-The most fundamental comparison: does adding a slope factor significantly improve fit?
-
-**[Open Interactive Model Comparison](/images/guides/lgcm/interactive/model_comparison.html)** *(opens in browser)*
-
-<details>
-<summary>Embedded interactive version</summary>
-
-<iframe
-  src="/images/guides/lgcm/interactive/model_comparison.html"
-  width="100%"
-  height="680"
-  style="border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px;"
-  title="Interactive Model Comparison">
-</iframe>
-
-</details>
-
-*Click the buttons to animate between an intercept-only model (flat trajectories) and a linear growth model (sloped trajectories). Notice how adding the slope factor allows the model to capture systematic change.*
-
-Compare an intercept-only model to a linear growth model. Significant Δχ² means there's systematic change.
-
-#### Test 2: Do People Differ in Growth?
-
-Compare a model with fixed slope (variance = 0) to a model with random slope (variance estimated). Significant Δχ² means individuals differ in change rates.
-
-**Note**: Testing variance = 0 is a boundary test. The p-value is conservative (true p ≈ half the reported value).
-
-#### Test 3: Are Residual Variances Equal?
-
-Compare free residual variances to constrained (equal) residual variances. Non-significant Δχ² means equal residuals are justified—use the simpler model.
-
-### Decision Framework
-
-1. Fit intercept-only model
-2. Fit linear growth model
-3. Compare (LRT): Is growth significant?
-4. Test equal residual variances
-5. Select final model based on LRT and AIC/BIC
-
-### Reporting Example
-
-> We compared an intercept-only model to a linear growth model. Linear growth fit significantly better, Δχ²(3) = 226.10, p < .001. Constraining residual variances to equality did not significantly worsen fit, Δχ²(4) = 5.23, p = .26. The final model includes linear growth with equal residual variances (CFI = 0.996, RMSEA = 0.025, SRMR = 0.030).
-
-| Model | χ² | df | CFI | RMSEA | AIC | BIC |
-|-------|-----|-----|------|-------|-----|-----|
-| Intercept only | 238.45 | 13 | 0.82 | 0.21 | 10456 | 10484 |
-| Linear growth | 12.35 | 10 | 0.998 | 0.024 | 10234 | 10274 |
-| Linear (equal resid) | 17.58 | 14 | 0.996 | 0.025 | 10228 | 10260 |

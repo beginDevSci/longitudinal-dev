@@ -41,7 +41,7 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
             <header class="border-b border-default bg-subtle">
                 <div class="guide-header-container">
                     // Breadcrumb
-                    <nav class="mb-4 text-sm">
+                    <nav class="mb-3 text-sm">
                         <a href={base_path::join("guides/")} class="text-secondary hover:text-accent transition-colors">
                             "Method Guides"
                         </a>
@@ -50,21 +50,17 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                     </nav>
 
                     // Title
-                    <h1 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">
                         {title}
                     </h1>
 
                     // Description
-                    <p class="text-lg text-secondary mb-6">
+                    <p class="text-lg text-secondary mb-4">
                         {description}
                     </p>
 
                     // Metadata pills
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
-                            "Method Guide"
-                        </span>
-
                         {tags.iter().map(|tag| {
                             view! {
                                 <span class="px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent border border-accent/20">
