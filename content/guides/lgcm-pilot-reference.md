@@ -11,6 +11,8 @@ r_packages: ["lavaan"]
 
 Fast lookup for syntax, fit indices, and troubleshooting. For step-by-step learning, see the [Tutorial](/guides/lgcm-pilot-tutorial).
 
+**Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation--missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors--fixes)
+
 ---
 
 ## lavaan Syntax
@@ -73,6 +75,120 @@ intercept =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5
 slope     =~ 0*y1 + y2 + y3 + y4 + 1*y5
 ```
 
+### Correlated Adjacent Residuals
+
+```r
+y1 ~~ y2
+y2 ~~ y3
+y3 ~~ y4
+y4 ~~ y5
+```
+
+### Multigroup Growth
+
+```r
+fit <- growth(model, data = data_wide, group = "group_var")
+```
+
+---
+
+## Estimation & Missing Data
+
+| Scenario | Estimator | Code |
+|----------|-----------|------|
+| Complete data | ML (default) | `growth(model, data)` |
+| Missing data (MAR) | FIML | `missing = "fiml"` |
+| Non-normal data | MLR | `estimator = "MLR"` |
+| Ordinal outcomes | WLSMV | `estimator = "WLSMV"` |
+
+**FIML for missing data:**
+```r
+fit <- growth(model, data = data_wide, missing = "fiml")
+```
+
+**Robust SEs (non-normality):**
+```r
+fit <- growth(model, data = data_wide, estimator = "MLR")
+```
+
+**Ordinal outcomes:**
+```r
+fit <- growth(model, data = data_wide, estimator = "WLSMV")
+```
+
+---
+
+## Extract Output
+
+### Fit Indices
+
+```r
+fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
+```
+
+### Growth Factor Means
+
+```r
+parameterEstimates(fit) %>%
+  filter(op == "~1", lhs %in% c("intercept", "slope"))
+```
+
+### Growth Factor Variances/Covariances
+
+```r
+parameterEstimates(fit) %>%
+  filter(op == "~~", lhs %in% c("intercept", "slope"),
+         rhs %in% c("intercept", "slope"))
+```
+
+### Standardized Estimates
+
+```r
+parameterEstimates(fit, standardized = TRUE) %>%
+  select(lhs, op, rhs, est, se, std.all)
+```
+
+### R² (Variance Explained)
+
+```r
+inspect(fit, "r2")
+```
+
+### Residual Correlations
+
+```r
+resid(fit, type = "cor")$cov %>% round(3)
+```
+
+### Modification Indices
+
+```r
+modindices(fit, sort = TRUE, minimum.value = 10)
+```
+
+---
+
+## Model Comparison
+
+### Nested Models (LRT)
+
+```r
+anova(fit_constrained, fit_full)
+```
+
+### Robust LRT (for MLR fits)
+
+```r
+anova(fit1, fit2, method = "satorra.bentler.2001")
+```
+
+### Information Criteria
+
+```r
+AIC(fit1); AIC(fit2)  # Lower = better
+BIC(fit1); BIC(fit2)  # Lower = better
+```
+
 ---
 
 ## Fit Indices
@@ -83,11 +199,6 @@ slope     =~ 0*y1 + y2 + y3 + y4 + 1*y5
 | CFI | ≥ .95 | ≥ .90 | Comparative fit (vs. null model) |
 | RMSEA | ≤ .06 | ≤ .08 | Population misfit estimate |
 | SRMR | ≤ .08 | ≤ .10 | Avg. residual correlation |
-
-**Extract in lavaan:**
-```r
-fitmeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
-```
 
 ---
 
@@ -102,12 +213,6 @@ fitmeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 | I-S covariance | ψᵢₛ | Start-change relationship |
 | Residual variance | θ | Unexplained variance at each wave |
 
-**Extract in lavaan:**
-```r
-parameterEstimates(fit) %>%
-  filter(op %in% c("~1", "~~"))
-```
-
 ---
 
 ## Time Coding
@@ -119,63 +224,11 @@ parameterEstimates(fit) %>%
 | Final wave | -4, -3, -2, -1, 0 | Score at Wave 5 |
 | Actual months | 0, 3, 6, 12, 24 | Score at baseline |
 
-**The slope is always "change per unit"**—centering only moves the intercept.
+Slope interpretation unchanged by centering; intercept moves to the zero-point.
 
 ---
 
-## Requirements
-
-| Aspect | Minimum | Recommended |
-|--------|---------|-------------|
-| Time points | 3 | 4+ |
-| Sample size (simple) | 100 | 150+ |
-| Sample size (complex) | 200 | 300+ |
-| Data format | Wide | Wide |
-
----
-
-## Distributional Assumptions
-
-ML estimation assumes multivariate normality. Check before fitting:
-
-| Check | Acceptable | Action if Violated |
-|-------|------------|-------------------|
-| Skewness | \|skew\| < 2 | Use MLR estimator |
-| Kurtosis | \|kurt\| < 7 | Use MLR estimator |
-| Outliers | Few, not extreme | Investigate; consider robust estimation |
-| Floor/ceiling effects | Minimal | May need transformed outcomes |
-
-**Using robust estimation in lavaan:**
-```r
-fit <- growth(model, data = data_wide, estimator = "MLR")
-```
-
-MLR provides robust standard errors and Satorra-Bentler scaled χ² (use `estimator = "MLR"` or `se = "robust"`).
-
-**For categorical outcomes** (ordinal with few categories):
-```r
-fit <- growth(model, data = data_wide, estimator = "WLSMV")
-```
-
----
-
-## Model Comparison
-
-```r
-# Nested models (likelihood ratio test)
-anova(fit_constrained, fit_full)
-
-# With robust SEs
-anova(fit1, fit2, method = "satorra.bentler.2001")
-
-# Any models (information criteria)
-AIC(fit1); AIC(fit2)  # Lower = better
-BIC(fit1); BIC(fit2)  # Lower = better
-```
-
----
-
-## Common Pitfalls
+## Common Errors & Fixes
 
 | Issue | Symptom | Fix |
 |-------|---------|-----|
@@ -189,59 +242,31 @@ BIC(fit1); BIC(fit2)  # Lower = better
 
 ## Troubleshooting
 
-### "Covariance matrix not positive definite"
+### Non-Positive Definite Matrix
 
-- Check for very high correlations between time points
-- Verify variance estimates aren't near zero
-- Consider constraining residual variances equal
+- Very high correlations between time points
+- Variance estimates near zero
+- Try constraining residual variances equal
 
-### Negative Variance Estimate
+### Negative Variance (Heywood Case)
 
 ```r
-# Option 1: Constrain to zero
-slope ~~ 0*slope
-
-# Option 2: Constrain to small positive
-slope ~~ 0.001*slope
+slope ~~ 0*slope           # Constrain to zero
+intercept ~~ 0*slope       # Also fix covariance
 ```
 
 ### Non-Convergence
 
-```r
-# Provide starting values
-fit <- growth(model, data = data_wide,
-              start = list(intercept ~ 50, slope ~ 2))
-```
+- Increase iterations: `control = list(iter.max = 10000)`
+- Check sample size relative to model complexity
+- Simplify model (fewer free parameters)
 
-### Checking for Problems
+### Flag Problematic Estimates
 
 ```r
-# Modification indices (large = localized misfit)
-modindices(fit, sort = TRUE, minimum.value = 10)
-
-# Residual correlations (should be near 0)
-resid(fit, type = "cor")$cov %>% round(3)
-
-# Flag negative variances
 parameterEstimates(fit) %>%
   filter(op == "~~", est < 0)
 ```
-
----
-
-## Diagnostics Checklist
-
-**Before running:**
-- [ ] Data in wide format
-- [ ] Variable names match syntax
-- [ ] Time coding reflects actual spacing
-- [ ] Trajectories visualized
-
-**Before reporting:**
-- [ ] Model fit indices reported
-- [ ] All parameters with SEs
-- [ ] Variances interpreted (not just means)
-- [ ] Time coding stated
 
 ---
 
@@ -268,9 +293,9 @@ r_is <- cov_is / sqrt(var_i * var_s)
 pnorm(0, mean = slope_mean, sd = sqrt(slope_var), lower.tail = FALSE)
 ```
 
-**Degrees of freedom (T waves, free residuals):**
-```
-df = T(T+1)/2 - 5
+**Degrees of freedom:**
+```r
+fitMeasures(fit, "df")
 ```
 
 ---
