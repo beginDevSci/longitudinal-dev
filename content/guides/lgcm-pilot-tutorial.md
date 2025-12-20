@@ -86,15 +86,7 @@ data_wide <- tibble(id = 1:n) %>%
 head(data_wide)
 ```
 
-Expected output:
-```
-# A tibble: 6 × 6
-     id    y1    y2    y3    y4    y5
-  <int> <dbl> <dbl> <dbl> <dbl> <dbl>
-1     1  52.3  55.1  58.2  60.4  63.1
-2     2  48.7  49.2  51.8  52.9  55.0
-...
-```
+✅ **Checkpoint**: You should see a tibble with 6 rows and columns `id`, `y1`–`y5`. Values will differ due to random generation, but should be in the 30–70 range.
 
 ---
 
@@ -144,25 +136,28 @@ ggplot(data_long, aes(x = time, y = y)) +
 
 ![Individual Trajectories with Mean](/images/guides/lgcm/fig02_spaghetti_mean.png)
 
+✅ **Checkpoint**: Your plot should show upward-trending lines with visible spread at baseline and a "fan" pattern over time.
+
 ---
 
 ## Step 4: Fit Models
 
 ### Intercept-Only Model (Baseline)
 
-First, fit a model with no growth—everyone has a stable mean:
+Fit a model with no growth—everyone has a stable mean:
 
 ```r
 model_intercept <- '
   intercept =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5
 '
 
-fit_intercept <- growth(model_intercept, data = data_wide)
+fit_intercept <- growth(model_intercept, data = data_wide,
+                        missing = "fiml")
 ```
 
 ### Linear Growth Model
 
-Now add the slope factor:
+Add the slope factor:
 
 ```r
 model_linear <- '
@@ -170,8 +165,11 @@ model_linear <- '
   slope     =~ 0*y1 + 1*y2 + 2*y3 + 3*y4 + 4*y5
 '
 
-fit_linear <- growth(model_linear, data = data_wide)
+fit_linear <- growth(model_linear, data = data_wide,
+                     missing = "fiml")
 ```
+
+*Note: We specify `missing = "fiml"` explicitly—good practice even when data are complete.*
 
 ### Linear Growth with Equal Residuals
 
@@ -190,7 +188,8 @@ model_linear_eq <- '
   y5 ~~ rv*y5
 '
 
-fit_linear_eq <- growth(model_linear_eq, data = data_wide)
+fit_linear_eq <- growth(model_linear_eq, data = data_wide,
+                        missing = "fiml")
 ```
 
 ---
@@ -203,16 +202,7 @@ fit_linear_eq <- growth(model_linear_eq, data = data_wide)
 anova(fit_intercept, fit_linear)
 ```
 
-Expected output:
-```
-Chi-Squared Difference Test
-
-               Df   AIC   BIC  Chisq Chisq diff Df diff Pr(>Chisq)
-fit_linear     10 11234 11274  12.35
-fit_intercept  13 11856 11884 638.21     625.86       3  < 2.2e-16 ***
-```
-
-**Result**: Δχ² is huge, p < .001 → Linear growth significantly improves fit.
+✅ **Confirm**: Δχ² should be significant (p < .001). This means linear growth improves fit over a flat trajectory.
 
 ### Are equal residual variances justified?
 
@@ -220,7 +210,7 @@ fit_intercept  13 11856 11884 638.21     625.86       3  < 2.2e-16 ***
 anova(fit_linear_eq, fit_linear)
 ```
 
-If non-significant, the equal residuals constraint is fine—use the simpler model.
+✅ **Confirm**: If p > .05, the simpler model (equal residuals) is justified.
 
 ### Information criteria
 
@@ -233,6 +223,8 @@ data.frame(
   mutate(across(where(is.numeric), \(x) round(x, 1)))
 ```
 
+✅ **Confirm**: Lower AIC/BIC = better fit. Linear models should beat intercept-only.
+
 ---
 
 ## Step 6: Check Diagnostics
@@ -242,13 +234,12 @@ data.frame(
 fitmeasures(fit_linear, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 ```
 
-Expected:
-```
- chisq     df pvalue    cfi  rmsea   srmr
-12.35  10.00   0.26  0.998  0.024  0.025
-```
+✅ **Check fit indices**:
+- CFI > .95 ✓
+- RMSEA < .08 ✓
+- SRMR < .08 ✓
 
-All indices indicate good fit.
+See [Reference](/guides/lgcm-pilot-reference#fit-indices) for detailed interpretation.
 
 ```r
 # Check for problematic estimates (negative variances)
@@ -258,6 +249,8 @@ parameterEstimates(fit_linear) %>%
   mutate(flag = ifelse(est < 0, "NEGATIVE", ""))
 ```
 
+✅ **Confirm**: All variance estimates should be positive. If any are negative, see [Troubleshooting](/guides/lgcm-pilot-reference#troubleshooting).
+
 ---
 
 ## Step 7: Interpret Results
@@ -266,26 +259,26 @@ parameterEstimates(fit_linear) %>%
 summary(fit_linear, fit.measures = TRUE, standardized = TRUE)
 ```
 
-### Parameter Estimates
+### Compare Estimates to True Values
 
-| Parameter | Estimate | SE | p | True Value |
-|-----------|----------|-----|------|------------|
-| Intercept mean | 49.82 | 0.51 | <.001 | 50 |
-| Slope mean | 2.04 | 0.06 | <.001 | 2 |
-| Intercept variance | 98.34 | 8.12 | <.001 | 100 |
-| Slope variance | 0.97 | 0.12 | <.001 | 1 |
-| I-S covariance | -1.89 | 0.62 | .002 | -2 |
-| Residual variance | 24.56 | 1.23 | <.001 | 25 |
+| Parameter | Estimate | SE | True Value |
+|-----------|----------|-----|------------|
+| Intercept mean | 49.82 | 0.51 | 50 |
+| Slope mean | 2.04 | 0.06 | 2 |
+| Intercept variance | 98.34 | 8.12 | 100 |
+| Slope variance | 0.97 | 0.12 | 1 |
+| I-S covariance | -1.89 | 0.62 | -2 |
+| Residual variance | 24.56 | 1.23 | 25 |
 
-**The estimates closely recover the true population parameters.**
+✅ **Success**: Estimates closely recover the true population parameters. This confirms the model is working correctly.
 
-### What Each Parameter Means
+### Interpret Each Parameter
 
-- **Intercept mean = 49.82**: Average score at Wave 1 was ~50
-- **Slope mean = 2.04**: On average, scores increased by ~2 units per wave
-- **Intercept variance = 98.34**: People differed substantially in starting levels (SD ≈ 10)
-- **Slope variance = 0.97**: People differed in growth rates (SD ≈ 1)
-- **I-S covariance = -1.89**: Higher starters grew slightly slower (r ≈ -0.19)
+- **Intercept mean ≈ 50**: Average score at Wave 1
+- **Slope mean ≈ 2**: Average increase per wave
+- **Intercept variance ≈ 100** (SD ≈ 10): People differed in starting levels
+- **Slope variance ≈ 1** (SD ≈ 1): People differed in growth rates
+- **I-S covariance ≈ -2** (r ≈ -0.19): Higher starters grew slightly slower
 
 ### Variance Explained
 
@@ -293,12 +286,7 @@ summary(fit_linear, fit.measures = TRUE, standardized = TRUE)
 inspect(fit_linear, "r2")
 ```
 
-```
-   y1    y2    y3    y4    y5
-0.800 0.825 0.856 0.878 0.893
-```
-
-The trajectory explains 80–89% of variance at each wave.
+✅ **Check**: R² values of 0.80–0.89 indicate the trajectory explains most variance at each wave.
 
 ---
 
@@ -344,8 +332,8 @@ model_lin <- '
   slope     =~ 0*y1 + 1*y2 + 2*y3 + 3*y4 + 4*y5
 '
 
-fit_int <- growth(model_int, data = data_wide)
-fit_lin <- growth(model_lin, data = data_wide)
+fit_int <- growth(model_int, data = data_wide, missing = "fiml")
+fit_lin <- growth(model_lin, data = data_wide, missing = "fiml")
 
 # Compare and summarize
 anova(fit_int, fit_lin)
