@@ -134,6 +134,31 @@ parameterEstimates(fit) %>%
 
 ---
 
+## Distributional Assumptions
+
+ML estimation assumes multivariate normality. Check before fitting:
+
+| Check | Acceptable | Action if Violated |
+|-------|------------|-------------------|
+| Skewness | \|skew\| < 2 | Use MLR estimator |
+| Kurtosis | \|kurt\| < 7 | Use MLR estimator |
+| Outliers | Few, not extreme | Investigate; consider robust estimation |
+| Floor/ceiling effects | Minimal | May need transformed outcomes |
+
+**Using robust estimation in lavaan:**
+```r
+fit <- growth(model, data = data_wide, estimator = "MLR")
+```
+
+MLR provides robust standard errors and Satorra-Bentler scaled χ² (use `estimator = "MLR"` or `se = "robust"`).
+
+**For categorical outcomes** (ordinal with few categories):
+```r
+fit <- growth(model, data = data_wide, estimator = "WLSMV")
+```
+
+---
+
 ## Model Comparison
 
 ```r
