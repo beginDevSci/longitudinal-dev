@@ -16,14 +16,45 @@ This tutorial walks through a complete LGCM analysis. By the end, you will have:
 3. Fit and compared growth models
 4. Interpreted the results
 
-**Time**: ~20 minutes if running code along the way.
-
 ---
 
 ## Workflow Overview
 
 ```
-Setup → Simulate Data → Visualize → Fit Models → Compare → Interpret
+┌─────────────────────────────────┐
+│ 1. Setup                        │
+│    Load packages, set seed      │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 2. Simulate/Load Data           │
+│    Wide format, check structure │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 3. Visualize                    │
+│    Spaghetti plot, look first   │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 4. Fit Models                   │
+│    Baseline + growth models     │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 5. Compare Models               │
+│    LRT, AIC/BIC                 │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 6. Check Diagnostics            │
+│    Fit indices, residuals       │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 7. Interpret Results            │
+│    Parameters, effect sizes     │
+└─────────────────────────────────┘
 ```
 
 ---
@@ -136,6 +167,8 @@ ggplot(data_long, aes(x = time, y = y)) +
 
 ![Individual Trajectories with Mean](/images/guides/lgcm/fig02_spaghetti_mean.png)
 
+*Figure: Individual trajectories (gray) with mean trajectory overlay (blue). The upward trend shows positive average growth; the spread shows individual differences.*
+
 ✅ **Checkpoint**: Your plot should show upward-trending lines with visible spread at baseline and a "fan" pattern over time.
 
 ---
@@ -229,8 +262,11 @@ data.frame(
 
 ## Step 6: Check Diagnostics
 
+Before interpreting results, verify model fit and check for problems.
+
+### Fit Indices
+
 ```r
-# Fit indices
 fitmeasures(fit_linear, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 ```
 
@@ -239,15 +275,42 @@ fitmeasures(fit_linear, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 - RMSEA < .08 ✓
 - SRMR < .08 ✓
 
-See [Reference](/guides/lgcm-pilot-reference#fit-indices) for detailed interpretation.
+See [Reference](/guides/lgcm-pilot-reference#fit-indices) for threshold details.
+
+### Modification Indices
 
 ```r
-# Check for problematic estimates (negative variances)
+modindices(fit_linear, sort = TRUE, minimum.value = 10)
+```
+
+**What to look for:**
+- Residual covariances (e.g., `y2 ~~ y3`): May indicate autocorrelation
+- Large values (>10) suggest localized misfit
+- Cross-loadings usually shouldn't be freed in LGCM
+
+✅ **Checkpoint**: Few or no modification indices >10 indicates good specification.
+
+### Residual Correlations
+
+```r
+resid(fit_linear, type = "cor")$cov %>% round(3)
+```
+
+Values should be near zero (|r| < 0.10). Large residual correlations mean the model doesn't fully capture those relationships.
+
+### Check for Problematic Estimates
+
+```r
 parameterEstimates(fit_linear) %>%
   filter(op == "~~") %>%
   select(lhs, rhs, est, se) %>%
   mutate(flag = ifelse(est < 0, "NEGATIVE", ""))
 ```
+
+**Red flags:**
+- Negative variances (Heywood cases): Model misspecified or sample too small
+- Very large SEs (SE > estimate): Parameter poorly identified
+- Variances at exactly zero: May need constraints
 
 ✅ **Confirm**: All variance estimates should be positive. If any are negative, see [Troubleshooting](/guides/lgcm-pilot-reference#troubleshooting).
 
@@ -278,7 +341,37 @@ summary(fit_linear, fit.measures = TRUE, standardized = TRUE)
 - **Slope mean ≈ 2**: Average increase per wave
 - **Intercept variance ≈ 100** (SD ≈ 10): People differed in starting levels
 - **Slope variance ≈ 1** (SD ≈ 1): People differed in growth rates
-- **I-S covariance ≈ -2** (r ≈ -0.19): Higher starters grew slightly slower
+- **I-S covariance ≈ -2**: Higher starters grew slightly slower (see correlation below)
+
+### Intercept-Slope Correlation
+
+Convert the covariance to a correlation for interpretability:
+
+```r
+cov_is <- -1.89
+var_i <- 98.34
+var_s <- 0.97
+
+r_is <- cov_is / sqrt(var_i * var_s)
+r_is  # ≈ -0.19
+```
+
+The correlation of -0.19 is small—higher starters grew *slower*, but most still improved.
+
+### Proportion with Positive Slopes
+
+A positive slope mean doesn't mean everyone improved. Check:
+
+```r
+slope_mean <- 2.04
+slope_sd <- sqrt(0.97)  # ≈ 0.98
+
+# P(slope > 0)
+pnorm(0, mean = slope_mean, sd = slope_sd, lower.tail = FALSE)
+# ≈ 0.98
+```
+
+✅ **Checkpoint**: ~98% of participants had positive slopes. With slope mean = 2 and SD ≈ 1, almost everyone improved.
 
 ### Variance Explained
 
@@ -286,7 +379,11 @@ summary(fit_linear, fit.measures = TRUE, standardized = TRUE)
 inspect(fit_linear, "r2")
 ```
 
-✅ **Check**: R² values of 0.80–0.89 indicate the trajectory explains most variance at each wave.
+Expected R² values: 0.80–0.89 across waves.
+
+**Interpretation**: The trajectory (intercept + slope) explains 80–89% of variance at each wave. The remaining 10–20% is residual variance (measurement error, occasion-specific factors).
+
+✅ **Check**: R² values of 0.70–0.90 are typical for well-fitting LGCMs.
 
 ---
 
@@ -325,6 +422,16 @@ data_wide <- tibble(id = 1:n) %>%
     y5 = int + slp*4 + rnorm(n, 0, 5)
   ) %>% select(id, y1:y5)
 
+# Visualize
+data_long <- data_wide %>%
+  pivot_longer(y1:y5, names_to = "wave", values_to = "y") %>%
+  mutate(time = as.numeric(gsub("y", "", wave)) - 1)
+
+ggplot(data_long, aes(x = time, y = y, group = id)) +
+  geom_line(alpha = 0.15) +
+  theme_minimal() +
+  labs(title = "Individual Trajectories")
+
 # Fit models
 model_int <- 'intercept =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5'
 model_lin <- '
@@ -338,12 +445,59 @@ fit_lin <- growth(model_lin, data = data_wide, missing = "fiml")
 # Compare and summarize
 anova(fit_int, fit_lin)
 summary(fit_lin, fit.measures = TRUE, standardized = TRUE)
+fitmeasures(fit_lin, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
+inspect(fit_lin, "r2")
 ```
+
+---
+
+## Adapt to Your Data
+
+To use this workflow with your own dataset:
+
+### 1. Read and Prepare Data
+
+```r
+library(readr)
+library(dplyr)
+
+# Read your data (wide format: one row per person)
+data_wide <- read_csv("my_longitudinal_data.csv") %>%
+  select(id, outcome_t1, outcome_t2, outcome_t3, outcome_t4, outcome_t5)
+```
+
+### 2. Update Variable Names
+
+Replace `y1`–`y5` with your variable names:
+
+```r
+model <- '
+  intercept =~ 1*outcome_t1 + 1*outcome_t2 + 1*outcome_t3 + 1*outcome_t4 + 1*outcome_t5
+  slope     =~ 0*outcome_t1 + 1*outcome_t2 + 2*outcome_t3 + 3*outcome_t4 + 4*outcome_t5
+'
+
+fit <- growth(model, data = data_wide, missing = "fiml")
+summary(fit, fit.measures = TRUE, standardized = TRUE)
+```
+
+### 3. Adjust Time Coding (if needed)
+
+If waves are unequally spaced, adjust slope loadings to reflect actual time. For example, measurements at baseline, 1, 3, 6, and 12 months:
+
+```r
+model <- '
+  intercept =~ 1*y_0mo + 1*y_1mo + 1*y_3mo + 1*y_6mo + 1*y_12mo
+  slope     =~ 0*y_0mo + 1*y_1mo + 3*y_3mo + 6*y_6mo + 12*y_12mo
+'
+# Now slope = change per month
+```
+
+✅ **Checkpoint**: Once your basic model runs, layer on diagnostics, model comparisons, and predictors exactly as shown above.
 
 ---
 
 ## Next Steps
 
 - **Need syntax or thresholds?** → [Reference](/guides/lgcm-pilot-reference)
-- **Hit an error?** → [Reference: Troubleshooting](/guides/lgcm-pilot-reference#common-pitfalls)
+- **Hit an error?** → [Reference: Troubleshooting](/guides/lgcm-pilot-reference#troubleshooting)
 - **Back to overview** → [LGCM Guide](/guides/lgcm-pilot)
