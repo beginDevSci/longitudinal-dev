@@ -11,7 +11,7 @@ r_packages: ["lavaan"]
 
 Fast lookup for syntax, fit indices, and troubleshooting. For step-by-step learning, see the [Tutorial](/guides/lgcm-pilot-tutorial).
 
-**Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation--missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors--fixes)
+**Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation--missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -279,6 +279,8 @@ parameterEstimates(fit) %>%
 | "Good fit = correct model" | Good fit ≠ true model; consider alternatives |
 | Comparing intercepts across studies | Intercept meaning depends on time coding |
 
+For detailed examples and fixes, see [LGCM Overview](/guides/lgcm-pilot).
+
 ---
 
 ## Quick Formulas
@@ -297,6 +299,54 @@ pnorm(0, mean = slope_mean, sd = sqrt(slope_var), lower.tail = FALSE)
 ```r
 fitMeasures(fit, "df")
 ```
+
+---
+
+## Advanced Extensions
+
+### Time-Invariant Predictors (TIC)
+
+Baseline characteristics predicting growth:
+
+```r
+model <- '
+  intercept =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5
+  slope     =~ 0*y1 + 1*y2 + 2*y3 + 3*y4 + 4*y5
+
+  intercept ~ treatment + age
+  slope     ~ treatment + age
+'
+```
+
+| Coefficient | Interpretation |
+|-------------|----------------|
+| `intercept ~ treatment` | Group difference in starting level |
+| `slope ~ treatment` | Group difference in rate of change |
+
+### Time-Varying Covariates (TVC)
+
+Concurrent predictors at each wave:
+
+```r
+model <- '
+  intercept =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5
+  slope     =~ 0*y1 + 1*y2 + 2*y3 + 3*y4 + 4*y5
+
+  y1 ~ x1
+  y2 ~ x2
+  y3 ~ x3
+  y4 ~ x4
+  y5 ~ x5
+'
+```
+
+### Other Extensions
+
+| Extension | Description | Notes |
+|-----------|-------------|-------|
+| Growth Mixture Models | Latent subgroups with different trajectories | Complex; requires specialized packages |
+| Parallel Process | Two outcomes growing together | Relate intercepts/slopes across processes |
+| Latent Change Score | Change between adjacent waves | Tests dynamic coupling |
 
 ---
 
@@ -324,8 +374,59 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 ---
 
+## Resources
+
+### Books
+
+| Book | Focus |
+|------|-------|
+| Grimm, Ram, & Estabrook (2017). *Growth Modeling*. Guilford. | Comprehensive SEM/MLM coverage |
+| Bollen & Curran (2006). *Latent Curve Models*. Wiley. | Classic SEM treatment |
+| Singer & Willett (2003). *Applied Longitudinal Data Analysis*. Oxford. | MLM perspective, excellent pedagogy |
+| Little (2013). *Longitudinal Structural Equation Modeling*. Guilford. | Measurement issues |
+
+### Key Articles
+
+| Article | Contribution |
+|---------|--------------|
+| Curran, Obeidat, & Losardo (2010). *J Cognition & Development* | 12 FAQs comparing LGCM and MLM |
+| McNeish & Matta (2018). *Behavior Research Methods* | When approaches differ in practice |
+| Preacher et al. (2008). *Latent growth curve modeling*. Sage. | Centering and time coding guidance |
+
+### Online
+
+- [lavaan tutorial](https://lavaan.ugent.be/tutorial/growth.html)
+- [QuantDev tutorials](https://quantdev.ssri.psu.edu/)
+- [Curran-Bauer Analytics](https://www.youtube.com/@curranbauer) (YouTube)
+
+---
+
+## Software
+
+### R Packages
+
+| Package | Use Case |
+|---------|----------|
+| **lavaan** | Primary choice; free, flexible, active development |
+| **OpenMx** | Maximum flexibility; steeper learning curve |
+| **lme4 / nlme** | MLM approach; equivalent for basic models |
+| **semTools** | lavaan extensions (measurement invariance) |
+| **lcmm** | Latent class / mixture growth models |
+
+### Other Options
+
+| Software | Notes |
+|----------|-------|
+| **Mplus** | Gold standard for complex/mixture models; licensed |
+| **Stata (sem)** | Good documentation; integrates with Stata workflow |
+| **semopy** (Python) | SEM in Python; active development |
+
+**Recommendation:** Use lavaan for learning and most research. Use Mplus for mixture models or complex specifications.
+
+---
+
 ## Links
 
 - [Tutorial](/guides/lgcm-pilot-tutorial) — Step-by-step worked example
-- [LGCM Overview](/guides/lgcm-pilot) — When to use, key concepts
+- [LGCM Overview](/guides/lgcm-pilot) — When to use, key concepts, mathematical notation
 - [lavaan documentation](https://lavaan.ugent.be/tutorial/growth.html) — Official guide
