@@ -196,6 +196,67 @@ yᵢₜ = (η₁ᵢ + η₂ᵢ × t) + εᵢₜ
 
 ---
 
+<details>
+<summary><strong>Mathematical Foundations</strong> (optional formal notation)</summary>
+
+### The Individual Trajectory Equation
+
+Each person's score at time *t* follows:
+
+```
+yᵢₜ = η₁ᵢ + η₂ᵢ × λₜ + εᵢₜ
+```
+
+Where:
+- **yᵢₜ** = observed score for person *i* at time *t*
+- **η₁ᵢ** = person *i*'s intercept (latent)
+- **η₂ᵢ** = person *i*'s slope (latent)
+- **λₜ** = time coding for occasion *t* (fixed: 0, 1, 2, 3, 4)
+- **εᵢₜ** = residual (measurement error + occasion-specific variation)
+
+### Distribution of Growth Factors
+
+The intercept and slope follow a bivariate normal distribution:
+
+```
+[η₁]     [μ₁]   [ψ₁₁  ψ₁₂]
+[η₂] ~ N([μ₂], [ψ₁₂  ψ₂₂])
+```
+
+This means:
+- **μ₁, μ₂** = population means (the "average" trajectory)
+- **ψ₁₁, ψ₂₂** = variances (individual differences in intercept and slope)
+- **ψ₁₂** = covariance (relationship between starting level and change)
+
+### Model-Implied Covariance Structure
+
+LGCM is a structural equation model. It implies a specific covariance matrix:
+
+```
+Σ = ΛΨΛ' + Θ
+```
+
+Where:
+- **Λ** = factor loading matrix (fixed time codes)
+- **Ψ** = factor covariance matrix (estimated)
+- **Θ** = residual covariance matrix (typically diagonal)
+
+Model fit tests whether your observed covariance matrix matches this implied structure.
+
+### Degrees of Freedom
+
+| Components | Count |
+|------------|-------|
+| Observed statistics | T(T+1)/2 + T means |
+| Estimated parameters | 2 factor means + 3 factor (co)variances + T residual variances |
+| Degrees of freedom | Observed − Estimated |
+
+For 5 waves with equal residual variances: df = (15 + 5) − (2 + 3 + 1) = 14
+
+</details>
+
+---
+
 ## The Path Diagram
 
 The path diagram provides a visual grammar for LGCM:
@@ -351,6 +412,42 @@ If waves aren't equally spaced, use actual time values:
 | Follow-up 4 | Month 24 | 24 |
 
 Now slope = change per **month**. Rescale for interpretability if needed (e.g., divide by 12 for slope = change per year).
+
+---
+
+## Common Pitfalls
+
+Before applying LGCM to your data, be aware of these frequent misinterpretations.
+
+### "Everyone improved" (ignoring slope variance)
+
+**Mistake:** Mean slope = 2, so you conclude everyone improved.
+
+**Reality:** If slope SD = 2, roughly 16% have slopes ≤ 0 (no improvement or decline). Always report variance alongside the mean—individual differences are the point of LGCM.
+
+### "High starters declined" (misreading intercept-slope correlation)
+
+**Mistake:** Negative I-S correlation means people who started high got worse.
+
+**Reality:** Negative correlation means high starters *grew slower*, not that they declined. To determine direction, combine the correlation with the slope mean. If mean slope = 3 and r = -0.30, high starters still improved—just less steeply.
+
+### Confusing the average trajectory with individual patterns
+
+**Mistake:** "The model shows steady linear improvement"—implying everyone follows this pattern.
+
+**Reality:** The mean trajectory summarizes the group, but individual trajectories can look wildly different. Some people may decline while the average rises. Plot individual trajectories (spaghetti plots) alongside the mean to avoid overgeneralizing.
+
+### Assuming good fit proves the model is "correct"
+
+**Mistake:** RMSEA < .06 and CFI > .95, so the linear model must be the true data-generating process.
+
+**Reality:** Good fit means the model is *plausible*, not *correct*. Multiple models can fit the same data. Good fit doesn't rule out nonlinear patterns, omitted variables, or alternative specifications. Always compare alternative models (quadratic, piecewise) rather than accepting the first one that fits.
+
+### Misinterpreting the intercept after recentering
+
+**Mistake:** You recenter time at midpoint (loadings: -2, -1, 0, 1, 2) but interpret the intercept as "baseline."
+
+**Reality:** The intercept always refers to where time = 0 in your coding. After midpoint centering, the intercept represents expected score at Wave 3, not Wave 1. Match your interpretation to your time coding—or you'll misattribute effects to the wrong time point.
 
 ---
 
