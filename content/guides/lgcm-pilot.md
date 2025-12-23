@@ -20,9 +20,10 @@ Traditional approaches like repeated measures ANOVA focus on group means: "Did t
 
 Consider a therapy study where the average patient improves by 8 points over 6 months. Success? Look at the individual trajectories:
 
-![Individual Growth Trajectories](/images/guides/lgcm/fig01_spaghetti_all.png)
-
-*Each line is one person. Some improved dramatically. Some stayed flat. A few got worse. The average hides enormous individual variation.*
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/lgcm/fig01_spaghetti_all.png" alt="Individual Growth Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Each line is one person. Some improved dramatically. Some stayed flat. A few got worse. The average hides enormous individual variation.</figcaption>
+</figure>
 
 The average tells you "the group improved"—but the real questions are:
 
@@ -149,9 +150,10 @@ This is where LGCM shines—quantifying how much people differ.
 - If ψ₁₁ = 100 → SD = 10 → ~68% of people have intercepts within ±10 of the mean
 - If ψ₂₂ = 1 → SD = 1 → ~68% of people have slopes within ±1 of the mean
 
-![Distribution of Growth Parameters](/images/guides/lgcm/fig05_distributions.png)
-
-*Histograms showing the distribution of individual intercepts (left) and slopes (right) across 400 participants.*
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/lgcm/fig05_distributions.png" alt="Distribution of Growth Parameters" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Histograms showing the distribution of individual intercepts (left) and slopes (right) across 400 participants.</figcaption>
+</figure>
 
 ### Factor Covariance: The Intercept-Slope Relationship
 
@@ -163,9 +165,10 @@ One of LGCM's most informative parameters is the relationship between where peop
 | **Negative** | High starters grow slower (or decline faster). Regression to mean. |
 | **Zero** | Starting level doesn't predict change rate. |
 
-![Intercept-Slope Relationship](/images/guides/lgcm/fig06_intercept_slope.png)
-
-*Scatterplot of individual intercepts vs. slopes. The negative correlation (r ≈ -0.20) indicates that participants who started higher tended to grow slightly slower.*
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/lgcm/fig06_intercept_slope.png" alt="Intercept-Slope Relationship" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Scatterplot of individual intercepts vs. slopes. The negative correlation (r ≈ -0.20) indicates that participants who started higher tended to grow slightly slower.</figcaption>
+</figure>
 
 These patterns aren't just statistical curiosities—they have substantive meaning:
 
@@ -299,9 +302,10 @@ Residual variances omitted for clarity
 
 The path diagram shows the model structure; spaghetti plots show what it describes:
 
-![Variability in Trajectories](/images/guides/lgcm/fig04_highlighted.png)
-
-*Extreme cases highlighted to illustrate different combinations of intercept and slope: high starters with fast growth (blue), high starters with slow growth (purple), low starters with fast growth (orange), low starters with slow growth (red).*
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/lgcm/fig04_highlighted.png" alt="Variability in Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Extreme cases highlighted to illustrate different combinations of intercept and slope: high starters with fast growth (blue), high starters with slow growth (purple), low starters with fast growth (orange), low starters with slow growth (red).</figcaption>
+</figure>
 
 This figure illustrates the four "corners" of the intercept-slope distribution:
 
@@ -416,37 +420,27 @@ Now slope = change per **month**. Rescale for interpretability if needed (e.g., 
 
 ## Common Pitfalls
 
-Before applying LGCM to your data, be aware of these frequent misinterpretations.
+Before applying LGCM, be aware of these frequent misinterpretations.
 
-### "Everyone improved" (ignoring slope variance)
+**Ignoring slope variance** — Concluding "everyone improved" because mean slope = 2. *Reality:* If slope SD = 2, roughly 16% have slopes ≤ 0. Always report variance alongside the mean.
 
-**Mistake:** Mean slope = 2, so you conclude everyone improved.
+**Misreading intercept-slope correlation** — Assuming negative correlation means high starters declined. *Reality:* Negative correlation means high starters *grew slower*, not that they declined. Combine with slope mean to interpret direction.
 
-**Reality:** If slope SD = 2, roughly 16% have slopes ≤ 0 (no improvement or decline). Always report variance alongside the mean—individual differences are the point of LGCM.
+**Confusing means with individuals** — Stating "the model shows steady improvement" as if everyone follows this pattern. *Reality:* The mean trajectory summarizes the group; individual trajectories can look wildly different. Plot spaghetti plots alongside the mean.
 
-### "High starters declined" (misreading intercept-slope correlation)
+**Equating good fit with truth** — Assuming RMSEA < .06 proves the model is correct. *Reality:* Good fit means *plausible*, not *true*. Multiple models can fit the same data. Always compare alternatives (quadratic, piecewise).
 
-**Mistake:** Negative I-S correlation means people who started high got worse.
+**Misinterpreting recentered intercepts** — Recentering time at midpoint but still interpreting the intercept as "baseline." *Reality:* The intercept refers to wherever time = 0 in your coding. Match interpretation to your time coding.
 
-**Reality:** Negative correlation means high starters *grew slower*, not that they declined. To determine direction, combine the correlation with the slope mean. If mean slope = 3 and r = -0.30, high starters still improved—just less steeply.
+**Ignoring residual autocorrelation** — Assuming residuals are independent across time without checking. *Reality:* Large modification indices or poor fit may indicate carryover effects. Check modification indices; consider autoregressive structures if needed.
 
-### Confusing the average trajectory with individual patterns
+**Overfitting with too few time points** — Fitting a quadratic model with 4 waves (0 df) and concluding "quadratic growth." *Reality:* Just-identified models fit perfectly by construction—there's no test of fit. Ensure positive degrees of freedom.
 
-**Mistake:** "The model shows steady linear improvement"—implying everyone follows this pattern.
+**Ignoring the missing data mechanism** — Using FIML and assuming everything is fine. *Reality:* FIML assumes MAR. If dropout depends on unobserved values (MNAR), estimates may be biased. Examine who drops out; include auxiliary variables; conduct sensitivity analyses.
 
-**Reality:** The mean trajectory summarizes the group, but individual trajectories can look wildly different. Some people may decline while the average rises. Plot individual trajectories (spaghetti plots) alongside the mean to avoid overgeneralizing.
+**Over-interpreting non-significant variance** — Slope variance p = .08, so "everyone changes at the same rate." *Reality:* You may be underpowered; p = .08 isn't strong evidence of zero. Report the estimate and confidence interval, not just the p-value.
 
-### Assuming good fit proves the model is "correct"
-
-**Mistake:** RMSEA < .06 and CFI > .95, so the linear model must be the true data-generating process.
-
-**Reality:** Good fit means the model is *plausible*, not *correct*. Multiple models can fit the same data. Good fit doesn't rule out nonlinear patterns, omitted variables, or alternative specifications. Always compare alternative models (quadratic, piecewise) rather than accepting the first one that fits.
-
-### Misinterpreting the intercept after recentering
-
-**Mistake:** You recenter time at midpoint (loadings: -2, -1, 0, 1, 2) but interpret the intercept as "baseline."
-
-**Reality:** The intercept always refers to where time = 0 in your coding. After midpoint centering, the intercept represents expected score at Wave 3, not Wave 1. Match your interpretation to your time coding—or you'll misattribute effects to the wrong time point.
+**Forgetting to look at the data** — Jumping straight to modeling without visualization. *Reality:* You might miss outliers, nonlinearity, subgroups, or data errors. Always plot spaghetti plots first.
 
 ---
 
