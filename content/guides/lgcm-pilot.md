@@ -3,8 +3,7 @@ title: "Latent Growth Curve Models"
 slug: "lgcm-pilot"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
-tags: ["LGCM", "SEM", "longitudinal", "growth-curves"]
-r_packages: ["lavaan", "tidyverse"]
+tags: ["LGCM", "guide", "SEM", "lavaan"]
 ---
 
 ## Why Study Growth?
