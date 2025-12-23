@@ -304,19 +304,18 @@ The path diagram shows the model structure; spaghetti plots show what it describ
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/lgcm/fig04_highlighted.png" alt="Variability in Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
-<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Extreme cases highlighted to illustrate different combinations of intercept and slope: high starters with fast growth (blue), high starters with slow growth (purple), low starters with fast growth (orange), low starters with slow growth (red).</figcaption>
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Extreme cases highlighted to illustrate different combinations of intercept and slope: high starters with fast growth (blue), high starters with slow growth (purple), and low starters with fast growth (orange).</figcaption>
 </figure>
 
-This figure illustrates the four "corners" of the intercept-slope distribution:
+This figure illustrates three highlighted trajectories from different regions of the intercept-slope distribution:
 
-| Quadrant | Intercept | Slope | Pattern |
-|----------|-----------|-------|---------|
+| Trajectory | Intercept | Slope | Pattern |
+|------------|-----------|-------|---------|
 | Blue | High | High | Started high, grew fast |
 | Purple | High | Low | Started high, grew slowly |
 | Orange | Low | High | Started low, grew fast |
-| Red | Low | Low | Started low, grew slowly |
 
-The intercept-slope covariance determines how concentrated trajectories are in certain quadrants. A strong negative covariance would mean most people fall in the purple (high-low) and orange (low-high) quadrants.
+The intercept-slope covariance determines how concentrated trajectories are in certain regions. A strong negative covariance would mean most people fall in the purple (high-low) and orange (low-high) patterns—high starters tend to grow slower, while low starters catch up.
 
 ---
 
