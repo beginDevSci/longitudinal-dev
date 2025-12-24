@@ -6,6 +6,7 @@ date_iso: 2025-01-15
 family: BLMM
 family_label: "Big Linear Mixed Models (BLMM)"
 engine: blmm
+language: python
 outcome_type: Continuous
 covariates: Multiple
 updated_at: 2025-01-15

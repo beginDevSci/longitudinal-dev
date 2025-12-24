@@ -9,6 +9,9 @@ max_age_hours = 168  # 1 week
 [stages]
 # Which stages to run by default
 enabled = [1, 2, 3, 4, 5]
+# Languages that skip R validation stages (2, 3, 4)
+# Tutorials with these languages only run Stage 1 (structural) and Stage 5 (JSON)
+skip_r_stages_for_languages = ["python", "none", "display-only"]
 
 [stage1]
 # Required frontmatter fields (must be present)

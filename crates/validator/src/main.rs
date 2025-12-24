@@ -19,6 +19,9 @@ use anyhow::Result;
 use clap::Parser;
 use std::path::PathBuf;
 
+// Import parser for frontmatter extraction
+use longitudinal_parser::validation::parse_structure;
+
 mod cache;
 mod config;
 mod executor;
@@ -120,28 +123,54 @@ fn main() -> Result<()> {
             }
         }
 
-        // Stage 2: R Syntax Validation
-        use stages::stage2::Stage2Validator;
-        let stage2_validator = Stage2Validator::new(&config.stage2, &config.r);
-
-        match stage2_validator.validate(file) {
-            Ok(stage2_result) => {
-                output::print_stage2_result(file, &stage2_result, args.verbose);
-
-                if !stage2_result.passed() {
-                    all_passed = false;
-                    continue; // Skip to next file
+        // Check if this tutorial should skip R stages based on language
+        let skip_r_stages = {
+            let content = std::fs::read_to_string(file).unwrap_or_default();
+            if let Ok(structure) = parse_structure(&content) {
+                let language = structure
+                    .frontmatter
+                    .fields
+                    .get("language")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("r");
+                let should_skip = config
+                    .stages
+                    .skip_r_stages_for_languages
+                    .iter()
+                    .any(|l| l == language);
+                if should_skip {
+                    println!("\n  ℹ Language '{}' detected - skipping R stages (2, 3, 4)", language);
                 }
+                should_skip
+            } else {
+                false
             }
-            Err(e) => {
-                eprintln!("Stage 2 error: {e}");
-                all_passed = false;
-                continue;
+        };
+
+        // Stage 2: R Syntax Validation
+        if !skip_r_stages {
+            use stages::stage2::Stage2Validator;
+            let stage2_validator = Stage2Validator::new(&config.stage2, &config.r);
+
+            match stage2_validator.validate(file) {
+                Ok(stage2_result) => {
+                    output::print_stage2_result(file, &stage2_result, args.verbose);
+
+                    if !stage2_result.passed() {
+                        all_passed = false;
+                        continue; // Skip to next file
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Stage 2 error: {e}");
+                    all_passed = false;
+                    continue;
+                }
             }
         }
 
         // Stage 3: Dry Run Execution
-        if config.stages.enabled.contains(&3) && !args.validate_only {
+        if config.stages.enabled.contains(&3) && !args.validate_only && !skip_r_stages {
             use stages::stage3::Stage3Validator;
             let stage3_validator = Stage3Validator::new(&config.stage3, &config.r);
 
@@ -163,7 +192,7 @@ fn main() -> Result<()> {
         }
 
         // Stage 4: Full Execution with Real Data
-        let stage4_result = if config.stages.enabled.contains(&4) && !args.validate_only {
+        let stage4_result = if config.stages.enabled.contains(&4) && !args.validate_only && !skip_r_stages {
             use stages::stage4::Stage4Validator;
             let stage4_validator = Stage4Validator::new(&config.stage4, &config.r);
 

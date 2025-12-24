@@ -33,6 +33,9 @@ pub struct CacheConfig {
 #[derive(Debug, Deserialize)]
 pub struct StagesConfig {
     pub enabled: Vec<u8>,
+    /// Languages that skip R validation stages (2, 3, 4)
+    #[serde(default)]
+    pub skip_r_stages_for_languages: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
