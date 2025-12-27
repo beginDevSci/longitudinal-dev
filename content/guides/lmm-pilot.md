@@ -4,6 +4,7 @@ slug: "lmm-pilot"
 description: "Model individual trajectories while accounting for the nested structure of longitudinal data."
 category: "mixed-models"
 tags: ["LMM", "guide", "lme4", "multilevel"]
+guide_type: "hub"
 ---
 
 ## Why Mixed Models?

@@ -5,6 +5,8 @@ description: "Step-by-step LGCM analysis from setup to interpretation using simu
 category: "growth-models"
 tags: ["LGCM", "tutorial", "lavaan", "R"]
 r_packages: ["lavaan", "tidyverse", "MASS"]
+guide_type: "tutorial"
+parent_method: "lgcm-pilot"
 ---
 
 ## LGCM Tutorial

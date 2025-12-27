@@ -109,6 +109,11 @@ pub fn guides() -> Vec<Guide> {
             let path = entry.path();
 
             if path.extension().map_or(false, |ext| ext == "md") {
+                // Skip TEMPLATE.md - it's a template, not a real guide
+                if path.file_name().map_or(false, |n| n == "TEMPLATE.md") {
+                    continue;
+                }
+
                 if let Some(guide) = load_guide_from_file(&path) {
                     guides.push(guide);
                 } else {
@@ -184,8 +189,79 @@ pub fn parse_guide_content(slug: &str, content: &str) -> Option<Guide> {
         tags: frontmatter.tags.into_iter().map(Cow::Owned).collect(),
         r_packages: frontmatter.r_packages.into_iter().map(Cow::Owned).collect(),
         script_path: frontmatter.script_path.map(Cow::Owned),
+        guide_type: frontmatter.guide_type.map(Cow::Owned),
+        parent_method: frontmatter.parent_method.map(Cow::Owned),
         raw_markdown: Cow::Owned(content.to_string()),
         html_content: Cow::Owned(render_result.html),
         outline: render_result.outline,
     })
+}
+
+// ============================================================================
+// Guide grouping for catalog display
+// ============================================================================
+
+use crate::models::guide::MethodGroup;
+use std::collections::HashMap;
+
+/// Group guides by method, combining hub/tutorial/reference into MethodGroups.
+///
+/// Guides with `guide_type: "hub"` become the primary entry.
+/// Guides with `guide_type: "tutorial"` or `"reference"` are matched to their
+/// parent hub via `parent_method`.
+pub fn group_guides_by_method(guides: Vec<GuideCatalogItem>) -> Vec<MethodGroup> {
+    let mut hubs: HashMap<String, GuideCatalogItem> = HashMap::new();
+    let mut tutorials: HashMap<String, GuideCatalogItem> = HashMap::new();
+    let mut references: HashMap<String, GuideCatalogItem> = HashMap::new();
+
+    for guide in guides {
+        match guide.guide_type.as_deref() {
+            Some("hub") => {
+                hubs.insert(guide.slug.clone(), guide);
+            }
+            Some("tutorial") => {
+                if let Some(parent) = &guide.parent_method {
+                    tutorials.insert(parent.clone(), guide);
+                }
+            }
+            Some("reference") => {
+                if let Some(parent) = &guide.parent_method {
+                    references.insert(parent.clone(), guide);
+                }
+            }
+            _ => {
+                // Guides without a type are treated as standalone hubs
+                hubs.insert(guide.slug.clone(), guide);
+            }
+        }
+    }
+
+    // Build MethodGroups from hubs
+    let mut groups: Vec<MethodGroup> = hubs
+        .into_iter()
+        .map(|(slug, hub)| {
+            let category = hub.category.clone();
+            MethodGroup {
+                hub,
+                tutorial: tutorials.remove(&slug),
+                reference: references.remove(&slug),
+                category,
+            }
+        })
+        .collect();
+
+    // Sort by category, then by hub title
+    groups.sort_by(|a, b| {
+        a.category
+            .cmp(&b.category)
+            .then_with(|| a.hub.title.cmp(&b.hub.title))
+    });
+
+    groups
+}
+
+/// Load guides and group them by method for the catalog.
+pub fn grouped_guide_catalog() -> Vec<MethodGroup> {
+    let items = guide_catalog_items();
+    group_guides_by_method(items)
 }

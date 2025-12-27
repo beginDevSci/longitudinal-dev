@@ -5,6 +5,8 @@ description: "Quick lookup for LGCM syntax, fit indices, parameters, and trouble
 category: "growth-models"
 tags: ["LGCM", "reference", "lavaan", "cheat-sheet"]
 r_packages: ["lavaan"]
+guide_type: "reference"
+parent_method: "lgcm-pilot"
 ---
 
 ## LGCM Quick Reference

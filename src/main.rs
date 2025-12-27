@@ -6,8 +6,8 @@ use leptos::config::get_configuration;
 use leptos::prelude::*;
 use leptos::tachys::view::RenderHtml;
 use longitudinal_dev::base_path;
-use longitudinal_dev::guide_catalog::GuideCatalog;
-use longitudinal_dev::guides::guides;
+use longitudinal_dev::guide_catalog::GroupedGuideCatalog;
+use longitudinal_dev::guides::{group_guides_by_method, guides};
 use longitudinal_dev::layout::{GuideLayout, PostLayout, SiteLayout};
 use longitudinal_dev::models::guide::GuideCatalogItem;
 use longitudinal_dev::posts::posts;
@@ -211,6 +211,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(GuideCatalogItem::from_guide)
         .collect();
 
+    // Group guides by method (hub + tutorial + reference)
+    let method_groups = group_guides_by_method(guide_catalog_items);
+    let method_count = method_groups.len();
+
     let guides_catalog_html = view! {
         <SiteLayout options=opts.clone()>
             <main class="min-h-screen bg-surface">
@@ -232,7 +236,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 </section>
 
                 <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-10">
-                    <GuideCatalog guides=guide_catalog_items.clone() />
+                    <GroupedGuideCatalog groups=method_groups.clone() />
                 </section>
             </main>
         </SiteLayout>

@@ -45,6 +45,12 @@ pub struct GuideFrontmatter {
     pub r_packages: Vec<String>,
     /// Optional path to downloadable R script
     pub script_path: Option<String>,
+    /// Type of guide: "hub", "tutorial", or "reference"
+    #[serde(default)]
+    pub guide_type: Option<String>,
+    /// Parent method slug for tutorials/references (e.g., "lgcm-pilot")
+    #[serde(default)]
+    pub parent_method: Option<String>,
 }
 
 /// A parsed guide ready for rendering.
@@ -57,6 +63,10 @@ pub struct Guide {
     pub tags: Vec<Cow<'static, str>>,
     pub r_packages: Vec<Cow<'static, str>>,
     pub script_path: Option<Cow<'static, str>>,
+    /// Type of guide: "hub", "tutorial", or "reference"
+    pub guide_type: Option<Cow<'static, str>>,
+    /// Parent method slug for tutorials/references
+    pub parent_method: Option<Cow<'static, str>>,
     /// The full markdown content (for editing/prefill)
     pub raw_markdown: Cow<'static, str>,
     /// The rendered HTML content
@@ -81,6 +91,8 @@ impl Guide {
             tags: frontmatter.tags.into_iter().map(Cow::Owned).collect(),
             r_packages: frontmatter.r_packages.into_iter().map(Cow::Owned).collect(),
             script_path: frontmatter.script_path.map(Cow::Owned),
+            guide_type: frontmatter.guide_type.map(Cow::Owned),
+            parent_method: frontmatter.parent_method.map(Cow::Owned),
             raw_markdown: Cow::Owned(raw_markdown),
             html_content: Cow::Owned(html_content),
             outline,
@@ -97,6 +109,10 @@ pub struct GuideCatalogItem {
     pub category: String,
     pub tags: Vec<String>,
     pub r_packages: Vec<String>,
+    /// Type of guide: "hub", "tutorial", or "reference"
+    pub guide_type: Option<String>,
+    /// Parent method slug for tutorials/references
+    pub parent_method: Option<String>,
 }
 
 impl GuideCatalogItem {
@@ -108,6 +124,21 @@ impl GuideCatalogItem {
             category: guide.category.to_string(),
             tags: guide.tags.iter().map(|t| t.to_string()).collect(),
             r_packages: guide.r_packages.iter().map(|p| p.to_string()).collect(),
+            guide_type: guide.guide_type.as_ref().map(|s| s.to_string()),
+            parent_method: guide.parent_method.as_ref().map(|s| s.to_string()),
         }
     }
+}
+
+/// A grouped method containing hub, tutorial, and reference guides.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MethodGroup {
+    /// The hub guide (conceptual overview)
+    pub hub: GuideCatalogItem,
+    /// Optional tutorial guide (worked example)
+    pub tutorial: Option<GuideCatalogItem>,
+    /// Optional reference guide (quick lookup)
+    pub reference: Option<GuideCatalogItem>,
+    /// Category for the method group
+    pub category: String,
 }

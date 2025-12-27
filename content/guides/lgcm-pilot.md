@@ -4,6 +4,7 @@ slug: "lgcm-pilot"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
 tags: ["LGCM", "guide", "SEM", "lavaan"]
+guide_type: "hub"
 ---
 
 ## Why Study Growth?

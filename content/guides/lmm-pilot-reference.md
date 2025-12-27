@@ -5,6 +5,8 @@ description: "Quick lookup for LMM syntax, diagnostics, parameters, and troubles
 category: "mixed-models"
 tags: ["LMM", "reference", "lme4", "cheat-sheet"]
 r_packages: ["lme4", "lmerTest", "performance"]
+guide_type: "reference"
+parent_method: "lmm-pilot"
 ---
 
 ## LMM Quick Reference
