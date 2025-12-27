@@ -2,6 +2,7 @@
 //!
 //! Displays method guides in a card layout with filtering by category.
 //! Guides are grouped by method (hub + tutorial + reference).
+//! Uses a Leptos island for interactive category filtering.
 
 use crate::base_path;
 use crate::models::guide::{CategoryMeta, GuideCatalogItem, MethodGroup};
@@ -74,7 +75,6 @@ pub fn GuideCard(guide: GuideCatalogItem) -> impl IntoView {
 }
 
 /// A method card showing hub, tutorial, and reference links.
-/// Uses CategoryMeta for consistent styling.
 #[component]
 pub fn MethodCard(group: MethodGroup) -> impl IntoView {
     let hub_href = base_path::join(&format!("guides/{}/", group.hub.slug));
@@ -167,76 +167,22 @@ pub fn MethodCard(group: MethodGroup) -> impl IntoView {
     }
 }
 
-/// Category section header component.
-#[component]
-fn CategorySection(
-    meta: &'static CategoryMeta,
-    groups: Vec<MethodGroup>,
-) -> impl IntoView {
-    view! {
-        <section class="mb-12">
-            // Section header
-            <div class="flex items-center gap-3 mb-6">
-                <span class="text-2xl">{meta.icon}</span>
-                <div>
-                    <h2 class="text-xl font-bold text-primary">{meta.name}</h2>
-                    <p class="text-sm text-secondary">{meta.description}</p>
-                </div>
-            </div>
-
-            // Cards grid
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {groups.into_iter().map(|group| {
-                    view! {
-                        <MethodCard group />
-                    }
-                }).collect_view()}
-            </div>
-        </section>
-    }
-}
-
-/// Filter pill component for category filtering.
-#[component]
-fn FilterPill(
-    label: &'static str,
-    category_id: Option<&'static str>,
-    is_active: bool,
-    color_classes: &'static str,
-) -> impl IntoView {
-    let base_classes = "px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer";
-    let active_classes = if is_active {
-        format!("{} {} ring-2 ring-offset-2 ring-accent/50", base_classes, color_classes)
-    } else {
-        format!("{} bg-surface border-stroke text-secondary hover:bg-subtle hover:text-primary", base_classes)
-    };
-
-    // Data attribute for client-side filtering
-    let data_category = category_id.unwrap_or("all");
-
-    view! {
-        <button
-            type="button"
-            class={active_classes}
-            data-filter-category={data_category}
-        >
-            {label}
-        </button>
-    }
-}
-
-/// Grouped guide catalog component with category sections and filter pills.
-#[component]
+/// Grouped guide catalog island with interactive category filtering.
+#[island]
 pub fn GroupedGuideCatalog(groups: Vec<MethodGroup>) -> impl IntoView {
+    // Filter state: None = show all, Some(category_id) = filter to that category
+    let active_filter = RwSignal::new(None::<String>);
+
     if groups.is_empty() {
         return view! {
             <div class="text-center py-12">
                 <p class="text-secondary">"No method guides available yet. Check back soon!"</p>
             </div>
-        }.into_any();
+        }
+        .into_any();
     }
 
-    // Group by category
+    // Group by category (done once, not reactive)
     let mut by_category: HashMap<String, Vec<MethodGroup>> = HashMap::new();
     for group in groups {
         by_category
@@ -251,37 +197,97 @@ pub fn GroupedGuideCatalog(groups: Vec<MethodGroup>) -> impl IntoView {
         .filter(|cat| by_category.contains_key(cat.id))
         .collect();
 
+    // Clone for use in closures
+    let categories_for_pills = active_categories.clone();
+    let categories_for_sections = active_categories.clone();
+
     view! {
         <div class="space-y-8">
             // Filter pills
             <div class="flex flex-wrap gap-2 pb-4 border-b border-stroke">
-                <FilterPill
-                    label="All"
-                    category_id=None
-                    is_active=true
-                    color_classes="bg-accent text-white border-accent"
-                />
-                {active_categories.iter().map(|cat| {
+                // "All" pill
+                <button
+                    type="button"
+                    class=move || {
+                        let base = "px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer";
+                        if active_filter.get().is_none() {
+                            format!("{base} bg-accent text-white border-accent ring-2 ring-offset-2 ring-accent/50")
+                        } else {
+                            format!("{base} bg-surface border-stroke text-secondary hover:bg-subtle hover:text-primary")
+                        }
+                    }
+                    on:click=move |_| active_filter.set(None)
+                >
+                    "All"
+                </button>
+
+                // Category pills
+                {categories_for_pills.into_iter().map(|cat| {
+                    let cat_id = cat.id.to_string();
+                    let cat_id_for_check = cat_id.clone();
+                    let cat_id_for_click = cat_id.clone();
+                    let color_classes = cat.color_classes;
+
                     view! {
-                        <FilterPill
-                            label={cat.name}
-                            category_id=Some(cat.id)
-                            is_active=false
-                            color_classes={cat.color_classes}
-                        />
+                        <button
+                            type="button"
+                            class=move || {
+                                let base = "px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer";
+                                let is_active = active_filter.get().as_ref() == Some(&cat_id_for_check);
+                                if is_active {
+                                    format!("{base} {color_classes} ring-2 ring-offset-2 ring-accent/50")
+                                } else {
+                                    format!("{base} bg-surface border-stroke text-secondary hover:bg-subtle hover:text-primary")
+                                }
+                            }
+                            on:click=move |_| active_filter.set(Some(cat_id_for_click.clone()))
+                        >
+                            {cat.name}
+                        </button>
                     }
                 }).collect_view()}
             </div>
 
-            // Category sections
-            {active_categories.into_iter().map(|cat| {
+            // Category sections (visibility toggled via CSS classes)
+            {categories_for_sections.into_iter().map(|cat| {
+                let cat_id = cat.id.to_string();
                 let cat_groups = by_category.remove(cat.id).unwrap_or_default();
+
                 view! {
-                    <CategorySection meta=cat groups=cat_groups />
+                    <section
+                        class=move || {
+                            let filter = active_filter.get();
+                            let is_visible = filter.is_none() || filter.as_ref() == Some(&cat_id);
+                            if is_visible {
+                                "mb-12"
+                            } else {
+                                "mb-12 hidden"
+                            }
+                        }
+                    >
+                        // Section header
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="text-2xl">{cat.icon}</span>
+                            <div>
+                                <h2 class="text-xl font-bold text-primary">{cat.name}</h2>
+                                <p class="text-sm text-secondary">{cat.description}</p>
+                            </div>
+                        </div>
+
+                        // Cards grid
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {cat_groups.into_iter().map(|group| {
+                                view! {
+                                    <MethodCard group />
+                                }
+                            }).collect_view()}
+                        </div>
+                    </section>
                 }
             }).collect_view()}
         </div>
-    }.into_any()
+    }
+    .into_any()
 }
 
 /// Guide catalog grid component (legacy - shows individual cards).
