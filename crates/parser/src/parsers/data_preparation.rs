@@ -1,4 +1,5 @@
 use crate::math::render_math_in_html;
+use crate::syntax::highlight_code_in_html;
 use crate::types::{
     JsonCodeBlock, JsonDataPrep, JsonDataPrepBlock, JsonNoteBlock, JsonOutputBlock,
 };
@@ -304,8 +305,9 @@ fn parse_note_block(
         return None;
     }
 
-    // Render any math expressions in the HTML
-    let content_with_math = render_math_in_html(content_html.trim());
+    // Apply syntax highlighting to code blocks, then render math
+    let content_with_syntax = highlight_code_in_html(content_html.trim());
+    let content_with_math = render_math_in_html(&content_with_syntax);
 
     Some(JsonNoteBlock {
         title: title.to_string(),

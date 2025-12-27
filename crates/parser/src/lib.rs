@@ -7,6 +7,7 @@ pub mod frontmatter;
 pub mod math;
 pub mod parsers;
 pub mod sections;
+pub mod syntax;
 pub mod types;
 pub mod utils;
 pub mod validation;

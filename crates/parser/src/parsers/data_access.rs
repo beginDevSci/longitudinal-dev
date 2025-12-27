@@ -1,4 +1,5 @@
 use crate::math::render_math_in_html;
+use crate::syntax::highlight_code_in_html;
 use crate::types::{JsonDataAccess, JsonDataAccessItem};
 use crate::utils::extract_marker;
 use anyhow::Result;
@@ -78,8 +79,9 @@ pub fn parse_data_access_section(
             let mut content_html = String::new();
             html::push_html(&mut content_html, content_events.into_iter());
 
-            // Render any math expressions in the HTML
-            let content_with_math = render_math_in_html(&content_html);
+            // Apply syntax highlighting to code blocks, then render math
+            let content_with_syntax = highlight_code_in_html(&content_html);
+            let content_with_math = render_math_in_html(&content_with_syntax);
 
             items.push(JsonDataAccessItem::Collapsible {
                 title,
@@ -97,8 +99,9 @@ pub fn parse_data_access_section(
     let prose = if items.is_empty() {
         let mut html_output = String::new();
         html::push_html(&mut html_output, events.iter().cloned());
-        // Render any math expressions in the HTML
-        Some(render_math_in_html(&html_output))
+        // Apply syntax highlighting to code blocks, then render math
+        let with_syntax = highlight_code_in_html(&html_output);
+        Some(render_math_in_html(&with_syntax))
     } else {
         None
     };

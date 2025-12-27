@@ -1,4 +1,5 @@
 use crate::math::render_math_in_html;
+use crate::syntax::highlight_code_in_html;
 use crate::types::{JsonDiscussion, JsonDiscussionItem};
 use crate::utils::extract_marker;
 use anyhow::Result;
@@ -79,8 +80,9 @@ pub fn parse_discussion_section(
             html::push_html(&mut content_html, content_events.into_iter());
 
             if !title.is_empty() && !content_html.trim().is_empty() {
-                // Render any math expressions in the HTML
-                let content_with_math = render_math_in_html(content_html.trim());
+                // Apply syntax highlighting to code blocks, then render math
+                let content_with_syntax = highlight_code_in_html(content_html.trim());
+                let content_with_math = render_math_in_html(&content_with_syntax);
                 items.push(JsonDiscussionItem {
                     title,
                     content: content_with_math,

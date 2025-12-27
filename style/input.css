@@ -2026,51 +2026,55 @@ body {
   }
 
   /* ========================================
-     SYNTAX HIGHLIGHTING COLORS
+     SYNTAX HIGHLIGHTING COLORS (GLOBAL)
      Vibrant, engaging palette inspired by
      Dracula/One Dark with teal accents
+
+     These classes apply globally so syntax
+     highlighting works in guides, tutorials,
+     and any other code context.
      ======================================== */
 
   /* Comments - muted but readable */
-  .code-block-wrapper .syn-comment {
+  .syn-comment {
     color: #6272a4;
     font-style: italic;
   }
 
   /* Strings - vibrant green */
-  .code-block-wrapper .syn-string {
+  .syn-string {
     color: #50fa7b;
   }
 
   /* Numbers - warm orange */
-  .code-block-wrapper .syn-number {
+  .syn-number {
     color: #ffb86c;
   }
 
   /* Keywords - vibrant pink/magenta */
-  .code-block-wrapper .syn-keyword {
+  .syn-keyword {
     color: #ff79c6;
     font-weight: 500;
   }
 
   /* Functions - cyan/teal (matches site accent) */
-  .code-block-wrapper .syn-function {
+  .syn-function {
     color: #8be9fd;
   }
 
   /* Types - purple */
-  .code-block-wrapper .syn-type {
+  .syn-type {
     color: #bd93f9;
   }
 
   /* Variables - light foreground */
-  .code-block-wrapper .syn-variable {
+  .syn-variable {
     color: #f8f8f2;
   }
 
   /* Operators & punctuation - slightly muted */
-  .code-block-wrapper .syn-operator,
-  .code-block-wrapper .syn-punctuation {
+  .syn-operator,
+  .syn-punctuation {
     color: #ff79c6;
   }
 
@@ -3150,6 +3154,18 @@ body {
     max-width: 100%;
     box-sizing: border-box; /* Include padding in width calculation */
     contain: inline-size; /* Prevent content from expanding parent width */
+    /* Dark background for syntax highlighting visibility */
+    background-color: #0d1117;  /* GitHub dark bg - matches guide code blocks */
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;  /* 13px - matches guide code blocks */
+    line-height: 1.65;
+  }
+
+  /* Light mode adjustment for tutorial code blocks */
+  :root:not(.dark) .code-content-wrapper pre {
+    background-color: #1e1e1e;  /* VS Code dark */
   }
 
   /* Force nested cards containing code blocks to respect parent width */
@@ -3161,6 +3177,15 @@ body {
   .code-content-wrapper pre code {
     display: block;
     max-width: 100%;
+    font-family: var(--font-mono);
+    background: transparent;
+    padding: 0;
+    color: #e6edf3;  /* Light text on dark bg */
+  }
+
+  /* Ensure code text is always light on dark background */
+  :root:not(.dark) .code-content-wrapper pre code {
+    color: #d4d4d4;
   }
 
   /* Focus state for accessibility */
