@@ -1,7 +1,8 @@
-//! Discussion section renderer (simplified).
+//! Discussion section renderer.
 //!
 //! Renders a section with:
-//! - Narrative paragraphs (at least 1 required)
+//! - Structured items with collapsible subsections (preferred)
+//! - Fallback narrative paragraphs (for backward compatibility)
 
 use leptos::prelude::*;
 
@@ -10,83 +11,32 @@ use crate::models::discussion::DiscussionModel;
 #[component]
 pub fn DiscussionSection(model: DiscussionModel) -> impl IntoView {
     // Move data out before view!
+    let items = model.items;
     let paragraphs = model.paragraphs;
-    let paragraph_count = paragraphs.len();
 
-    // Determine if we should add subheadings (when >= 3 paragraphs)
-    let use_subheadings = paragraph_count >= 3;
-
-    // Render content based on paragraph count
-    let content = if use_subheadings {
-        // Group paragraphs with subheadings for better structure
-        // First paragraph(s) -> "Key Findings"
-        // Middle paragraph(s) -> "Implications"
-        // Last paragraph -> "Conclusion" (if > 3 paragraphs)
-
-        let split_point = if paragraph_count == 3 {
-            // 3 paragraphs: 1 + 1 + 1
-            (1, 2)
-        } else if paragraph_count == 4 {
-            // 4 paragraphs: 2 + 2
-            (2, 2)
-        } else {
-            // 5+ paragraphs: ~40% + ~40% + remainder
-            let first_group = (paragraph_count * 2 / 5).max(1);
-            let second_group = (paragraph_count * 2 / 5).max(1);
-            (first_group, second_group)
-        };
-
-        let mut paragraphs_iter = paragraphs.into_iter();
-
-        // First group - Key Findings
-        let first_group_paras: Vec<_> = paragraphs_iter.by_ref().take(split_point.0).collect();
-        let first_nodes = first_group_paras
+    // Prefer structured items if available, otherwise fall back to paragraphs
+    let content = if !items.is_empty() {
+        // Render structured items with collapsible sections
+        let item_nodes = items
             .into_iter()
-            .map(|p| view! { <p class="body-text">{p.to_string()}</p> })
-            .collect_view();
-
-        // Second group - Implications
-        let second_group_paras: Vec<_> = paragraphs_iter.by_ref().take(split_point.1).collect();
-        let second_nodes = second_group_paras
-            .into_iter()
-            .map(|p| view! { <p class="body-text">{p.to_string()}</p> })
-            .collect_view();
-
-        // Third group - Conclusion (remaining paragraphs)
-        let third_group_paras: Vec<_> = paragraphs_iter.collect();
-        let has_third_group = !third_group_paras.is_empty();
-        let third_nodes = third_group_paras
-            .into_iter()
-            .map(|p| view! { <p class="body-text">{p.to_string()}</p> })
+            .map(|item| {
+                view! {
+                    <div class="discussion-item">
+                        <h3 class="panel-title mb-4">{item.title.to_string()}</h3>
+                        <div class="prose prose-sm" inner_html={item.content.to_string()} />
+                    </div>
+                }
+            })
             .collect_view();
 
         view! {
-            <div data-testid="discussion:narrative" class="space-y-8">
-                <div>
-                    <h3 class="panel-title mb-4">"Key Findings"</h3>
-                    <div class="space-y-4">
-                        {first_nodes}
-                    </div>
-                </div>
-                <div>
-                    <h3 class="panel-title mb-4">"Implications"</h3>
-                    <div class="space-y-4">
-                        {second_nodes}
-                    </div>
-                </div>
-                {has_third_group.then(|| view! {
-                    <div>
-                        <h3 class="panel-title mb-4">"Conclusion"</h3>
-                        <div class="space-y-4">
-                            {third_nodes}
-                        </div>
-                    </div>
-                })}
+            <div data-testid="discussion:items" class="space-y-8">
+                {item_nodes}
             </div>
         }
         .into_any()
     } else {
-        // Simple paragraph rendering for < 3 paragraphs
+        // Fallback: simple paragraph rendering
         let para_nodes = paragraphs
             .into_iter()
             .map(|p| {

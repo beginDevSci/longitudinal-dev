@@ -1,3 +1,4 @@
+use crate::math::render_math_in_html;
 use crate::types::{
     JsonCodeBlock, JsonDataPrep, JsonDataPrepBlock, JsonNoteBlock, JsonOutputBlock,
 };
@@ -260,6 +261,8 @@ fn parse_note_block(
     title: &str,
     warnings: &mut Vec<String>,
 ) -> Option<JsonNoteBlock> {
+    use pulldown_cmark::html;
+
     // Skip past the heading to find content
     let mut i = start_pos + 1;
 
@@ -272,34 +275,41 @@ fn parse_note_block(
         i += 1;
     }
 
-    // Now collect paragraph content after the heading
-    let mut content = String::new();
-
+    // Collect all events until the next H2 heading
+    let mut content_events = Vec::new();
     while i < events.len() {
-        match &events[i] {
-            Event::Text(text) => {
-                content.push_str(text.as_ref());
-            }
-            Event::SoftBreak | Event::HardBreak => {
-                content.push(' ');
-            }
-            Event::Start(Tag::Heading { .. }) => {
-                // Reached next heading
-                break;
-            }
-            _ => {}
+        // Stop at next H2 heading
+        if let Event::Start(Tag::Heading {
+            level: pulldown_cmark::HeadingLevel::H2,
+            ..
+        }) = &events[i]
+        {
+            break;
         }
+        content_events.push(events[i].clone());
         i += 1;
     }
 
-    if content.is_empty() {
+    if content_events.is_empty() {
         warnings.push(format!("Note block '{title}' has no content"));
         return None;
     }
 
+    // Convert to HTML to preserve all markdown formatting (lists, tables, code, etc.)
+    let mut content_html = String::new();
+    html::push_html(&mut content_html, content_events.into_iter());
+
+    if content_html.trim().is_empty() {
+        warnings.push(format!("Note block '{title}' has no content"));
+        return None;
+    }
+
+    // Render any math expressions in the HTML
+    let content_with_math = render_math_in_html(content_html.trim());
+
     Some(JsonNoteBlock {
         title: title.to_string(),
-        content: content.trim().to_string(),
+        content: content_with_math,
     })
 }
 

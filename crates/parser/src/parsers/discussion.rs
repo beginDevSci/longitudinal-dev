@@ -1,24 +1,110 @@
-use crate::event_stream::extract_paragraphs;
-use crate::types::JsonDiscussion;
+use crate::math::render_math_in_html;
+use crate::types::{JsonDiscussion, JsonDiscussionItem};
+use crate::utils::extract_marker;
 use anyhow::Result;
-use pulldown_cmark::Event;
+use pulldown_cmark::{html, Event, HeadingLevel, Tag, TagEnd};
 
 pub fn parse_discussion_section(
     events: &[Event],
     warnings: &mut Vec<String>,
 ) -> Result<JsonDiscussion> {
-    // Extract all paragraphs from the discussion section
-    // No longer looking for specific headings - just get all paragraph text
-    let paragraphs = extract_paragraphs(events);
+    // Parse Discussion section into structured items (like Data Access)
+    // Look for H2 headings to identify collapsible sections
 
-    if paragraphs.is_empty() {
-        warnings.push("Discussion section has no paragraphs".to_string());
+    let mut items = Vec::new();
+    let mut i = 0;
+
+    // Skip initial H1 heading if present (section title)
+    if i < events.len() && matches!(&events[i], Event::Start(Tag::Heading { .. })) {
+        while i < events.len() {
+            if matches!(&events[i], Event::End(TagEnd::Heading(_))) {
+                i += 1;
+                break;
+            }
+            i += 1;
+        }
+    }
+
+    while i < events.len() {
+        // Look for H2 headings
+        if let Event::Start(Tag::Heading {
+            level: HeadingLevel::H2,
+            ..
+        }) = &events[i]
+        {
+            i += 1; // Move past heading start
+
+            // Extract heading text
+            let mut raw_title = String::new();
+            while i < events.len() {
+                match &events[i] {
+                    Event::Text(t) => raw_title.push_str(t),
+                    Event::Code(c) => raw_title.push_str(c),
+                    Event::End(TagEnd::Heading(_)) => {
+                        i += 1; // Move past heading end
+                        break;
+                    }
+                    _ => {}
+                }
+                i += 1;
+            }
+
+            // Strip {.note} or other markers from title
+            let title = if let Some((_marker, clean_title)) = extract_marker(&raw_title) {
+                clean_title
+            } else {
+                raw_title.trim().to_string()
+            };
+
+            // Collect all content until the next H2 heading or end of section
+            let mut content_events = Vec::new();
+            while i < events.len() {
+                // Stop if we hit another H2 heading
+                if matches!(
+                    &events[i],
+                    Event::Start(Tag::Heading {
+                        level: HeadingLevel::H2,
+                        ..
+                    })
+                ) {
+                    break;
+                }
+
+                content_events.push(events[i].clone());
+                i += 1;
+            }
+
+            // Convert content to HTML
+            let mut content_html = String::new();
+            html::push_html(&mut content_html, content_events.into_iter());
+
+            if !title.is_empty() && !content_html.trim().is_empty() {
+                // Render any math expressions in the HTML
+                let content_with_math = render_math_in_html(content_html.trim());
+                items.push(JsonDiscussionItem {
+                    title,
+                    content: content_with_math,
+                });
+            }
+
+            continue; // Continue to next iteration
+        }
+
+        i += 1;
+    }
+
+    if items.is_empty() {
+        warnings.push("Discussion section has no H2 subsections".to_string());
         return Ok(JsonDiscussion {
+            items: vec![],
             paragraphs: vec!["No discussion provided.".to_string()],
         });
     }
 
-    Ok(JsonDiscussion { paragraphs })
+    Ok(JsonDiscussion {
+        items,
+        paragraphs: vec![],
+    })
 }
 
 #[cfg(test)]

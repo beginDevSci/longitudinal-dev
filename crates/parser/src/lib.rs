@@ -4,6 +4,7 @@ use std::path::Path;
 
 pub mod event_stream;
 pub mod frontmatter;
+pub mod math;
 pub mod parsers;
 pub mod sections;
 pub mod types;

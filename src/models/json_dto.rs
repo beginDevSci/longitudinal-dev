@@ -236,17 +236,35 @@ impl JsonDataAccess {
 // Note: V1 JSON structs and conversion functions removed - all tutorials now use V2 format
 
 #[derive(Deserialize, Debug, Clone)]
+pub struct JsonDiscussionItem {
+    pub title: String,
+    pub content: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct JsonDiscussion {
-    /// At least 1 paragraph (validated by schema)
+    /// Structured items from H2 headings (preferred)
+    #[serde(default)]
+    pub items: Vec<JsonDiscussionItem>,
+    /// Fallback paragraphs (for backward compatibility)
+    #[serde(default)]
     pub paragraphs: Vec<String>,
 }
 
 impl JsonDiscussion {
     pub(crate) fn into_discussion_model(self) -> crate::models::discussion::DiscussionModel {
-        use crate::models::discussion::DiscussionModel;
+        use crate::models::discussion::{DiscussionItem, DiscussionModel};
         use std::borrow::Cow;
 
         DiscussionModel {
+            items: self
+                .items
+                .into_iter()
+                .map(|item| DiscussionItem {
+                    title: Cow::Owned(item.title),
+                    content: Cow::Owned(item.content),
+                })
+                .collect(),
             paragraphs: self.paragraphs.into_iter().map(Cow::Owned).collect(),
         }
     }

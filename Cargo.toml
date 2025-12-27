@@ -44,8 +44,8 @@ katex = { version = "0.4", optional = true }
 syntect = { version = "5.2", optional = true, default-features = false, features = ["default-fancy"] }
 # Tutorial Writer package
 longitudinal_writer = { path = "crates/writer" }
-# Markdown parser (for validation pipeline)
-longitudinal_parser = { path = "crates/parser" }
+# Markdown parser (for validation pipeline) - SSR only due to katex dependency
+longitudinal_parser = { path = "crates/parser", optional = true }
 # Date/time handling for test runner
 chrono = { version = "=0.4.42", optional = true }
 # Shared dependencies (also used by other binaries)
@@ -120,6 +120,7 @@ ssr = [
     "leptos_meta/ssr",
     "syntect",
     "katex",
+    "longitudinal_parser",
     "dep:chrono",
     "dep:clap",
     "dep:anyhow",

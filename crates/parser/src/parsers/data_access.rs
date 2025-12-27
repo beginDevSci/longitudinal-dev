@@ -1,4 +1,6 @@
+use crate::math::render_math_in_html;
 use crate::types::{JsonDataAccess, JsonDataAccessItem};
+use crate::utils::extract_marker;
 use anyhow::Result;
 use pulldown_cmark::{html, Event, HeadingLevel, Tag, TagEnd};
 
@@ -33,11 +35,11 @@ pub fn parse_data_access_section(
             i += 1; // Move past heading start
 
             // Extract heading text
-            let mut title = String::new();
+            let mut raw_title = String::new();
             while i < events.len() {
                 match &events[i] {
-                    Event::Text(t) => title.push_str(t),
-                    Event::Code(c) => title.push_str(c),
+                    Event::Text(t) => raw_title.push_str(t),
+                    Event::Code(c) => raw_title.push_str(c),
                     Event::End(TagEnd::Heading(_)) => {
                         i += 1; // Move past heading end
                         break;
@@ -46,6 +48,13 @@ pub fn parse_data_access_section(
                 }
                 i += 1;
             }
+
+            // Strip {.note} or other markers from title
+            let title = if let Some((_marker, clean_title)) = extract_marker(&raw_title) {
+                clean_title
+            } else {
+                raw_title.trim().to_string()
+            };
 
             // Collect all content until the next H2 heading or end of section
             let mut content_events = Vec::new();
@@ -69,9 +78,12 @@ pub fn parse_data_access_section(
             let mut content_html = String::new();
             html::push_html(&mut content_html, content_events.into_iter());
 
+            // Render any math expressions in the HTML
+            let content_with_math = render_math_in_html(&content_html);
+
             items.push(JsonDataAccessItem::Collapsible {
                 title,
-                content: content_html,
+                content: content_with_math,
                 open: false,
             });
 
@@ -85,7 +97,8 @@ pub fn parse_data_access_section(
     let prose = if items.is_empty() {
         let mut html_output = String::new();
         html::push_html(&mut html_output, events.iter().cloned());
-        Some(html_output)
+        // Render any math expressions in the HTML
+        Some(render_math_in_html(&html_output))
     } else {
         None
     };

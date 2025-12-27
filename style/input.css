@@ -3,6 +3,9 @@
 
 @source "./src/**/*.rs";
 
+/* Safelist dynamically-generated syntax highlighting classes (from syntax_highlight.rs) */
+@source inline("syn-comment syn-string syn-number syn-keyword syn-function syn-type syn-variable syn-operator syn-punctuation");
+
 /* Configure dark: variant to work with data-theme="dark" OR data-theme="dracula" */
 @variant dark (:is([data-theme="dark"], [data-theme="dracula"]) &);
 
@@ -3421,6 +3424,199 @@ body {
   /* Dracula theme adjustments */
   [data-theme="dracula"] .data-access-content ul li::before {
     background-color: var(--color-accent-300);
+  }
+
+  /* ========================================
+     NOTE CARD CONTENT STYLING
+     Rich HTML content in note/interpretation cards
+     ======================================== */
+
+  /* Note card styling - info boxes in Data Prep/Stats sections */
+  .note-card {
+    padding: var(--spacing-6);
+    text-align: center;
+  }
+
+  /* Note content - rich HTML from markdown */
+  .note-content {
+    text-align: left;
+    max-width: none;
+  }
+
+  /* Paragraphs in note content */
+  .note-content p {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-longform);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .note-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Lists in note content */
+  .note-content ul,
+  .note-content ol {
+    margin: var(--spacing-4) 0;
+    padding-left: var(--spacing-6);
+  }
+
+  .note-content ul {
+    list-style: disc;
+  }
+
+  .note-content ol {
+    list-style: decimal;
+  }
+
+  .note-content li {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .note-content li::marker {
+    color: var(--color-accent-500);
+  }
+
+  /* Bold text in notes */
+  .note-content strong {
+    color: var(--color-text-accent);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Links in notes */
+  .note-content a {
+    color: var(--color-text-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .note-content a:hover {
+    color: var(--color-accent-600);
+  }
+
+  /* Code in notes */
+  .note-content code {
+    background-color: var(--color-bg-accent-subtle);
+    color: var(--color-text-accent);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm);
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+
+  /* Code blocks in notes */
+  .note-content pre {
+    background-color: var(--color-bg-canvas);
+    border: 1px solid var(--color-border-default);
+    padding: var(--spacing-4);
+    margin: var(--spacing-4) 0;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+  }
+
+  .note-content pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    line-height: 1.6;
+  }
+
+  /* Tables in notes */
+  .note-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-4) 0;
+    font-size: var(--font-size-sm);
+  }
+
+  .note-content th,
+  .note-content td {
+    padding: var(--spacing-2) var(--spacing-3);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .note-content th {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-accent);
+    background-color: var(--color-bg-accent-subtle);
+  }
+
+  /* Dark mode adjustments for note content */
+  [data-theme="dark"] .note-content li::marker,
+  [data-theme="dracula"] .note-content li::marker {
+    color: var(--color-accent-400);
+  }
+
+  /* ========================================
+     DISCUSSION SECTION STYLING
+     ======================================== */
+
+  /* Discussion items spacing */
+  .discussion-item {
+    padding-bottom: var(--spacing-6);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .discussion-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* Prose styling for discussion content - inherit from note-content */
+  .discussion-item .prose {
+    text-align: left;
+    max-width: none;
+  }
+
+  .discussion-item .prose p,
+  .discussion-item .prose ul,
+  .discussion-item .prose ol,
+  .discussion-item .prose li,
+  .discussion-item .prose strong,
+  .discussion-item .prose a,
+  .discussion-item .prose code,
+  .discussion-item .prose pre,
+  .discussion-item .prose table,
+  .discussion-item .prose th,
+  .discussion-item .prose td {
+    /* Inherit from note-content styles */
+  }
+
+  /* Discussion paragraphs */
+  .discussion-item .prose p {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-longform);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .discussion-item .prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Discussion lists */
+  .discussion-item .prose ul,
+  .discussion-item .prose ol {
+    margin: var(--spacing-4) 0;
+    padding-left: var(--spacing-6);
+  }
+
+  .discussion-item .prose li {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  /* Bold labels in discussion */
+  .discussion-item .prose strong {
+    color: var(--color-text-accent);
+    font-weight: var(--font-weight-semibold);
   }
 
   /* ========================================

@@ -1,18 +1,55 @@
 {
   "type": "object",
-  "required": [
-    "paragraphs"
-  ],
   "properties": {
+    "items": {
+      "type": "array",
+      "description": "Structured discussion items with title and HTML content (preferred format)",
+      "items": {
+        "type": "object",
+        "required": ["title", "content"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title for the discussion subsection"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "description": "HTML content for the discussion subsection"
+          }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
     "paragraphs": {
       "type": "array",
-      "description": "Narrative paragraphs for the discussion section (at least 1 paragraph required)",
+      "description": "Narrative paragraphs for the discussion section (legacy/fallback format)",
       "items": {
         "type": "string",
         "minLength": 1
       },
-      "minItems": 1
+      "default": []
     }
   },
+  "anyOf": [
+    {
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "minItems": 1
+        }
+      }
+    },
+    {
+      "required": ["paragraphs"],
+      "properties": {
+        "paragraphs": {
+          "minItems": 1
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

@@ -123,9 +123,21 @@ pub struct JsonTableNote {
     pub copy: String,
 }
 
-/// Discussion section - simplified to just paragraphs
+/// Discussion section item - collapsible with title and HTML content
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JsonDiscussionItem {
+    pub title: String,
+    pub content: String,
+}
+
+/// Discussion section - structured with collapsible items
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonDiscussion {
+    /// Structured items from H2 headings (preferred)
+    #[serde(default)]
+    pub items: Vec<JsonDiscussionItem>,
+    /// Fallback paragraphs (for backward compatibility)
+    #[serde(default)]
     pub paragraphs: Vec<String>,
 }
 

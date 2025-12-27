@@ -1694,6 +1694,7 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
+ "katex",
  "predicates",
  "pulldown-cmark 0.11.3",
  "serde",

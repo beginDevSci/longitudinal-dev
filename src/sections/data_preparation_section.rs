@@ -165,13 +165,13 @@ fn render_image_output(data: OutputData, key: String) -> impl IntoView {
     }
 }
 
-/// Render note block as callout card
+/// Render note block as callout card with rich HTML content
 fn render_note_block(data: NoteData, key: String) -> impl IntoView {
     view! {
         <div
             data-testid={format!("data-prep-v2:note:{key}")}
             role="note"
-            class="mt-6 card p-10 text-center"
+            class="mt-6 card note-card"
         >
             <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border">
                 <svg aria-hidden="true" class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@ fn render_note_block(data: NoteData, key: String) -> impl IntoView {
                 <span class="sr-only">"Note"</span>
             </div>
             <div class="panel-title">{data.title.to_string()}</div>
-            <p class="body-text mt-1 text-muted whitespace-pre-wrap">{data.content.to_string()}</p>
+            <div class="note-content prose prose-sm mt-4" inner_html={data.content.to_string()} />
         </div>
     }
 }

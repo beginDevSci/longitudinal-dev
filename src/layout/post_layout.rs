@@ -243,12 +243,16 @@ pub fn PostLayout(
                                                 }
 
                                                 if !meta.tags.is_empty() {
+                                                    // Filter out tags that duplicate the engine to avoid showing "blmm" twice
+                                                    let engine_lower = meta.statistical_engine.to_lowercase();
                                                     for tag in &meta.tags {
-                                                        pills.push(view! {
-                                                            <span class="hero-pill hero-pill--tag">
-                                                                {tag.clone()}
-                                                            </span>
-                                                        });
+                                                        if tag.to_lowercase() != engine_lower {
+                                                            pills.push(view! {
+                                                                <span class="hero-pill hero-pill--tag">
+                                                                    {tag.clone()}
+                                                                </span>
+                                                            });
+                                                        }
                                                     }
                                                 }
 
