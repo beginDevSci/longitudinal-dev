@@ -142,3 +142,74 @@ pub struct MethodGroup {
     /// Category for the method group
     pub category: String,
 }
+
+// ============================================================================
+// Category metadata for display and filtering
+// ============================================================================
+
+/// Metadata for a guide category.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CategoryMeta {
+    /// URL-friendly identifier (e.g., "growth-models")
+    pub id: &'static str,
+    /// Display name (e.g., "Growth Models")
+    pub name: &'static str,
+    /// Emoji or icon for the category
+    pub icon: &'static str,
+    /// Brief description of the category
+    pub description: &'static str,
+    /// Sort order (lower = first)
+    pub order: u8,
+    /// Tailwind CSS classes for the category badge
+    pub color_classes: &'static str,
+}
+
+/// All known guide categories with their display metadata.
+pub const CATEGORIES: &[CategoryMeta] = &[
+    CategoryMeta {
+        id: "growth-models",
+        name: "Growth Models",
+        icon: "📈",
+        description: "Model change trajectories over time using latent growth curves",
+        order: 1,
+        color_classes: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
+    },
+    CategoryMeta {
+        id: "mixed-models",
+        name: "Mixed Models",
+        icon: "🔀",
+        description: "Account for nested data structure with fixed and random effects",
+        order: 2,
+        color_classes: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+    },
+    CategoryMeta {
+        id: "survival",
+        name: "Survival Analysis",
+        icon: "⏱️",
+        description: "Model time-to-event data and hazard rates",
+        order: 3,
+        color_classes: "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800",
+    },
+    CategoryMeta {
+        id: "latent-variable",
+        name: "Latent Variable",
+        icon: "🔮",
+        description: "Uncover hidden constructs from observed indicators",
+        order: 4,
+        color_classes: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
+    },
+];
+
+impl CategoryMeta {
+    /// Find category metadata by ID.
+    pub fn find(id: &str) -> Option<&'static CategoryMeta> {
+        CATEGORIES.iter().find(|c| c.id == id)
+    }
+
+    /// Get all categories sorted by order.
+    pub fn all_sorted() -> Vec<&'static CategoryMeta> {
+        let mut cats: Vec<_> = CATEGORIES.iter().collect();
+        cats.sort_by_key(|c| c.order);
+        cats
+    }
+}

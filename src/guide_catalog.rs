@@ -4,8 +4,9 @@
 //! Guides are grouped by method (hub + tutorial + reference).
 
 use crate::base_path;
-use crate::models::guide::{GuideCatalogItem, MethodGroup};
+use crate::models::guide::{CategoryMeta, GuideCatalogItem, MethodGroup};
 use leptos::prelude::*;
+use std::collections::HashMap;
 
 /// A single guide card in the catalog.
 #[component]
@@ -73,6 +74,7 @@ pub fn GuideCard(guide: GuideCatalogItem) -> impl IntoView {
 }
 
 /// A method card showing hub, tutorial, and reference links.
+/// Uses CategoryMeta for consistent styling.
 #[component]
 pub fn MethodCard(group: MethodGroup) -> impl IntoView {
     let hub_href = base_path::join(&format!("guides/{}/", group.hub.slug));
@@ -85,38 +87,8 @@ pub fn MethodCard(group: MethodGroup) -> impl IntoView {
         .as_ref()
         .map(|r| base_path::join(&format!("guides/{}/", r.slug)));
 
-    // Category color mapping
-    let category_color = match group.category.as_str() {
-        "growth-models" => "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
-        "mixed-models" => "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
-        "survival" => "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800",
-        "latent-variable" => "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
-        _ => "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
-    };
-
-    // Format category name for display
-    let category_display = group
-        .category
-        .split('-')
-        .map(|word| {
-            let mut chars = word.chars();
-            match chars.next() {
-                None => String::new(),
-                Some(first) => first.to_uppercase().chain(chars).collect(),
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ");
-
     view! {
         <div class="rounded-xl bg-elevated border border-stroke p-6 hover:shadow-lg transition-shadow duration-200">
-            // Category badge
-            <div class="flex items-center gap-2 mb-3">
-                <span class={format!("text-xs px-2 py-0.5 rounded-full border {}", category_color)}>
-                    {category_display}
-                </span>
-            </div>
-
             // Title (links to hub)
             <a href={hub_href.clone()} class="group">
                 <h3 class="text-lg font-semibold group-hover:underline group-hover:text-accent transition-colors duration-200 text-primary">
@@ -195,30 +167,121 @@ pub fn MethodCard(group: MethodGroup) -> impl IntoView {
     }
 }
 
-/// Grouped guide catalog component.
+/// Category section header component.
+#[component]
+fn CategorySection(
+    meta: &'static CategoryMeta,
+    groups: Vec<MethodGroup>,
+) -> impl IntoView {
+    view! {
+        <section class="mb-12">
+            // Section header
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-2xl">{meta.icon}</span>
+                <div>
+                    <h2 class="text-xl font-bold text-primary">{meta.name}</h2>
+                    <p class="text-sm text-secondary">{meta.description}</p>
+                </div>
+            </div>
+
+            // Cards grid
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {groups.into_iter().map(|group| {
+                    view! {
+                        <MethodCard group />
+                    }
+                }).collect_view()}
+            </div>
+        </section>
+    }
+}
+
+/// Filter pill component for category filtering.
+#[component]
+fn FilterPill(
+    label: &'static str,
+    category_id: Option<&'static str>,
+    is_active: bool,
+    color_classes: &'static str,
+) -> impl IntoView {
+    let base_classes = "px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer";
+    let active_classes = if is_active {
+        format!("{} {} ring-2 ring-offset-2 ring-accent/50", base_classes, color_classes)
+    } else {
+        format!("{} bg-surface border-stroke text-secondary hover:bg-subtle hover:text-primary", base_classes)
+    };
+
+    // Data attribute for client-side filtering
+    let data_category = category_id.unwrap_or("all");
+
+    view! {
+        <button
+            type="button"
+            class={active_classes}
+            data-filter-category={data_category}
+        >
+            {label}
+        </button>
+    }
+}
+
+/// Grouped guide catalog component with category sections and filter pills.
 #[component]
 pub fn GroupedGuideCatalog(groups: Vec<MethodGroup>) -> impl IntoView {
-    view! {
-        <div class="space-y-10">
-            {if groups.is_empty() {
-                view! {
-                    <div class="text-center py-12">
-                        <p class="text-secondary">"No method guides available yet. Check back soon!"</p>
-                    </div>
-                }.into_any()
-            } else {
-                view! {
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {groups.into_iter().map(|group| {
-                            view! {
-                                <MethodCard group />
-                            }
-                        }).collect_view()}
-                    </div>
-                }.into_any()
-            }}
-        </div>
+    if groups.is_empty() {
+        return view! {
+            <div class="text-center py-12">
+                <p class="text-secondary">"No method guides available yet. Check back soon!"</p>
+            </div>
+        }.into_any();
     }
+
+    // Group by category
+    let mut by_category: HashMap<String, Vec<MethodGroup>> = HashMap::new();
+    for group in groups {
+        by_category
+            .entry(group.category.clone())
+            .or_default()
+            .push(group);
+    }
+
+    // Get categories that have content, sorted by order
+    let active_categories: Vec<&'static CategoryMeta> = CategoryMeta::all_sorted()
+        .into_iter()
+        .filter(|cat| by_category.contains_key(cat.id))
+        .collect();
+
+    view! {
+        <div class="space-y-8">
+            // Filter pills
+            <div class="flex flex-wrap gap-2 pb-4 border-b border-stroke">
+                <FilterPill
+                    label="All"
+                    category_id=None
+                    is_active=true
+                    color_classes="bg-accent text-white border-accent"
+                />
+                {active_categories.iter().map(|cat| {
+                    view! {
+                        <FilterPill
+                            label={cat.name}
+                            category_id=Some(cat.id)
+                            is_active=false
+                            color_classes={cat.color_classes}
+                        />
+                    }
+                }).collect_view()}
+            </div>
+
+            // Category sections
+            {active_categories.into_iter().map(|cat| {
+                let cat_groups = by_category.remove(cat.id).unwrap_or_default();
+                view! {
+                    <CategorySection meta=cat groups=cat_groups />
+                }
+            }).collect_view()}
+        </div>
+    }.into_any()
 }
 
 /// Guide catalog grid component (legacy - shows individual cards).
