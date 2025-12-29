@@ -145,8 +145,11 @@ pub fn EditorModalIsland(
     }
 
     // Submit handler using Action to avoid FnOnce issues
+    #[cfg(target_arch = "wasm32")]
     let slug_for_action = slug.clone();
+    #[cfg(target_arch = "wasm32")]
     let page_url_for_action = page_url.clone();
+    #[cfg(target_arch = "wasm32")]
     let baseline_hash_for_action = baseline_hash.clone();
 
     let submit_action = Action::new(move |_: &()| {

@@ -36,7 +36,7 @@ pub fn wrap_tables(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
 
             // Collect and emit all table events until End(Table)
             let mut depth = 1;
-            while let Some(inner_event) = iter.next() {
+            for inner_event in iter.by_ref() {
                 match &inner_event {
                     Event::Start(Tag::Table(_)) => depth += 1,
                     Event::End(TagEnd::Table) => {

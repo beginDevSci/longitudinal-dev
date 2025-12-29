@@ -242,10 +242,8 @@ fn slugify(text: &str) -> String {
         .map(|c| {
             if c.is_alphanumeric() {
                 c
-            } else if c.is_whitespace() || c == '-' || c == '_' {
-                '-'
             } else {
-                '-' // Replace special chars like & with -
+                '-' // Replace whitespace, hyphens, underscores, and special chars
             }
         })
         .collect::<String>()

@@ -16,7 +16,7 @@ use leptos::prelude::*;
 #[component]
 pub fn GuideSidebarNav(outline: Vec<OutlineNode>) -> impl IntoView {
     if outline.is_empty() {
-        return view! {}.into_any();
+        return ().into_any();
     }
 
     view! {
@@ -54,7 +54,7 @@ fn OutlineItem(node: OutlineNode) -> impl IntoView {
                     </ul>
                 }.into_any()
             } else {
-                view! {}.into_any()
+                ().into_any()
             }}
         </li>
     }

@@ -43,6 +43,7 @@ pub fn add_code_block_ids(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
     let mut result = Vec::with_capacity(events.len() + 20);
     let mut in_code_block = false;
     let mut current_language = String::new();
+    #[allow(unused_assignments)]
     let mut current_code_id = String::new();
     let mut code_buffer = String::new();
 

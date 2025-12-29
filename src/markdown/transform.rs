@@ -36,8 +36,7 @@ pub fn transform_markdown_events(events: Vec<Event<'_>>) -> Vec<Event<'static>> 
     let events = tables::wrap_tables(events);
     let events = modules::wrap_modules(events);
     let events = math::render_math(events);
-    let events = code_blocks::add_code_block_ids(events);
-    events
+    code_blocks::add_code_block_ids(events)
 }
 
 /// Transform markdown events and also extract a hierarchical outline.

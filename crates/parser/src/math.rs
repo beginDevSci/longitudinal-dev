@@ -43,7 +43,7 @@ pub fn render_math_in_html(html: &str) -> String {
                 // Inline math ($...$)
                 let mut expr = String::new();
                 let mut found_close = false;
-                while let Some(c2) = chars.next() {
+                for c2 in chars.by_ref() {
                     if c2 == '$' {
                         found_close = true;
                         break;

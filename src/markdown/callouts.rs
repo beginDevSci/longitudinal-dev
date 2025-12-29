@@ -377,7 +377,7 @@ fn collect_until_end_blockquote<'a>(
     let mut events = Vec::new();
     let mut depth = 1;
 
-    while let Some(event) = iter.next() {
+    for event in iter.by_ref() {
         match &event {
             Event::Start(Tag::BlockQuote) => depth += 1,
             Event::End(TagEnd::BlockQuote) => {

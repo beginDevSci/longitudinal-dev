@@ -108,9 +108,9 @@ pub fn guides() -> Vec<Guide> {
         for entry in entries.filter_map(|e| e.ok()) {
             let path = entry.path();
 
-            if path.extension().map_or(false, |ext| ext == "md") {
+            if path.extension().is_some_and(|ext| ext == "md") {
                 // Skip TEMPLATE.md - it's a template, not a real guide
-                if path.file_name().map_or(false, |n| n == "TEMPLATE.md") {
+                if path.file_name().is_some_and(|n| n == "TEMPLATE.md") {
                     continue;
                 }
 

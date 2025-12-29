@@ -58,9 +58,9 @@ pub fn wrap_modules(events: Vec<Event<'_>>) -> Vec<Event<'static>> {
     let mut collecting_heading_text = false;
     let mut heading_text_buffer = String::new();
 
-    let mut iter = events.into_iter().peekable();
+    let iter = events.into_iter();
 
-    while let Some(event) = iter.next() {
+    for event in iter {
         match (&mut state, &event) {
             // Detect H2 start
             (

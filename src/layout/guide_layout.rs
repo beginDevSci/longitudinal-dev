@@ -138,7 +138,7 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                     </nav>
                 }.into_any()
             } else {
-                view! {}.into_any()
+                ().into_any()
             }}
 
             // 3-column layout: sidebar | content | empty

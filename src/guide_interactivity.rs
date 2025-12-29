@@ -34,8 +34,7 @@ pub fn GuideInteractivity() -> impl IntoView {
         });
     }
 
-    // Return empty view - this island is purely for side effects
-    view! {}
+    // This island is purely for side effects, return empty view
 }
 
 // ============================================================================
