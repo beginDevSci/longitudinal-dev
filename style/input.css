@@ -1432,6 +1432,64 @@ body {
     }
   }
 
+  /* ----------------------------------------
+     Guide Navigation Tabs
+     Horizontal tabs for hub/tutorial/reference navigation
+     ---------------------------------------- */
+
+  .guide-nav-tabs {
+    border-bottom: 1px solid var(--color-border-default);
+    background-color: var(--color-bg-subtle);
+  }
+
+  .guide-nav-tabs-container {
+    display: flex;
+    gap: var(--spacing-1);
+    max-width: 75ch;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* On larger screens, offset to account for sidebar (matches header) */
+  @media (min-width: 1280px) {
+    .guide-nav-tabs-container {
+      max-width: calc(75ch + 16rem);
+      padding-left: calc(16rem + 3rem);
+    }
+  }
+
+  .guide-nav-tab {
+    position: relative;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; /* Overlap container border */
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .guide-nav-tab:hover {
+    color: var(--color-text-primary);
+  }
+
+  .guide-nav-tab--active {
+    color: var(--color-text-accent);
+    border-bottom-color: var(--color-accent-500);
+  }
+
+  .guide-nav-tab--active:hover {
+    color: var(--color-text-accent);
+  }
+
+  /* Disabled state for non-existent pages (future use) */
+  .guide-nav-tab--disabled {
+    color: var(--color-text-muted);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
   /* 3-column grid container */
   .guide-layout-container {
     display: grid;

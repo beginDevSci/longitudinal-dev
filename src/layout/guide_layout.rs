@@ -2,12 +2,13 @@
 //!
 //! Renders a guide with:
 //! - Title and metadata header
+//! - Navigation tabs for hub/tutorial/reference switching
 //! - Left sidebar with hierarchical outline navigation
 //! - Main content area with rendered HTML
 //! - Interactive behaviors (copy buttons, anchor navigation)
 
 use crate::base_path;
-use crate::layout::GuideSidebarNav;
+use crate::layout::{GuideNavTabs, GuideSidebarNav, GuideTabInfo};
 use crate::models::guide::Guide;
 use crate::GuideInteractivity;
 use leptos::prelude::*;
@@ -19,6 +20,7 @@ const SHOW_HORIZONTAL_TOC: bool = false;
 ///
 /// Layout:
 /// - Full-width header with title, description, and metadata
+/// - Navigation tabs for switching between hub/tutorial/reference
 /// - 3-column grid: sidebar | content | (empty right column)
 /// - Full-width footer
 #[component]
@@ -34,6 +36,13 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
         .collect::<Vec<_>>();
     let html_content = guide.html_content.to_string();
     let outline = guide.outline.clone();
+
+    // Build tab navigation info if this guide is part of a method group
+    let tab_info = GuideTabInfo::from_guide(
+        &guide.slug,
+        guide.guide_type.as_ref().map(|s| s.as_ref()),
+        guide.parent_method.as_ref().map(|s| s.as_ref()),
+    );
 
     view! {
         <div class="min-h-screen bg-surface">
@@ -79,6 +88,9 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                     </div>
                 </div>
             </header>
+
+            // Navigation tabs for hub/tutorial/reference
+            {tab_info.map(|info| view! { <GuideNavTabs info=info /> })}
 
             // Horizontal TOC (feature-flagged, kept for rollback)
             {if SHOW_HORIZONTAL_TOC {

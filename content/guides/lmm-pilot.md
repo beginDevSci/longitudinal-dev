@@ -27,13 +27,6 @@ Consider a simple example: 200 participants measured at 5 time points each. You 
 
 **Quick mental model**: Think of LMM as "fit one regression line per person, then summarize those lines." Each individual gets their own intercept and slope, but these estimates are informed by the whole sample—extreme values get pulled toward the group average, and people with sparse data borrow strength from others.
 
-> [!info] **About This Guide**
->
-> This page explains *what* LMM is and *why* it works—building conceptual understanding before implementation.
->
-> - **Ready to see code?** → [Tutorial: Worked Example](/guides/lmm-pilot-tutorial)
-> - **Need syntax or fit thresholds?** → [Quick Reference](/guides/lmm-pilot-reference)
-
 ---
 
 ## What LMM Provides

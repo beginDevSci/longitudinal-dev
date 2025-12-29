@@ -34,13 +34,6 @@ The average tells you "the group improved"—but the real questions are:
 
 **Latent Growth Curve Models (LGCM)** answer exactly these questions. Every person gets their own trajectory—a starting point (intercept) and rate of change (slope)—and the model quantifies how much people vary in these trajectories.
 
-> [!info] **About This Guide**
->
-> This page explains *what* LGCM is and *why* it works—building conceptual understanding before implementation.
->
-> - **Ready to see code?** → [Tutorial: Worked Example](/guides/lgcm-pilot-tutorial)
-> - **Need syntax or fit index thresholds?** → [Quick Reference](/guides/lgcm-pilot-reference)
-
 ---
 
 > [!tip] **Before You Continue**
