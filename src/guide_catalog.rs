@@ -52,24 +52,6 @@ pub fn GuideCard(guide: GuideCatalogItem) -> impl IntoView {
             } else {
                 None
             }}
-
-            // R packages
-            {if !guide.r_packages.is_empty() {
-                Some(view! {
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <span class="text-xs text-muted">"R packages:"</span>
-                        {guide.r_packages.iter().map(|pkg| {
-                            view! {
-                                <span class="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                    {pkg.clone()}
-                                </span>
-                            }
-                        }).collect_view()}
-                    </div>
-                })
-            } else {
-                None
-            }}
         </a>
     }
 }
@@ -126,43 +108,6 @@ pub fn MethodCard(group: MethodGroup) -> impl IntoView {
                     </a>
                 })}
             </div>
-
-            // R packages (merged from all parts)
-            {
-                let mut all_packages: Vec<String> = group.hub.r_packages.clone();
-                if let Some(ref t) = group.tutorial {
-                    for pkg in &t.r_packages {
-                        if !all_packages.contains(pkg) {
-                            all_packages.push(pkg.clone());
-                        }
-                    }
-                }
-                if let Some(ref r) = group.reference {
-                    for pkg in &r.r_packages {
-                        if !all_packages.contains(pkg) {
-                            all_packages.push(pkg.clone());
-                        }
-                    }
-                }
-                all_packages.sort();
-
-                if !all_packages.is_empty() {
-                    Some(view! {
-                        <div class="mt-3 flex flex-wrap gap-1.5">
-                            <span class="text-xs text-muted">"R:"</span>
-                            {all_packages.into_iter().map(|pkg| {
-                                view! {
-                                    <span class="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                        {pkg}
-                                    </span>
-                                }
-                            }).collect_view()}
-                        </div>
-                    })
-                } else {
-                    None
-                }
-            }
         </div>
     }
 }
