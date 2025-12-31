@@ -130,11 +130,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
     eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
 
-    // Also write the same catalog to /posts/index.html to replace directory listing
+    // Ensure /posts directory exists for individual tutorials
     let posts_dir = site_root.join("posts");
     create_dir_all(&posts_dir)?;
-    write(posts_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", posts_dir.join("index.html").display());
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
@@ -183,7 +181,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .to_html();
 
-        let post_dir = site_root.join("posts").join(&slug);
+        let post_dir = posts_dir.join(&slug);
         create_dir_all(&post_dir)?;
         write(post_dir.join("index.html"), html)?;
         eprintln!("Wrote {}", post_dir.join("index.html").display());
@@ -213,7 +211,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Group guides by method (hub + tutorial + reference)
     let method_groups = group_guides_by_method(guide_catalog_items);
-    let method_count = method_groups.len();
 
     let guides_catalog_html = view! {
         <SiteLayout options=opts.clone()>
@@ -265,6 +262,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("Wrote {}", guide_dir.join("index.html").display());
     }
 
-    eprintln!("\n✅ Generated {post_count} posts + {guide_count} guides + index page + about page + writer");
+    eprintln!("\n✅ Generated {post_count} posts + {guide_count} guides + home + tutorials + about + writer");
     Ok(())
 }
