@@ -223,7 +223,7 @@ pub fn generate_curations_output(
         .collect();
 
     // Generate recently_updated (sorted by updated_at descending, top 8)
-    let mut sorted_tutorials: Vec<_> = tutorials.iter().cloned().collect();
+    let mut sorted_tutorials: Vec<_> = tutorials.to_vec();
     sorted_tutorials.sort_by(|a, b| b.updated_at.cmp(&a.updated_at));
     let recently_updated: Vec<TutorialIndexEntry> = sorted_tutorials.into_iter().take(8).collect();
 

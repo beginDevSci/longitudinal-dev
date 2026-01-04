@@ -395,7 +395,9 @@ pub fn SidebarFilters(
 /// Tutorial card component (non-island, server-rendered)
 #[component]
 pub fn TutorialCard(tutorial: TutorialData) -> impl IntoView {
-    let href = base_path::join(&format!("posts/{}/", tutorial.slug));
+    // Use new canonical URL: /tutorials/<family>/<slug>/
+    let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
+    let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
 
     view! {
         <a
@@ -555,7 +557,9 @@ pub fn TutorialTable(tutorials: Vec<TutorialData>, sort_by: RwSignal<SortOption>
                 </thead>
                 <tbody class="divide-y divide-stroke">
                     {tutorials.into_iter().map(|tutorial| {
-                        let href = base_path::join(&format!("posts/{}/", tutorial.slug));
+                        // Use new canonical URL: /tutorials/<family>/<slug>/
+                        let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
+                        let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
                         view! {
                             <tr class="hover:bg-subtle transition-colors">
                                 <td class="px-4 py-3">

@@ -175,10 +175,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Ensure /posts directory exists for individual tutorials
-    let posts_dir = site_root.join("posts");
-    create_dir_all(&posts_dir)?;
-
     // 3. Generate About page at /about/index.html
     let about_html = view! {
         <SiteLayout options=opts.clone()>
@@ -192,9 +188,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(about_dir.join("index.html"), &about_html)?;
     eprintln!("Wrote {}", about_dir.join("index.html").display());
 
-    // 4. Generate one page per post at /posts/<slug>/index.html
+    // 4. Generate one page per tutorial at /tutorials/<family>/<slug>/index.html
+    // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
+    let posts_dir = site_root.join("posts");
+    create_dir_all(&posts_dir)?;
+
     for post in all_posts.into_iter() {
-        let slug = post.slug.to_string(); // capture before moving into the view
+        let slug = post.slug.to_string();
+
+        // Get method family for URL structure (lowercase, default to "other" if missing)
+        let method_family = post
+            .metadata
+            .as_ref()
+            .map(|m| m.method_family.to_lowercase().replace(' ', "-"))
+            .unwrap_or_else(|| "other".to_string());
 
         // Read the original markdown file for prefill
         let markdown_path = PathBuf::from("content/tutorials").join(format!("{}.md", slug));
@@ -226,10 +233,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .to_html();
 
-        let post_dir = posts_dir.join(&slug);
-        create_dir_all(&post_dir)?;
-        write(post_dir.join("index.html"), html)?;
-        eprintln!("Wrote {}", post_dir.join("index.html").display());
+        // Write tutorial to new canonical URL: /tutorials/<family>/<slug>/
+        let tutorial_dir = tutorials_dir.join(&method_family).join(&slug);
+        create_dir_all(&tutorial_dir)?;
+        write(tutorial_dir.join("index.html"), &html)?;
+        eprintln!("Wrote {}", tutorial_dir.join("index.html").display());
+
+        // Generate redirect page at old URL: /posts/<slug>/
+        let base_path_prefix = std::env::var("SITE_BASE_PATH").unwrap_or_default();
+        let canonical_url = if base_path_prefix.is_empty() {
+            format!("/tutorials/{}/{}/", method_family, slug)
+        } else {
+            format!("{}/tutorials/{}/{}/", base_path_prefix.trim_end_matches('/'), method_family, slug)
+        };
+
+        let redirect_html = format!(
+            r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url={canonical_url}">
+    <link rel="canonical" href="{canonical_url}">
+    <title>Redirecting...</title>
+    <script>window.location.replace("{canonical_url}");</script>
+</head>
+<body>
+    <p>This page has moved. Redirecting to <a href="{canonical_url}">{canonical_url}</a>...</p>
+</body>
+</html>"#
+        );
+
+        let redirect_dir = posts_dir.join(&slug);
+        create_dir_all(&redirect_dir)?;
+        write(redirect_dir.join("index.html"), redirect_html)?;
+        eprintln!("Wrote redirect {}", redirect_dir.join("index.html").display());
     }
 
     // 5. Generate Writer page at /writer/index.html
