@@ -10,8 +10,13 @@ tags:
 family: GEE
 family_label: Generalized Estimating Equations (GEE)
 engine: geepack
+engines:
+  - geepack
 covariates: None
 outcome_type: Binary
+difficulty: intro
+timepoints: 3_5
+summary: Fit population-averaged generalized estimating equations for binary outcomes, choose working correlation structures, and interpret marginal effects for clustered ABCD observations.
 description: Fit population-averaged generalized estimating equations for binary outcomes, choose working correlation structures, and interpret marginal effects for clustered ABCD observations.
 ---
 

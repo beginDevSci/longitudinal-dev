@@ -10,8 +10,13 @@ tags:
 family: LGCM
 family_label: Latent Growth Curve Models (LGCM)
 engine: lavaan
+engines:
+  - lavaan
 covariates: None
 outcome_type: Continuous
+difficulty: intro
+timepoints: 3_5
+summary: Introduce latent growth curve modeling to estimate average emotional suppression trajectories, growth rates, and individual variability across repeated ABCD assessments.
 description: Introduce latent growth curve modeling to estimate average emotional suppression trajectories, growth rates, and individual variability across repeated ABCD assessments.
 ---
 

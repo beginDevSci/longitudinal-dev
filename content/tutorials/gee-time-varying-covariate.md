@@ -10,8 +10,13 @@ tags:
 family: GEE
 family_label: Generalized Estimating Equations (GEE)
 engine: geepack
+engines:
+  - geepack
 covariates: TVC
 outcome_type: Binary
+difficulty: intermediate
+timepoints: 3_5
+summary: Add time-varying covariates to generalized estimating equations to examine how evolving exposures influence repeated binary outcomes.
 description: Add time-varying covariates to generalized estimating equations to examine how evolving exposures influence repeated binary outcomes.
 ---
 

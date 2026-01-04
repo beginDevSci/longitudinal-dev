@@ -10,8 +10,13 @@ tags:
 family: LMM
 family_label: Linear Mixed Models (LMM)
 engine: lme4
+engines:
+  - lme4
 covariates: TIC
 outcome_type: Continuous
+difficulty: intermediate
+timepoints: 3_5
+summary: Incorporate time-invariant covariates within mixed models to test whether baseline characteristics explain differences in intercepts or slopes across ABCD participants.
 description: Incorporate time-invariant covariates within mixed models to test whether baseline characteristics explain differences in intercepts or slopes across ABCD participants.
 ---
 

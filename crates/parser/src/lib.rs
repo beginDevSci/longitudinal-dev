@@ -109,28 +109,61 @@ fn parse_post(
             .unwrap_or_else(|| "Untitled Post".to_string());
 
         // Construct metadata if all required fields are present
+        // Note: engine OR engines must be present (engines takes precedence)
+        let has_engine = fm.engine.is_some() || fm.engines.is_some();
         let metadata = if fm.family.is_some()
-            && fm.engine.is_some()
+            && has_engine
             && fm.covariates.is_some()
             && fm.outcome_type.is_some()
             && fm.updated_at.is_some()
             && fm.tags.is_some()
             && fm.author.is_some()
         {
+            // Build engines array: prefer explicit engines[], fall back to wrapping engine
+            let engines = if let Some(engines_arr) = fm.engines.take() {
+                engines_arr
+            } else if let Some(ref engine) = fm.engine {
+                vec![engine.clone()]
+            } else {
+                vec![]
+            };
+
             Some(types::PostMetadata {
                 method_family: fm.family.take().unwrap(),
                 method_family_label: fm.family_label.take(),
-                statistical_engine: fm.engine.take().unwrap(),
+                statistical_engine: fm.engine.take().unwrap_or_else(|| {
+                    engines.first().cloned().unwrap_or_default()
+                }),
+                engines,
                 covariates: fm.covariates.take().unwrap(),
                 outcome_type: fm.outcome_type.take().unwrap(),
                 updated_at: fm.updated_at.take().unwrap(),
                 tags: fm.tags.take().unwrap(),
                 author: fm.author.take().unwrap(),
                 description: fm.description,
+                summary: fm.summary,
+                difficulty: fm.difficulty,
+                timepoints: fm.timepoints,
             })
         } else {
             None
         };
+
+        // Validate new schema fields and emit warnings for missing ones
+        if let Some(ref meta) = metadata {
+            if meta.difficulty.is_none() {
+                warnings.push("Missing 'difficulty' field (intro | intermediate | advanced) - recommended for scaling".to_string());
+            }
+            if meta.timepoints.is_none() {
+                warnings.push("Missing 'timepoints' field (2 | 3_5 | 6_plus | irregular) - recommended for scaling".to_string());
+            }
+            if meta.engines.is_empty() {
+                warnings.push("Missing 'engines' array - using legacy 'engine' field as fallback".to_string());
+            }
+            if meta.summary.is_none() {
+                warnings.push("Missing explicit 'summary' field - will derive from description".to_string());
+            }
+        }
 
         (title, metadata)
     } else {

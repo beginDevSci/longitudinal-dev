@@ -10,8 +10,13 @@ tags:
 family: LMM
 family_label: Linear Mixed Models (LMM)
 engine: lme4
+engines:
+  - lme4
 covariates: None
 outcome_type: Continuous
+difficulty: intro
+timepoints: 3_5
+summary: Estimate linear mixed models with random intercepts to capture person-specific baselines, separating within- and between-subject variance in repeated ABCD measurements.
 description: Estimate linear mixed models with random intercepts to capture person-specific baselines, separating within- and between-subject variance in repeated ABCD measurements.
 ---
 

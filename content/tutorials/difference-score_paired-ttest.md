@@ -10,8 +10,13 @@ tags:
 family: LM
 family_label: Linear Models (LM)
 engine: stats::t.test
+engines:
+  - stats::t.test
 covariates: None
 outcome_type: Continuous
+difficulty: intro
+timepoints: 2
+summary: Learn to compute participant-level difference scores, run paired t-tests, and interpret within-subject height changes using ABCD repeated measurements.
 description: Learn to compute participant-level difference scores, run paired t-tests, and interpret within-subject height changes using ABCD repeated measurements.
 ---
 

@@ -10,8 +10,13 @@ tags:
 family: LGCM
 family_label: Latent Growth Curve Models (LGCM)
 engine: lavaan
+engines:
+  - lavaan
 covariates: None
 outcome_type: Continuous
+difficulty: advanced
+timepoints: 3_5
+summary: Compare latent growth trajectories between groups using multigroup LGCM, testing memory development differences while accounting for related ABCD participants.
 description: Compare latent growth trajectories between groups using multigroup LGCM, testing memory development differences while accounting for related ABCD participants.
 ---
 

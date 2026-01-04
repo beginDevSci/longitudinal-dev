@@ -48,8 +48,13 @@ fn parse_yaml_frontmatter(yaml: &str) -> Result<Frontmatter, serde_yaml::Error> 
         family: Option<String>,
         family_label: Option<String>,
         engine: Option<String>,
+        engines: Option<Vec<String>>,
         covariates: Option<String>,
         outcome_type: Option<String>,
+        // New fields for scaling
+        summary: Option<String>,
+        difficulty: Option<String>,
+        timepoints: Option<String>,
     }
 
     let parsed: YamlFrontmatter = serde_yaml::from_str(yaml)?;
@@ -63,8 +68,12 @@ fn parse_yaml_frontmatter(yaml: &str) -> Result<Frontmatter, serde_yaml::Error> 
         family: parsed.family,
         family_label: parsed.family_label,
         engine: parsed.engine,
+        engines: parsed.engines,
         covariates: parsed.covariates,
         outcome_type: parsed.outcome_type,
+        summary: parsed.summary,
+        difficulty: parsed.difficulty,
+        timepoints: parsed.timepoints,
     })
 }
 

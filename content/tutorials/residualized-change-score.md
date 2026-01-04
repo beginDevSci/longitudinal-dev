@@ -10,8 +10,13 @@ tags:
 family: LM
 family_label: Linear Models (LM)
 engine: stats::lm
+engines:
+  - stats::lm
 covariates: None
 outcome_type: Continuous
+difficulty: intro
+timepoints: 2
+summary: Use residualized change score regression to isolate within-person change while adjusting for baseline levels in ABCD longitudinal analyses.
 description: Use residualized change score regression to isolate within-person change while adjusting for baseline levels in ABCD longitudinal analyses.
 ---
 

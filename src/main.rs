@@ -8,6 +8,10 @@ use leptos::tachys::view::RenderHtml;
 use longitudinal_dev::base_path;
 use longitudinal_dev::guide_catalog::GroupedGuideCatalog;
 use longitudinal_dev::guides::{group_guides_by_method, guides};
+use longitudinal_dev::index_generator::{
+    generate_curations_output, generate_family_index, generate_tutorial_index,
+    load_curations_config, write_index_files, CurationsOutput,
+};
 use longitudinal_dev::layout::{GuideLayout, PostLayout, SiteLayout};
 use longitudinal_dev::models::guide::GuideCatalogItem;
 use longitudinal_dev::posts::posts;
@@ -129,6 +133,47 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     create_dir_all(&tutorials_dir)?;
     write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
     eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
+
+    // 2.5 Generate tutorial index JSON artifacts for client-side loading
+    let tutorial_index = generate_tutorial_index(&posts_with_metadata);
+    let family_index = generate_family_index(&tutorial_index);
+
+    // Load curations config or use defaults if not found
+    let curations_path = PathBuf::from("content/tutorial_curations.yaml");
+    let curations_output = if curations_path.exists() {
+        match load_curations_config(&curations_path) {
+            Ok(config) => generate_curations_output(&config, &tutorial_index),
+            Err(e) => {
+                eprintln!("Warning: Failed to load curations config: {}", e);
+                eprintln!("Using default empty curations");
+                CurationsOutput {
+                    getting_started: vec![],
+                    workflows: std::collections::HashMap::new(),
+                    recently_updated: tutorial_index.iter().take(8).cloned().collect(),
+                }
+            }
+        }
+    } else {
+        eprintln!("Note: No curations file found at content/tutorial_curations.yaml");
+        eprintln!("Using auto-generated recently_updated only");
+        CurationsOutput {
+            getting_started: vec![],
+            workflows: std::collections::HashMap::new(),
+            recently_updated: tutorial_index.iter().take(8).cloned().collect(),
+        }
+    };
+
+    // Write JSON artifacts to dist/api/
+    match write_index_files(site_root, &tutorial_index, &family_index, &curations_output) {
+        Ok(()) => {
+            eprintln!("Wrote {}/api/tutorial_index.json ({} entries)", site_root.display(), tutorial_index.len());
+            eprintln!("Wrote {}/api/tutorial_families.json ({} families)", site_root.display(), family_index.len());
+            eprintln!("Wrote {}/api/tutorial_curations.json", site_root.display());
+        }
+        Err(e) => {
+            eprintln!("Warning: Failed to write index files: {}", e);
+        }
+    }
 
     // Ensure /posts directory exists for individual tutorials
     let posts_dir = site_root.join("posts");

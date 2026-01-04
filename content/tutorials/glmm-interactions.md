@@ -10,8 +10,13 @@ tags:
 family: GLMM
 family_label: Generalized Linear Mixed Models (GLMM)
 engine: glmmTMB
+engines:
+  - glmmTMB
 covariates: TIC
 outcome_type: Count
+difficulty: intermediate
+timepoints: 3_5
+summary: Model count outcomes with generalized linear mixed models that include interaction terms, revealing whether predictor effects differ across moderators in ABCD repeated measures.
 description: Model count outcomes with generalized linear mixed models that include interaction terms, revealing whether predictor effects differ across moderators in ABCD repeated measures.
 ---
 

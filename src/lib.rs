@@ -22,6 +22,9 @@ pub mod ui;
 pub mod posts;
 pub mod tutorial_catalog;
 
+// Index generation for tutorial scaling
+pub mod index_generator;
+
 // Method guides modules
 pub mod guide_catalog;
 pub mod guides;

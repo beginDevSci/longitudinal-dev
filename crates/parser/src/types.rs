@@ -22,6 +22,9 @@ pub struct PostMetadata {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub method_family_label: Option<String>,
     pub statistical_engine: String,
+    /// Array of statistical engines (preferred over statistical_engine)
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub engines: Vec<String>,
     pub covariates: String,
     pub outcome_type: String,
     pub updated_at: String,
@@ -29,6 +32,15 @@ pub struct PostMetadata {
     pub author: String,
     #[serde(default)]
     pub description: Option<String>,
+    /// Explicit summary for catalog display
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+    /// Difficulty level: intro, intermediate, advanced
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub difficulty: Option<String>,
+    /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timepoints: Option<String>,
 }
 
 /// Stat item - either simple string or object with custom label
@@ -182,9 +194,18 @@ pub struct Frontmatter {
     pub tags: Option<Vec<String>>,
     pub family: Option<String>,
     pub family_label: Option<String>,
+    /// Single engine (legacy, for backward compatibility)
     pub engine: Option<String>,
+    /// Array of engines (preferred)
+    pub engines: Option<Vec<String>>,
     pub covariates: Option<String>,
     pub outcome_type: Option<String>,
+    /// Explicit summary for catalog display
+    pub summary: Option<String>,
+    /// Difficulty level: intro, intermediate, advanced
+    pub difficulty: Option<String>,
+    /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
+    pub timepoints: Option<String>,
 }
 
 // ============================================================================

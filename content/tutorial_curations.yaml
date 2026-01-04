@@ -1,0 +1,49 @@
+# Tutorial Curations Configuration
+#
+# This file defines curated tutorial collections for the tutorials landing page.
+# Edit this file to update curated sections without code changes.
+#
+# Slugs must match tutorial markdown filenames (without .md extension).
+
+# Getting Started: Beginner-friendly progression (6-8 tutorials)
+getting_started:
+  - lmm-random-intercept      # Foundation concept, simplest mixed model
+  - lmm-random-slopes         # Natural next step from random intercept
+  - lgcm-basic                # Introduces growth modeling paradigm
+  - gee                       # Alternative to mixed models, different assumptions
+  - glmm                      # Extends LMM to non-continuous outcomes
+  - residualized-change-score # Simple change-score approach
+
+# Workflows: Problem-first collections organized by use case
+workflows:
+  time_varying_effects:
+    label: "Time-Varying Effects"
+    tutorials:
+      - lmm-time-invariant-covariates
+      - lgcm-time-invariant-covariates
+      - gee-time-varying-covariate
+
+  complex_designs:
+    label: "Complex Designs"
+    tutorials:
+      - lgcm-multiple-groups
+      - lgcm-nesting
+      - glmm-interactions
+
+  growth_and_change:
+    label: "Growth & Change"
+    tutorials:
+      - lgcm-basic
+      - mlgcm
+      - difference-score_paired-ttest
+      - difference-score_simple-regression
+
+  non_continuous_outcomes:
+    label: "Non-Continuous Outcomes"
+    tutorials:
+      - glmm
+      - glmm-interactions
+      - gee
+      - gee-time-varying-covariate
+
+# Note: recently_updated is computed automatically from updated_at dates

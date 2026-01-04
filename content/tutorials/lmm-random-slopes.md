@@ -10,8 +10,13 @@ tags:
 family: LMM
 family_label: Linear Mixed Models (LMM)
 engine: lme4
+engines:
+  - lme4
 covariates: None
 outcome_type: Continuous
+difficulty: intermediate
+timepoints: 3_5
+summary: Extend random-intercept LMMs by adding random slopes, enabling individualized change trajectories and richer inferences for ABCD longitudinal outcomes.
 description: Extend random-intercept LMMs by adding random slopes, enabling individualized change trajectories and richer inferences for ABCD longitudinal outcomes.
 ---
 

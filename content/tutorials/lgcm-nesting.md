@@ -10,8 +10,13 @@ tags:
 family: LGCM
 family_label: Latent Growth Curve Models (LGCM)
 engine: lavaan
+engines:
+  - lavaan
 covariates: None
 outcome_type: Continuous
+difficulty: advanced
+timepoints: 3_5
+summary: Incorporate nesting within families and sites in latent growth curve models to obtain robust emotional suppression trajectories for clustered ABCD youth.
 description: Incorporate nesting within families and sites in latent growth curve models to obtain robust emotional suppression trajectories for clustered ABCD youth.
 ---
 

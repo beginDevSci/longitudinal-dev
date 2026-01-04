@@ -10,8 +10,13 @@ tags:
 family: GLMM
 family_label: Generalized Linear Mixed Models (GLMM)
 engine: glmmTMB
+engines:
+  - glmmTMB
 covariates: TIC
 outcome_type: Count
+difficulty: intro
+timepoints: 3_5
+summary: Build generalized linear mixed models for clustered count data, specify random effects, handle overdispersion, and interpret conditional estimates for ABCD longitudinal outcomes.
 description: Build generalized linear mixed models for clustered count data, specify random effects, handle overdispersion, and interpret conditional estimates for ABCD longitudinal outcomes.
 ---
 

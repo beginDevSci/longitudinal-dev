@@ -38,6 +38,9 @@ pub struct PostMetadata {
     #[serde(default)]
     pub method_family_label: Option<String>,
     pub statistical_engine: String,
+    /// Array of statistical engines (preferred over statistical_engine for new tutorials)
+    #[serde(default)]
+    pub engines: Vec<String>,
     pub covariates: String,
     pub outcome_type: String,
     pub updated_at: String,
@@ -45,6 +48,15 @@ pub struct PostMetadata {
     pub author: String,
     #[serde(default)]
     pub description: Option<String>,
+    /// Explicit summary for catalog display
+    #[serde(default)]
+    pub summary: Option<String>,
+    /// Difficulty level: intro, intermediate, advanced
+    #[serde(default)]
+    pub difficulty: Option<String>,
+    /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
+    #[serde(default)]
+    pub timepoints: Option<String>,
 }
 
 /// Overview section: summary and key statistics.

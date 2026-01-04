@@ -10,8 +10,13 @@ tags:
 family: LGCM
 family_label: Latent Growth Curve Models (LGCM)
 engine: lavaan
+engines:
+  - lavaan
 covariates: TIC
 outcome_type: Continuous
+difficulty: intermediate
+timepoints: 3_5
+summary: Add time-invariant covariates to latent growth curve models to evaluate how stable characteristics shift baseline levels and slopes of ABCD emotional suppression.
 description: Add time-invariant covariates to latent growth curve models to evaluate how stable characteristics shift baseline levels and slopes of ABCD emotional suppression.
 ---
 

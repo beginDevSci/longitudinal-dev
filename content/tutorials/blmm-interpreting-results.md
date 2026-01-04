@@ -6,10 +6,14 @@ date_iso: 2025-01-15
 family: BLMM
 family_label: "Big Linear Mixed Models (BLMM)"
 engine: blmm
+engines:
+  - blmm
 language: python
 outcome_type: Continuous
 covariates: Multiple
-updated_at: 2025-01-15
+difficulty: advanced
+timepoints: 3_5
+summary: "Understanding and interpreting mass-univariate Linear Mixed Model results from neuroimaging analyses using the BLMM toolbox."
 description: "Understanding and interpreting mass-univariate Linear Mixed Model results from neuroimaging analyses using the BLMM toolbox."
 tags:
   - abcd-study

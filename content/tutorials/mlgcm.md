@@ -10,8 +10,13 @@ tags:
 family: LGCM
 family_label: Latent Growth Curve Models (LGCM)
 engine: lavaan
+engines:
+  - lavaan
 covariates: None
 outcome_type: Continuous
+difficulty: advanced
+timepoints: 3_5
+summary: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate their intercepts and slopes using lavaan.
 description: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate their intercepts and slopes using lavaan.
 ---
 

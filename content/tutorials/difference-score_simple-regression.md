@@ -10,8 +10,13 @@ tags:
 family: LM
 family_label: Linear Models (LM)
 engine: stats::lm
+engines:
+  - stats::lm
 covariates: TIC
 outcome_type: Continuous
+difficulty: intro
+timepoints: 2
+summary: Explore how baseline characteristics predict change by regressing difference scores on individual covariates, demonstrated with handedness predicting ABCD height growth.
 description: Explore how baseline characteristics predict change by regressing difference scores on individual covariates, demonstrated with handedness predicting ABCD height growth.
 ---
 
