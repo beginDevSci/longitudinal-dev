@@ -1,0 +1,128 @@
+# Open Source Tools for Data Science
+# Extracted from Nuxt prototype: /Users/shawes/git/beginDevSci/longitudinal-dev/app/pages/tools.vue
+
+programming_languages:
+  - title: "Python"
+    url: "https://www.python.org/"
+    blurb: "General-purpose programming language widely used for data analysis, machine learning, and scientific computing."
+
+  - title: "R"
+    url: "https://www.r-project.org/"
+    blurb: "Statistical computing language with extensive packages for data analysis and visualization."
+
+  - title: "Julia"
+    url: "https://julialang.org/"
+    blurb: "High-performance language for technical computing, combining ease of use with speed."
+
+  - title: "SQL"
+    url: "https://www.mysql.com/"
+    blurb: "Standard language for managing and querying relational databases."
+
+  - title: "C++"
+    url: "https://isocpp.org/"
+    blurb: "High-performance language often used for computationally intensive algorithms and system-level programming."
+
+ides:
+  - title: "VS Code"
+    url: "https://code.visualstudio.com/"
+    blurb: "Lightweight, extensible code editor with support for multiple languages and integrated terminal."
+
+  - title: "RStudio"
+    url: "https://www.rstudio.com/"
+    blurb: "Integrated development environment designed specifically for R programming and data science."
+
+  - title: "Neovim"
+    url: "https://neovim.io/"
+    blurb: "Highly configurable text editor built for efficient coding with extensible plugin architecture."
+
+  - title: "Conda"
+    url: "https://docs.conda.io/"
+    blurb: "Package and environment manager for Python and R, simplifying dependency management."
+
+  - title: "Emacs"
+    url: "https://www.gnu.org/software/emacs/"
+    blurb: "Extensible, customizable text editor with powerful support for programming and literate computing."
+
+  - title: "Zed"
+    url: "https://zed.dev/"
+    blurb: "Modern, high-performance code editor built for collaborative development."
+
+version_control:
+  - title: "Git"
+    url: "https://git-scm.com/"
+    blurb: "Distributed version control system for tracking changes and collaborating on code."
+
+  - title: "GitHub"
+    url: "https://github.com/"
+    blurb: "Web-based platform for hosting Git repositories with collaboration and CI/CD features."
+
+  - title: "GitLab"
+    url: "https://about.gitlab.com/"
+    blurb: "DevOps platform providing Git repository management, CI/CD, and project planning."
+
+  - title: "GitKraken"
+    url: "https://www.gitkraken.com/"
+    blurb: "Visual Git client with intuitive interface for managing repositories and branches."
+
+  - title: "Gitea"
+    url: "https://gitea.io/en-us/"
+    blurb: "Lightweight, self-hosted Git service for teams preferring on-premises solutions."
+
+data_formats:
+  - title: "Markdown"
+    url: "https://www.markdownguide.org/"
+    blurb: "Lightweight markup language for creating formatted text using plain-text syntax."
+
+  - title: "CSV"
+    url: "https://en.wikipedia.org/wiki/Comma-separated_values"
+    blurb: "Simple, widely-supported format for storing tabular data as plain text."
+
+  - title: "Apache Parquet"
+    url: "https://parquet.apache.org/"
+    blurb: "Columnar storage format optimized for efficient data processing and analytics."
+
+  - title: "JSON"
+    url: "https://www.json.org/"
+    blurb: "Lightweight data interchange format that is easy to read and write."
+
+  - title: "Apache Arrow"
+    url: "https://arrow.apache.org/"
+    blurb: "Cross-language development platform for in-memory analytics with columnar data."
+
+  - title: "XML"
+    url: "https://en.wikipedia.org/wiki/XML"
+    blurb: "Markup language for encoding documents in a format readable by both humans and machines."
+
+notebooks:
+  - title: "Quarto"
+    url: "https://quarto.org/"
+    blurb: "Open-source publishing system for creating reproducible documents, presentations, and websites."
+
+  - title: "Jupyter"
+    url: "https://jupyter.org/"
+    blurb: "Interactive computing environment for creating notebooks with code, visualizations, and narrative."
+
+  - title: "Observable"
+    url: "https://observablehq.com/"
+    blurb: "Collaborative platform for creating interactive data visualizations and exploratory analysis."
+
+databases:
+  - title: "PostgreSQL"
+    url: "https://www.postgresql.org/"
+    blurb: "Powerful open-source relational database with extensive features and reliability."
+
+  - title: "MySQL"
+    url: "https://www.mysql.com/"
+    blurb: "Popular open-source relational database known for speed and ease of use."
+
+  - title: "DuckDB"
+    url: "https://duckdb.org/"
+    blurb: "In-process analytical database designed for fast queries on local data files."
+
+  - title: "MongoDB"
+    url: "https://www.mongodb.com/"
+    blurb: "Document-oriented NoSQL database for flexible, scalable data storage."
+
+  - title: "Redis"
+    url: "https://redis.io/"
+    blurb: "In-memory data store used for caching, real-time analytics, and message queuing."

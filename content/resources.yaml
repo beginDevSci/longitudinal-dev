@@ -1,0 +1,160 @@
+# R Learning Resources
+# Initial curated set extracted from Nuxt prototype
+# Source: /Users/shawes/git/beginDevSci/longitudinal-dev/app/pages/resources.vue
+
+books:
+  - title: "R for Data Science"
+    author: "Hadley Wickham & Garrett Grolemund"
+    url: "https://r4ds.hadley.nz/"
+    blurb: "Data science with R, covering the entire data analysis workflow."
+    image: "r-for-data-science-cover.jpg"
+
+  - title: "Advanced R"
+    author: "Hadley Wickham"
+    url: "https://adv-r.hadley.nz/"
+    blurb: "A deep dive into the R language, covering data structures and programming paradigms."
+    image: "advanced-r.png"
+
+  - title: "Efficient R Programming"
+    author: "Colin Gillespie & Robin Lovelace"
+    url: "https://csgillespie.github.io/efficientR/"
+    blurb: "Tools and techniques to make your R code more efficient."
+    image: "efficient-r-programming.png"
+
+  - title: "R Programming for Data Science"
+    author: "Roger D. Peng"
+    url: "https://bookdown.org/rdpeng/RProgDA/"
+    blurb: "An introduction to R programming for data science, covering fundamental concepts and techniques."
+    image: "r-programming-for-data-science.png"
+
+  - title: "Hands-On Programming with R"
+    author: "Garrett Grolemund"
+    url: "https://rstudio-education.github.io/hopr/"
+    blurb: "A practical introduction to programming with R, focusing on hands-on experience and real-world examples."
+    image: "hands-on-programming-with-r.jpg"
+
+  - title: "R Inferno"
+    author: "Patrick Burns"
+    url: "https://www.burns-stat.com/pages/Tutor/R_inferno.pdf"
+    blurb: "A guide to the pitfalls of R, providing insights into common errors and how to avoid them."
+    image: "r-inferno.jpg"
+
+  - title: "Software for Data Analysis with R"
+    author: "John M. Chambers"
+    url: "https://bookdown.org/rdpeng/RProgDA/"
+    blurb: "Software development for data analysis, with a focus on R and its applications."
+    image: "software-for-data-analysis-with-r.jpg"
+
+  - title: "The Pirate's Guide to R (YaRrr!)"
+    author: "Nathaniel D. Phillips"
+    url: "https://bookdown.org/ndphillips/YaRrr/"
+    blurb: "An accessible introduction to R, presented in a pirate-themed format."
+    image: "yarrr-the-pirates-guide-to-r.jpeg"
+
+  - title: "The Art of R Programming"
+    author: "Norman Matloff"
+    url: "https://web.cs.ucdavis.edu/~matloff/matloff/public_html/145/PLN/RMaterials/NSPpart.pdf"
+    blurb: "A guide to R programming, covering basic concepts to advanced techniques."
+    image: "the-art-of-r-programming.jpg"
+
+  - title: "Deep R Programming"
+    author: "Roger D. Peng"
+    url: "https://deepr.gagolewski.com/"
+    blurb: "An in-depth exploration of R programming, focusing on advanced topics and techniques."
+    image: "deep-r-programming.png"
+
+  - title: "R Cookbook, 2nd Edition"
+    author: "James (JD) Long"
+    url: "https://rc2e.com/"
+    blurb: "How-to recipes for R, each solving a specific problem."
+    image: "rc2e.jpg"
+
+  - title: "ggplot2: Elegant Graphics for Data Analysis (3e)"
+    author: "Hadley Wickham"
+    url: "https://ggplot2-book.org/"
+    blurb: "Data visualization with ggplot2, covering the grammar of graphics."
+    image: "ggplot2.jpg"
+
+videos:
+  - title: "R Programming Tutorial"
+    source: "freeCodeCamp.org"
+    url: "https://www.youtube.com/watch?v=_V8eKsto3Ug"
+    blurb: "Learn the basics of statistical computing with R."
+
+  - title: "CS50's Introduction to Programming with R"
+    source: "Harvard/CS50"
+    url: "https://www.youtube.com/playlist?list=PLhQjrBD2T382yfNp_-xzX244d-O9W6YmD"
+    blurb: "An introduction to programming using R."
+
+  - title: "R Programming For Beginners"
+    source: "R Programming 101"
+    url: "https://www.youtube.com/playlist?list=PLtL57Fdbwb_Chn-dNR0qBjH3esKS2MXY3"
+    blurb: "R programming for beginners."
+
+  - title: "An R Tutorial For Beginners"
+    source: "Simplilearn"
+    url: "https://www.youtube.com/playlist?list=PLm-R300a1uRfH-cy2-KuOD7gHzSRFnX-h"
+    blurb: "An R tutorial for beginners."
+
+  - title: "Full data analyses with R"
+    source: "Equitable Equations"
+    url: "https://www.youtube.com/playlist?list=PLKBUk9FL4nBbnAFHU3AZfsGHShsMC2AJC"
+    blurb: "Full data analyses with R."
+
+  - title: "Statistical Learning with R"
+    source: "Stanford"
+    url: "https://www.youtube.com/playlist?list=PLoROMvodv4rOzrYsAxzQyHb8n_RWNuS1e"
+    blurb: "Supervised learning with a focus on regression and classification methods."
+
+tutorials:
+  - title: "DataCamp R Programming Tutorials"
+    url: "https://www.datacamp.com/tutorial/category/r-programming"
+    blurb: "R tutorials with tips and use cases to grow your programming skills."
+    platform: "DataCamp"
+
+  - title: "{swirl} Learn R, in R"
+    url: "https://swirlstats.com/"
+    blurb: "Learn R programming and data science interactively, at your own pace, in the R console."
+    platform: "swirl"
+
+  - title: "HarvardX: CS50's Introduction to Programming with R"
+    url: "https://cs50.harvard.edu/r/2024/"
+    blurb: "An introduction to programming using R, a language for statistical computing and graphics."
+    platform: "Harvard/edX"
+
+  - title: "fasteR"
+    url: "https://github.com/matloff/fasteR"
+    blurb: "Fast Lane to Learning R. Becoming productive in R, as fast as possible."
+    platform: "GitHub"
+
+# Provisional seed set - prototype has placeholder section only
+cheatsheets:
+  - title: "Base R Cheatsheet"
+    url: "https://rstudio.github.io/cheatsheets/base-r.pdf"
+    blurb: "R functions and syntax for base R operations."
+    format: "pdf"
+
+  - title: "Data Transformation with dplyr"
+    url: "https://rstudio.github.io/cheatsheets/data-transformation.pdf"
+    blurb: "Data manipulation functions using the dplyr package."
+    format: "pdf"
+
+  - title: "Data Visualization with ggplot2"
+    url: "https://rstudio.github.io/cheatsheets/data-visualization.pdf"
+    blurb: "ggplot2 syntax and geoms for data visualization."
+    format: "pdf"
+
+  - title: "R Markdown Cheatsheet"
+    url: "https://rstudio.github.io/cheatsheets/rmarkdown.pdf"
+    blurb: "R Markdown syntax, YAML options, and output formats."
+    format: "pdf"
+
+  - title: "Shiny Cheatsheet"
+    url: "https://rstudio.github.io/cheatsheets/shiny.pdf"
+    blurb: "Building interactive web applications with Shiny."
+    format: "pdf"
+
+  - title: "String Manipulation with stringr"
+    url: "https://rstudio.github.io/cheatsheets/strings.pdf"
+    blurb: "String processing functions using the stringr package."
+    format: "pdf"
