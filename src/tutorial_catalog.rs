@@ -825,7 +825,7 @@ pub fn TutorialTable(tutorials: Vec<TutorialData>, sort_by: RwSignal<SortOption>
 // Landing Section Components (SSR-rendered curated content)
 // ============================================================================
 
-/// Featured Tutorials section - curated highlights
+/// Featured Tutorials section - curated highlights with prominent styling
 #[component]
 fn FeaturedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
     if tutorials.is_empty() {
@@ -833,12 +833,38 @@ fn FeaturedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
     }
 
     view! {
-        <section class="space-y-6">
-            <h2 class="text-2xl font-bold text-primary">"Featured Tutorials"</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tutorials.into_iter().map(|t| view! {
-                    <TutorialCard tutorial=t />
-                }).collect_view()}
+        <section class="relative rounded-2xl tutorial-gradient-accent">
+            <div class="p-6 lg:p-8 space-y-6">
+                <h2 class="text-2xl font-bold text-primary">"Featured Tutorials"</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {tutorials.into_iter().map(|tutorial| {
+                        let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
+                        let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
+
+                        view! {
+                            <a
+                                href={href}
+                                class="group block rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-xl \
+                                       tutorial-card-featured bg-elevated border border-stroke p-5"
+                            >
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20">
+                                        {tutorial.method_family.clone()}
+                                    </span>
+                                    <span class="text-xs text-muted">
+                                        {tutorial.updated_at.clone()}
+                                    </span>
+                                </div>
+                                <h3 class="text-lg font-semibold group-hover:text-accent transition-colors text-primary line-clamp-2">
+                                    {tutorial.title}
+                                </h3>
+                                <p class="mt-2 text-sm text-secondary line-clamp-2">
+                                    {tutorial.summary}
+                                </p>
+                            </a>
+                        }
+                    }).collect_view()}
+                </div>
             </div>
         </section>
     }.into_any()
@@ -852,27 +878,28 @@ fn WorkflowsSection(workflows: Vec<WorkflowGroup>) -> impl IntoView {
     }
 
     view! {
-        <section class="space-y-6">
+        <section class="rounded-2xl p-6 lg:p-8 space-y-6 tutorial-gradient-blue">
+
             <div>
                 <h2 class="text-2xl font-bold text-primary">"Common Workflows"</h2>
-                <p class="mt-2 text-secondary">
-                    "Tutorials grouped by research question or use case"
+                <p class="text-sm text-secondary mt-1">
+                    "Tutorials grouped by research question"
                 </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {workflows.into_iter().map(|workflow| {
                     let tutorial_count = workflow.tutorials.len();
                     view! {
-                        <details class="group rounded-xl bg-elevated border border-stroke overflow-hidden">
-                            <summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-subtle transition-colors">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-primary">{workflow.label}</h3>
-                                    <p class="text-sm text-muted mt-1">
+                        <details class="group rounded-xl bg-elevated border border-stroke overflow-hidden shadow-sm">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-subtle/50 transition-colors">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-semibold text-primary">{workflow.label}</h3>
+                                    <p class="text-xs text-muted mt-0.5">
                                         {tutorial_count} " tutorials"
                                     </p>
                                 </div>
                                 <svg
-                                    class="w-5 h-5 text-muted transition-transform group-open:rotate-180"
+                                    class="w-5 h-5 text-muted transition-transform group-open:rotate-180 flex-shrink-0 ml-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -880,21 +907,21 @@ fn WorkflowsSection(workflows: Vec<WorkflowGroup>) -> impl IntoView {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </summary>
-                            <div class="p-5 pt-0 space-y-3">
+                            <div class="px-4 pb-4 space-y-1 border-t border-stroke/50">
                                 {workflow.tutorials.into_iter().map(|tutorial| {
                                     let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
                                     let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
                                     view! {
                                         <a
                                             href={href}
-                                            class="block p-4 rounded-lg bg-subtle hover:bg-accent/5 border border-transparent hover:border-accent/20 transition-all"
+                                            class="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-accent/5 border border-transparent hover:border-accent/20 transition-all"
                                         >
-                                            <div class="font-medium text-primary hover:text-accent transition-colors">
+                                            <div class="font-medium text-primary text-sm group-hover:text-accent transition-colors truncate">
                                                 {tutorial.title}
                                             </div>
-                                            <div class="text-sm text-muted mt-1 line-clamp-2">
-                                                {tutorial.summary}
-                                            </div>
+                                            <span class="text-xs text-muted flex-shrink-0 px-2 py-0.5 rounded bg-subtle">
+                                                {tutorial.method_family}
+                                            </span>
                                         </a>
                                     }
                                 }).collect_view()}
@@ -907,7 +934,7 @@ fn WorkflowsSection(workflows: Vec<WorkflowGroup>) -> impl IntoView {
     }.into_any()
 }
 
-/// Browse by Method Family section - clickable family cards
+/// Browse by Method Family section - clean cards with gradient
 #[component]
 fn BrowseByFamilySection<F>(
     families: Vec<FamilySummary>,
@@ -921,27 +948,33 @@ where
     }
 
     view! {
-        <section class="space-y-6">
+        <section class="rounded-2xl p-6 lg:p-8 space-y-6 tutorial-gradient-emerald">
+
             <div>
-                <h2 class="text-2xl font-bold text-primary">"Browse by Method Family"</h2>
-                <p class="mt-2 text-secondary">
-                    "Explore tutorials organized by statistical approach"
+                <h2 class="text-2xl font-bold text-primary">"Browse by Method"</h2>
+                <p class="text-sm text-secondary mt-1">
+                    "Explore by statistical approach"
                 </p>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {families.into_iter().map(|family| {
                     let family_id = family.id.clone();
+                    let family_id_display = family.id.clone();
                     let on_click = on_family_click.clone();
+
                     view! {
                         <button
                             type="button"
-                            class="group text-left p-5 rounded-xl bg-elevated border border-stroke hover:border-accent hover:shadow-lg transition-all"
+                            class="group flex flex-col items-center justify-center p-5 rounded-xl \
+                                   bg-elevated border-2 border-stroke \
+                                   hover:border-accent hover:bg-accent/5 \
+                                   hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                             on:click=move |_| on_click(family_id.clone())
                         >
-                            <div class="text-lg font-semibold text-primary group-hover:text-accent transition-colors">
-                                {family.id.clone()}
+                            <div class="text-lg font-bold text-primary group-hover:text-accent transition-colors">
+                                {family_id_display}
                             </div>
-                            <div class="text-sm text-muted mt-1">
+                            <div class="text-xs text-muted mt-1">
                                 {family.count} " tutorials"
                             </div>
                         </button>
@@ -952,7 +985,7 @@ where
     }.into_any()
 }
 
-/// Recently Updated section - latest tutorials
+/// Recently Updated section - compact horizontal list
 #[component]
 fn RecentlyUpdatedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
     if tutorials.is_empty() {
@@ -960,31 +993,31 @@ fn RecentlyUpdatedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
     }
 
     view! {
-        <section class="space-y-6">
-            <div>
-                <h2 class="text-2xl font-bold text-primary">"Recently Updated"</h2>
-                <p class="mt-2 text-secondary">
-                    "The latest additions and updates to the collection"
-                </p>
+        <section class="rounded-2xl border border-stroke bg-elevated overflow-hidden">
+            <div class="px-6 py-4 border-b border-stroke bg-subtle/30">
+                <h2 class="text-lg font-bold text-primary">"Recently Updated"</h2>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="divide-y divide-stroke/50">
                 {tutorials.into_iter().map(|tutorial| {
                     let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
                     let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
+
                     view! {
                         <a
                             href={href}
-                            class="group block p-4 rounded-xl bg-elevated border border-stroke hover:border-accent hover:shadow-md transition-all"
+                            class="group flex items-center gap-4 px-6 py-3 hover:bg-subtle/50 transition-colors"
                         >
-                            <div class="text-xs text-muted mb-2">
-                                "Updated " {tutorial.updated_at.clone()}
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-primary group-hover:text-accent transition-colors truncate">
+                                    {tutorial.title}
+                                </div>
                             </div>
-                            <div class="font-medium text-primary group-hover:text-accent transition-colors line-clamp-2">
-                                {tutorial.title}
-                            </div>
-                            <div class="mt-2 flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/5 text-accent border border-accent/20">
+                            <div class="flex items-center gap-3 flex-shrink-0">
+                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
                                     {tutorial.method_family}
+                                </span>
+                                <span class="text-xs text-muted whitespace-nowrap">
+                                    {tutorial.updated_at}
                                 </span>
                             </div>
                         </a>
@@ -1565,45 +1598,50 @@ pub fn TutorialCatalogFetch(
 
                     view! {
                         <div class="flex flex-col lg:flex-row gap-8">
-                            // Left sidebar filters
+                            // Left sidebar filters (sticky on desktop)
                             <div class="lg:w-64 flex-shrink-0">
-                                <SidebarFilters
-                                    selected_families
-                                    selected_engines
-                                    selected_covariates
-                                    method_families=method_families_facets
-                                    statistical_engines=statistical_engines_facets
-                                    covariates=covariates_facets
-                                    current_page=current_page
-                                />
+                                <div class="lg:sticky lg:top-24">
+                                    <SidebarFilters
+                                        selected_families
+                                        selected_engines
+                                        selected_covariates
+                                        method_families=method_families_facets
+                                        statistical_engines=statistical_engines_facets
+                                        covariates=covariates_facets
+                                        current_page=current_page
+                                    />
+                                </div>
                             </div>
 
                             // Main content: curated sections
                             <div class="flex-1 space-y-12">
-                                // Search bar (triggers Browse mode on input)
-                                <div class="max-w-2xl">
-                                    <div class="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="Search tutorials..."
-                                            class="w-full px-5 py-4 pl-12 rounded-xl bg-elevated border border-stroke text-primary placeholder-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-                                            on:input=move |ev| {
-                                                let value = event_target_value(&ev);
-                                                if !value.is_empty() {
-                                                    search_query.set(value);
-                                                    mode.set(CatalogMode::Browse);
+                                // Search bar and view toggle
+                                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                    <div class="flex-1 max-w-2xl">
+                                        <div class="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Search tutorials..."
+                                                class="w-full px-5 py-4 pl-12 rounded-xl bg-elevated border border-stroke text-primary placeholder-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                                                on:input=move |ev| {
+                                                    let value = event_target_value(&ev);
+                                                    if !value.is_empty() {
+                                                        search_query.set(value);
+                                                        mode.set(CatalogMode::Browse);
+                                                    }
                                                 }
-                                            }
-                                        />
-                                        <svg
-                                            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
+                                            />
+                                            <svg
+                                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
                                     </div>
+                                    <ViewToggle view_mode />
                                 </div>
 
                                 // Curated sections (if data provided)
@@ -1615,30 +1653,41 @@ pub fn TutorialCatalogFetch(
                                     let enter_browse = enter_browse_mode;
 
                                     view! {
-                                        <>
+                                        <div class="space-y-10">
                                             <FeaturedSection tutorials=featured />
+
+                                            // Visual divider
+                                            <div class="border-t border-stroke/50"/>
+
                                             <WorkflowsSection workflows=workflows />
                                             <BrowseByFamilySection
                                                 families=families
                                                 on_family_click=move |family_id| enter_browse(Some(family_id))
                                             />
+
+                                            // Visual divider before recent
+                                            <div class="border-t border-stroke/50"/>
+
                                             <RecentlyUpdatedSection tutorials=recently_updated />
-                                        </>
+                                        </div>
                                     }
                                 })}
 
-                                // Browse all button
-                                <div class="text-center pt-4">
-                                    <button
-                                        type="button"
-                                        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-dashed border-stroke text-secondary hover:border-accent hover:text-accent transition-colors"
-                                        on:click=move |_| enter_browse_mode(None)
-                                    >
-                                        "Browse all tutorials"
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                        </svg>
-                                    </button>
+                                // Browse all button with visual separator
+                                <div class="pt-6 mt-6 border-t border-stroke/30">
+                                    <div class="text-center">
+                                        <p class="text-sm text-muted mb-4">"Looking for something specific?"</p>
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent/5 border-2 border-accent/20 text-accent font-medium hover:bg-accent hover:text-white hover:border-accent transition-all duration-200"
+                                            on:click=move |_| enter_browse_mode(None)
+                                        >
+                                            "Browse all tutorials"
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
