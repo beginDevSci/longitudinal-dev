@@ -260,9 +260,10 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
             />
 
             // Resource sections
-            <div class="space-y-12">
+            <div>
                 {move || {
                     let groups = grouped_resources.get();
+                    let mut index = 0usize;
                     ResourceCategory::all()
                         .into_iter()
                         .filter_map(|cat| {
@@ -270,8 +271,10 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
                             if items.is_empty() {
                                 return None;
                             }
+                            let current_index = index;
+                            index += 1;
                             Some(view! {
-                                <ResourceSection category=cat items=items.clone() />
+                                <ResourceSection category=cat items=items.clone() index=current_index />
                             })
                         })
                         .collect_view()
@@ -300,7 +303,7 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
 
 /// Resource section component (rendered within the island)
 #[component]
-fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>) -> impl IntoView {
+fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>, index: usize) -> impl IntoView {
     let section_id = category.id();
     let section_title = category.label();
     let description = match category {
@@ -317,8 +320,15 @@ fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>) -> impl
         ResourceCategory::Cheatsheets => "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
     };
 
+    // Alternating backgrounds: odd indices get bg-subtle
+    let section_class = if index % 2 == 1 {
+        "py-12 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-subtle"
+    } else {
+        "py-12"
+    };
+
     view! {
-        <section id=section_id>
+        <section id=section_id class=section_class>
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-primary mb-2">{section_title}</h2>
                 <p class="text-secondary">{description}</p>
@@ -356,7 +366,7 @@ fn BookCardInner(item: ResourceItem) -> impl IntoView {
             rel="noopener noreferrer"
             class="resource-card group block"
         >
-            <div class="aspect-[3/4] w-full cover-frame mb-4">
+            <div class="aspect-[3/4] w-full cover-frame">
                 {if has_image {
                     view! {
                         <img
@@ -374,11 +384,13 @@ fn BookCardInner(item: ResourceItem) -> impl IntoView {
                     }.into_any()
                 }}
             </div>
-            <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-1">
-                {item.title}
-            </h3>
-            <p class="text-sm text-tertiary mb-2">{author}</p>
-            <p class="text-sm text-secondary line-clamp-3">{item.description}</p>
+            <div class="p-4">
+                <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-1">
+                    {item.title}
+                </h3>
+                <p class="text-sm text-tertiary mb-2">{author}</p>
+                <p class="text-sm text-secondary">{item.description}</p>
+            </div>
         </a>
     }
 }
@@ -392,7 +404,7 @@ fn VideoCardInner(item: ResourceItem) -> impl IntoView {
 
     view! {
         <div class="resource-card group">
-            <div class="aspect-video w-full bg-black rounded-lg overflow-hidden mb-4">
+            <div class="aspect-video w-full bg-black overflow-hidden">
                 {if has_embed {
                     view! {
                         <iframe
@@ -415,18 +427,20 @@ fn VideoCardInner(item: ResourceItem) -> impl IntoView {
                     }.into_any()
                 }}
             </div>
-            <a
-                href=item.url.clone()
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block"
-            >
-                <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-1">
-                    {item.title}
-                </h3>
-                <p class="text-sm text-tertiary mb-2">{source}</p>
-                <p class="text-sm text-secondary line-clamp-3">{item.description}</p>
-            </a>
+            <div class="p-4">
+                <a
+                    href=item.url.clone()
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block"
+                >
+                    <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-1">
+                        {item.title}
+                    </h3>
+                    <p class="text-sm text-tertiary mb-2">{source}</p>
+                    <p class="text-sm text-secondary">{item.description}</p>
+                </a>
+            </div>
         </div>
     }
 }

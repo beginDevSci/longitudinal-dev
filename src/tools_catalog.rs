@@ -271,9 +271,10 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
             />
 
             // Tool sections
-            <div class="space-y-12">
+            <div>
                 {move || {
                     let groups = grouped_tools.get();
+                    let mut index = 0usize;
                     ToolCategory::all()
                         .into_iter()
                         .filter_map(|cat| {
@@ -281,8 +282,10 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
                             if items.is_empty() {
                                 return None;
                             }
+                            let current_index = index;
+                            index += 1;
                             Some(view! {
-                                <ToolSection category=cat items=items.clone() />
+                                <ToolSection category=cat items=items.clone() index=current_index />
                             })
                         })
                         .collect_view()
@@ -311,7 +314,7 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
 
 /// Tool section component (rendered within the island)
 #[component]
-fn ToolSection(category: ToolCategory, items: Vec<ToolItem>) -> impl IntoView {
+fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> impl IntoView {
     let section_id = category.id();
     let section_title = category.full_label();
     let description = category.description();
@@ -326,8 +329,15 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>) -> impl IntoView {
         ToolCategory::Databases => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
     };
 
+    // Alternating backgrounds: odd indices get bg-subtle
+    let section_class = if index % 2 == 1 {
+        "py-12 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-subtle"
+    } else {
+        "py-12"
+    };
+
     view! {
-        <section id=section_id>
+        <section id=section_id class=section_class>
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-primary mb-2">{section_title}</h2>
                 <p class="text-secondary">{description}</p>
@@ -355,7 +365,7 @@ fn ToolCard(item: ToolItem) -> impl IntoView {
             rel="noopener noreferrer"
             class="resource-card group block"
         >
-            <div class="aspect-square w-full logo-tile mb-4">
+            <div class="aspect-[4/3] w-full logo-tile">
                 {if has_logo {
                     view! {
                         <img
@@ -373,12 +383,14 @@ fn ToolCard(item: ToolItem) -> impl IntoView {
                     }.into_any()
                 }}
             </div>
-            <h3 class="font-semibold text-primary group-hover:text-accent transition-colors text-center mb-2">
-                {item.title}
-            </h3>
-            <p class="text-sm text-secondary text-center line-clamp-2">
-                {item.description}
-            </p>
+            <div class="p-4">
+                <h3 class="font-semibold text-primary group-hover:text-accent transition-colors text-center mb-2">
+                    {item.title}
+                </h3>
+                <p class="text-sm text-secondary text-center">
+                    {item.description}
+                </p>
+            </div>
         </a>
     }
 }

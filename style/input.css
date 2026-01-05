@@ -804,8 +804,8 @@ body {
   }
 
   .logo-tile img {
-    max-height: 3.5rem;  /* 56px */
-    max-width: 7.5rem;   /* 120px */
+    max-height: 6rem;    /* 96px - larger logos for better visibility */
+    max-width: 12rem;    /* 192px */
     width: auto;
     height: auto;
     object-fit: contain;
