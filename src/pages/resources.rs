@@ -4,6 +4,10 @@
 //! Data is loaded from content/resources.yaml at build time.
 
 use leptos::prelude::*;
+use longitudinal_dev::ui::{
+    Badge, BadgeVariant, CardContent, CardDescription, CardFooter, CardMedia, CardMeta, CardShell,
+    CardTitle, PageSectionHeader,
+};
 use serde::Deserialize;
 
 /// Book resource with cover image.
@@ -72,43 +76,35 @@ pub fn load_resources() -> Resources {
 fn BookCard(book: Book) -> impl IntoView {
     let has_image = book.image.is_some();
     let image_url = book.image.clone().unwrap_or_default();
+    let title = book.title.clone();
+    let alt_text = book.title.clone();
 
     view! {
-        <a
-            href=book.url.clone()
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group block bg-surface border border-default rounded-2xl overflow-hidden hover:border-accent hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        >
-            // Cover image
-            {if has_image {
-                view! {
-                    <div class="aspect-[3/4] w-full overflow-hidden bg-subtle">
+        <CardShell href=book.url.clone() class="group".to_string()>
+            <CardMedia aspect="3/4" class="w-full cover-frame">
+                {if has_image {
+                    view! {
                         <img
                             src=image_url
-                            alt=book.title.clone()
-                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            alt=alt_text
+                            class="w-full h-full object-cover"
                             loading="lazy"
                         />
-                    </div>
-                }.into_any()
-            } else {
-                view! {
-                    <div class="aspect-[3/4] w-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-                        <span class="text-6xl opacity-50">"📚"</span>
-                    </div>
-                }.into_any()
-            }}
-
-            // Content
-            <div class="p-4">
-                <h3 class="font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2 mb-1">
-                    {book.title}
-                </h3>
-                <p class="text-sm text-tertiary mb-2">{book.author}</p>
-                <p class="text-sm text-secondary line-clamp-2">{book.blurb}</p>
-            </div>
-        </a>
+                    }.into_any()
+                } else {
+                    view! {
+                        <div class="w-full h-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                            <span class="text-6xl opacity-50">"📚"</span>
+                        </div>
+                    }.into_any()
+                }}
+            </CardMedia>
+            <CardContent>
+                <CardTitle class="mb-1">{title}</CardTitle>
+                <CardMeta class="mb-2">{book.author}</CardMeta>
+                <CardDescription>{book.blurb}</CardDescription>
+            </CardContent>
+        </CardShell>
     }
 }
 
@@ -117,50 +113,47 @@ fn BookCard(book: Book) -> impl IntoView {
 fn VideoCard(video: Video) -> impl IntoView {
     let has_embed = video.embed_url.is_some();
     let embed_url = video.embed_url.clone().unwrap_or_default();
+    let title = video.title.clone();
+    let iframe_title = video.title.clone();
 
     view! {
-        <div class="group bg-surface border border-default rounded-2xl overflow-hidden hover:border-accent hover:shadow-xl transition-all duration-300">
-            // Video embed or thumbnail
-            {if has_embed {
-                view! {
-                    <div class="aspect-video w-full bg-black">
+        <CardShell class="group">
+            <CardMedia aspect="video" class="w-full bg-black">
+                {if has_embed {
+                    view! {
                         <iframe
                             src=embed_url
-                            title=video.title.clone()
+                            title=iframe_title
                             class="w-full h-full border-0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen=true
                         />
-                    </div>
-                }.into_any()
-            } else {
-                view! {
-                    <div class="aspect-video w-full bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full bg-red-500/80 flex items-center justify-center">
-                            <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
+                    }.into_any()
+                } else {
+                    view! {
+                        <div class="w-full h-full bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full bg-red-500/80 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
                         </div>
-                    </div>
-                }.into_any()
-            }}
-
-            // Content
-            <div class="p-4">
+                    }.into_any()
+                }}
+            </CardMedia>
+            <CardContent>
                 <a
                     href=video.url.clone()
                     target="_blank"
                     rel="noopener noreferrer"
                     class="block"
                 >
-                    <h3 class="font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2 mb-1">
-                        {video.title}
-                    </h3>
-                    <p class="text-sm text-tertiary mb-2">{video.source}</p>
-                    <p class="text-sm text-secondary line-clamp-2">{video.blurb}</p>
+                    <CardTitle class="mb-1">{title}</CardTitle>
+                    <CardMeta class="mb-2">{video.source}</CardMeta>
+                    <CardDescription>{video.blurb}</CardDescription>
                 </a>
-            </div>
-        </div>
+            </CardContent>
+        </CardShell>
     }
 }
 
@@ -171,54 +164,45 @@ fn TutorialCard(tutorial: Tutorial) -> impl IntoView {
     let show_platform = !platform_display.is_empty();
     let access_badge = tutorial.access.clone().map(|a| {
         match a.to_lowercase().as_str() {
-            "freemium" => ("Freemium", "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"),
-            _ => ("Open", "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"),
+            "freemium" => ("Freemium", BadgeVariant::Warning),
+            _ => ("Open", BadgeVariant::Success),
         }
     });
+    let title = tutorial.title.clone();
 
     view! {
-        <a
-            href=tutorial.url.clone()
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group block p-6 bg-surface border border-default rounded-2xl hover:border-accent hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        >
-            <div class="flex items-start gap-4 mb-4">
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                    <span class="text-2xl">"🎓"</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2">
-                        {tutorial.title}
-                    </h3>
-                    <div class="flex items-center gap-2 mt-1">
-                        {if show_platform {
-                            view! { <span class="text-sm text-tertiary">{platform_display}</span> }.into_any()
-                        } else {
-                            view! { }.into_any()
-                        }}
-                        {if let Some((label, classes)) = access_badge {
-                            view! {
-                                <span class=format!("inline-block px-2 py-0.5 text-xs font-medium rounded {}", classes)>
-                                    {label}
-                                </span>
-                            }.into_any()
-                        } else {
-                            view! { }.into_any()
-                        }}
+        <CardShell href=tutorial.url.clone() class="group">
+            <CardContent class="p-6">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <span class="text-2xl">"🎓"</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <CardTitle>{title}</CardTitle>
+                        <div class="flex items-center gap-2 mt-1">
+                            {if show_platform {
+                                view! { <span class="text-sm text-tertiary">{platform_display}</span> }.into_any()
+                            } else {
+                                view! { }.into_any()
+                            }}
+                            {if let Some((label, variant)) = access_badge {
+                                view! { <Badge variant=variant>{label}</Badge> }.into_any()
+                            } else {
+                                view! { }.into_any()
+                            }}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <p class="text-sm text-secondary line-clamp-3">{tutorial.blurb}</p>
+                <CardDescription lines=3>{tutorial.blurb}</CardDescription>
 
-            // Call to action
-            <div class="mt-4 flex items-center text-accent text-sm font-medium">
-                <span>"Open Tutorial"</span>
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </div>
-        </a>
+                <CardFooter class="flex items-center text-accent text-sm font-medium">
+                    <span>"Open Tutorial"</span>
+                    <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </CardFooter>
+            </CardContent>
+        </CardShell>
     }
 }
 
@@ -240,40 +224,30 @@ fn get_cheatsheet_icon(icon: &str) -> &'static str {
 fn CheatsheetCard(cheatsheet: Cheatsheet) -> impl IntoView {
     let format_badge = cheatsheet.format.clone().map(|f| f.to_uppercase());
     let icon_path = get_cheatsheet_icon(&cheatsheet.icon.clone().unwrap_or_default());
+    let title = cheatsheet.title.clone();
 
     view! {
-        <a
-            href=cheatsheet.url.clone()
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group block p-6 bg-surface border border-default rounded-2xl hover:border-accent hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        >
-            // Icon container
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" inner_html=icon_path />
-            </div>
+        <CardShell href=cheatsheet.url.clone() class="group">
+            <CardContent class="p-6">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" inner_html=icon_path />
+                </div>
 
-            <h3 class="font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2 mb-2">
-                {cheatsheet.title}
-            </h3>
-            <p class="text-sm text-secondary line-clamp-2 mb-4">{cheatsheet.blurb}</p>
+                <CardTitle class="mb-2">{title}</CardTitle>
+                <CardDescription class="mb-4">{cheatsheet.blurb}</CardDescription>
 
-            // Footer with badge and external link indicator
-            <div class="flex items-center justify-between">
-                {if let Some(badge) = format_badge {
-                    view! {
-                        <span class="inline-block px-3 py-1 text-xs font-semibold bg-accent/10 text-accent rounded-full">
-                            {badge}
-                        </span>
-                    }.into_any()
-                } else {
-                    view! { <span></span> }.into_any()
-                }}
-                <svg class="w-5 h-5 text-tertiary group-hover:text-accent group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                </svg>
-            </div>
-        </a>
+                <CardFooter class="flex items-center justify-between">
+                    {if let Some(badge) = format_badge {
+                        view! { <Badge variant=BadgeVariant::Accent>{badge}</Badge> }.into_any()
+                    } else {
+                        view! { <span></span> }.into_any()
+                    }}
+                    <svg class="w-5 h-5 text-tertiary group-hover:text-accent group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </CardFooter>
+            </CardContent>
+        </CardShell>
     }
 }
 
@@ -310,8 +284,11 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
 
             // Books section
             <section id="books" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h2 class="text-2xl font-bold text-primary mb-2">"Books"</h2>
-                <p class="text-secondary mb-6">"Includes both modern tidyverse-era resources and classic texts that remain influential."</p>
+                <PageSectionHeader
+                    title="Books"
+                    description="Includes both modern tidyverse-era resources and classic texts that remain influential."
+                    id="books-header"
+                />
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {resources.books.iter().map(|book| {
                         view! { <BookCard book=book.clone() /> }
@@ -322,7 +299,11 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
             // Videos section
             <section id="videos" class="bg-subtle">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <h2 class="text-2xl font-bold text-primary mb-6">"Videos"</h2>
+                    <PageSectionHeader
+                        title="Videos"
+                        description="Video courses and tutorials from the R community."
+                        id="videos-header"
+                    />
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {resources.videos.iter().map(|video| {
                             view! { <VideoCard video=video.clone() /> }
@@ -333,7 +314,11 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
 
             // Tutorials section
             <section id="tutorials" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h2 class="text-2xl font-bold text-primary mb-6">"Tutorials"</h2>
+                <PageSectionHeader
+                    title="Tutorials"
+                    description="Interactive online tutorials and learning platforms."
+                    id="tutorials-header"
+                />
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {resources.tutorials.iter().map(|tutorial| {
                         view! { <TutorialCard tutorial=tutorial.clone() /> }
@@ -344,7 +329,11 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
             // Cheatsheets section
             <section id="cheatsheets" class="bg-subtle">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <h2 class="text-2xl font-bold text-primary mb-6">"Cheatsheets"</h2>
+                    <PageSectionHeader
+                        title="Cheatsheets"
+                        description="Quick reference guides and one-page summaries."
+                        id="cheatsheets-header"
+                    />
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {resources.cheatsheets.iter().map(|cheatsheet| {
                             view! { <CheatsheetCard cheatsheet=cheatsheet.clone() /> }

@@ -200,3 +200,261 @@ pub fn ControlBar(
         </div>
     }
 }
+
+// ============================================================================
+// PageSectionHeader - Section header for Resources/Tools pages
+// ============================================================================
+
+/// Page section header with title, description, and optional controls slot.
+/// Used for Resources and Tools page sections (Books, Videos, Languages, etc.)
+#[component]
+pub fn PageSectionHeader(
+    title: &'static str,
+    #[prop(optional)] description: Option<&'static str>,
+    #[prop(optional)] id: Option<&'static str>,
+    #[prop(optional)] children: Option<Children>,
+) -> impl IntoView {
+    view! {
+        <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+            <div>
+                <h2 id=id class="text-2xl font-bold text-primary">{title}</h2>
+                {description.map(|desc| {
+                    view! { <p class="mt-1 text-secondary">{desc}</p> }
+                })}
+            </div>
+            {children.map(|c| {
+                view! { <div class="flex items-center gap-2">{c()}</div> }
+            })}
+        </header>
+    }
+}
+
+// ============================================================================
+// CardShell - Unified interactive card wrapper
+// ============================================================================
+
+/// Interactive card wrapper for Resources/Tools pages.
+/// Uses CSS custom properties for consistent styling across themes.
+///
+/// # Props
+/// - `href`: Optional URL - if provided, renders as an `<a>` tag
+/// - `external`: Whether link opens in new tab (default: true for external links)
+/// - `class`: Additional CSS classes to apply
+/// - `children`: Card content
+#[component]
+pub fn CardShell(
+    #[prop(optional, into)] href: Option<String>,
+    #[prop(default = true)] external: bool,
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let base_class = "resource-card";
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base_class, c),
+        None => base_class.to_string(),
+    };
+
+    match href {
+        Some(url) => {
+            if external {
+                view! {
+                    <a
+                        href=url
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class=full_class
+                    >
+                        {children()}
+                    </a>
+                }
+                .into_any()
+            } else {
+                view! {
+                    <a href=url class=full_class>
+                        {children()}
+                    </a>
+                }
+                .into_any()
+            }
+        }
+        None => {
+            view! {
+                <div class=full_class>
+                    {children()}
+                </div>
+            }
+            .into_any()
+        }
+    }
+}
+
+/// Card media container - for images, logos, icons
+/// Provides consistent aspect ratio and background
+#[component]
+pub fn CardMedia(
+    #[prop(optional, into)] aspect: Option<String>,
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    // Aspect ratio classes: "3/4" for book covers, "video" for 16:9, "square" for 1:1
+    let aspect_class = match aspect.as_deref() {
+        Some("3/4") => "aspect-[3/4]",
+        Some("video") => "aspect-video",
+        Some("square") => "aspect-square",
+        Some("logo") => "h-24", // Fixed height for tool logos
+        _ => "aspect-video",     // Default 16:9
+    };
+
+    let full_class = format!("resource-card__media {}", aspect_class);
+    let full_class = match &class {
+        Some(c) => format!("{} {}", full_class, c),
+        None => full_class,
+    };
+
+    view! {
+        <div class=full_class>
+            {children()}
+        </div>
+    }
+}
+
+/// Card content area - flexible container for text
+#[component]
+pub fn CardContent(
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let base = "resource-card__content";
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base.to_string(),
+    };
+
+    view! {
+        <div class=full_class>
+            {children()}
+        </div>
+    }
+}
+
+/// Card title - consistent heading style
+#[component]
+pub fn CardTitle(
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let base = "font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2";
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base.to_string(),
+    };
+
+    view! {
+        <h3 class=full_class>
+            {children()}
+        </h3>
+    }
+}
+
+/// Card description - secondary text with line clamping
+#[component]
+pub fn CardDescription(
+    #[prop(default = 2)] lines: u8,
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let clamp_class = match lines {
+        1 => "line-clamp-1",
+        2 => "line-clamp-2",
+        3 => "line-clamp-3",
+        _ => "line-clamp-2",
+    };
+
+    let base = format!("text-sm text-secondary {}", clamp_class);
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base,
+    };
+
+    view! {
+        <p class=full_class>
+            {children()}
+        </p>
+    }
+}
+
+/// Card meta - tertiary information (author, source, etc.)
+#[component]
+pub fn CardMeta(
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let base = "text-sm text-tertiary";
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base.to_string(),
+    };
+
+    view! {
+        <p class=full_class>
+            {children()}
+        </p>
+    }
+}
+
+/// Card footer - pinned to bottom with mt-auto
+#[component]
+pub fn CardFooter(
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let base = "resource-card__footer";
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base.to_string(),
+    };
+
+    view! {
+        <div class=full_class>
+            {children()}
+        </div>
+    }
+}
+
+/// Badge/pill for metadata (format, access type, etc.)
+#[derive(Clone, Copy, Debug)]
+pub enum BadgeVariant {
+    Default,
+    Accent,
+    Success,
+    Warning,
+}
+
+#[component]
+pub fn Badge(
+    #[prop(default = BadgeVariant::Default)] variant: BadgeVariant,
+    #[prop(optional, into)] class: Option<String>,
+    children: Children,
+) -> impl IntoView {
+    let variant_class = match variant {
+        BadgeVariant::Default => "bg-subtle text-secondary border-default",
+        BadgeVariant::Accent => "bg-accent/10 text-accent border-accent/30",
+        BadgeVariant::Success => "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700",
+        BadgeVariant::Warning => "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-300 dark:border-amber-700",
+    };
+
+    let base = format!(
+        "inline-block px-2 py-0.5 text-xs font-medium rounded border {}",
+        variant_class
+    );
+    let full_class = match &class {
+        Some(c) => format!("{} {}", base, c),
+        None => base,
+    };
+
+    view! {
+        <span class=full_class>
+            {children()}
+        </span>
+    }
+}
