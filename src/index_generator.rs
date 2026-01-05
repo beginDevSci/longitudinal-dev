@@ -250,6 +250,43 @@ pub fn generate_curations_output(
     }
 }
 
+/// Validate that all curated slugs exist in the tutorial index.
+/// Returns a list of error messages for invalid slugs.
+#[cfg(feature = "ssr")]
+pub fn validate_curations_slugs(
+    config: &CurationsConfig,
+    tutorials: &[TutorialIndexEntry],
+) -> Vec<String> {
+    use std::collections::HashSet;
+
+    let valid_slugs: HashSet<&str> = tutorials.iter().map(|t| t.slug.as_str()).collect();
+    let mut errors = Vec::new();
+
+    // Validate getting_started slugs
+    for slug in &config.getting_started {
+        if !valid_slugs.contains(slug.as_str()) {
+            errors.push(format!(
+                "tutorial_curations.yaml: getting_started contains unknown slug '{}'",
+                slug
+            ));
+        }
+    }
+
+    // Validate workflow slugs
+    for (workflow_key, category) in &config.workflows {
+        for slug in &category.tutorials {
+            if !valid_slugs.contains(slug.as_str()) {
+                errors.push(format!(
+                    "tutorial_curations.yaml: workflows.{}.tutorials contains unknown slug '{}'",
+                    workflow_key, slug
+                ));
+            }
+        }
+    }
+
+    errors
+}
+
 /// Write all index JSON files to the output directory
 #[cfg(feature = "ssr")]
 pub fn write_index_files(

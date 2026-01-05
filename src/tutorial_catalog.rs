@@ -151,6 +151,45 @@ pub enum LoadState {
     Error(String),
 }
 
+/// Catalog display mode: curated landing vs full browse
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub enum CatalogMode {
+    /// Show curated sections (Getting Started, Workflows, Browse by Family, Recently Updated)
+    #[default]
+    Landing,
+    /// Show full catalog with filters, search, pagination
+    Browse,
+}
+
+/// Method family summary for Browse by Family section
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FamilySummary {
+    pub id: String,
+    pub label: String,
+    pub count: usize,
+}
+
+/// Workflow group for Common Workflows section
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WorkflowGroup {
+    pub key: String,
+    pub label: String,
+    pub tutorials: Vec<TutorialData>,
+}
+
+/// Props for the curated landing sections (SSR-rendered)
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LandingSectionsData {
+    pub getting_started: Vec<TutorialData>,
+    pub workflows: Vec<WorkflowGroup>,
+    pub families: Vec<FamilySummary>,
+    pub recently_updated: Vec<TutorialData>,
+    /// Facet counts for filters (computed from all tutorials)
+    pub method_families: Vec<(String, usize)>,
+    pub statistical_engines: Vec<(String, usize)>,
+    pub covariates: Vec<(String, usize)>,
+}
+
 /// Active filter representation for chips display
 #[derive(Debug, Clone, PartialEq)]
 pub struct ActiveFilter {
@@ -782,6 +821,180 @@ pub fn TutorialTable(tutorials: Vec<TutorialData>, sort_by: RwSignal<SortOption>
     }
 }
 
+// ============================================================================
+// Landing Section Components (SSR-rendered curated content)
+// ============================================================================
+
+/// Featured Tutorials section - curated highlights
+#[component]
+fn FeaturedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
+    if tutorials.is_empty() {
+        return None::<()>.into_any();
+    }
+
+    view! {
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold text-primary">"Featured Tutorials"</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tutorials.into_iter().map(|t| view! {
+                    <TutorialCard tutorial=t />
+                }).collect_view()}
+            </div>
+        </section>
+    }.into_any()
+}
+
+/// Common Workflows section - problem-first collections
+#[component]
+fn WorkflowsSection(workflows: Vec<WorkflowGroup>) -> impl IntoView {
+    if workflows.is_empty() {
+        return None::<()>.into_any();
+    }
+
+    view! {
+        <section class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-primary">"Common Workflows"</h2>
+                <p class="mt-2 text-secondary">
+                    "Tutorials grouped by research question or use case"
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {workflows.into_iter().map(|workflow| {
+                    let tutorial_count = workflow.tutorials.len();
+                    view! {
+                        <details class="group rounded-xl bg-elevated border border-stroke overflow-hidden">
+                            <summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-subtle transition-colors">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-primary">{workflow.label}</h3>
+                                    <p class="text-sm text-muted mt-1">
+                                        {tutorial_count} " tutorials"
+                                    </p>
+                                </div>
+                                <svg
+                                    class="w-5 h-5 text-muted transition-transform group-open:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </summary>
+                            <div class="p-5 pt-0 space-y-3">
+                                {workflow.tutorials.into_iter().map(|tutorial| {
+                                    let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
+                                    let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
+                                    view! {
+                                        <a
+                                            href={href}
+                                            class="block p-4 rounded-lg bg-subtle hover:bg-accent/5 border border-transparent hover:border-accent/20 transition-all"
+                                        >
+                                            <div class="font-medium text-primary hover:text-accent transition-colors">
+                                                {tutorial.title}
+                                            </div>
+                                            <div class="text-sm text-muted mt-1 line-clamp-2">
+                                                {tutorial.summary}
+                                            </div>
+                                        </a>
+                                    }
+                                }).collect_view()}
+                            </div>
+                        </details>
+                    }
+                }).collect_view()}
+            </div>
+        </section>
+    }.into_any()
+}
+
+/// Browse by Method Family section - clickable family cards
+#[component]
+fn BrowseByFamilySection<F>(
+    families: Vec<FamilySummary>,
+    on_family_click: F,
+) -> impl IntoView
+where
+    F: Fn(String) + Clone + 'static,
+{
+    if families.is_empty() {
+        return None::<()>.into_any();
+    }
+
+    view! {
+        <section class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-primary">"Browse by Method Family"</h2>
+                <p class="mt-2 text-secondary">
+                    "Explore tutorials organized by statistical approach"
+                </p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                {families.into_iter().map(|family| {
+                    let family_id = family.id.clone();
+                    let on_click = on_family_click.clone();
+                    view! {
+                        <button
+                            type="button"
+                            class="group text-left p-5 rounded-xl bg-elevated border border-stroke hover:border-accent hover:shadow-lg transition-all"
+                            on:click=move |_| on_click(family_id.clone())
+                        >
+                            <div class="text-lg font-semibold text-primary group-hover:text-accent transition-colors">
+                                {family.id.clone()}
+                            </div>
+                            <div class="text-sm text-muted mt-1">
+                                {family.count} " tutorials"
+                            </div>
+                        </button>
+                    }
+                }).collect_view()}
+            </div>
+        </section>
+    }.into_any()
+}
+
+/// Recently Updated section - latest tutorials
+#[component]
+fn RecentlyUpdatedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
+    if tutorials.is_empty() {
+        return None::<()>.into_any();
+    }
+
+    view! {
+        <section class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-primary">"Recently Updated"</h2>
+                <p class="mt-2 text-secondary">
+                    "The latest additions and updates to the collection"
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {tutorials.into_iter().map(|tutorial| {
+                    let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
+                    let href = base_path::join(&format!("tutorials/{}/{}/", family_slug, tutorial.slug));
+                    view! {
+                        <a
+                            href={href}
+                            class="group block p-4 rounded-xl bg-elevated border border-stroke hover:border-accent hover:shadow-md transition-all"
+                        >
+                            <div class="text-xs text-muted mb-2">
+                                "Updated " {tutorial.updated_at.clone()}
+                            </div>
+                            <div class="font-medium text-primary group-hover:text-accent transition-colors line-clamp-2">
+                                {tutorial.title}
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/5 text-accent border border-accent/20">
+                                    {tutorial.method_family}
+                                </span>
+                            </div>
+                        </a>
+                    }
+                }).collect_view()}
+            </div>
+        </section>
+    }.into_any()
+}
+
 /// Loading skeleton for catalog
 #[component]
 fn CatalogSkeleton() -> impl IntoView {
@@ -1127,16 +1340,28 @@ fn CatalogError(
     }
 }
 
-/// Fetch-based tutorial catalog island
+/// Fetch-based tutorial catalog island with Landing/Browse modes
 ///
-/// Fetches tutorial data from `/api/tutorial_index.json` on hydration.
-/// Shows loading skeleton while fetching, error state on failure.
+/// - Landing mode: Shows curated sections (Getting Started, Workflows, Families, Recent)
+/// - Browse mode: Fetches `/api/tutorial_index.json` and shows full catalog
+///
+/// Mode transitions:
+/// - Search input, filter selection, or "Browse all" button → Browse mode
+/// - Optional "Back to overview" → Landing mode
 #[island]
-pub fn TutorialCatalogFetch() -> impl IntoView {
-    // Data loading state
-    let load_state = RwSignal::new(LoadState::Loading);
+pub fn TutorialCatalogFetch(
+    /// Curated landing data (optional, for SSR)
+    #[prop(optional)]
+    landing_data: Option<LandingSectionsData>,
+) -> impl IntoView {
+    // Mode state: Landing shows curated sections, Browse shows full catalog
+    let mode = RwSignal::new(CatalogMode::Landing);
 
-    // UI state (initialized once data is loaded)
+    // Data loading state (only used in Browse mode)
+    let load_state = RwSignal::new(LoadState::Loading);
+    let has_fetched = RwSignal::new(false);
+
+    // UI state
     let search_query = RwSignal::new(String::new());
     let selected_families = RwSignal::new(Vec::<String>::new());
     let selected_engines = RwSignal::new(Vec::<String>::new());
@@ -1147,6 +1372,10 @@ pub fn TutorialCatalogFetch() -> impl IntoView {
 
     // Fetch function
     let fetch_tutorials = move || {
+        if has_fetched.get_untracked() {
+            return; // Already fetched
+        }
+        has_fetched.set(true);
         load_state.set(LoadState::Loading);
 
         #[cfg(target_arch = "wasm32")]
@@ -1204,10 +1433,30 @@ pub fn TutorialCatalogFetch() -> impl IntoView {
         }
     };
 
-    // Trigger initial fetch on mount
+    // Fetch when entering Browse mode
     Effect::new(move |_| {
-        fetch_tutorials();
+        if mode.get() == CatalogMode::Browse {
+            fetch_tutorials();
+        }
     });
+
+    // Handler to switch to Browse mode (used by family cards and browse button)
+    let enter_browse_mode = move |pre_select_family: Option<String>| {
+        if let Some(family) = pre_select_family {
+            selected_families.set(vec![family]);
+        }
+        mode.set(CatalogMode::Browse);
+    };
+
+    // Handler for back to landing
+    let back_to_landing = move || {
+        mode.set(CatalogMode::Landing);
+        search_query.set(String::new());
+        selected_families.set(vec![]);
+        selected_engines.set(vec![]);
+        selected_covariates.set(vec![]);
+        current_page.set(1);
+    };
 
     // Computed: facets from loaded data
     let facets = Memo::new(move |_| {
@@ -1285,125 +1534,253 @@ pub fn TutorialCatalogFetch() -> impl IntoView {
         }
     });
 
+    // Clone landing_data for use in view
+    let landing = landing_data.clone();
+
+    // Effect: switch to Browse mode when filters are selected in Landing mode
+    Effect::new(move |_| {
+        if mode.get() == CatalogMode::Landing {
+            let has_filters = !selected_families.get().is_empty()
+                || !selected_engines.get().is_empty()
+                || !selected_covariates.get().is_empty();
+
+            if has_filters {
+                mode.set(CatalogMode::Browse);
+            }
+        }
+    });
+
     view! {
         {move || {
-            match load_state.get() {
-                LoadState::Loading => view! { <CatalogLoadingSkeleton /> }.into_any(),
+            match mode.get() {
+                CatalogMode::Landing => {
+                    // Landing mode: show filters sidebar + curated sections
+                    let data = landing.clone();
 
-                LoadState::Error(msg) => {
-                    let retry = fetch_tutorials;
-                    view! { <CatalogError message=msg on_retry=move || retry() /> }.into_any()
-                }
-
-                LoadState::Loaded(_) => {
-                    let (method_families, statistical_engines, covariates, _) = facets.get();
+                    // Extract facets from landing data for sidebar
+                    let (method_families_facets, statistical_engines_facets, covariates_facets) =
+                        data.as_ref()
+                            .map(|d| (d.method_families.clone(), d.statistical_engines.clone(), d.covariates.clone()))
+                            .unwrap_or_default();
 
                     view! {
-                        <div class="flex flex-col lg:flex-row gap-6">
+                        <div class="flex flex-col lg:flex-row gap-8">
                             // Left sidebar filters
                             <div class="lg:w-64 flex-shrink-0">
                                 <SidebarFilters
                                     selected_families
                                     selected_engines
                                     selected_covariates
-                                    method_families=method_families.clone()
-                                    statistical_engines=statistical_engines.clone()
-                                    covariates=covariates.clone()
+                                    method_families=method_families_facets
+                                    statistical_engines=statistical_engines_facets
+                                    covariates=covariates_facets
                                     current_page=current_page
                                 />
                             </div>
 
-                            // Main content area
-                            <div class="flex-1 space-y-6">
-                                // Search bar
-                                <div class="bg-elevated border border-stroke rounded-xl p-4">
-                                    <SearchBar search_query current_page=current_page />
-                                </div>
-
-                                // Active filter chips
-                                <ActiveFilterChips
-                                    selected_families
-                                    selected_engines
-                                    selected_covariates
-                                    current_page=current_page
-                                />
-
-                                // Controls
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                    <div class="text-sm text-muted">
-                                        {move || {
-                                            let total = processed_tutorials.get().len();
-                                            let page = current_page.get();
-                                            let start = (page - 1) * PAGE_SIZE + 1;
-                                            let end = std::cmp::min(page * PAGE_SIZE, total);
-                                            if total == 0 {
-                                                "No tutorials found".to_string()
-                                            } else {
-                                                format!("Showing {}-{} of {} tutorials", start, end, total)
+                            // Main content: curated sections
+                            <div class="flex-1 space-y-12">
+                                // Search bar (triggers Browse mode on input)
+                                <div class="max-w-2xl">
+                                    <div class="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search tutorials..."
+                                            class="w-full px-5 py-4 pl-12 rounded-xl bg-elevated border border-stroke text-primary placeholder-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                if !value.is_empty() {
+                                                    search_query.set(value);
+                                                    mode.set(CatalogMode::Browse);
+                                                }
                                             }
-                                        }}
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <ViewToggle view_mode />
-                                        <SortDropdown sort_by />
+                                        />
+                                        <svg
+                                            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
                                     </div>
                                 </div>
 
-                                // Results
-                                {move || {
-                                    let results = page_results.get();
-                                    let query = search_query.get();
+                                // Curated sections (if data provided)
+                                {data.map(|d| {
+                                    let featured = d.getting_started;
+                                    let workflows = d.workflows;
+                                    let families = d.families;
+                                    let recently_updated = d.recently_updated;
+                                    let enter_browse = enter_browse_mode;
 
-                                    if results.is_empty() {
-                                        view! {
-                                            <div class="text-center py-12 text-muted">
-                                                <svg class="w-16 h-16 mx-auto mb-4 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                <p class="text-lg font-medium">"No tutorials found"</p>
-                                                <p class="text-sm mt-1">"Try adjusting your search or filters"</p>
-                                            </div>
-                                        }.into_any()
-                                    } else {
-                                        match view_mode.get() {
-                                            ViewMode::Cards => view! {
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                                    {results.into_iter().map(|(_score, title_html, summary_html, tutorial)| {
-                                                        let has_highlight = !query.is_empty();
-                                                        if has_highlight {
-                                                            view! {
-                                                                <TutorialCard
-                                                                    tutorial=tutorial
-                                                                    title_html=title_html
-                                                                    summary_html=summary_html
-                                                                />
-                                                            }.into_any()
-                                                        } else {
-                                                            view! {
-                                                                <TutorialCard tutorial=tutorial />
-                                                            }.into_any()
-                                                        }
-                                                    }).collect_view()}
-                                                </div>
-                                            }.into_any(),
-                                            ViewMode::Table => {
-                                                let tutorials: Vec<_> = results.into_iter().map(|(_, _, _, t)| t).collect();
-                                                view! {
-                                                    <TutorialTable tutorials sort_by />
-                                                }.into_any()
-                                            }
-                                        }
+                                    view! {
+                                        <>
+                                            <FeaturedSection tutorials=featured />
+                                            <WorkflowsSection workflows=workflows />
+                                            <BrowseByFamilySection
+                                                families=families
+                                                on_family_click=move |family_id| enter_browse(Some(family_id))
+                                            />
+                                            <RecentlyUpdatedSection tutorials=recently_updated />
+                                        </>
                                     }
-                                }}
+                                })}
 
-                                // Pagination
-                                {move || {
-                                    let total = processed_tutorials.get().len();
-                                    view! { <PaginationControls current_page total_count=total /> }
-                                }}
+                                // Browse all button
+                                <div class="text-center pt-4">
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-dashed border-stroke text-secondary hover:border-accent hover:text-accent transition-colors"
+                                        on:click=move |_| enter_browse_mode(None)
+                                    >
+                                        "Browse all tutorials"
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     }.into_any()
+                }
+
+                CatalogMode::Browse => {
+                    // Browse mode: show full catalog
+                    match load_state.get() {
+                        LoadState::Loading => view! { <CatalogLoadingSkeleton /> }.into_any(),
+
+                        LoadState::Error(msg) => {
+                            let retry = fetch_tutorials;
+                            view! { <CatalogError message=msg on_retry=move || retry() /> }.into_any()
+                        }
+
+                        LoadState::Loaded(_) => {
+                            let (method_families, statistical_engines, covariates, _) = facets.get();
+                            let back = back_to_landing;
+
+                            view! {
+                                <div class="space-y-6">
+                                    // Back to overview link
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
+                                        on:click=move |_| back()
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+                                        </svg>
+                                        "Back to curated overview"
+                                    </button>
+
+                                    <div class="flex flex-col lg:flex-row gap-6">
+                                        // Left sidebar filters
+                                        <div class="lg:w-64 flex-shrink-0">
+                                            <SidebarFilters
+                                                selected_families
+                                                selected_engines
+                                                selected_covariates
+                                                method_families=method_families.clone()
+                                                statistical_engines=statistical_engines.clone()
+                                                covariates=covariates.clone()
+                                                current_page=current_page
+                                            />
+                                        </div>
+
+                                        // Main content area
+                                        <div class="flex-1 space-y-6">
+                                            // Search bar
+                                            <div class="bg-elevated border border-stroke rounded-xl p-4">
+                                                <SearchBar search_query current_page=current_page />
+                                            </div>
+
+                                            // Active filter chips
+                                            <ActiveFilterChips
+                                                selected_families
+                                                selected_engines
+                                                selected_covariates
+                                                current_page=current_page
+                                            />
+
+                                            // Controls
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                <div class="text-sm text-muted">
+                                                    {move || {
+                                                        let total = processed_tutorials.get().len();
+                                                        let page = current_page.get();
+                                                        let start = (page - 1) * PAGE_SIZE + 1;
+                                                        let end = std::cmp::min(page * PAGE_SIZE, total);
+                                                        if total == 0 {
+                                                            "No tutorials found".to_string()
+                                                        } else {
+                                                            format!("Showing {}-{} of {} tutorials", start, end, total)
+                                                        }
+                                                    }}
+                                                </div>
+                                                <div class="flex items-center gap-4">
+                                                    <ViewToggle view_mode />
+                                                    <SortDropdown sort_by />
+                                                </div>
+                                            </div>
+
+                                            // Results
+                                            {move || {
+                                                let results = page_results.get();
+                                                let query = search_query.get();
+
+                                                if results.is_empty() {
+                                                    view! {
+                                                        <div class="text-center py-12 text-muted">
+                                                            <svg class="w-16 h-16 mx-auto mb-4 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            <p class="text-lg font-medium">"No tutorials found"</p>
+                                                            <p class="text-sm mt-1">"Try adjusting your search or filters"</p>
+                                                        </div>
+                                                    }.into_any()
+                                                } else {
+                                                    match view_mode.get() {
+                                                        ViewMode::Cards => view! {
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                                                {results.into_iter().map(|(_score, title_html, summary_html, tutorial)| {
+                                                                    let has_highlight = !query.is_empty();
+                                                                    if has_highlight {
+                                                                        view! {
+                                                                            <TutorialCard
+                                                                                tutorial=tutorial
+                                                                                title_html=title_html
+                                                                                summary_html=summary_html
+                                                                            />
+                                                                        }.into_any()
+                                                                    } else {
+                                                                        view! {
+                                                                            <TutorialCard tutorial=tutorial />
+                                                                        }.into_any()
+                                                                    }
+                                                                }).collect_view()}
+                                                            </div>
+                                                        }.into_any(),
+                                                        ViewMode::Table => {
+                                                            let tutorials: Vec<_> = results.into_iter().map(|(_, _, _, t)| t).collect();
+                                                            view! {
+                                                                <TutorialTable tutorials sort_by />
+                                                            }.into_any()
+                                                        }
+                                                    }
+                                                }
+                                            }}
+
+                                            // Pagination
+                                            {move || {
+                                                let total = processed_tutorials.get().len();
+                                                view! { <PaginationControls current_page total_count=total /> }
+                                            }}
+                                        </div>
+                                    </div>
+                                </div>
+                            }.into_any()
+                        }
+                    }
                 }
             }
         }}

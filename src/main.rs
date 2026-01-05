@@ -10,7 +10,7 @@ use longitudinal_dev::guide_catalog::GroupedGuideCatalog;
 use longitudinal_dev::guides::{group_guides_by_method, guides};
 use longitudinal_dev::index_generator::{
     generate_curations_output, generate_family_index, generate_tutorial_index,
-    load_curations_config, write_index_files, CurationsOutput,
+    load_curations_config, validate_curations_slugs, write_index_files, CurationsOutput,
 };
 use longitudinal_dev::layout::{GuideLayout, PostLayout, SiteLayout};
 use longitudinal_dev::models::guide::GuideCatalogItem;
@@ -19,7 +19,9 @@ use longitudinal_dev::posts::posts;
 #[cfg(feature = "embedded-catalog")]
 use longitudinal_dev::tutorial_catalog::{TutorialCatalog, TutorialData};
 #[cfg(not(feature = "embedded-catalog"))]
-use longitudinal_dev::tutorial_catalog::TutorialCatalogFetch;
+use longitudinal_dev::tutorial_catalog::{
+    FamilySummary, LandingSectionsData, TutorialCatalogFetch, TutorialData, WorkflowGroup,
+};
 use longitudinal_writer::WriterApp;
 use pages::about::AboutPage;
 use sha2::{Digest, Sha256};
@@ -99,64 +101,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter(|p| p.metadata.is_some())
         .collect();
 
-    // Generate catalog HTML based on feature flag
-    // - Default (fetch mode): TutorialCatalogFetch fetches /api/tutorial_index.json on hydration
-    // - embedded-catalog feature: TutorialCatalog receives data via props (legacy, for rollback)
-    #[cfg(feature = "embedded-catalog")]
-    let tutorial_data: Vec<TutorialData> = posts_with_metadata
-        .iter()
-        .map(TutorialData::from_post)
-        .collect();
-
-    let tutorial_catalog_html = view! {
-        <SiteLayout options=opts.clone()>
-            <main class="min-h-screen bg-surface">
-                // Static hero section (renders without waiting for data)
-                <section class="relative overflow-hidden bg-subtle">
-                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-                        <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Examples"</h1>
-                        <p class="mt-3 text-lg md:text-xl text-secondary">
-                            "Examples of longitudinal analysis methods using data from the ABCD Study® dataset."
-                        </p>
-                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                            <a href="#catalog" class="inline-block px-6 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors">
-                                "Browse Examples"
-                            </a>
-                            <a href={base_path::join("")} class="inline-block px-6 py-3 rounded-lg border border-default text-primary hover:bg-accent-subtle transition-colors">
-                                "Back to Home"
-                            </a>
-                        </div>
-                    </div>
-                </section>
-
-                // Catalog island
-                <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-10">
-                    {
-                        #[cfg(feature = "embedded-catalog")]
-                        { view! { <TutorialCatalog tutorials=tutorial_data.clone() /> } }
-                        #[cfg(not(feature = "embedded-catalog"))]
-                        { view! { <TutorialCatalogFetch /> } }
-                    }
-                </section>
-            </main>
-        </SiteLayout>
-    }
-    .to_html();
-
-    let tutorials_dir = site_root.join("tutorials");
-    create_dir_all(&tutorials_dir)?;
-    write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
-
-    // 2.5 Generate tutorial index JSON artifacts for client-side loading
+    // 2.1 Generate tutorial index JSON artifacts (needed for curations)
     let tutorial_index = generate_tutorial_index(&posts_with_metadata);
     let family_index = generate_family_index(&tutorial_index);
 
-    // Load curations config or use defaults if not found
+    // 2.2 Load curations config or use defaults
     let curations_path = PathBuf::from("content/tutorial_curations.yaml");
     let curations_output = if curations_path.exists() {
         match load_curations_config(&curations_path) {
-            Ok(config) => generate_curations_output(&config, &tutorial_index),
+            Ok(config) => {
+                // Validate slugs before generating output (fail fast on typos)
+                let validation_errors = validate_curations_slugs(&config, &tutorial_index);
+                if !validation_errors.is_empty() {
+                    eprintln!("ERROR: Invalid slugs in tutorial_curations.yaml:");
+                    for error in &validation_errors {
+                        eprintln!("  - {}", error);
+                    }
+                    eprintln!("\nAvailable tutorial slugs:");
+                    for tutorial in &tutorial_index {
+                        eprintln!("  - {}", tutorial.slug);
+                    }
+                    std::process::exit(1);
+                }
+                generate_curations_output(&config, &tutorial_index)
+            }
             Err(e) => {
                 eprintln!("Warning: Failed to load curations config: {}", e);
                 eprintln!("Using default empty curations");
@@ -177,7 +145,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // Write JSON artifacts to dist/api/
+    // 2.3 Write JSON artifacts to dist/api/
     match write_index_files(site_root, &tutorial_index, &family_index, &curations_output) {
         Ok(()) => {
             eprintln!("Wrote {}/api/tutorial_index.json ({} entries)", site_root.display(), tutorial_index.len());
@@ -188,6 +156,114 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             eprintln!("Warning: Failed to write index files: {}", e);
         }
     }
+
+    // 2.4 Build landing data for the catalog page
+    #[cfg(not(feature = "embedded-catalog"))]
+    let landing_data = {
+        use std::collections::HashMap;
+
+        // Convert curations to landing sections data
+        let getting_started: Vec<TutorialData> = curations_output
+            .getting_started
+            .iter()
+            .map(|e| TutorialData::from(e.clone()))
+            .collect();
+
+        let workflows: Vec<WorkflowGroup> = curations_output
+            .workflows
+            .iter()
+            .map(|(key, wo)| WorkflowGroup {
+                key: key.clone(),
+                label: wo.label.clone(),
+                tutorials: wo.tutorials.iter().map(|e| TutorialData::from(e.clone())).collect(),
+            })
+            .collect();
+
+        let families: Vec<FamilySummary> = family_index
+            .iter()
+            .map(|f| FamilySummary {
+                id: f.id.clone(),
+                label: f.label.clone(),
+                count: f.count,
+            })
+            .collect();
+
+        let recently_updated: Vec<TutorialData> = curations_output
+            .recently_updated
+            .iter()
+            .map(|e| TutorialData::from(e.clone()))
+            .collect();
+
+        // Compute facets from all tutorials for sidebar filters
+        let mut method_families_map: HashMap<String, usize> = HashMap::new();
+        let mut engines_map: HashMap<String, usize> = HashMap::new();
+        let mut covariates_map: HashMap<String, usize> = HashMap::new();
+
+        for entry in &tutorial_index {
+            *method_families_map.entry(entry.method_family.clone()).or_insert(0) += 1;
+            *engines_map.entry(entry.statistical_engine.clone()).or_insert(0) += 1;
+            *covariates_map.entry(entry.covariates.clone()).or_insert(0) += 1;
+        }
+
+        let mut method_families: Vec<_> = method_families_map.into_iter().collect();
+        let mut statistical_engines: Vec<_> = engines_map.into_iter().collect();
+        let mut covariates: Vec<_> = covariates_map.into_iter().collect();
+
+        method_families.sort_by(|a, b| a.0.cmp(&b.0));
+        statistical_engines.sort_by(|a, b| a.0.cmp(&b.0));
+        covariates.sort_by(|a, b| a.0.cmp(&b.0));
+
+        LandingSectionsData {
+            getting_started,
+            workflows,
+            families,
+            recently_updated,
+            method_families,
+            statistical_engines,
+            covariates,
+        }
+    };
+
+    // Generate catalog HTML based on feature flag
+    // - Default (fetch mode): TutorialCatalogFetch with landing data
+    // - embedded-catalog feature: TutorialCatalog receives full data via props (legacy)
+    #[cfg(feature = "embedded-catalog")]
+    let tutorial_data: Vec<TutorialData> = posts_with_metadata
+        .iter()
+        .map(TutorialData::from_post)
+        .collect();
+
+    let tutorial_catalog_html = view! {
+        <SiteLayout options=opts.clone()>
+            <main class="min-h-screen bg-surface">
+                // Static hero section
+                <section class="relative overflow-hidden bg-subtle">
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                        <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Examples"</h1>
+                        <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
+                            "Examples of longitudinal analysis methods using data from the ABCD Study® dataset."
+                        </p>
+                    </div>
+                </section>
+
+                // Catalog island with landing data
+                <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                    {
+                        #[cfg(feature = "embedded-catalog")]
+                        { view! { <TutorialCatalog tutorials=tutorial_data.clone() /> } }
+                        #[cfg(not(feature = "embedded-catalog"))]
+                        { view! { <TutorialCatalogFetch landing_data=landing_data.clone() /> } }
+                    }
+                </section>
+            </main>
+        </SiteLayout>
+    }
+    .to_html();
+
+    let tutorials_dir = site_root.join("tutorials");
+    create_dir_all(&tutorials_dir)?;
+    write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
+    eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
