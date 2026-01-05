@@ -651,19 +651,6 @@ pub fn TutorialCard(
             class="group block rounded-xl transition-all duration-200 hover:scale-102 hover:shadow-xl bg-elevated border border-stroke p-6"
         >
             <div class="flex items-center gap-2 mb-2">
-                {tutorial.difficulty.as_ref().map(|d| {
-                    let (bg, text) = match d.as_str() {
-                        "intro" => ("bg-emerald-100 dark:bg-emerald-900/30", "text-emerald-700 dark:text-emerald-400"),
-                        "intermediate" => ("bg-amber-100 dark:bg-amber-900/30", "text-amber-700 dark:text-amber-400"),
-                        "advanced" => ("bg-rose-100 dark:bg-rose-900/30", "text-rose-700 dark:text-rose-400"),
-                        _ => ("bg-gray-100 dark:bg-gray-800", "text-gray-600 dark:text-gray-400"),
-                    };
-                    view! {
-                        <span class=format!("text-xs px-2 py-0.5 rounded-full {} {}", bg, text)>
-                            {d.clone()}
-                        </span>
-                    }
-                })}
                 <span class="text-xs text-muted">
                     "Updated " {tutorial.updated_at.clone()}
                 </span>
