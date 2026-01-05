@@ -156,7 +156,7 @@ One of LGCM's most informative parameters is the relationship between where peop
 | Sign | Interpretation |
 |------|----------------|
 | **Positive** | High starters grow faster (or decline slower). "Rich get richer." |
-| **Negative** | High starters grow slower (or decline faster). Regression to mean. |
+| **Negative** | High starters grow slower (or decline faster). Catching up or ceiling effects. |
 | **Zero** | Starting level doesn't predict change rate. |
 
 <figure style="margin: 1.5rem 0;">

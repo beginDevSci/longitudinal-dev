@@ -290,16 +290,16 @@ yᵢₜ = γ₀₀ + γ₁₀(Time) + u₀ᵢ + u₁ᵢ(Time) + εᵢₜ
 
 ### Variance of Observations
 
-The marginal variance of yᵢₜ:
+The marginal variance of yᵢₜ at time t:
 
 ```
-Var(yᵢₜ) = τ₀₀ + 2(Time)τ₀₁ + (Time)²τ₁₁ + σ²
+Var(yᵢₜ) = τ₀₀ + 2t·τ₀₁ + t²·τ₁₁ + σ²
 ```
 
-The covariance between two observations from the same person:
+The covariance between two observations from the same person at times t and t':
 
 ```
-Cov(yᵢₜ, yᵢₜ') = τ₀₀ + (Time + Time')τ₀₁ + (Time × Time')τ₁₁
+Cov(yᵢₜ, yᵢₜ') = τ₀₀ + (t + t')·τ₀₁ + (t × t')·τ₁₁
 ```
 
 </details>

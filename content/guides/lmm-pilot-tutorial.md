@@ -228,6 +228,8 @@ Fixed effects:
 time          2.014      0.067  799.00   30.06   <2e-16 ***
 ```
 
+*Note: Your exact values will differ slightly due to random sampling, but the patterns should match.*
+
 **What this model assumes:**
 - People differ in their starting level (random intercepts)
 - Everyone changes at the *same rate* (fixed slope)

@@ -125,7 +125,7 @@ fit <- growth(model, data = data_wide, estimator = "WLSMV")
 ### Fit Indices
 
 ```r
-fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
+fitmeasures(fit, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 ```
 
 ### Growth Factor Means
@@ -299,7 +299,7 @@ pnorm(0, mean = slope_mean, sd = sqrt(slope_var), lower.tail = FALSE)
 
 **Degrees of freedom:**
 ```r
-fitMeasures(fit, "df")
+fitmeasures(fit, "df")
 ```
 
 ---

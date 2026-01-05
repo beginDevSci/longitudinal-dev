@@ -61,15 +61,19 @@ mod <- lmer(y ~ time + I(time^2) + (1 + time | id), data = data_long)
 mod <- lmer(y ~ time + (0 + time | id), data = data_long)
 ```
 
-### Nested Random Effects
+### Nested Random Effects (Three-Level Data)
+
+Use when you have clustering at multiple levels (e.g., observations within students within schools):
 
 ```r
-# Students nested in schools
+# Three-level: observations nested in students nested in schools
 mod <- lmer(y ~ time + (1 + time | school/id), data = data_long)
 
 # Equivalent explicit syntax
 mod <- lmer(y ~ time + (1 + time | school) + (1 + time | school:id), data = data_long)
 ```
+
+**Note**: For standard longitudinal data (observations within persons only), use the simpler `(1 + time | id)` syntax shown above.
 
 ---
 
