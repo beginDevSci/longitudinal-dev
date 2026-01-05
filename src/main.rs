@@ -226,8 +226,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             (String::new(), String::new())
         };
 
+        // Build canonical URL for this tutorial
+        let base_path_prefix = std::env::var("SITE_BASE_PATH").unwrap_or_default();
+        let canonical_url = if base_path_prefix.is_empty() {
+            format!("/tutorials/{}/{}/", method_family, slug)
+        } else {
+            format!(
+                "{}/tutorials/{}/{}/",
+                base_path_prefix.trim_end_matches('/'),
+                method_family,
+                slug
+            )
+        };
+
         let html = view! {
-            <SiteLayout options=opts.clone()>
+            <SiteLayout options=opts.clone() canonical_url=canonical_url.clone()>
                 <PostLayout post prefill_markdown baseline_hash/>
             </SiteLayout>
         }
@@ -240,13 +253,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("Wrote {}", tutorial_dir.join("index.html").display());
 
         // Generate redirect page at old URL: /posts/<slug>/
-        let base_path_prefix = std::env::var("SITE_BASE_PATH").unwrap_or_default();
-        let canonical_url = if base_path_prefix.is_empty() {
-            format!("/tutorials/{}/{}/", method_family, slug)
-        } else {
-            format!("{}/tutorials/{}/{}/", base_path_prefix.trim_end_matches('/'), method_family, slug)
-        };
-
+        // (canonical_url already computed above)
         let redirect_html = format!(
             r#"<!DOCTYPE html>
 <html lang="en">

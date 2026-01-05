@@ -18,6 +18,7 @@ use crate::layout::TopNav;
 #[component]
 pub fn SiteLayout(
     options: leptos::config::LeptosOptions,
+    #[prop(optional, into)] canonical_url: Option<String>,
     children: Children,
 ) -> impl IntoView {
     // Always compute base path (defaults to "/" if SITE_BASE_PATH not set)
@@ -41,6 +42,8 @@ pub fn SiteLayout(
                 <link rel="stylesheet" href=css_url/>
                 // KaTeX CSS for math rendering (guides use server-side KaTeX)
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous"/>
+                // Canonical URL for SEO (only rendered if provided)
+                {canonical_url.map(|url| view! { <link rel="canonical" href=url/> })}
                 <AutoReload options=options.clone()/>
                 // Pass trimmed base path to HydrationScripts for modulepreload/WASM URLs
                 <HydrationScripts options islands=true root=base_trimmed/>
