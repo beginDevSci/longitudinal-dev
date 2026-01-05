@@ -169,7 +169,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|e| TutorialData::from(e.clone()))
             .collect();
 
-        let workflows: Vec<WorkflowGroup> = curations_output
+        let mut workflows: Vec<WorkflowGroup> = curations_output
             .workflows
             .iter()
             .map(|(key, wo)| WorkflowGroup {
@@ -178,6 +178,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 tutorials: wo.tutorials.iter().map(|e| TutorialData::from(e.clone())).collect(),
             })
             .collect();
+        workflows.sort_by(|a, b| a.key.cmp(&b.key)); // Ensure deterministic ordering
 
         let families: Vec<FamilySummary> = family_index
             .iter()
