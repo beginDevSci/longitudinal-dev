@@ -6,9 +6,15 @@
 //! - Ranked search with match highlighting
 //! - Scalable filter facets with active chips
 //! - Backward compatibility with embedded data
+//!
+//! ## Data Loading Modes
+//!
+//! - `TutorialCatalogFetch`: Fetches `/api/tutorial_index.json` on hydration (default)
+//! - `TutorialCatalog`: Receives data via props (legacy, for rollback)
 
 use crate::base_path;
 use crate::index_generator::TutorialIndexEntry;
+#[cfg(feature = "ssr")]
 use crate::models::post::Post;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -71,6 +77,7 @@ pub struct TutorialData {
     pub search_text: Option<String>,
 }
 
+#[cfg(feature = "ssr")]
 impl TutorialData {
     pub fn from_post(post: &Post) -> Self {
         let summary = post
@@ -1041,5 +1048,377 @@ pub fn MethodTabs(
                 }
             }).collect_view()}
         </div>
+    }
+}
+
+// ============================================================================
+// Client-side fetch catalog (Phase 3 implementation)
+// ============================================================================
+
+/// Loading skeleton component for catalog
+#[component]
+fn CatalogLoadingSkeleton() -> impl IntoView {
+    view! {
+        <div class="flex flex-col lg:flex-row gap-6">
+            // Sidebar skeleton
+            <div class="lg:w-64 flex-shrink-0">
+                <div class="bg-elevated border border-stroke rounded-xl p-6 space-y-6 animate-pulse">
+                    <div class="h-6 w-20 bg-subtle rounded"/>
+                    <div class="space-y-3">
+                        <div class="h-4 w-32 bg-subtle rounded"/>
+                        <div class="h-4 w-28 bg-subtle rounded"/>
+                        <div class="h-4 w-24 bg-subtle rounded"/>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="h-4 w-36 bg-subtle rounded"/>
+                        <div class="h-4 w-28 bg-subtle rounded"/>
+                    </div>
+                </div>
+            </div>
+
+            // Main content skeleton
+            <div class="flex-1 space-y-6 animate-pulse">
+                // Search bar skeleton
+                <div class="bg-elevated border border-stroke rounded-xl p-4">
+                    <div class="h-12 bg-subtle rounded-lg"/>
+                </div>
+
+                // Controls skeleton
+                <div class="flex justify-between">
+                    <div class="h-5 w-40 bg-subtle rounded"/>
+                    <div class="flex gap-4">
+                        <div class="h-10 w-24 bg-subtle rounded-lg"/>
+                        <div class="h-10 w-24 bg-subtle rounded-lg"/>
+                    </div>
+                </div>
+
+                // Cards skeleton
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {(0..6).map(|_| view! {
+                        <div class="bg-elevated border border-stroke rounded-xl p-6 space-y-4">
+                            <div class="flex gap-2">
+                                <div class="h-5 w-16 bg-subtle rounded-full"/>
+                                <div class="h-5 w-24 bg-subtle rounded"/>
+                            </div>
+                            <div class="h-6 w-3/4 bg-subtle rounded"/>
+                            <div class="space-y-2">
+                                <div class="h-4 w-full bg-subtle rounded"/>
+                                <div class="h-4 w-5/6 bg-subtle rounded"/>
+                            </div>
+                            <div class="flex gap-2 mt-4">
+                                <div class="h-7 w-20 bg-subtle rounded-full"/>
+                                <div class="h-7 w-16 bg-subtle rounded-full"/>
+                            </div>
+                        </div>
+                    }).collect_view()}
+                </div>
+            </div>
+        </div>
+    }
+}
+
+/// Error state component with retry button
+#[component]
+fn CatalogError(
+    message: String,
+    on_retry: impl Fn() + 'static + Clone,
+) -> impl IntoView {
+    view! {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <svg class="w-16 h-16 text-error mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <p class="text-lg font-medium text-primary mb-2">"Failed to load tutorials"</p>
+            <p class="text-sm text-muted mb-6">{message}</p>
+            <button
+                class="px-6 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors"
+                on:click=move |_| on_retry()
+            >
+                "Try Again"
+            </button>
+        </div>
+    }
+}
+
+/// Fetch-based tutorial catalog island
+///
+/// Fetches tutorial data from `/api/tutorial_index.json` on hydration.
+/// Shows loading skeleton while fetching, error state on failure.
+#[island]
+pub fn TutorialCatalogFetch() -> impl IntoView {
+    // Data loading state
+    let load_state = RwSignal::new(LoadState::Loading);
+
+    // UI state (initialized once data is loaded)
+    let search_query = RwSignal::new(String::new());
+    let selected_families = RwSignal::new(Vec::<String>::new());
+    let selected_engines = RwSignal::new(Vec::<String>::new());
+    let selected_covariates = RwSignal::new(Vec::<String>::new());
+    let sort_by = RwSignal::new(SortOption::Newest);
+    let view_mode = RwSignal::new(ViewMode::Cards);
+    let current_page = RwSignal::new(1usize);
+
+    // Fetch function
+    let fetch_tutorials = move || {
+        load_state.set(LoadState::Loading);
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::JsCast;
+            use wasm_bindgen_futures::JsFuture;
+
+            leptos::task::spawn_local(async move {
+                let result = async {
+                    let window = leptos::web_sys::window()
+                        .ok_or_else(|| "No window object".to_string())?;
+
+                    let url = base_path::join("api/tutorial_index.json");
+
+                    let resp_value = JsFuture::from(window.fetch_with_str(&url))
+                        .await
+                        .map_err(|e| format!("Fetch failed: {:?}", e))?;
+
+                    let resp: leptos::web_sys::Response = resp_value
+                        .dyn_into()
+                        .map_err(|_| "Response conversion failed".to_string())?;
+
+                    if !resp.ok() {
+                        return Err(format!("HTTP error: {}", resp.status()));
+                    }
+
+                    let json = JsFuture::from(
+                        resp.json().map_err(|_| "JSON parse setup failed".to_string())?
+                    )
+                    .await
+                    .map_err(|e| format!("JSON parse failed: {:?}", e))?;
+
+                    let entries: Vec<TutorialIndexEntry> = serde_wasm_bindgen::from_value(json)
+                        .map_err(|e| format!("Deserialization failed: {:?}", e))?;
+
+                    let tutorials: Vec<TutorialData> = entries
+                        .into_iter()
+                        .map(TutorialData::from)
+                        .collect();
+
+                    Ok(tutorials)
+                }.await;
+
+                match result {
+                    Ok(tutorials) => load_state.set(LoadState::Loaded(tutorials)),
+                    Err(e) => load_state.set(LoadState::Error(e)),
+                }
+            });
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            // SSR: show loading state (will hydrate on client)
+            load_state.set(LoadState::Loading);
+        }
+    };
+
+    // Trigger initial fetch on mount
+    Effect::new(move |_| {
+        fetch_tutorials();
+    });
+
+    // Computed: facets from loaded data
+    let facets = Memo::new(move |_| {
+        match load_state.get() {
+            LoadState::Loaded(ref tutorials) => compute_facets(tutorials),
+            _ => (vec![], vec![], vec![], vec![]),
+        }
+    });
+
+    // Computed: filtered, ranked, and sorted tutorials
+    let processed_tutorials = Memo::new(move |_| {
+        let tutorials = match load_state.get() {
+            LoadState::Loaded(tutorials) => tutorials,
+            _ => return vec![],
+        };
+
+        let query = search_query.get();
+        let families = selected_families.get();
+        let engines = selected_engines.get();
+        let covs = selected_covariates.get();
+        let sort = sort_by.get();
+
+        let mut results: Vec<(i32, String, String, TutorialData)> = tutorials
+            .iter()
+            .filter_map(|tutorial| {
+                if !families.is_empty() && !families.contains(&tutorial.method_family) {
+                    return None;
+                }
+                if !engines.is_empty() && !engines.contains(&tutorial.statistical_engine) {
+                    return None;
+                }
+                if !covs.is_empty() && !covs.contains(&tutorial.covariates) {
+                    return None;
+                }
+
+                let (score, title_html, summary_html) = rank_and_highlight(tutorial, &query);
+
+                if !query.is_empty() && score == 0 {
+                    return None;
+                }
+
+                Some((score, title_html, summary_html, tutorial.clone()))
+            })
+            .collect();
+
+        if !query.is_empty() {
+            results.sort_by(|a, b| b.0.cmp(&a.0));
+        } else {
+            match sort {
+                SortOption::Newest => results.sort_by(|a, b| b.3.updated_at.cmp(&a.3.updated_at)),
+                SortOption::TitleAZ => results.sort_by(|a, b| a.3.title.cmp(&b.3.title)),
+                SortOption::TitleZA => results.sort_by(|a, b| b.3.title.cmp(&a.3.title)),
+                SortOption::FamilyAZ => results.sort_by(|a, b| a.3.method_family.cmp(&b.3.method_family)),
+                SortOption::FamilyZA => results.sort_by(|a, b| b.3.method_family.cmp(&a.3.method_family)),
+                SortOption::EngineAZ => results.sort_by(|a, b| a.3.statistical_engine.cmp(&b.3.statistical_engine)),
+                SortOption::EngineZA => results.sort_by(|a, b| b.3.statistical_engine.cmp(&a.3.statistical_engine)),
+                _ => {}
+            }
+        }
+
+        results
+    });
+
+    // Paginated results
+    let page_results = Memo::new(move |_| {
+        let all = processed_tutorials.get();
+        let page = current_page.get();
+        let start = (page - 1) * PAGE_SIZE;
+        let end = std::cmp::min(start + PAGE_SIZE, all.len());
+
+        if start >= all.len() {
+            vec![]
+        } else {
+            all[start..end].to_vec()
+        }
+    });
+
+    view! {
+        {move || {
+            match load_state.get() {
+                LoadState::Loading => view! { <CatalogLoadingSkeleton /> }.into_any(),
+
+                LoadState::Error(msg) => {
+                    let retry = fetch_tutorials;
+                    view! { <CatalogError message=msg on_retry=move || retry() /> }.into_any()
+                }
+
+                LoadState::Loaded(_) => {
+                    let (method_families, statistical_engines, covariates, _) = facets.get();
+
+                    view! {
+                        <div class="flex flex-col lg:flex-row gap-6">
+                            // Left sidebar filters
+                            <div class="lg:w-64 flex-shrink-0">
+                                <SidebarFilters
+                                    selected_families
+                                    selected_engines
+                                    selected_covariates
+                                    method_families=method_families.clone()
+                                    statistical_engines=statistical_engines.clone()
+                                    covariates=covariates.clone()
+                                    current_page=current_page
+                                />
+                            </div>
+
+                            // Main content area
+                            <div class="flex-1 space-y-6">
+                                // Search bar
+                                <div class="bg-elevated border border-stroke rounded-xl p-4">
+                                    <SearchBar search_query current_page=current_page />
+                                </div>
+
+                                // Active filter chips
+                                <ActiveFilterChips
+                                    selected_families
+                                    selected_engines
+                                    selected_covariates
+                                    current_page=current_page
+                                />
+
+                                // Controls
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div class="text-sm text-muted">
+                                        {move || {
+                                            let total = processed_tutorials.get().len();
+                                            let page = current_page.get();
+                                            let start = (page - 1) * PAGE_SIZE + 1;
+                                            let end = std::cmp::min(page * PAGE_SIZE, total);
+                                            if total == 0 {
+                                                "No tutorials found".to_string()
+                                            } else {
+                                                format!("Showing {}-{} of {} tutorials", start, end, total)
+                                            }
+                                        }}
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <ViewToggle view_mode />
+                                        <SortDropdown sort_by />
+                                    </div>
+                                </div>
+
+                                // Results
+                                {move || {
+                                    let results = page_results.get();
+                                    let query = search_query.get();
+
+                                    if results.is_empty() {
+                                        view! {
+                                            <div class="text-center py-12 text-muted">
+                                                <svg class="w-16 h-16 mx-auto mb-4 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <p class="text-lg font-medium">"No tutorials found"</p>
+                                                <p class="text-sm mt-1">"Try adjusting your search or filters"</p>
+                                            </div>
+                                        }.into_any()
+                                    } else {
+                                        match view_mode.get() {
+                                            ViewMode::Cards => view! {
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                                    {results.into_iter().map(|(_score, title_html, summary_html, tutorial)| {
+                                                        let has_highlight = !query.is_empty();
+                                                        if has_highlight {
+                                                            view! {
+                                                                <TutorialCard
+                                                                    tutorial=tutorial
+                                                                    title_html=title_html
+                                                                    summary_html=summary_html
+                                                                />
+                                                            }.into_any()
+                                                        } else {
+                                                            view! {
+                                                                <TutorialCard tutorial=tutorial />
+                                                            }.into_any()
+                                                        }
+                                                    }).collect_view()}
+                                                </div>
+                                            }.into_any(),
+                                            ViewMode::Table => {
+                                                let tutorials: Vec<_> = results.into_iter().map(|(_, _, _, t)| t).collect();
+                                                view! {
+                                                    <TutorialTable tutorials sort_by />
+                                                }.into_any()
+                                            }
+                                        }
+                                    }
+                                }}
+
+                                // Pagination
+                                {move || {
+                                    let total = processed_tutorials.get().len();
+                                    view! { <PaginationControls current_page total_count=total /> }
+                                }}
+                            </div>
+                        </div>
+                    }.into_any()
+                }
+            }
+        }}
     }
 }

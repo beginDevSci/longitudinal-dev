@@ -90,6 +90,7 @@ web-sys = { version = "0.3", features = [
 ] }
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
+serde-wasm-bindgen = "0.6"
 # Pin to 0.2.x to avoid getrandom 0.3.3 compilation issues in CI
 # See: https://github.com/rust-random/getrandom/issues/448
 getrandom = { version = "0.2", features = ["js"] }
@@ -131,6 +132,9 @@ ssr = [
 ]
 # Client features: WASM build uses these (smaller bundle)
 hydrate = ["leptos/hydrate", "leptos/islands", "wasm-bindgen"]
+# Legacy embedded catalog mode (for rollback if fetch mode has issues)
+# To enable: add "embedded-catalog" to features in bin-features
+embedded-catalog = []
 
 [package.metadata.leptos]
 # single-package + static-site output

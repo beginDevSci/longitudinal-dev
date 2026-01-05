@@ -15,7 +15,11 @@ use longitudinal_dev::index_generator::{
 use longitudinal_dev::layout::{GuideLayout, PostLayout, SiteLayout};
 use longitudinal_dev::models::guide::GuideCatalogItem;
 use longitudinal_dev::posts::posts;
+// Feature flag: embedded-catalog uses legacy mode with props, otherwise uses fetch mode
+#[cfg(feature = "embedded-catalog")]
 use longitudinal_dev::tutorial_catalog::{TutorialCatalog, TutorialData};
+#[cfg(not(feature = "embedded-catalog"))]
+use longitudinal_dev::tutorial_catalog::TutorialCatalogFetch;
 use longitudinal_writer::WriterApp;
 use pages::about::AboutPage;
 use sha2::{Digest, Sha256};
@@ -95,7 +99,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter(|p| p.metadata.is_some())
         .collect();
 
-    // Convert posts to TutorialData for the catalog
+    // Generate catalog HTML based on feature flag
+    // - Default (fetch mode): TutorialCatalogFetch fetches /api/tutorial_index.json on hydration
+    // - embedded-catalog feature: TutorialCatalog receives data via props (legacy, for rollback)
+    #[cfg(feature = "embedded-catalog")]
     let tutorial_data: Vec<TutorialData> = posts_with_metadata
         .iter()
         .map(TutorialData::from_post)
@@ -104,6 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tutorial_catalog_html = view! {
         <SiteLayout options=opts.clone()>
             <main class="min-h-screen bg-surface">
+                // Static hero section (renders without waiting for data)
                 <section class="relative overflow-hidden bg-subtle">
                     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
                         <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Examples"</h1>
@@ -121,8 +129,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     </div>
                 </section>
 
+                // Catalog island
                 <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-10">
-                    <TutorialCatalog tutorials=tutorial_data.clone() />
+                    {
+                        #[cfg(feature = "embedded-catalog")]
+                        { view! { <TutorialCatalog tutorials=tutorial_data.clone() /> } }
+                        #[cfg(not(feature = "embedded-catalog"))]
+                        { view! { <TutorialCatalogFetch /> } }
+                    }
                 </section>
             </main>
         </SiteLayout>

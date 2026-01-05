@@ -4,11 +4,18 @@
 //! - tutorial_index.json: All tutorial metadata for filtering/search
 //! - tutorial_families.json: Method family counts and ordering
 //! - tutorial_curations.json: Curated collections (getting started, workflows)
+//!
+//! The data types (`TutorialIndexEntry`, `FamilyEntry`, etc.) are available in
+//! both SSR and hydrate modes for JSON deserialization. The generation functions
+//! (`generate_tutorial_index`, `from_post`, etc.) are SSR-only.
 
+#[cfg(feature = "ssr")]
 use crate::models::post::Post;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+#[cfg(feature = "ssr")]
 use std::fs;
+#[cfg(feature = "ssr")]
 use std::path::Path;
 
 /// Entry in the tutorial index (for client-side search/filter)
@@ -32,8 +39,9 @@ pub struct TutorialIndexEntry {
     pub search_text: String,
 }
 
+#[cfg(feature = "ssr")]
 impl TutorialIndexEntry {
-    /// Create index entry from a Post
+    /// Create index entry from a Post (SSR only)
     pub fn from_post(post: &Post) -> Option<Self> {
         let metadata = post.metadata.as_ref()?;
 
@@ -131,7 +139,12 @@ pub struct WorkflowOutput {
     pub tutorials: Vec<TutorialIndexEntry>,
 }
 
+// ============================================================================
+// SSR-only functions for generating index files
+// ============================================================================
+
 /// Generate tutorial index from posts
+#[cfg(feature = "ssr")]
 pub fn generate_tutorial_index(posts: &[Post]) -> Vec<TutorialIndexEntry> {
     posts
         .iter()
@@ -140,6 +153,7 @@ pub fn generate_tutorial_index(posts: &[Post]) -> Vec<TutorialIndexEntry> {
 }
 
 /// Generate family index from tutorial index
+#[cfg(feature = "ssr")]
 pub fn generate_family_index(tutorials: &[TutorialIndexEntry]) -> Vec<FamilyEntry> {
     let mut family_counts: HashMap<String, (String, usize)> = HashMap::new();
 
@@ -175,6 +189,7 @@ pub fn generate_family_index(tutorials: &[TutorialIndexEntry]) -> Vec<FamilyEntr
 }
 
 /// Load curations config from YAML file
+#[cfg(feature = "ssr")]
 pub fn load_curations_config(path: &Path) -> Result<CurationsConfig, String> {
     let content = fs::read_to_string(path)
         .map_err(|e| format!("Failed to read curations file: {}", e))?;
@@ -184,6 +199,7 @@ pub fn load_curations_config(path: &Path) -> Result<CurationsConfig, String> {
 }
 
 /// Generate curations output by resolving slugs to tutorial entries
+#[cfg(feature = "ssr")]
 pub fn generate_curations_output(
     config: &CurationsConfig,
     tutorials: &[TutorialIndexEntry],
@@ -235,6 +251,7 @@ pub fn generate_curations_output(
 }
 
 /// Write all index JSON files to the output directory
+#[cfg(feature = "ssr")]
 pub fn write_index_files(
     outdir: &Path,
     tutorials: &[TutorialIndexEntry],
