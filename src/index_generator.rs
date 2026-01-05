@@ -114,7 +114,7 @@ pub struct FamilyEntry {
 /// Curated collection configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CurationsConfig {
-    pub getting_started: Vec<String>,
+    pub featured: Vec<String>,
     pub workflows: HashMap<String, WorkflowCategory>,
 }
 
@@ -128,7 +128,7 @@ pub struct WorkflowCategory {
 /// Generated curations JSON (resolved slugs to entries)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CurationsOutput {
-    pub getting_started: Vec<TutorialIndexEntry>,
+    pub featured: Vec<TutorialIndexEntry>,
     pub workflows: HashMap<String, WorkflowOutput>,
     pub recently_updated: Vec<TutorialIndexEntry>,
 }
@@ -210,9 +210,9 @@ pub fn generate_curations_output(
         .map(|t| (t.slug.as_str(), t))
         .collect();
 
-    // Resolve getting_started slugs
-    let getting_started: Vec<TutorialIndexEntry> = config
-        .getting_started
+    // Resolve featured slugs
+    let featured: Vec<TutorialIndexEntry> = config
+        .featured
         .iter()
         .filter_map(|slug| slug_map.get(slug.as_str()).cloned().cloned())
         .collect();
@@ -244,7 +244,7 @@ pub fn generate_curations_output(
     let recently_updated: Vec<TutorialIndexEntry> = sorted_tutorials.into_iter().take(8).collect();
 
     CurationsOutput {
-        getting_started,
+        featured,
         workflows,
         recently_updated,
     }
@@ -262,11 +262,11 @@ pub fn validate_curations_slugs(
     let valid_slugs: HashSet<&str> = tutorials.iter().map(|t| t.slug.as_str()).collect();
     let mut errors = Vec::new();
 
-    // Validate getting_started slugs
-    for slug in &config.getting_started {
+    // Validate featured slugs
+    for slug in &config.featured {
         if !valid_slugs.contains(slug.as_str()) {
             errors.push(format!(
-                "tutorial_curations.yaml: getting_started contains unknown slug '{}'",
+                "tutorial_curations.yaml: featured contains unknown slug '{}'",
                 slug
             ));
         }

@@ -5,8 +5,8 @@
 #
 # Slugs must match tutorial markdown filenames (without .md extension).
 
-# Getting Started: Beginner-friendly progression (6-8 tutorials)
-getting_started:
+# Featured: Curated highlights (6-8 tutorials)
+featured:
   - lmm-random-intercept      # Foundation concept, simplest mixed model
   - lmm-random-slopes         # Natural next step from random intercept
   - lgcm-basic                # Introduces growth modeling paradigm

@@ -1,8 +1,9 @@
 # Tutorials Page Scaling Plan
 
 **Branch:** `feature/tutorials-scaling`
-**Status:** Planning → Implementation Ready
+**Status:** Phases 0-3 Complete (Schema, Index Pipeline, URLs, Client-Side Fetch)
 **Created:** 2025-01-04
+**Updated:** 2025-01-05
 **Target:** Scale from 16 → 200-300 tutorials
 
 ---
@@ -502,12 +503,34 @@ Based on existing 16 tutorials:
 
 ---
 
-## Next Steps
+## Implementation Status
 
-1. **Immediate:** Migrate 16 tutorial frontmatter (add difficulty, timepoints, engines array, summary)
-2. **Then:** Create index generator + JSON artifacts
-3. **Then:** Implement URL changes + redirects
-4. **Then:** Refactor catalog to fetch-based architecture
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 0 | Schema migration (frontmatter fields) | ✅ Complete |
+| Phase 1 | Index pipeline (JSON artifacts) | ✅ Complete |
+| Phase 2 | URL restructure + redirects | ✅ Complete |
+| Phase 3 | Client-side fetch + catalog UI | ✅ Complete |
+| Phase 4+ | Additional UI enhancements | Future |
+
+## Completed Features
+
+- [x] Tutorial frontmatter extended (difficulty, timepoints, engines[], summary)
+- [x] JSON index generation (`/api/tutorial_index.json`, `tutorial_families.json`, `tutorial_curations.json`)
+- [x] URL restructure: `/tutorials/<family>/<slug>/`
+- [x] 301 redirects from `/posts/<slug>/`
+- [x] Canonical tags on tutorial pages
+- [x] Client-side fetch mode (Landing/Browse modes)
+- [x] Curated landing page (Featured, Workflows, Browse by Method, Recently Updated)
+- [x] Pagination, ranked search, filter chips
+- [x] ViewToggle (Cards/Table views)
+- [x] Sidebar filters in Landing mode
+
+## Next Steps (Future Phases)
+
+- URL state persistence (`?family=lgcm&page=2`)
+- localStorage caching for fetched index
+- Method family hub pages (`/tutorials/<family>/`)
 
 ---
 
@@ -517,9 +540,9 @@ Based on existing 16 tutorials:
 - [x] Schema migration approach confirmed (phased)
 - [x] Architecture approach confirmed (two-step)
 - [x] Curated content ownership confirmed (implementer proposes, editable file)
-- [ ] Ready to begin Phase 0 implementation
+- [x] Phases 0-3 implementation complete
 
 ---
 
-*Document version: 2.0*
-*Last updated: 2025-01-04*
+*Document version: 3.0*
+*Last updated: 2025-01-05*

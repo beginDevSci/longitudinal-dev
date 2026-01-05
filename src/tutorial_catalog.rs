@@ -180,7 +180,7 @@ pub struct WorkflowGroup {
 /// Props for the curated landing sections (SSR-rendered)
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LandingSectionsData {
-    pub getting_started: Vec<TutorialData>,
+    pub featured: Vec<TutorialData>,
     pub workflows: Vec<WorkflowGroup>,
     pub families: Vec<FamilySummary>,
     pub recently_updated: Vec<TutorialData>,
@@ -1646,7 +1646,7 @@ pub fn TutorialCatalogFetch(
 
                                 // Curated sections (if data provided)
                                 {data.map(|d| {
-                                    let featured = d.getting_started;
+                                    let featured = d.featured;
                                     let workflows = d.workflows;
                                     let families = d.families;
                                     let recently_updated = d.recently_updated;

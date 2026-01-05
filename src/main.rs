@@ -129,7 +129,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("Warning: Failed to load curations config: {}", e);
                 eprintln!("Using default empty curations");
                 CurationsOutput {
-                    getting_started: vec![],
+                    featured: vec![],
                     workflows: std::collections::HashMap::new(),
                     recently_updated: tutorial_index.iter().take(8).cloned().collect(),
                 }
@@ -139,7 +139,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("Note: No curations file found at content/tutorial_curations.yaml");
         eprintln!("Using auto-generated recently_updated only");
         CurationsOutput {
-            getting_started: vec![],
+            featured: vec![],
             workflows: std::collections::HashMap::new(),
             recently_updated: tutorial_index.iter().take(8).cloned().collect(),
         }
@@ -163,8 +163,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         use std::collections::HashMap;
 
         // Convert curations to landing sections data
-        let getting_started: Vec<TutorialData> = curations_output
-            .getting_started
+        let featured: Vec<TutorialData> = curations_output
+            .featured
             .iter()
             .map(|e| TutorialData::from(e.clone()))
             .collect();
@@ -214,7 +214,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         covariates.sort_by(|a, b| a.0.cmp(&b.0));
 
         LandingSectionsData {
-            getting_started,
+            featured,
             workflows,
             families,
             recently_updated,
