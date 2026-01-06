@@ -344,7 +344,8 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
             </div>
             <div class=grid_class>
                 {items.into_iter().map(|item| {
-                    view! { <ToolCard item=item /> }
+                    let large_logo = matches!(category, ToolCategory::Notebooks);
+                    view! { <ToolCard item=item large_logo=large_logo /> }
                 }).collect_view()}
             </div>
         </section>
@@ -353,10 +354,16 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
 
 /// Individual tool card component
 #[component]
-fn ToolCard(item: ToolItem) -> impl IntoView {
+fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl IntoView {
     let logo_url = item.logo.clone().unwrap_or_default();
     let has_logo = !logo_url.is_empty();
     let first_char = item.title.chars().next().unwrap_or('?');
+
+    let logo_class = if large_logo {
+        "aspect-[4/3] w-full logo-tile logo-tile-lg"
+    } else {
+        "aspect-[4/3] w-full logo-tile"
+    };
 
     view! {
         <a
@@ -365,7 +372,7 @@ fn ToolCard(item: ToolItem) -> impl IntoView {
             rel="noopener noreferrer"
             class="resource-card group block"
         >
-            <div class="aspect-[4/3] w-full logo-tile">
+            <div class=logo_class>
                 {if has_logo {
                     view! {
                         <img

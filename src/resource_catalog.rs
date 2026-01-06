@@ -366,13 +366,13 @@ fn BookCardInner(item: ResourceItem) -> impl IntoView {
             rel="noopener noreferrer"
             class="resource-card group block"
         >
-            <div class="aspect-[3/4] w-full cover-frame">
+            <div class="aspect-[4/3] w-full cover-frame">
                 {if has_image {
                     view! {
                         <img
                             src=image_url
                             alt=item.title.clone()
-                            class="w-full h-full object-cover"
+                            class="w-full h-full object-contain"
                             loading="lazy"
                         />
                     }.into_any()

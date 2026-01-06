@@ -811,6 +811,12 @@ body {
     object-fit: contain;
   }
 
+  /* Larger logos for Notebooks section */
+  .logo-tile-lg img {
+    max-height: 8rem;    /* 128px */
+    max-width: 16rem;    /* 256px */
+  }
+
   [data-theme="dark"] .logo-tile {
     background: linear-gradient(
       135deg,
