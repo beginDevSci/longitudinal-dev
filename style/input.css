@@ -700,46 +700,6 @@ body {
     }
   }
 
-  /* Card content area */
-  .resource-card__content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: var(--card-padding);
-  }
-
-  /* Card media/image area */
-  .resource-card__media {
-    background: var(--card-media-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .resource-card__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform var(--card-transition);
-  }
-
-  .resource-card:hover .resource-card__media img {
-    transform: scale(1.05);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .resource-card:hover .resource-card__media img {
-      transform: none;
-    }
-  }
-
-  /* Card footer - pinned to bottom */
-  .resource-card__footer {
-    margin-top: auto;
-    padding-top: var(--spacing-3);
-  }
-
   /* ========================================
      COVER FRAME - Book cover treatment
      Reduces visual dominance of varied cover images
