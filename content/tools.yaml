@@ -1,0 +1,158 @@
+# Open Source Tools for Data Science
+# Enhanced with logo images from Nuxt prototype
+
+programming_languages:
+  - title: "Python"
+    url: "https://www.python.org/"
+    blurb: "General-purpose programming language widely used for data analysis, machine learning, and scientific computing."
+    logo: "/images/logos/python-logo.svg"
+
+  - title: "R"
+    url: "https://www.r-project.org/"
+    blurb: "Statistical computing language with extensive packages for data analysis and visualization."
+    logo: "/images/logos/r-logo.png"
+
+  - title: "Julia"
+    url: "https://julialang.org/"
+    blurb: "High-performance language for technical computing, combining ease of use with speed."
+    logo: "/images/logos/julia-logo.svg"
+
+  - title: "SQL"
+    url: "https://www.mysql.com/"
+    blurb: "Standard language for managing and querying relational databases."
+    logo: "/images/logos/sql-logo.svg"
+
+  - title: "C++"
+    url: "https://isocpp.org/"
+    blurb: "High-performance language often used for computationally intensive algorithms and system-level programming."
+    logo: "/images/logos/cpp-logo.svg"
+
+ides:
+  - title: "VS Code"
+    url: "https://code.visualstudio.com/"
+    blurb: "Lightweight, extensible code editor with support for multiple languages and integrated terminal."
+    logo: "/images/logos/vscodelogo.png"
+
+  - title: "RStudio"
+    url: "https://www.rstudio.com/"
+    blurb: "Integrated development environment designed specifically for R programming and data science."
+    logo: "/images/logos/rstudiologo.svg"
+
+  - title: "Neovim"
+    url: "https://neovim.io/"
+    blurb: "Highly configurable text editor built for efficient coding with extensible plugin architecture."
+    logo: "/images/logos/neovimlogo.svg"
+
+  - title: "Conda"
+    url: "https://docs.conda.io/"
+    blurb: "Package and environment manager for Python and R, simplifying dependency management."
+    logo: "/images/logos/condalogo.svg"
+
+  - title: "Emacs"
+    url: "https://www.gnu.org/software/emacs/"
+    blurb: "Extensible, customizable text editor with powerful support for programming and literate computing."
+    logo: "/images/logos/emacslogo.svg"
+
+  - title: "Zed"
+    url: "https://zed.dev/"
+    blurb: "Modern, high-performance code editor built for collaborative development."
+    logo: "/images/logos/zed-logo.png"
+
+version_control:
+  - title: "Git"
+    url: "https://git-scm.com/"
+    blurb: "Distributed version control system for tracking changes and collaborating on code."
+    logo: "/images/logos/git-logo.svg"
+
+  - title: "GitHub"
+    url: "https://github.com/"
+    blurb: "Web-based platform for hosting Git repositories with collaboration and CI/CD features."
+    logo: "/images/logos/github-logo.png"
+
+  - title: "GitLab"
+    url: "https://about.gitlab.com/"
+    blurb: "DevOps platform providing Git repository management, CI/CD, and project planning."
+    logo: "/images/logos/gitlab_logo.svg"
+
+  - title: "GitKraken"
+    url: "https://www.gitkraken.com/"
+    blurb: "Visual Git client with intuitive interface for managing repositories and branches."
+    logo: "/images/logos/gitkraken-logo.svg"
+
+  - title: "Gitea"
+    url: "https://gitea.io/en-us/"
+    blurb: "Lightweight, self-hosted Git service for teams preferring on-premises solutions."
+    logo: "/images/logos/gitea-logo.svg"
+
+data_formats:
+  - title: "Markdown"
+    url: "https://www.markdownguide.org/"
+    blurb: "Lightweight markup language for creating formatted text using plain-text syntax."
+    logo: "/images/logos/markdown-logo.png"
+
+  - title: "CSV"
+    url: "https://en.wikipedia.org/wiki/Comma-separated_values"
+    blurb: "Simple, widely-supported format for storing tabular data as plain text."
+    logo: "/images/logos/csv-logo.jpeg"
+
+  - title: "Apache Parquet"
+    url: "https://parquet.apache.org/"
+    blurb: "Columnar storage format optimized for efficient data processing and analytics."
+    logo: "/images/logos/parquet-logo.svg"
+
+  - title: "JSON"
+    url: "https://www.json.org/"
+    blurb: "Lightweight data interchange format that is easy to read and write."
+    logo: "/images/logos/json-logo.svg"
+
+  - title: "Apache Arrow"
+    url: "https://arrow.apache.org/"
+    blurb: "Cross-language development platform for in-memory analytics with columnar data."
+    logo: "/images/logos/arrow-logo.png"
+
+  - title: "XML"
+    url: "https://en.wikipedia.org/wiki/XML"
+    blurb: "Markup language for encoding documents in a format readable by both humans and machines."
+    logo: "/images/logos/xml-logo.webp"
+
+notebooks:
+  - title: "Quarto"
+    url: "https://quarto.org/"
+    blurb: "Open-source publishing system for creating reproducible documents, presentations, and websites."
+    logo: "/images/logos/quarto-logo.png"
+
+  - title: "Jupyter"
+    url: "https://jupyter.org/"
+    blurb: "Interactive computing environment for creating notebooks with code, visualizations, and narrative."
+    logo: "/images/logos/jupyter-logo.svg"
+
+  - title: "Observable"
+    url: "https://observablehq.com/"
+    blurb: "Collaborative platform for creating interactive data visualizations and exploratory analysis."
+    logo: "/images/logos/observable-logo.webp"
+
+databases:
+  - title: "PostgreSQL"
+    url: "https://www.postgresql.org/"
+    blurb: "Powerful open-source relational database with extensive features and reliability."
+    logo: "/images/logos/postgresql-logo.svg"
+
+  - title: "MySQL"
+    url: "https://www.mysql.com/"
+    blurb: "Popular open-source relational database known for speed and ease of use."
+    logo: "/images/logos/mysql-logo.svg"
+
+  - title: "DuckDB"
+    url: "https://duckdb.org/"
+    blurb: "In-process analytical database designed for fast queries on local data files."
+    logo: "/images/logos/duckdb-logo.svg"
+
+  - title: "MongoDB"
+    url: "https://www.mongodb.com/"
+    blurb: "Document-oriented NoSQL database for flexible, scalable data storage."
+    logo: "/images/logos/mongodb-logo.svg"
+
+  - title: "Redis"
+    url: "https://redis.io/"
+    blurb: "In-memory data store used for caching, real-time analytics, and message queuing."
+    logo: "/images/logos/redis-logo.svg"

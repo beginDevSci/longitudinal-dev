@@ -24,6 +24,8 @@ use longitudinal_dev::tutorial_catalog::{
 };
 use longitudinal_writer::WriterApp;
 use pages::about::AboutPage;
+use pages::resources::{load_resources, ResourcesPage};
+use pages::tools::{load_tools, ToolsPage};
 use sha2::{Digest, Sha256};
 use std::fs::{create_dir_all, read_to_string, write};
 use std::path::PathBuf;
@@ -279,11 +281,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(about_dir.join("index.html"), &about_html)?;
     eprintln!("Wrote {}", about_dir.join("index.html").display());
 
+    // 3b. Generate Resources page at /resources/index.html
+    let resources_data = load_resources();
+    let resources_html = view! {
+        <SiteLayout options=opts.clone()>
+            <ResourcesPage resources=resources_data />
+        </SiteLayout>
+    }
+    .to_html();
+
+    let resources_dir = site_root.join("resources");
+    create_dir_all(&resources_dir)?;
+    write(resources_dir.join("index.html"), &resources_html)?;
+    eprintln!("Wrote {}", resources_dir.join("index.html").display());
+
+    // 3c. Generate Tools page at /tools/index.html
+    let tools_data = load_tools();
+    let tools_html = view! {
+        <SiteLayout options=opts.clone()>
+            <ToolsPage tools=tools_data />
+        </SiteLayout>
+    }
+    .to_html();
+
+    let tools_dir = site_root.join("tools");
+    create_dir_all(&tools_dir)?;
+    write(tools_dir.join("index.html"), &tools_html)?;
+    eprintln!("Wrote {}", tools_dir.join("index.html").display());
+
     // 4. Generate one page per tutorial at /tutorials/<family>/<slug>/index.html
     // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
     let posts_dir = site_root.join("posts");
     create_dir_all(&posts_dir)?;
-
     for post in all_posts.into_iter() {
         let slug = post.slug.to_string();
 

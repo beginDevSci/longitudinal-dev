@@ -207,6 +207,39 @@
   --color-code-bg: rgb(15, 23, 42);                   /* slate-900 - dark background */
   --color-code-border: var(--color-accent-500);       /* teal accent border */
   --color-code-text: var(--color-neutral-100);        /* light text on dark */
+
+  /* ========================================
+     INTERACTIVE CARD TOKENS
+     For resource cards, tool cards, and similar interactive surfaces
+     ======================================== */
+
+  /* Card structure */
+  --card-radius: var(--radius-2xl);                   /* 24px - consistent rounded corners */
+  --card-padding: var(--spacing-4);                   /* 16px - internal padding */
+  --card-padding-lg: var(--spacing-6);                /* 24px - larger card padding */
+  --card-gap: var(--spacing-6);                       /* 24px - grid gap between cards */
+
+  /* Card colors */
+  --card-bg: var(--color-bg-surface);                 /* White surface */
+  --card-bg-hover: var(--color-bg-surface);           /* Same on hover (shadow provides depth) */
+  --card-border: var(--color-border-default);         /* Default border */
+  --card-border-hover: var(--color-accent-500);       /* Accent on hover */
+
+  /* Card shadows */
+  --card-shadow: var(--shadow-xs);                    /* Subtle resting shadow */
+  --card-shadow-hover: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); /* Elevated on hover */
+
+  /* Card transitions */
+  --card-transition: 200ms ease;                      /* Smooth, not too fast */
+
+  /* Card focus ring */
+  --card-focus-ring: var(--color-focus-ring);         /* Accent color */
+  --card-focus-ring-offset: 2px;                      /* Offset from card edge */
+  --card-focus-ring-width: 2px;                       /* Ring thickness */
+
+  /* Media container (for logos, covers) */
+  --card-media-bg: var(--color-bg-subtle);            /* Subtle background for media areas */
+  --card-media-radius: var(--radius-xl);              /* Slightly smaller than card */
 }
 
 /* ========================================
@@ -272,6 +305,15 @@
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+
+  /* Card tokens - dark mode */
+  --card-bg: var(--color-bg-surface);
+  --card-bg-hover: var(--color-bg-surface);
+  --card-border: var(--color-border-default);
+  --card-border-hover: var(--color-accent-400);
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --card-shadow-hover: 0 10px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --card-media-bg: var(--color-bg-subtle);
 
   /* Icon filters - invert dark icons for visibility on dark backgrounds */
   .download-btn-icon--invert {
@@ -387,6 +429,15 @@
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6);
+
+  /* Card tokens - Dracula */
+  --card-bg: var(--color-bg-surface);
+  --card-bg-hover: var(--color-bg-surface);
+  --card-border: var(--color-border-default);
+  --card-border-hover: #bd93f9;  /* Dracula purple */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --card-shadow-hover: 0 10px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --card-media-bg: var(--color-bg-subtle);
 
   /* Icon filters - invert dark icons with purple tint for Dracula aesthetic */
   .download-btn-icon--invert {
@@ -607,6 +658,167 @@ body {
     .card-hover:focus-within {
       transform: none;
     }
+  }
+
+  /* ========================================
+     RESOURCE CARD - Interactive card for Resources/Tools pages
+     Uses card design tokens for consistent styling
+     ======================================== */
+
+  .resource-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition:
+      border-color var(--card-transition),
+      box-shadow var(--card-transition),
+      transform var(--card-transition);
+  }
+
+  .resource-card:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .resource-card:focus-visible {
+    outline: none;
+    border-color: var(--card-focus-ring);
+    box-shadow:
+      0 0 0 var(--card-focus-ring-offset) var(--card-bg),
+      0 0 0 calc(var(--card-focus-ring-offset) + var(--card-focus-ring-width)) var(--card-focus-ring);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .resource-card,
+    .resource-card:hover {
+      transform: none;
+    }
+  }
+
+  /* ========================================
+     COVER FRAME - Book cover treatment
+     Reduces visual dominance of varied cover images
+     ======================================== */
+
+  .cover-frame {
+    position: relative;
+    background: var(--card-media-bg);
+    overflow: hidden;
+  }
+
+  /* Subtle vignette overlay to unify contrast */
+  .cover-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.03) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Inner border to separate cover from card edge */
+  .cover-frame img {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="dark"] .cover-frame::after,
+  [data-theme="dracula"] .cover-frame::after {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.15) 100%
+    );
+  }
+
+  [data-theme="dark"] .cover-frame img,
+  [data-theme="dracula"] .cover-frame img {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ========================================
+     LOGO TILE - Tool logo wrapper
+     Ensures consistent visual weight for varied logos
+     ======================================== */
+
+  .logo-tile {
+    background: linear-gradient(
+      135deg,
+      var(--color-neutral-50) 0%,
+      var(--color-neutral-100) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .logo-tile img {
+    max-height: 6rem;    /* 96px - larger logos for better visibility */
+    max-width: 12rem;    /* 192px */
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Larger logos for Notebooks section */
+  .logo-tile-lg img {
+    max-height: 8rem;    /* 128px */
+    max-width: 16rem;    /* 256px */
+  }
+
+  [data-theme="dark"] .logo-tile {
+    background: linear-gradient(
+      135deg,
+      var(--color-neutral-800) 0%,
+      var(--color-neutral-900) 100%
+    );
+  }
+
+  [data-theme="dracula"] .logo-tile {
+    background: linear-gradient(
+      135deg,
+      #44475a 0%,
+      #282a36 100%
+    );
+  }
+
+  /* Logo placeholder for tools without logos */
+  .logo-placeholder {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-100) 0%,
+      var(--color-accent-50) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent-600);
+  }
+
+  [data-theme="dark"] .logo-placeholder,
+  [data-theme="dracula"] .logo-placeholder {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 182, 212, 0.2) 0%,
+      rgba(6, 182, 212, 0.1) 100%
+    );
+    color: var(--color-accent-400);
   }
 
   /* ========================================

@@ -204,7 +204,7 @@ pub fn EditorModalIsland(
                 let result: Result<(), JsValue> = async {
                     let window = leptos::web_sys::window().ok_or(JsValue::from_str("No window"))?;
 
-                    let mut opts = leptos::web_sys::RequestInit::new();
+                    let opts = leptos::web_sys::RequestInit::new();
                     opts.set_method("POST");
                     opts.set_mode(leptos::web_sys::RequestMode::Cors);
 

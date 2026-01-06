@@ -8,8 +8,10 @@ mod copy_code_button;
 mod edit_page_button;
 mod editor_modal_island;
 mod guide_interactivity;
+pub mod resource_catalog;
 mod section_container;
 mod theme_toggle;
+pub mod tools_catalog;
 mod work_in_progress_badge;
 
 // New architecture modules
