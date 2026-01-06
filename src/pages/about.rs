@@ -9,9 +9,22 @@ pub fn AboutPage() -> impl IntoView {
                 <section class="space-y-4">
                     <p class="text-sm uppercase tracking-[0.3em] text-teal-300">"About"</p>
                     <p class="text-lg text-slate-200 leading-relaxed">
-                        "This open-source project is a collaborative, and community-driven resource hub dedicated to longitudinal data science. Content includes tutorials, open-source tools, code examples, and documentation."
+                        "Longitudinal.dev is a collaborative, community-driven resource hub for longitudinal data science, developed by members of the "
+                        <a
+                            href="https://abcdstudy.org"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-teal-400 hover:text-teal-300 transition-colors font-medium"
+                        >
+                            "ABCD Study® Biostatistics Working Group"
+                        </a>
+                        ". Content includes tutorials, open-source tools, code examples, and documentation."
                     </p>
                 </section>
+
+                <blockquote class="border-l-4 border-teal-600/50 pl-4 py-2 text-slate-400 text-sm italic">
+                    "Please note that this project is not officially associated with or endorsed by the ABCD Study®, and all opinions expressed within are solely those of the project maintainers."
+                </blockquote>
 
                 <section class="space-y-4">
                     <p class="text-sm uppercase tracking-[0.3em] text-teal-300">"Community and Collaboration"</p>
