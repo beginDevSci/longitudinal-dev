@@ -112,11 +112,11 @@ videos:
     blurb: "Supervised learning with a focus on regression and classification methods."
 
 tutorials:
-  - title: "DataCamp R Programming Tutorials"
-    url: "https://www.datacamp.com/tutorial/category/r-programming"
-    blurb: "R tutorials with tips and use cases to grow your programming skills."
-    platform: "DataCamp"
-    access: "freemium"
+  - title: "Introduction to R"
+    url: "https://johnmuschelli.com/intro_to_r/index.html"
+    blurb: "Comprehensive R course from Johns Hopkins Bloomberg School of Public Health."
+    platform: "Johns Hopkins"
+    access: "open"
 
   - title: "{swirl} Learn R, in R"
     url: "https://swirlstats.com/"

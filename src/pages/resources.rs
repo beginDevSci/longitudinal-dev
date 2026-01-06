@@ -159,7 +159,7 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
                 <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"R Learning Resources"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
-                        "A curated, browseable collection of R learning resources. Open-source-first, with clearly labeled freemium resources commonly used in research workflows."
+                        "A curated, browseable collection of open-source R learning resources for research workflows."
                     </p>
                 </div>
             </section>
