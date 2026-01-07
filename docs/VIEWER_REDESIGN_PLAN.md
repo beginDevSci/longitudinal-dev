@@ -180,20 +180,27 @@ Connect viewer to surrounding educational content
 
 Ensure viewer works across devices and for all users
 
-- [ ] **Step 6.1: Responsive Breakpoints**
-  - [ ] Define behavior for tablet (stack sidebars below canvas)
-  - [ ] Define behavior for mobile (overlay panels, swipe to access)
-  - [ ] Ensure touch interactions work (pinch to zoom, swipe to rotate)
+- [x] **Step 6.1: Responsive Breakpoints**
+  - [x] Define behavior for tablet (768-1023px): Canvas prominent, controls wrap below
+  - [x] Define behavior for mobile (<768px): Canvas first via CSS order, controls stack
+  - [x] Touch interactions: Pinch to zoom, drag to rotate
+  - [x] CSS responsive classes: brain-viewer-layout, brain-viewer-sidebar, brain-viewer-canvas-wrapper
+  - [x] Touch-friendly targets via @media (pointer: coarse)
+  - [x] Responsive canvas height: h-64 → h-80 → h-96 → h-[28rem]
 
-- [ ] **Step 6.2: Keyboard Navigation**
-  - [ ] Ensure all controls are keyboard accessible
-  - [ ] Add keyboard shortcuts for common actions (R=reset, F=fullscreen)
-  - [ ] Visible focus indicators
+- [x] **Step 6.2: Keyboard Navigation**
+  - [x] All controls keyboard accessible (buttons, dropdowns have focus states)
+  - [x] Existing keyboard shortcuts: Arrow keys (rotate), +/- (zoom), R (reset), F (fullscreen), Escape (clear/exit), 1-8 (presets)
+  - [x] Visible focus indicators via focus:ring-2 on all interactive elements
+  - [x] CSS :focus-visible for high-visibility focus outlines
+  - [x] Skip link CSS prepared (can be added to HTML structure if needed)
 
-- [ ] **Step 6.3: Screen Reader Support**
-  - [ ] Add ARIA labels to all controls
-  - [ ] Announce state changes (e.g., "Now showing Sex contrast")
-  - [ ] Provide text alternative for visualization (summary stats)
+- [x] **Step 6.3: Screen Reader Support**
+  - [x] ARIA labels on all interactive elements (buttons, dropdowns, canvas)
+  - [x] role="application" on main container, role="img" on canvas, role="toolbar" on actions
+  - [x] aria-live="polite" region for status announcements
+  - [x] Screen reader summary of current visualization state (hemisphere, statistic, contrast, threshold)
+  - [x] Error messages use role="alert" and aria-live="assertive"
 
 ---
 
@@ -228,7 +235,8 @@ Final refinements
 | 4        | Phase 3   | Progressive disclosure addresses core tension   | ✅ Done |
 | 5        | Phase 4   | Canvas enhancements (controls, hints, fullscreen) | ✅ Done |
 | 6        | Phase 5   | Tutorial integration (contextual help, URL state) | ✅ Done |
-| 7        | Phase 6-7 | Polish after core UX is solid                   | Pending |
+| 7        | Phase 6   | Responsive design & Accessibility               | ✅ Done |
+| 8        | Phase 7   | Polish & Performance                            | Pending |
 
 ---
 

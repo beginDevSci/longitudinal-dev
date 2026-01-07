@@ -4163,3 +4163,214 @@ body {
 .loading-shimmer {
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+/* ========================================
+   BRAIN VIEWER - Responsive Layout
+   ======================================== */
+
+/* Base mobile styles (< 768px) */
+.brain-viewer-container {
+  width: 100%;
+}
+
+/* Mobile: Control panel becomes collapsible horizontal bar */
+.brain-viewer-sidebar {
+  width: 100%;
+  order: 2; /* Canvas first on mobile */
+}
+
+.brain-viewer-canvas-wrapper {
+  order: 1;
+  min-height: 280px; /* Minimum canvas height on mobile */
+}
+
+.brain-viewer-right-panel {
+  width: 100%;
+  order: 3;
+}
+
+/* Hide less important elements on mobile by default */
+@media (max-width: 767px) {
+  /* Collapse sidebar sections by default on mobile */
+  .brain-viewer-sidebar .collapsible-section {
+    --section-default-collapsed: true;
+  }
+
+  /* Smaller on-canvas controls on mobile */
+  .brain-viewer-canvas-controls {
+    bottom: var(--spacing-2);
+    right: var(--spacing-2);
+    gap: 0.25rem;
+  }
+
+  .brain-viewer-canvas-controls button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Stack action buttons vertically on narrow screens */
+  .brain-viewer-actions {
+    flex-direction: column;
+  }
+
+  /* Smaller text for mobile */
+  .brain-viewer-right-panel {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet: 768px - 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .brain-viewer-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(350px, 1fr) auto;
+    gap: var(--spacing-3);
+  }
+
+  .brain-viewer-sidebar {
+    width: 100%;
+    order: 1;
+  }
+
+  /* Sidebar becomes horizontal scrollable on tablet */
+  .brain-viewer-sidebar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  .brain-viewer-sidebar-inner > * {
+    flex: 1 1 auto;
+    min-width: 200px;
+    max-width: 300px;
+  }
+
+  .brain-viewer-canvas-wrapper {
+    order: 2;
+    min-height: 400px;
+  }
+
+  .brain-viewer-right-panel {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* Desktop: 1024px+ (existing lg: breakpoint behavior) */
+@media (min-width: 1024px) {
+  .brain-viewer-layout {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-4);
+  }
+
+  .brain-viewer-sidebar {
+    width: 16rem; /* 256px */
+    flex-shrink: 0;
+    order: 1;
+  }
+
+  .brain-viewer-canvas-wrapper {
+    flex: 1;
+    order: 2;
+    min-height: 400px;
+  }
+
+  .brain-viewer-right-panel {
+    width: 16rem; /* 256px */
+    flex-shrink: 0;
+    order: 3;
+  }
+}
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  /* Larger touch targets for buttons */
+  .brain-viewer-canvas-controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Larger toggle buttons */
+  .brain-viewer-sidebar button,
+  .brain-viewer-sidebar select {
+    min-height: 44px;
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+
+  /* Show touch hint on touch devices */
+  .brain-viewer-touch-hint {
+    display: block;
+  }
+}
+
+@media (pointer: fine) {
+  .brain-viewer-touch-hint {
+    display: none;
+  }
+}
+
+/* Reduced motion: disable shimmer and pulse */
+@media (prefers-reduced-motion: reduce) {
+  .loading-shimmer,
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* ========================================
+   BRAIN VIEWER - Keyboard Focus Styles
+   ======================================== */
+
+/* High-visibility focus for keyboard navigation */
+.brain-viewer-container *:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Skip link for keyboard users (visually hidden until focused) */
+.brain-viewer-skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  z-index: 100;
+  text-decoration: none;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  transition: top 0.2s ease;
+}
+
+.brain-viewer-skip-link:focus {
+  top: var(--spacing-2);
+}
+
+/* Focus within indicator for control panel sections */
+.brain-viewer-sidebar:focus-within {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+/* Keyboard shortcut hints in tooltips */
+.brain-viewer-canvas-controls button[title] {
+  position: relative;
+}
+
+/* Tab order indicator (for debugging - normally hidden) */
+[data-debug-tab-order] *:focus {
+  position: relative;
+}
+
+[data-debug-tab-order] *:focus::after {
+  content: attr(tabindex);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
