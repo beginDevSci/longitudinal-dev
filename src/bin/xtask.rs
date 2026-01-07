@@ -157,6 +157,17 @@ fn check_wasm_target() -> Result<(), String> {
 fn build_wasm() -> Result<(), String> {
     println!("📦 Building WASM...");
 
+    // Base features for hydrate build
+    let mut features = vec!["hydrate".to_string()];
+
+    // Check for optional webgpu-viewer feature (passed via WEBGPU_VIEWER=1 or in parent cargo features)
+    if env::var("WEBGPU_VIEWER").is_ok() {
+        println!("   Including webgpu-viewer feature");
+        features.push("webgpu-viewer".to_string());
+    }
+
+    let features_str = features.join(",");
+
     let status = Command::new("cargo")
         .args([
             "build",
@@ -166,7 +177,7 @@ fn build_wasm() -> Result<(), String> {
             "--lib",
             "--no-default-features",
             "--features",
-            "hydrate",
+            &features_str,
         ])
         .status()
         .map_err(|e| format!("❌ Failed to run cargo: {e}"))?;
