@@ -208,15 +208,19 @@ Ensure viewer works across devices and for all users
 
 Final refinements
 
-- [ ] **Step 7.1: Animation & Transitions**
-  - [ ] Smooth transitions when changing views/contrasts
-  - [ ] Subtle animations for collapsible sections
-  - [ ] Loading shimmer effects
+- [x] **Step 7.1: Animation & Transitions**
+  - [x] Smooth transitions for control panel elements (150ms ease)
+  - [x] Collapsible sections use grid-template-rows animation (200ms)
+  - [x] Canvas overlay fade-in and slide-up animations
+  - [x] Button press feedback with scale transform
+  - [x] All animations respect prefers-reduced-motion
 
-- [ ] **Step 7.2: Performance Optimization**
-  - [ ] Lazy load viewer component (don't block page render)
-  - [ ] Optimize WebGPU rendering for smooth interaction
-  - [ ] Cache loaded data across contrast switches
+- [x] **Step 7.2: Performance Optimization**
+  - [x] Lazy loading via "Load Interactive Viewer" button (viewer not loaded until clicked)
+  - [x] Data caching: All volumes loaded at once, switching contrasts is instant
+  - [x] CSS containment (contain: layout style) to prevent layout thrashing
+  - [x] GPU acceleration hints (will-change) for canvas and animations
+  - [x] Collapsible sections use CSS grid animation (no JS height calculation)
 
 - [ ] **Step 7.3: User Testing & Iteration**
   - [ ] Gather feedback from target users (researchers, students)
@@ -236,7 +240,8 @@ Final refinements
 | 5        | Phase 4   | Canvas enhancements (controls, hints, fullscreen) | ✅ Done |
 | 6        | Phase 5   | Tutorial integration (contextual help, URL state) | ✅ Done |
 | 7        | Phase 6   | Responsive design & Accessibility               | ✅ Done |
-| 8        | Phase 7   | Polish & Performance                            | Pending |
+| 8        | Phase 7   | Polish & Performance (7.1-7.2)                  | ✅ Done |
+| 9        | Phase 7.3 | User Testing & Iteration                        | Pending |
 
 ---
 

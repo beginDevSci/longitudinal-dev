@@ -4320,6 +4320,129 @@ body {
 }
 
 /* ========================================
+   BRAIN VIEWER - Animations & Transitions
+   ======================================== */
+
+/* Smooth transitions for control panel elements */
+.brain-viewer-sidebar select,
+.brain-viewer-sidebar input,
+.brain-viewer-sidebar button {
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+/* Canvas overlay transitions */
+.brain-viewer-canvas-wrapper > .absolute {
+  transition: opacity 200ms ease-out;
+}
+
+/* Loading overlay fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.brain-viewer-canvas-wrapper .loading-overlay {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Error overlay slide-up */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brain-viewer-canvas-wrapper .error-overlay {
+  animation: slideUp 300ms ease-out;
+}
+
+/* On-canvas controls hover effect */
+.brain-viewer-canvas-controls button {
+  transition: background-color 150ms ease, transform 100ms ease;
+}
+
+.brain-viewer-canvas-controls button:active {
+  transform: scale(0.95);
+}
+
+/* Collapsible section smooth height animation */
+.collapsible-section .grid {
+  transition: grid-template-rows 200ms ease-out;
+}
+
+/* Button press feedback */
+.brain-viewer-actions button:active {
+  transform: scale(0.97);
+  transition: transform 50ms ease;
+}
+
+/* Interaction hint animations */
+@keyframes hintFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -5px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Respect reduced motion preference for all viewer animations */
+@media (prefers-reduced-motion: reduce) {
+  .brain-viewer-sidebar select,
+  .brain-viewer-sidebar input,
+  .brain-viewer-sidebar button,
+  .brain-viewer-canvas-wrapper > .absolute,
+  .brain-viewer-canvas-controls button,
+  .collapsible-section .grid,
+  .brain-viewer-actions button {
+    transition: none;
+  }
+
+  .brain-viewer-canvas-wrapper .loading-overlay,
+  .brain-viewer-canvas-wrapper .error-overlay {
+    animation: none;
+  }
+}
+
+/* ========================================
+   BRAIN VIEWER - Performance Optimizations
+   ======================================== */
+
+/* GPU acceleration for canvas container */
+.brain-viewer-canvas-wrapper {
+  will-change: contents;
+  contain: layout style;
+}
+
+/* Promote canvas to its own compositing layer */
+.brain-viewer-canvas-wrapper canvas {
+  will-change: transform;
+}
+
+/* Optimize overlay transitions */
+.brain-viewer-canvas-controls,
+.brain-viewer-canvas-wrapper .absolute {
+  contain: layout paint;
+}
+
+/* Prevent layout thrashing from sidebar animations */
+.brain-viewer-sidebar {
+  contain: layout style;
+}
+
+/* Hardware acceleration for collapsible sections */
+.collapsible-section .grid {
+  will-change: grid-template-rows;
+}
+
+/* ========================================
    BRAIN VIEWER - Keyboard Focus Styles
    ======================================== */
 
