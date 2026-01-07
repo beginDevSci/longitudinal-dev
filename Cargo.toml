@@ -135,6 +135,11 @@ hydrate = ["leptos/hydrate", "leptos/islands", "wasm-bindgen"]
 # Legacy embedded catalog mode (for rollback if fetch mode has issues)
 # To enable: add "embedded-catalog" to features in bin-features
 embedded-catalog = []
+# WebGPU brain viewer (opt-in, adds significant WASM bundle size)
+# When enabled, viewer blocks render interactive 3D surfaces via wgpu.
+# When disabled, viewer blocks show static fallback images.
+# To enable: add "webgpu-viewer" to lib-features in [package.metadata.leptos]
+webgpu-viewer = []
 
 [package.metadata.leptos]
 # single-package + static-site output

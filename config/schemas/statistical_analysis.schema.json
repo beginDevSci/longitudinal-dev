@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Statistical Analysis Section - Flexible Blocks (v2)",
-  "description": "Simplified block-based system with 3 types: code, output, interpretation. Author controls exact ordering with zero constraints.",
+  "description": "Simplified block-based system with 4 types: code, output, interpretation, viewer. Author controls exact ordering with zero constraints.",
 
   "type": "object",
   "required": ["content_blocks"],
@@ -16,7 +16,8 @@
         "oneOf": [
           { "$ref": "#/definitions/CodeBlock" },
           { "$ref": "#/definitions/OutputBlock" },
-          { "$ref": "#/definitions/InterpretationBlock" }
+          { "$ref": "#/definitions/InterpretationBlock" },
+          { "$ref": "#/definitions/ViewerBlock" }
         ]
       }
     }
@@ -171,6 +172,97 @@
                 "The significant random slope variance (0.234) suggests substantial individual differences in trajectories. Some youth show steeper increases than the average trend.",
                 "The Poisson model shows better fit (AIC=5234) compared to the negative binomial alternative (AIC=5298), suggesting that overdispersion is not a major concern in this dataset."
               ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "ViewerBlock": {
+      "type": "object",
+      "required": ["type", "data"],
+      "description": "Interactive viewer block for WebGPU-powered 3D visualizations (e.g., brain surfaces). Shows static fallback when WebGPU is unavailable. Requires webgpu-viewer feature flag for full interactivity.",
+      "properties": {
+        "type": {
+          "const": "viewer",
+          "description": "Block type discriminator"
+        },
+        "data": {
+          "type": "object",
+          "required": ["manifest_path"],
+          "properties": {
+            "manifest_path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path to the viewer manifest JSON file that describes available surfaces, analyses, contrasts, and default settings.",
+              "examples": [
+                "/data/blmm/manifest.json",
+                "/data/viewers/cortical_thickness/manifest.json"
+              ]
+            },
+            "overrides": {
+              "type": "object",
+              "description": "Optional override values for this viewer instance. These take precedence over defaults in the manifest.",
+              "properties": {
+                "analysis": {
+                  "type": "string",
+                  "description": "Analysis design to display (e.g., 'des1', 'des2')"
+                },
+                "statistic": {
+                  "type": "string",
+                  "description": "Statistic type to display (e.g., 'conT', 'conTlp', 'beta', 'sigma2')"
+                },
+                "volume_idx": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Contrast/volume index (0-based)"
+                },
+                "colormap": {
+                  "type": "string",
+                  "description": "Colormap name (e.g., 'coolwarm', 'viridis')"
+                },
+                "threshold": {
+                  "type": "number",
+                  "description": "Threshold value for display (e.g., 2.0 for |t| > 2)"
+                },
+                "hemisphere": {
+                  "type": "string",
+                  "enum": ["lh", "rh", "both"],
+                  "description": "Hemisphere to display"
+                }
+              },
+              "additionalProperties": false
+            },
+            "caption": {
+              "type": "string",
+              "description": "Optional caption displayed below the viewer",
+              "examples": [
+                "Interactive BLMM t-statistics viewer. Explore different contrasts and analysis designs.",
+                "Cortical thickness mapped onto the brain surface. Use controls to rotate and zoom."
+              ]
+            },
+            "fallback_image": {
+              "type": "string",
+              "description": "Static fallback image path shown when WebGPU is unavailable or viewer initialization fails",
+              "examples": [
+                "/stage4-artifacts/blmm-interpreting-results/dual_hemisphere.png",
+                "/images/viewers/cortical_thickness_static.png"
+              ]
+            },
+            "fallback_alt": {
+              "type": "string",
+              "description": "Alt text for the fallback image (accessibility)",
+              "examples": [
+                "Static BLMM t-statistics for both hemispheres",
+                "Cortical thickness visualization (static fallback)"
+              ]
+            },
+            "auto_start": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, initialize viewer immediately on page load. If false (default), show 'Load 3D Viewer' button to avoid loading heavy WebGPU code unnecessarily."
             }
           },
           "additionalProperties": false

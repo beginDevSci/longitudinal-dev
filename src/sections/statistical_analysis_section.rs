@@ -4,13 +4,14 @@
 //! - Code blocks: Display code snippets with syntax highlighting
 //! - Output blocks: Display results (text, tables, or images)
 //! - Note blocks: Interpretation callout cards
+//! - Viewer blocks: Interactive WebGPU visualizations (with static fallback)
 //!
 //! All blocks are repeatable and author-controlled ordering.
 
 use leptos::prelude::*;
 
 use crate::models::statistical_analysis::{
-    CodeData, ContentBlock, NoteData, OutputData, OutputFormat, StatsModel,
+    CodeData, ContentBlock, NoteData, OutputData, OutputFormat, StatsModel, ViewerData,
 };
 use crate::ui::StatsTaskCard;
 
@@ -51,6 +52,7 @@ fn render_content_block(block: ContentBlock, key: String, index: usize) -> impl 
         ContentBlock::Code(data) => render_code_block(data, key, index).into_any(),
         ContentBlock::Output(data) => render_output_block(data, key, index).into_any(),
         ContentBlock::Note(data) => render_note_block(data, key).into_any(),
+        ContentBlock::Viewer(data) => render_viewer_block(data, key).into_any(),
     }
 }
 
@@ -181,6 +183,75 @@ fn render_note_block(data: NoteData, key: String) -> impl IntoView {
             </div>
             <div class="panel-title">{data.title.to_string()}</div>
             <div class="note-content prose prose-sm mt-4" inner_html={data.content.to_string()} />
+        </div>
+    }
+}
+
+/// Render interactive viewer block (placeholder - shows fallback until WebGPU viewer is implemented)
+///
+/// When the `webgpu-viewer` feature is enabled, this will render the interactive
+/// BrainViewerIsland component. Until then, it shows the fallback image or a
+/// placeholder message.
+fn render_viewer_block(data: ViewerData, key: String) -> impl IntoView {
+    let fallback_alt = data
+        .fallback_alt
+        .as_ref()
+        .map(|a| a.to_string())
+        .unwrap_or_else(|| "Interactive visualization (static fallback)".to_string());
+
+    let caption = data.caption.map(|c| c.to_string());
+
+    view! {
+        <div
+            data-testid={format!("stats-v2:viewer:{key}")}
+            class="mt-6"
+        >
+            // Placeholder container for future interactive viewer
+            <div class="viewer-container rounded-lg border border-default bg-subtle overflow-hidden">
+                {if let Some(fallback_src) = data.fallback_image {
+                    // Show fallback image
+                    view! {
+                        <figure class="figure-frame">
+                            <img
+                                src={fallback_src.to_string()}
+                                alt={fallback_alt.clone()}
+                                class="w-full"
+                                loading="lazy"
+                            />
+                            // Overlay indicating interactive version coming
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200">
+                                <div class="text-center text-white p-4">
+                                    <svg class="w-12 h-12 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                    </svg>
+                                    <p class="text-sm font-medium">"Interactive 3D viewer coming soon"</p>
+                                </div>
+                            </div>
+                        </figure>
+                    }.into_any()
+                } else {
+                    // No fallback image - show placeholder card
+                    view! {
+                        <div class="flex flex-col items-center justify-center p-12 text-center">
+                            <svg class="w-16 h-16 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                            </svg>
+                            <p class="text-lg font-medium text-secondary mb-2">"Interactive Brain Viewer"</p>
+                            <p class="text-sm text-muted max-w-md">
+                                "A WebGPU-powered 3D brain surface viewer will be available here. "
+                                "Requires a browser with WebGPU support."
+                            </p>
+                        </div>
+                    }.into_any()
+                }}
+            </div>
+
+            // Caption
+            {caption.map(|cap| view! {
+                <figcaption class="figure-caption mt-2">
+                    {cap}
+                </figcaption>
+            })}
         </div>
     }
 }

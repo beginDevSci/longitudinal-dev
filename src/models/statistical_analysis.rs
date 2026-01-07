@@ -2,7 +2,7 @@
 //!
 //! This module defines the v2 structure for Statistical Analysis content:
 //! - Fully flexible ordering of content blocks
-//! - Three block types: code, output, interpretation (note)
+//! - Four block types: code, output, interpretation (note), viewer (interactive)
 //! - No constraints on quantity or relationships
 //!
 //! Content is authored in JSON and validated at build time.
@@ -33,6 +33,9 @@ pub enum ContentBlock {
 
     #[serde(rename = "note")]
     Note(NoteData),
+
+    #[serde(rename = "viewer")]
+    Viewer(ViewerData),
 }
 
 /// Code block data - displays code snippets with syntax highlighting
@@ -96,6 +99,81 @@ pub struct NoteData {
     pub content: Cow<'static, str>,
 }
 
+/// Interactive viewer block data - WebGPU-powered visualizations (e.g., brain surfaces)
+///
+/// Renders an interactive 3D viewer when WebGPU is available, with graceful
+/// fallback to a static image when not supported or on error.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ViewerData {
+    /// Path to manifest JSON that describes surfaces, contrasts, and defaults.
+    /// Example: "/data/blmm/manifest.json"
+    pub manifest_path: Cow<'static, str>,
+
+    /// Optional override values for this viewer instance.
+    /// These take precedence over defaults specified in the manifest.
+    #[serde(default, skip_serializing_if = "ViewerOverrides::is_empty")]
+    pub overrides: ViewerOverrides,
+
+    /// Optional label/caption displayed below the viewer.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub caption: Option<Cow<'static, str>>,
+
+    /// Static fallback image path (shown if WebGPU unavailable or viewer fails).
+    /// Should point to a representative static render of the visualization.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fallback_image: Option<Cow<'static, str>>,
+
+    /// Alt text for the fallback image (accessibility).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fallback_alt: Option<Cow<'static, str>>,
+
+    /// If false (default), show a "Load 3D Viewer" button instead of auto-initializing.
+    /// Recommended false to avoid loading heavy WASM/WebGPU code on every page view.
+    #[serde(default)]
+    pub auto_start: bool,
+}
+
+/// Override values for viewer configuration.
+/// All fields are optional; unset fields use manifest defaults.
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+pub struct ViewerOverrides {
+    /// Analysis design to display (e.g., "des1", "des2")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub analysis: Option<Cow<'static, str>>,
+
+    /// Statistic type to display (e.g., "conT", "conTlp", "beta", "sigma2")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub statistic: Option<Cow<'static, str>>,
+
+    /// Contrast/volume index (0-based)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volume_idx: Option<u32>,
+
+    /// Colormap name (e.g., "coolwarm", "viridis")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub colormap: Option<Cow<'static, str>>,
+
+    /// Threshold value for display (e.g., 2.0 for |t| > 2)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub threshold: Option<f32>,
+
+    /// Hemisphere to display: "lh", "rh", or "both"
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hemisphere: Option<Cow<'static, str>>,
+}
+
+impl ViewerOverrides {
+    /// Returns true if all override fields are None (used for skip_serializing_if)
+    pub fn is_empty(&self) -> bool {
+        self.analysis.is_none()
+            && self.statistic.is_none()
+            && self.volume_idx.is_none()
+            && self.colormap.is_none()
+            && self.threshold.is_none()
+            && self.hemisphere.is_none()
+    }
+}
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -138,20 +216,22 @@ impl StatsModel {
         warnings
     }
 
-    /// Count blocks by type
-    pub fn count_blocks(&self) -> (usize, usize, usize) {
+    /// Count blocks by type (code, output, note, viewer)
+    pub fn count_blocks(&self) -> (usize, usize, usize, usize) {
         let mut code_count = 0;
         let mut output_count = 0;
         let mut note_count = 0;
+        let mut viewer_count = 0;
 
         for block in &self.content_blocks {
             match block {
                 ContentBlock::Code(_) => code_count += 1,
                 ContentBlock::Output(_) => output_count += 1,
                 ContentBlock::Note(_) => note_count += 1,
+                ContentBlock::Viewer(_) => viewer_count += 1,
             }
         }
 
-        (code_count, output_count, note_count)
+        (code_count, output_count, note_count, viewer_count)
     }
 }
