@@ -151,24 +151,28 @@ Improve the core visualization experience
 
 ---
 
-## Phase 5: Tutorial Integration
+## Phase 5: Tutorial Integration ✅ COMPLETE
 
 Connect viewer to surrounding educational content
 
-- [ ] **Step 5.1: Guided Exploration Presets**
+- [ ] **Step 5.1: Guided Exploration Presets** - deferred
   - [ ] Add "Preset Views" dropdown tied to tutorial content
   - [ ] E.g., "Show Sex Effect (Figure 2)" auto-configures viewer
   - [ ] Link from tutorial text to viewer state
+  - *Note: Requires defining preset configurations in tutorial content*
 
-- [ ] **Step 5.2: Contextual Help**
-  - [ ] Add (?) icons next to complex controls with explanatory tooltips
-  - [ ] Link to glossary for terms like "T-statistic", "Threshold"
-  - [ ] Consider inline help mode that highlights and explains each control
+- [x] **Step 5.2: Contextual Help**
+  - [x] Add (?) icons next to complex controls with explanatory tooltips
+  - [x] Created HelpTooltip component with hover/click behavior
+  - [x] Added help content for: Hemisphere, Contrast, Colormap, Threshold, Statistic
+  - [x] Tooltips include detailed explanations (e.g., T-stat thresholds for p-values)
+  - [ ] Link to glossary for terms - deferred (requires glossary pages)
 
-- [ ] **Step 5.3: Synchronized State**
-  - [ ] URL hash reflects viewer state (shareable links)
-  - [ ] "Copy view link" creates link that restores exact configuration
-  - [ ] Deep links from tutorial text to specific viewer states
+- [x] **Step 5.3: Synchronized State** (pre-existing)
+  - [x] URL query params reflect viewer state (hemi, stat, vol, layout, thr, etc.)
+  - [x] "Copy view link" button creates shareable URL
+  - [x] URL params parsed on load to restore configuration
+  - [ ] Deep links from tutorial text - deferred (requires tutorial content changes)
 
 ---
 
@@ -223,7 +227,7 @@ Final refinements
 | 3        | Phase 2   | Information architecture reorganization         | ✅ Done |
 | 4        | Phase 3   | Progressive disclosure addresses core tension   | ✅ Done |
 | 5        | Phase 4   | Canvas enhancements (controls, hints, fullscreen) | ✅ Done |
-| 6        | Phase 5   | Tutorial integration is site-specific value-add | Pending |
+| 6        | Phase 5   | Tutorial integration (contextual help, URL state) | ✅ Done |
 | 7        | Phase 6-7 | Polish after core UX is solid                   | Pending |
 
 ---
