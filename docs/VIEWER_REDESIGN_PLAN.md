@@ -95,19 +95,19 @@ Reorganize controls for better cognitive flow
 
 ---
 
-## Phase 3: Progressive Disclosure
+## Phase 3: Progressive Disclosure 🔄 IN PROGRESS
 
 Reduce initial complexity, reveal on demand
 
-- [ ] **Step 3.1: Implement View Mode Toggle**
-  - [ ] Create "Simple" vs. "Advanced" mode toggle
-  - [ ] Simple mode: Only essential controls (Hemisphere, Contrast, Colormap, Threshold)
-  - [ ] Advanced mode: Full control set as currently exists
+- [x] **Step 3.1: Implement View Mode Toggle**
+  - [x] Create "Simple" vs. "Advanced" mode toggle
+  - [x] Simple mode: Only essential controls (Hemisphere, Contrast, Colormap, Threshold)
+  - [x] Advanced mode: Full control set as currently exists
 
-- [ ] **Step 3.2: Default to Simple Mode**
-  - [ ] Tutorial readers see clean, focused interface
-  - [ ] "Show Advanced Controls" link expands to full toolset
-  - [ ] Persist preference in localStorage
+- [x] **Step 3.2: Default to Simple Mode**
+  - [x] Tutorial readers see clean, focused interface
+  - [x] "Show All Controls" link expands to full toolset
+  - [x] Persist preference in localStorage
 
 - [ ] **Step 3.3: Smart Defaults**
   - [ ] Set sensible defaults based on data (e.g., auto-detect threshold from metadata)
