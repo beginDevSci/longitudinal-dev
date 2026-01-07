@@ -95,7 +95,7 @@ Reorganize controls for better cognitive flow
 
 ---
 
-## Phase 3: Progressive Disclosure 🔄 IN PROGRESS
+## Phase 3: Progressive Disclosure ✅ COMPLETE
 
 Reduce initial complexity, reveal on demand
 
@@ -109,10 +109,10 @@ Reduce initial complexity, reveal on demand
   - [x] "Show All Controls" link expands to full toolset
   - [x] Persist preference in localStorage
 
-- [ ] **Step 3.3: Smart Defaults**
-  - [ ] Set sensible defaults based on data (e.g., auto-detect threshold from metadata)
-  - [ ] Pre-select first meaningful contrast (not Intercept)
-  - [ ] Default to "Both" hemispheres if side-by-side layout works
+- [x] **Step 3.3: Smart Defaults**
+  - [x] Apply suggested_threshold from metadata when loading statistics
+  - [x] Pre-select first meaningful contrast (skip "Intercept" labels)
+  - [x] Added find_first_meaningful_contrast() helper function
 
 ---
 
