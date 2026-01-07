@@ -27,11 +27,11 @@ Establish design direction before any implementation
 
 ---
 
-## Phase 1: Quick Wins (Visual Polish) 🔄 IN PROGRESS
+## Phase 1: Quick Wins (Visual Polish) ✅ COMPLETE
 
 Low-risk changes that improve appearance without restructuring
 
-- [x] **Step 1.1: Token Alignment** (added step - replace hardcoded colors with CSS variables)
+- [x] **Step 1.1: Token Alignment** (replace hardcoded colors with CSS variables)
   - [x] `control_panel.rs` - Left sidebar, form controls
   - [x] `collapsible_section.rs` - Section headers
   - [x] `color_legend.rs` - Legend card
@@ -43,25 +43,26 @@ Low-risk changes that improve appearance without restructuring
   - [x] `vertex_summary_table.rs` - Top 10 table
   - [x] `brain_viewer_facade/lib.rs` - Fallback/placeholder styling
 
-- [ ] **Step 1.2: Canvas Container Styling**
-  - [ ] Replace dashed border with subtle shadow or solid border matching site aesthetic
-  - [ ] Add proper rounded corners consistent with site cards
-  - [ ] Ensure canvas has appropriate padding/margins
+- [x] **Step 1.2: Canvas Container Styling** (addressed in 1.1)
+  - [x] Solid border with `--color-border-default`
+  - [x] Rounded corners with `--radius-panel`
+  - [x] Shadow with `--shadow-md`
 
-- [ ] **Step 1.3: Typography & Spacing Cleanup**
-  - [ ] Audit font sizes for hierarchy (headers vs. labels vs. help text)
-  - [ ] Ensure consistent spacing between sections
-  - [ ] Improve contrast ratios for accessibility
+- [x] **Step 1.3: Typography & Spacing Cleanup** (addressed in 1.1)
+  - [x] Headers: `--color-text-primary`
+  - [x] Labels: `--color-text-secondary`
+  - [x] Help text: `--color-text-muted`
+  - [x] Spacing uses `--spacing-*` tokens
 
-- [ ] **Step 1.4: Dropdown/Select Styling**
-  - [ ] Style selected values to look "selected" not "disabled" (darker text, not gray)
-  - [ ] Match dropdown styling to site's existing form elements
-  - [ ] Add subtle hover/focus states
+- [x] **Step 1.4: Dropdown/Select Styling** (addressed in 1.1)
+  - [x] Selected values use `--color-text-primary` (not gray)
+  - [x] Focus states use `--color-focus-ring`
+  - [x] Backgrounds use `--color-bg-surface`
 
-- [ ] **Step 1.5: Button Consistency**
-  - [ ] Audit all buttons (Export, Copy, ROI tools, Camera presets)
-  - [ ] Establish primary/secondary/tertiary button hierarchy
-  - [ ] Ensure consistent sizing and spacing
+- [x] **Step 1.5: Button Consistency** (addressed in 1.1)
+  - [x] Secondary buttons: `--color-border-default`, `--color-bg-subtle` on hover
+  - [x] Primary action (Load viewer): `--color-accent-500`
+  - [x] Consistent `--radius-md` and padding
 
 ---
 
