@@ -84,7 +84,7 @@ fn render_fallback(
 ) -> impl IntoView {
     view! {
         <div class="brain-viewer-island">
-            <div class="viewer-placeholder relative rounded-lg border border-default bg-subtle overflow-hidden">
+            <div class="viewer-placeholder relative rounded-[var(--radius-panel)] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] overflow-hidden">
                 {fallback_src.map(|src| view! {
                     <img
                         src=src
@@ -93,9 +93,9 @@ fn render_fallback(
                         loading="lazy"
                     />
                 })}
-                <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
+                <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-[var(--radius-panel)]">
                     <button
-                        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-lg transition-colors flex items-center gap-2"
+                        class="px-6 py-3 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] transition-colors flex items-center gap-2"
                         on:click=move |_| on_load_click()
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +168,7 @@ mod viewer_impl {
                     } else {
                         // Show fallback with "Load viewer" button
                         view! {
-                            <div class="viewer-placeholder relative rounded-lg border border-default bg-subtle overflow-hidden">
+                            <div class="viewer-placeholder relative rounded-[var(--radius-panel)] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] overflow-hidden">
                                 {fallback_src.clone().map(|src| view! {
                                     <img
                                         src=src
@@ -179,7 +179,7 @@ mod viewer_impl {
                                 })}
                                 <div class="absolute inset-0 flex items-center justify-center bg-black/40">
                                     <button
-                                        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-lg transition-colors flex items-center gap-2"
+                                        class="px-6 py-3 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] transition-colors flex items-center gap-2"
                                         on:click=move |_| set_viewer_started.set(true)
                                     >
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +221,7 @@ mod fallback_impl {
         let has_fallback = data.fallback_image.is_some();
 
         view! {
-            <div class="viewer-fallback rounded-lg border border-default bg-subtle overflow-hidden">
+            <div class="viewer-fallback rounded-[var(--radius-panel)] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] overflow-hidden">
                 {data.fallback_image.map(|src| view! {
                     <figure class="figure-frame">
                         <img src=src alt=fallback_alt.clone() class="w-full" loading="lazy" />
