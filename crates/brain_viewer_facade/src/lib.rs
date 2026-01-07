@@ -90,10 +90,10 @@ impl Default for ViewerData {
 }
 
 // ============================================================================
-// WebGPU-enabled viewer (feature = "webgpu-viewer")
+// WebGPU-enabled viewer (feature = "webgpu-viewer" + wasm32 target)
 // ============================================================================
 
-#[cfg(feature = "webgpu-viewer")]
+#[cfg(all(feature = "webgpu-viewer", target_arch = "wasm32"))]
 mod webgpu_impl {
     use super::*;
     #[allow(unused_imports)]
@@ -171,14 +171,14 @@ mod webgpu_impl {
     }
 }
 
-#[cfg(feature = "webgpu-viewer")]
+#[cfg(all(feature = "webgpu-viewer", target_arch = "wasm32"))]
 pub use webgpu_impl::BrainViewerIsland;
 
 // ============================================================================
-// Static fallback (feature = "webgpu-viewer" disabled)
+// Static fallback (used when webgpu-viewer disabled OR on non-wasm32 targets)
 // ============================================================================
 
-#[cfg(not(feature = "webgpu-viewer"))]
+#[cfg(not(all(feature = "webgpu-viewer", target_arch = "wasm32")))]
 mod fallback_impl {
     use super::*;
     #[allow(unused_imports)]
@@ -229,5 +229,5 @@ mod fallback_impl {
     }
 }
 
-#[cfg(not(feature = "webgpu-viewer"))]
+#[cfg(not(all(feature = "webgpu-viewer", target_arch = "wasm32")))]
 pub use fallback_impl::BrainViewerIsland;

@@ -7,12 +7,14 @@ description = "Facade crate exposing BrainViewerIsland for longitudinal-dev"
 [features]
 default = []
 # Compile-time gate for the WebGPU viewer
-# When disabled, renders static fallback image
-webgpu-viewer = ["dep:viewer_app"]
+# When disabled OR on non-wasm32 targets, renders static fallback image
+webgpu-viewer = ["viewer_app"]
 
 [dependencies]
 leptos = { version = "0.8", default-features = false, features = ["islands"] }
 serde = { version = "1", features = ["derive"] }
 
-# Optional: only compiled when webgpu-viewer feature is enabled
+# viewer_app is only available for wasm32 targets (requires web-loaders)
+# On native targets, this dependency is ignored even if webgpu-viewer is enabled
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 viewer_app = { path = "../../blmm_demo/crates/viewer_app", package = "brain-viewer", default-features = false, features = ["wgpu-renderer"], optional = true }
