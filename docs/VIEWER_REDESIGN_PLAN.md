@@ -66,7 +66,7 @@ Low-risk changes that improve appearance without restructuring
 
 ---
 
-## Phase 2: Information Architecture
+## Phase 2: Information Architecture 🔄 IN PROGRESS
 
 Reorganize controls for better cognitive flow
 
@@ -78,15 +78,15 @@ Reorganize controls for better cognitive flow
     - Advanced: Parcellation, ROI Tools, Accessibility
   - [ ] Add collapsible sections with sensible defaults (Advanced collapsed)
 
-- [ ] **Step 2.2: Improve Volume/Contrast Selection**
-  - [ ] Replace "Volume 0" with actual contrast label ("Intercept", "Sex", etc.)
-  - [ ] Consider a more visual selector (buttons or segmented control for 5 contrasts)
-  - [ ] Show contrast description on selection
+- [x] **Step 2.2: Improve Volume/Contrast Selection**
+  - [x] Replace "Volume 0" with actual contrast label ("Intercept", "Sex", etc.)
+  - [x] Updated label from "Volume" to "Contrast"
+  - [x] Updated help text to "Select the fixed effect to display on the surface"
 
-- [ ] **Step 2.3: Simplify Camera Presets**
-  - [ ] Replace abbreviations with full names or icons with tooltips
-  - [ ] Consider a visual "orientation cube" widget instead of buttons
-  - [ ] Or: grouped buttons with better labeling ("Left: Lateral | Medial")
+- [x] **Step 2.3: Simplify Camera Presets**
+  - [x] Replace abbreviations with friendly labels (e.g., "Top" instead of "Dor")
+  - [x] Grouped buttons by hemisphere: "Left: Lateral | Medial", "Right: Lateral | Medial"
+  - [x] Standard views row: "Top | Bottom | Front | Back"
 
 - [ ] **Step 2.4: Consolidate Right Panel**
   - [ ] Move Color Legend to be always visible (critical for interpretation)
