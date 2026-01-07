@@ -322,6 +322,17 @@ fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), String> {
 fn generate_static_html(outdir: &str) -> Result<(), String> {
     println!("📄 Generating static HTML...");
 
+    // Base features for SSR build
+    let mut features = vec!["ssr".to_string()];
+
+    // Check for optional webgpu-viewer feature
+    if env::var("WEBGPU_VIEWER").is_ok() {
+        println!("   Including webgpu-viewer feature for SSR");
+        features.push("webgpu-viewer".to_string());
+    }
+
+    let features_str = features.join(",");
+
     // Build SSG binary
     let status = Command::new("cargo")
         .args([
@@ -329,7 +340,7 @@ fn generate_static_html(outdir: &str) -> Result<(), String> {
             "--bin",
             "longitudinal_dev",
             "--features",
-            "ssr",
+            &features_str,
             "--release",
         ])
         .status()
