@@ -1,3 +1,4 @@
+#![recursion_limit = "512"]
 //! Facade crate for the WebGPU brain surface viewer.
 //!
 //! Exposes a single `BrainViewerIsland` component that can be embedded in
