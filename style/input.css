@@ -4114,3 +4114,42 @@ body {
       transparent 40%);
   }
 }
+
+/* ========================================
+   BRAIN VIEWER - Fullscreen Mode
+   ======================================== */
+
+/* Fullscreen container fills viewport */
+.fullscreen-canvas-container:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-4);
+}
+
+/* Canvas expands in fullscreen */
+.fullscreen-canvas-container:fullscreen canvas {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Ensure on-canvas controls stay visible in fullscreen */
+.fullscreen-canvas-container:fullscreen .absolute {
+  position: absolute;
+}
+
+/* Subtle pulse animation for interaction hint */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
