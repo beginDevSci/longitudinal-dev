@@ -66,17 +66,17 @@ Low-risk changes that improve appearance without restructuring
 
 ---
 
-## Phase 2: Information Architecture 🔄 IN PROGRESS
+## Phase 2: Information Architecture ✅ COMPLETE
 
 Reorganize controls for better cognitive flow
 
-- [ ] **Step 2.1: Sidebar Section Reorganization**
-  - [ ] Group related controls logically:
+- [x] **Step 2.1: Sidebar Section Reorganization**
+  - [x] Group related controls logically:
     - View: Hemisphere, Layout, Camera presets
     - Data: Analysis, Statistic, Volume/Contrast
     - Appearance: Colormap, Threshold, Symmetric toggle
-    - Advanced: Parcellation, ROI Tools, Accessibility
-  - [ ] Add collapsible sections with sensible defaults (Advanced collapsed)
+    - Advanced: Parcellation + Accessibility (combined with subsections)
+  - [x] Add collapsible sections with sensible defaults (Advanced collapsed)
 
 - [x] **Step 2.2: Improve Volume/Contrast Selection**
   - [x] Replace "Volume 0" with actual contrast label ("Intercept", "Sex", etc.)
@@ -210,13 +210,12 @@ Final refinements
 | Priority | Phase     | Rationale                                       | Status |
 |----------|-----------|-------------------------------------------------|--------|
 | 1        | Phase 0   | Must decide direction before coding             | ✅ Done |
-| 2        | Phase 1   | Quick wins build momentum, low risk             | 🔄 In Progress |
-| 3        | Phase 2.2 | Volume→Contrast label is high-impact UX fix     | Pending |
+| 2        | Phase 1   | Quick wins build momentum, low risk             | ✅ Done |
+| 3        | Phase 2   | Information architecture reorganization         | ✅ Done |
 | 4        | Phase 3   | Progressive disclosure addresses core tension   | Pending |
 | 5        | Phase 4.4 | Fullscreen is high-value, moderate effort       | Pending |
-| 6        | Phase 2   | Full reorganization after basics work           | Pending |
-| 7        | Phase 5   | Tutorial integration is site-specific value-add | Pending |
-| 8        | Phase 6-7 | Polish after core UX is solid                   | Pending |
+| 6        | Phase 5   | Tutorial integration is site-specific value-add | Pending |
+| 7        | Phase 6-7 | Polish after core UX is solid                   | Pending |
 
 ---
 
