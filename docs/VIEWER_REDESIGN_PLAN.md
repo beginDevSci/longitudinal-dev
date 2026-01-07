@@ -135,10 +135,11 @@ Improve the core visualization experience
   - [ ] Show cursor changes for different modes (rotate vs. ROI draw) - deferred
   - [ ] Toast/tooltip on first vertex click - deferred
 
-- [ ] **Step 4.3: Loading States**
-  - [ ] Design proper loading skeleton for canvas
-  - [ ] Show progress for large data loads
-  - [ ] Graceful error states with retry option
+- [x] **Step 4.3: Loading States**
+  - [x] Design proper loading skeleton for canvas (brain silhouette with shimmer)
+  - [x] Show progress for large data loads (progress bar + stage text + percentage)
+  - [x] Graceful error states with retry option (centered error with "Try again" button)
+  - [x] Added loading_stage and loading_progress signals for granular feedback
 
 - [x] **Step 4.4: Fullscreen Mode**
   - [x] Implement fullscreen toggle that hides page chrome

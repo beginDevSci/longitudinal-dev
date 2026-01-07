@@ -4153,3 +4153,13 @@ body {
 .animate-pulse {
   animation: subtle-pulse 2s ease-in-out infinite;
 }
+
+/* Loading shimmer animation for skeleton loader */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.loading-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
