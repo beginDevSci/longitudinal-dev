@@ -49,7 +49,7 @@ pub fn TopNav() -> impl IntoView {
                             </svg>
                         </a>
                         <a
-                            href="https://discord.gg/WXMv25rf"
+                            href="https://discord.gg/D796Bdy8"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="rounded-lg p-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200"
