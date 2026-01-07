@@ -1,0 +1,105 @@
+{
+  "name": "lh_des1_beta",
+  "display_name": "Beta Coefficients (DES1)",
+  "description": "Raw fixed effect coefficient estimates",
+  "hemisphere": "left",
+  "analysis": "des1",
+  "colormap": "coolwarm",
+  "symmetric": true,
+  "suggested_threshold": null,
+  "nan_handling": "transparent",
+  "volumes": [
+    {
+      "index": 0,
+      "label": "Intercept"
+    },
+    {
+      "index": 1,
+      "label": "Sex"
+    },
+    {
+      "index": 2,
+      "label": "CrossSectionalAge"
+    },
+    {
+      "index": 3,
+      "label": "LongitudinalTime"
+    },
+    {
+      "index": 4,
+      "label": "NIHScore"
+    },
+    {
+      "index": 5,
+      "label": "Covariate_6"
+    },
+    {
+      "index": 6,
+      "label": "Covariate_7"
+    },
+    {
+      "index": 7,
+      "label": "Covariate_8"
+    },
+    {
+      "index": 8,
+      "label": "Covariate_9"
+    },
+    {
+      "index": 9,
+      "label": "Covariate_10"
+    },
+    {
+      "index": 10,
+      "label": "Covariate_11"
+    },
+    {
+      "index": 11,
+      "label": "Covariate_12"
+    },
+    {
+      "index": 12,
+      "label": "Covariate_13"
+    },
+    {
+      "index": 13,
+      "label": "Covariate_14"
+    },
+    {
+      "index": 14,
+      "label": "Covariate_15"
+    },
+    {
+      "index": 15,
+      "label": "Covariate_16"
+    },
+    {
+      "index": 16,
+      "label": "Covariate_17"
+    },
+    {
+      "index": 17,
+      "label": "Covariate_18"
+    },
+    {
+      "index": 18,
+      "label": "Covariate_19"
+    },
+    {
+      "index": 19,
+      "label": "Covariate_20"
+    },
+    {
+      "index": 20,
+      "label": "Covariate_21"
+    },
+    {
+      "index": 21,
+      "label": "Covariate_22"
+    },
+    {
+      "index": 22,
+      "label": "Covariate_23"
+    }
+  ]
+}

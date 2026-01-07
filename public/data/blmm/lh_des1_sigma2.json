@@ -1,0 +1,17 @@
+{
+  "name": "lh_des1_sigma2",
+  "display_name": "Residual Variance (DES1)",
+  "description": "Residual variance at each vertex",
+  "hemisphere": "left",
+  "analysis": "des1",
+  "colormap": "viridis",
+  "symmetric": false,
+  "suggested_threshold": null,
+  "nan_handling": "transparent",
+  "volumes": [
+    {
+      "index": 0,
+      "label": "Residual Variance"
+    }
+  ]
+}
