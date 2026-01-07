@@ -46,6 +46,8 @@ syntect = { version = "5.2", optional = true, default-features = false, features
 longitudinal_writer = { path = "crates/writer" }
 # Markdown parser (for validation pipeline) - SSR only due to katex dependency
 longitudinal_parser = { path = "crates/parser", optional = true }
+# Brain viewer facade (optional WebGPU viewer for BLMM tutorials)
+brain_viewer_facade = { path = "crates/brain_viewer_facade", optional = true }
 # Date/time handling for test runner
 chrono = { version = "=0.4.42", optional = true }
 # Shared dependencies (also used by other binaries)
@@ -139,7 +141,7 @@ embedded-catalog = []
 # When enabled, viewer blocks render interactive 3D surfaces via wgpu.
 # When disabled, viewer blocks show static fallback images.
 # To enable: add "webgpu-viewer" to lib-features in [package.metadata.leptos]
-webgpu-viewer = []
+webgpu-viewer = ["brain_viewer_facade", "brain_viewer_facade/webgpu-viewer"]
 
 [package.metadata.leptos]
 # single-package + static-site output
@@ -166,5 +168,6 @@ members = [
     "crates/parser",
     "crates/writer",
     "crates/validator",
+    "crates/brain_viewer_facade",
 ]
 resolver = "2"

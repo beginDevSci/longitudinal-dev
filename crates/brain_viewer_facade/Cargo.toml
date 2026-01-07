@@ -1,0 +1,18 @@
+[package]
+name = "brain_viewer_facade"
+version = "0.1.0"
+edition = "2021"
+description = "Facade crate exposing BrainViewerIsland for longitudinal-dev"
+
+[features]
+default = []
+# Compile-time gate for the WebGPU viewer
+# When disabled, renders static fallback image
+webgpu-viewer = ["dep:viewer_app"]
+
+[dependencies]
+leptos = { version = "0.8", default-features = false, features = ["islands"] }
+serde = { version = "1", features = ["derive"] }
+
+# Optional: only compiled when webgpu-viewer feature is enabled
+viewer_app = { path = "../../blmm_demo/crates/viewer_app", package = "brain-viewer", default-features = false, features = ["wgpu-renderer"], optional = true }

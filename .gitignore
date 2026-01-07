@@ -80,3 +80,5 @@ OPTION_A_PLAN*.md
 # Generated JSON from markdown (Stage 5 validation)
 # Auto-generated with random IDs and timestamps - ignore to reduce diff noise
 content/posts/*.post.json
+# External viewer crate symlink (local dev only)
+blmm_demo
