@@ -4,16 +4,19 @@
     "lh": "lh.pial",
     "rh": "rh.pial"
   },
+  "results_pattern": "results_{hemisphere}_{analysis}/blmm_vox_{statistic}.dat",
   "analyses": {
     "des1": {
       "label": "Random Intercepts",
       "description": "Design 1: Subject-level intercept as random effect",
-      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"]
+      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"],
+      "available": true
     },
     "des2": {
       "label": "Random Intercepts + Slopes",
       "description": "Design 2: Subject-level intercept and longitudinal time as random effects",
-      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"]
+      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"],
+      "available": false
     }
   },
   "statistics": [
