@@ -88,10 +88,10 @@ Reorganize controls for better cognitive flow
   - [x] Grouped buttons by hemisphere: "Left: Lateral | Medial", "Right: Lateral | Medial"
   - [x] Standard views row: "Top | Bottom | Front | Back"
 
-- [ ] **Step 2.4: Consolidate Right Panel**
-  - [ ] Move Color Legend to be always visible (critical for interpretation)
-  - [ ] Group ROI Tools, Vertex Info, and Annotations under collapsible "Analysis Tools"
-  - [ ] Move "Top 10 Vertices" table into Analysis Tools section
+- [x] **Step 2.4: Consolidate Right Panel**
+  - [x] Move Color Legend to be always visible (critical for interpretation)
+  - [x] Group ROI Tools, Vertex Info, and Annotations under collapsible "Analysis Tools"
+  - [x] Move "Top 10 Vertices" table into Analysis Tools section
 
 ---
 
