@@ -159,37 +159,38 @@ Expanded (on click ▼):
 **Goal:** Better UX for common controls
 **Risk:** Low
 **Impact:** Medium
+**Status:** Implementation Complete (2025-01-08) - Visual testing needed
 
 ### Checklist
 
 #### 3.1 Hemisphere Segmented Control
-- [ ] **File:** `control_panel.rs`
-- [ ] Replace dropdown with segmented button group
-- [ ] Design: `[ Left | Right ]` toggle buttons
-- [ ] Active state clearly highlighted
-- [ ] Keyboard accessible (arrow keys to switch)
-- [ ] Test: State changes correctly, viewer updates
+- [x] **File:** `control_panel.rs`
+- [x] Replace dropdown with segmented button group
+- [x] Design: `[ Left | Right ]` toggle buttons
+- [x] Active state clearly highlighted (accent color background)
+- [x] Keyboard accessible (focus-visible styling, aria-pressed)
+- [ ] Test: State changes correctly, viewer updates (visual testing needed)
 
 #### 3.2 Threshold Slider + Input
-- [ ] **File:** `control_panel.rs`
-- [ ] Add numeric input box next to slider
-- [ ] Two-way binding: slider updates input, input updates slider
-- [ ] Input validation (numeric, within range)
-- [ ] Display to 2 decimal places
-- [ ] Test: Both slider and input work, values sync
+- [x] **File:** `control_panel.rs`
+- [x] Add numeric input box next to slider
+- [x] Two-way binding: slider updates input, input updates slider
+- [x] Input validation (numeric, within range via HTML5 attributes)
+- [x] Display to 2 decimal places
+- [ ] Test: Both slider and input work, values sync (visual testing needed)
 
 #### 3.3 Control Panel Styling
-- [ ] **File:** `style/input.css`
-- [ ] Consistent spacing (8-12px between controls)
-- [ ] Clear visual grouping
-- [ ] Ensure touch targets ≥44px on touch devices
+- [x] **File:** `style/input.css`
+- [x] Consistent spacing (via flex gap)
+- [x] Clear visual grouping
+- [x] Ensure touch targets ≥44px on touch devices (media query)
 
 #### 3.4 Validation
-- [ ] All controls functional
-- [ ] State persists correctly
-- [ ] Keyboard navigation works
-- [ ] Touch interactions work
-- [ ] No layout shifts on interaction
+- [ ] All controls functional (visual testing needed)
+- [ ] State persists correctly (visual testing needed)
+- [ ] Keyboard navigation works (visual testing needed)
+- [ ] Touch interactions work (visual testing needed)
+- [ ] No layout shifts on interaction (visual testing needed)
 
 ---
 

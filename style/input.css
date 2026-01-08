@@ -4376,6 +4376,117 @@ body {
   }
 }
 
+/* ========================================
+   BRAIN VIEWER - Control Components
+   ======================================== */
+
+/* Segmented Control (Hemisphere toggle) */
+.segmented-control {
+  display: flex;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+}
+
+.segmented-control-btn {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.segmented-control-btn:not(:last-child) {
+  border-right: 1px solid var(--color-border-default);
+}
+
+.segmented-control-btn:hover:not(:disabled):not(.active) {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.segmented-control-btn.active {
+  background: var(--color-accent-500);
+  color: white;
+}
+
+.segmented-control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segmented-control-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* Threshold Control (Slider + Input combo) */
+.threshold-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.threshold-slider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--color-accent-500);
+}
+
+.threshold-input {
+  width: 4rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  text-align: right;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.threshold-input:focus {
+  outline: none;
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
+}
+
+.threshold-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hide number input spin buttons */
+.threshold-input::-webkit-outer-spin-button,
+.threshold-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.threshold-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Touch-friendly overrides for controls */
+@media (pointer: coarse) {
+  .segmented-control-btn {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  .threshold-input {
+    min-height: 44px;
+    width: 5rem;
+    font-size: 1rem;
+  }
+}
+
 /* Reduced motion: disable shimmer and pulse */
 @media (prefers-reduced-motion: reduce) {
   .loading-shimmer,
