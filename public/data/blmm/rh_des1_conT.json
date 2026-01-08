@@ -1,0 +1,33 @@
+{
+  "name": "rh_des1_conT",
+  "display_name": "T-Statistics (DES1)",
+  "description": "T-statistics for testing whether contrasts differ from zero",
+  "hemisphere": "right",
+  "analysis": "des1",
+  "colormap": "coolwarm",
+  "symmetric": true,
+  "suggested_threshold": 2.0,
+  "nan_handling": "transparent",
+  "volumes": [
+    {
+      "index": 0,
+      "label": "Intercept"
+    },
+    {
+      "index": 1,
+      "label": "Sex"
+    },
+    {
+      "index": 2,
+      "label": "CrossSectionalAge"
+    },
+    {
+      "index": 3,
+      "label": "LongitudinalTime"
+    },
+    {
+      "index": 4,
+      "label": "NIHScore"
+    }
+  ]
+}

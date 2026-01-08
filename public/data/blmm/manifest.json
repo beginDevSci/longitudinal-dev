@@ -1,0 +1,61 @@
+{
+  "base_path": "/data/blmm",
+  "surfaces": {
+    "lh": "lh.pial",
+    "rh": "rh.pial"
+  },
+  "statistics_pattern": "{hemisphere}_{analysis}_{statistic}.bin.gz",
+  "geometry_pattern": "{hemisphere}_geometry.bin.gz",
+  "analyses": {
+    "des1": {
+      "label": "Random Intercepts",
+      "description": "Design 1: Subject-level intercept as random effect",
+      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"],
+      "available": true
+    },
+    "des2": {
+      "label": "Random Intercepts + Slopes",
+      "description": "Design 2: Subject-level intercept and longitudinal time as random effects",
+      "contrasts": ["Intercept", "Sex", "CrossSectionalAge", "LongitudinalTime", "NIHScore"],
+      "available": false
+    }
+  },
+  "statistics": [
+    {
+      "id": "conT",
+      "label": "T-Statistics",
+      "description": "T-statistics for testing whether contrasts differ from zero"
+    },
+    {
+      "id": "conTlp",
+      "label": "-log10(p)",
+      "description": "Negative log10 of p-values (values > 1.3 = p < 0.05)"
+    },
+    {
+      "id": "beta",
+      "label": "Beta Coefficients",
+      "description": "Raw fixed effect coefficient estimates"
+    },
+    {
+      "id": "sigma2",
+      "label": "Residual Variance",
+      "description": "Residual variance at each vertex"
+    }
+  ],
+  "defaults": {
+    "analysis": "des1",
+    "statistic": "conT",
+    "volume_idx": 0,
+    "colormap": "coolwarm",
+    "threshold": 2.0,
+    "hemisphere": "both"
+  },
+  "colormaps": ["coolwarm", "viridis", "plasma", "RdBu"],
+  "metadata": {
+    "study": "ABCD Study",
+    "subjects": 5179,
+    "observations": 9835,
+    "task": "N-back working memory",
+    "surface_type": "fsaverage5"
+  }
+}

@@ -4114,3 +4114,386 @@ body {
       transparent 40%);
   }
 }
+
+/* ========================================
+   BRAIN VIEWER - Fullscreen Mode
+   ======================================== */
+
+/* Fullscreen container fills viewport */
+.fullscreen-canvas-container:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-4);
+}
+
+/* Canvas expands in fullscreen */
+.fullscreen-canvas-container:fullscreen canvas {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Ensure on-canvas controls stay visible in fullscreen */
+.fullscreen-canvas-container:fullscreen .absolute {
+  position: absolute;
+}
+
+/* Subtle pulse animation for interaction hint */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Loading shimmer animation for skeleton loader */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.loading-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   BRAIN VIEWER - Responsive Layout
+   ======================================== */
+
+/* Base mobile styles (< 768px) */
+.brain-viewer-container {
+  width: 100%;
+}
+
+/* Mobile: Control panel becomes collapsible horizontal bar */
+.brain-viewer-sidebar {
+  width: 100%;
+  order: 2; /* Canvas first on mobile */
+}
+
+.brain-viewer-canvas-wrapper {
+  order: 1;
+  min-height: 280px; /* Minimum canvas height on mobile */
+}
+
+.brain-viewer-right-panel {
+  width: 100%;
+  order: 3;
+}
+
+/* Hide less important elements on mobile by default */
+@media (max-width: 767px) {
+  /* Collapse sidebar sections by default on mobile */
+  .brain-viewer-sidebar .collapsible-section {
+    --section-default-collapsed: true;
+  }
+
+  /* Smaller on-canvas controls on mobile */
+  .brain-viewer-canvas-controls {
+    bottom: var(--spacing-2);
+    right: var(--spacing-2);
+    gap: 0.25rem;
+  }
+
+  .brain-viewer-canvas-controls button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Stack action buttons vertically on narrow screens */
+  .brain-viewer-actions {
+    flex-direction: column;
+  }
+
+  /* Smaller text for mobile */
+  .brain-viewer-right-panel {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet: 768px - 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .brain-viewer-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(350px, 1fr) auto;
+    gap: var(--spacing-3);
+  }
+
+  .brain-viewer-sidebar {
+    width: 100%;
+    order: 1;
+  }
+
+  /* Sidebar becomes horizontal scrollable on tablet */
+  .brain-viewer-sidebar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  .brain-viewer-sidebar-inner > * {
+    flex: 1 1 auto;
+    min-width: 200px;
+    max-width: 300px;
+  }
+
+  .brain-viewer-canvas-wrapper {
+    order: 2;
+    min-height: 400px;
+  }
+
+  .brain-viewer-right-panel {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* Desktop: 1024px+ (existing lg: breakpoint behavior) */
+@media (min-width: 1024px) {
+  .brain-viewer-layout {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-4);
+  }
+
+  .brain-viewer-sidebar {
+    width: 16rem; /* 256px */
+    flex-shrink: 0;
+    order: 1;
+  }
+
+  .brain-viewer-canvas-wrapper {
+    flex: 1;
+    order: 2;
+    min-height: 400px;
+  }
+
+  .brain-viewer-right-panel {
+    width: 16rem; /* 256px */
+    flex-shrink: 0;
+    order: 3;
+  }
+}
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  /* Larger touch targets for buttons */
+  .brain-viewer-canvas-controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Larger toggle buttons */
+  .brain-viewer-sidebar button,
+  .brain-viewer-sidebar select {
+    min-height: 44px;
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+
+  /* Show touch hint on touch devices */
+  .brain-viewer-touch-hint {
+    display: block;
+  }
+}
+
+@media (pointer: fine) {
+  .brain-viewer-touch-hint {
+    display: none;
+  }
+}
+
+/* Reduced motion: disable shimmer and pulse */
+@media (prefers-reduced-motion: reduce) {
+  .loading-shimmer,
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* ========================================
+   BRAIN VIEWER - Animations & Transitions
+   ======================================== */
+
+/* Smooth transitions for control panel elements */
+.brain-viewer-sidebar select,
+.brain-viewer-sidebar input,
+.brain-viewer-sidebar button {
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+/* Canvas overlay transitions */
+.brain-viewer-canvas-wrapper > .absolute {
+  transition: opacity 200ms ease-out;
+}
+
+/* Loading overlay fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.brain-viewer-canvas-wrapper .loading-overlay {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Error overlay slide-up */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brain-viewer-canvas-wrapper .error-overlay {
+  animation: slideUp 300ms ease-out;
+}
+
+/* On-canvas controls hover effect */
+.brain-viewer-canvas-controls button {
+  transition: background-color 150ms ease, transform 100ms ease;
+}
+
+.brain-viewer-canvas-controls button:active {
+  transform: scale(0.95);
+}
+
+/* Collapsible section smooth height animation */
+.collapsible-section .grid {
+  transition: grid-template-rows 200ms ease-out;
+}
+
+/* Button press feedback */
+.brain-viewer-actions button:active {
+  transform: scale(0.97);
+  transition: transform 50ms ease;
+}
+
+/* Interaction hint animations */
+@keyframes hintFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -5px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Respect reduced motion preference for all viewer animations */
+@media (prefers-reduced-motion: reduce) {
+  .brain-viewer-sidebar select,
+  .brain-viewer-sidebar input,
+  .brain-viewer-sidebar button,
+  .brain-viewer-canvas-wrapper > .absolute,
+  .brain-viewer-canvas-controls button,
+  .collapsible-section .grid,
+  .brain-viewer-actions button {
+    transition: none;
+  }
+
+  .brain-viewer-canvas-wrapper .loading-overlay,
+  .brain-viewer-canvas-wrapper .error-overlay {
+    animation: none;
+  }
+}
+
+/* ========================================
+   BRAIN VIEWER - Performance Optimizations
+   ======================================== */
+
+/* GPU acceleration for canvas container */
+.brain-viewer-canvas-wrapper {
+  will-change: contents;
+  contain: layout style;
+}
+
+/* Promote canvas to its own compositing layer */
+.brain-viewer-canvas-wrapper canvas {
+  will-change: transform;
+}
+
+/* Optimize overlay transitions */
+.brain-viewer-canvas-controls,
+.brain-viewer-canvas-wrapper .absolute {
+  contain: layout paint;
+}
+
+/* Prevent layout thrashing from sidebar animations */
+.brain-viewer-sidebar {
+  contain: layout style;
+}
+
+/* Hardware acceleration for collapsible sections */
+.collapsible-section .grid {
+  will-change: grid-template-rows;
+}
+
+/* ========================================
+   BRAIN VIEWER - Keyboard Focus Styles
+   ======================================== */
+
+/* High-visibility focus for keyboard navigation */
+.brain-viewer-container *:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Skip link for keyboard users (visually hidden until focused) */
+.brain-viewer-skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  z-index: 100;
+  text-decoration: none;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  transition: top 0.2s ease;
+}
+
+.brain-viewer-skip-link:focus {
+  top: var(--spacing-2);
+}
+
+/* Focus within indicator for control panel sections */
+.brain-viewer-sidebar:focus-within {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+/* Keyboard shortcut hints in tooltips */
+.brain-viewer-canvas-controls button[title] {
+  position: relative;
+}
+
+/* Tab order indicator (for debugging - normally hidden) */
+[data-debug-tab-order] *:focus {
+  position: relative;
+}
+
+[data-debug-tab-order] *:focus::after {
+  content: attr(tabindex);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}

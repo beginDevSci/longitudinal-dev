@@ -1,0 +1,33 @@
+{
+  "name": "lh_des1_conTlp",
+  "display_name": "-log10(p-values) (DES1)",
+  "description": "Negative log10 of p-values (values > 1.3 correspond to p < 0.05)",
+  "hemisphere": "left",
+  "analysis": "des1",
+  "colormap": "plasma",
+  "symmetric": false,
+  "suggested_threshold": 1.3,
+  "nan_handling": "transparent",
+  "volumes": [
+    {
+      "index": 0,
+      "label": "Intercept"
+    },
+    {
+      "index": 1,
+      "label": "Sex"
+    },
+    {
+      "index": 2,
+      "label": "CrossSectionalAge"
+    },
+    {
+      "index": 3,
+      "label": "LongitudinalTime"
+    },
+    {
+      "index": 4,
+      "label": "NIHScore"
+    }
+  ]
+}
