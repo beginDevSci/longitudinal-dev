@@ -4,7 +4,8 @@
     "lh": "lh.pial",
     "rh": "rh.pial"
   },
-  "results_pattern": "results_{hemisphere}_{analysis}/blmm_vox_{statistic}.dat",
+  "statistics_pattern": "{hemisphere}_{analysis}_{statistic}.bin.gz",
+  "geometry_pattern": "{hemisphere}_geometry.bin.gz",
   "analyses": {
     "des1": {
       "label": "Random Intercepts",
