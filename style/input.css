@@ -4487,6 +4487,174 @@ body {
   }
 }
 
+/* ========================================
+   BRAIN VIEWER - Focus Mode
+   ======================================== */
+
+/* Focus mode active state - transforms the container */
+.brain-viewer-focus-active {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+/* Focus mode overlay (scrim + header) */
+.brain-viewer-focus-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Focus mode header strip */
+.brain-viewer-focus-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-bg-surface)/95;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border-default);
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.focus-header-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.focus-header-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.focus-header-threshold {
+  flex: 1;
+  max-width: 300px;
+}
+
+.focus-header-legend {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+/* Smaller segmented control for focus header */
+.segmented-control-sm {
+  font-size: 0.75rem;
+}
+
+.segmented-control-sm .segmented-control-btn {
+  padding: 0.25rem 0.5rem;
+  min-width: 2rem;
+}
+
+/* Smaller threshold control for focus header */
+.threshold-control-sm {
+  gap: 0.25rem;
+}
+
+.threshold-input-sm {
+  width: 3rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* Focus mode exit button */
+.brain-viewer-focus-exit {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.brain-viewer-focus-exit:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-accent);
+}
+
+.brain-viewer-focus-exit:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Focus mode layout - hides sidebar, maximizes canvas */
+.brain-viewer-layout-focus {
+  height: 100vh;
+  padding-top: 52px; /* Account for focus header */
+}
+
+.brain-viewer-layout-focus .brain-viewer-sidebar {
+  display: none;
+}
+
+.brain-viewer-layout-focus .brain-viewer-canvas-area {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.brain-viewer-layout-focus .brain-viewer-canvas-wrapper {
+  height: 100%;
+}
+
+.brain-viewer-layout-focus .brain-viewer-canvas-wrapper canvas {
+  height: 100% !important;
+  border-radius: 0;
+}
+
+.brain-viewer-layout-focus .brain-viewer-legend-strip {
+  display: none;
+}
+
+/* Focus mode canvas controls - reposition for full screen */
+.brain-viewer-layout-focus .brain-viewer-canvas-controls {
+  bottom: var(--spacing-4);
+  right: var(--spacing-4);
+}
+
+/* Focus mode mobile adjustments */
+@media (max-width: 767px) {
+  .brain-viewer-focus-header {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+  }
+
+  .focus-header-threshold {
+    order: 10;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .focus-header-legend {
+    display: none;
+  }
+
+  .brain-viewer-layout-focus {
+    padding-top: 88px; /* Taller header on mobile */
+  }
+}
+
 /* Reduced motion: disable shimmer and pulse */
 @media (prefers-reduced-motion: reduce) {
   .loading-shimmer,
