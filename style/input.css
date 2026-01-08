@@ -4173,17 +4173,36 @@ body {
   width: 100%;
 }
 
-/* Mobile: Control panel becomes collapsible horizontal bar */
+/* Mobile-first base styles */
 .brain-viewer-sidebar {
   width: 100%;
   order: 2; /* Canvas first on mobile */
 }
 
-.brain-viewer-canvas-wrapper {
+/* Canvas area wrapper (contains canvas + legend) */
+.brain-viewer-canvas-area {
   order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.brain-viewer-canvas-wrapper {
   min-height: 280px; /* Minimum canvas height on mobile */
 }
 
+/* Legend strip below canvas - stacks on mobile */
+.brain-viewer-legend-strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-panel);
+}
+
+/* Legacy right panel - hidden when using new layout */
 .brain-viewer-right-panel {
   width: 100%;
   order: 3;
@@ -4213,8 +4232,13 @@ body {
     flex-direction: column;
   }
 
-  /* Smaller text for mobile */
+  /* Hide legacy right panel on mobile (content in legend strip) */
   .brain-viewer-right-panel {
+    display: none;
+  }
+
+  /* Smaller text in legend strip on mobile */
+  .brain-viewer-legend-strip {
     font-size: 0.75rem;
   }
 }
@@ -4246,18 +4270,30 @@ body {
     max-width: 300px;
   }
 
-  .brain-viewer-canvas-wrapper {
+  /* Canvas area takes middle row */
+  .brain-viewer-canvas-area {
     order: 2;
+  }
+
+  .brain-viewer-canvas-wrapper {
     min-height: 400px;
   }
 
+  /* Legend strip horizontal on tablet */
+  .brain-viewer-legend-strip {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: var(--spacing-3);
+  }
+
+  /* Hide legacy right panel on tablet (content in legend strip) */
   .brain-viewer-right-panel {
-    order: 3;
-    width: 100%;
+    display: none;
   }
 }
 
-/* Desktop: 1024px+ (existing lg: breakpoint behavior) */
+/* Desktop: 1024px+ - 2-column layout with legend below canvas */
 @media (min-width: 1024px) {
   .brain-viewer-layout {
     display: flex;
@@ -4271,16 +4307,45 @@ body {
     order: 1;
   }
 
-  .brain-viewer-canvas-wrapper {
+  /* Canvas area: contains canvas + legend strip below */
+  .brain-viewer-canvas-area {
     flex: 1;
     order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    min-width: 0; /* Allow shrinking */
+  }
+
+  .brain-viewer-canvas-wrapper {
+    flex: 1;
     min-height: 400px;
   }
 
-  .brain-viewer-right-panel {
-    width: 16rem; /* 256px */
+  /* Legend strip below canvas - horizontal layout */
+  .brain-viewer-legend-strip {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+    padding: var(--spacing-3);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-panel);
+  }
+
+  .brain-viewer-legend-strip .brain-viewer-actions {
     flex-shrink: 0;
-    order: 3;
+  }
+
+  .brain-viewer-legend-strip .color-legend-container {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Hide right panel on desktop (content moved to legend strip) */
+  .brain-viewer-right-panel {
+    display: none;
   }
 }
 
