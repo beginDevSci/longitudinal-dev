@@ -47,6 +47,35 @@ pub fn TableOfContents(
 
     let (is_collapsed, set_is_collapsed) = signal(false);
 
+    // localStorage persistence for collapsed state
+    let storage_key = "right-toc-collapsed";
+
+    // Load initial state from localStorage on client mount
+    Effect::new({
+        let storage_key = storage_key.to_string();
+        move |_| {
+            if let Ok(Some(storage)) = window().local_storage() {
+                if let Ok(Some(stored_value)) = storage.get_item(&storage_key) {
+                    let should_collapse = stored_value == "true";
+                    if should_collapse != is_collapsed.get_untracked() {
+                        set_is_collapsed.set(should_collapse);
+                    }
+                }
+            }
+        }
+    });
+
+    // Save to localStorage when state changes
+    Effect::new({
+        let storage_key = storage_key.to_string();
+        move |_| {
+            let collapsed = is_collapsed.get();
+            if let Ok(Some(storage)) = window().local_storage() {
+                let _ = storage.set_item(&storage_key, if collapsed { "true" } else { "false" });
+            }
+        }
+    });
+
     view! {
         <aside
             class="hidden md:block sticky top-6 h-[calc(100vh-3rem)]"

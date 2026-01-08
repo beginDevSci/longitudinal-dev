@@ -268,29 +268,30 @@ Focus Mode Overlay (position: fixed, full viewport):
 **Goal:** Allow collapsing page-level sidebars for more viewer space
 **Risk:** Medium (affects site-wide layout)
 **Impact:** Medium
+**Status:** Implementation Complete (2025-01-08) - Visual testing needed
 
 ### Checklist
 
 #### 5.1 Collapse Affordances
-- [ ] **File:** `post_layout.rs`
-- [ ] Add collapse toggle (chevron) to left sidebar edge
-- [ ] Add collapse toggle to right TOC edge
-- [ ] Store collapse state in localStorage
+- [x] **File:** `left_nav.rs`, `table_of_contents.rs`
+- [x] Left sidebar has collapse toggle (chevron button)
+- [x] Right TOC has collapse toggle (chevron button)
+- [x] Store collapse state in localStorage (`left-nav-collapsed`, `right-toc-collapsed`)
 
 #### 5.2 Left Sidebar Collapse
-- [ ] **File:** `left_nav.rs` + `style/input.css`
-- [ ] Collapsed state: ~48px icon strip
-- [ ] Show method family icons only
-- [ ] Hover/click expands temporarily OR click chevron to expand
-- [ ] Smooth transition animation
+- [x] **File:** `left_nav.rs` + inline Tailwind
+- [x] Collapsed state: w-14 (56px) icon strip
+- [x] Chevron rotates when collapsed
+- [x] Smooth transition animation (duration-300)
+- [x] localStorage persistence via Effect
 
 #### 5.3 Right TOC Collapse
-- [ ] **File:** `table_of_contents.rs` + `style/input.css`
-- [ ] Collapsed state: ~48px with TOC icon
-- [ ] Click to expand
-- [ ] Smooth transition
+- [x] **File:** `table_of_contents.rs` + `style/input.css`
+- [x] Collapsed state: 48px with toggle visible
+- [x] Uses CSS transform (translateX) for smooth collapse
+- [x] localStorage persistence via Effect
 
-#### 5.4 Validation
+#### 5.4 Validation (Visual testing needed)
 - [ ] Sidebars collapse/expand smoothly
 - [ ] State persists on refresh
 - [ ] Navigation still accessible
