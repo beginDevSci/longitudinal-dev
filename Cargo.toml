@@ -151,8 +151,8 @@ site-pkg-dir = "pkg"
 # Explicitly select the primary bin target so cargo-leptos doesn't fail when
 # the auxiliary `validate` binary is present in the workspace.
 bin-target = "longitudinal_dev"
-lib-features = ["hydrate"]
-bin-features = ["ssr"]
+lib-features = ["hydrate", "webgpu-viewer"]
+bin-features = ["ssr", "webgpu-viewer"]
 
 # tailwind integration (v4 CSS-first, no JS config needed)
 tailwind-input-file = "style/input.css"
