@@ -407,9 +407,9 @@ The expert estimated the viewer was "~70% complete" with remaining work being "v
 - [x] Phase 5 – Canvas & Vertical Flow
 - [x] Phase 6 – Legend Details Refinement
 - [x] Phase 7 – Brush Slider Consistency
-- [ ] **Checkpoint C** (ready for commit)
+- [x] **Checkpoint C** (committed)
 - [ ] Phase 8 – Accessibility & Consistency Pass
 - [ ] Phase 9 – Final QA & Screenshots
 
-**Current Phase:** Checkpoint C – Commit Phase 5-7 changes
+**Current Phase:** Phase 8 – Accessibility & Consistency Pass
 **Last Updated:** 2025-01-09

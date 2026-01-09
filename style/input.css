@@ -5300,3 +5300,195 @@ body {
     padding: var(--spacing-3);
   }
 }
+
+/* ========================================
+   BRAIN VIEWER - Analysis Tools Panel
+   Below-canvas collapsible panel layout
+   ======================================== */
+
+/* Panel container - sits below legend strip */
+.analysis-tools-panel {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+
+/* Panel header - clickable toggle */
+.analysis-tools-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-bg-subtle);
+  border: none;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.analysis-tools-panel-header:hover {
+  background: var(--color-bg-elevated);
+}
+
+.analysis-tools-panel-header:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Show border when expanded */
+.analysis-tools-panel:has(.analysis-tools-panel-expanded) .analysis-tools-panel-header {
+  border-bottom-color: var(--color-border-subtle);
+}
+
+/* Chevron rotation */
+.analysis-tools-panel-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  transition: transform 200ms ease-out;
+}
+
+.analysis-tools-panel-chevron-open {
+  transform: rotate(90deg);
+}
+
+/* Panel title */
+.analysis-tools-panel-title {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+/* Active mode badge (e.g., "Drawing") */
+.analysis-tools-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  background: var(--color-accent-500);
+  color: white;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Animated collapse content */
+.analysis-tools-panel-content {
+  display: grid;
+  transition: grid-template-rows 250ms ease-out;
+}
+
+.analysis-tools-panel-collapsed {
+  grid-template-rows: 0fr;
+}
+
+.analysis-tools-panel-expanded {
+  grid-template-rows: 1fr;
+}
+
+/* Inner wrapper for overflow handling */
+.analysis-tools-panel-inner {
+  padding: var(--spacing-3);
+}
+
+/* 2-column grid for tool cards (desktop default) */
+.analysis-tools-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+}
+
+/* Individual tool cards */
+.analysis-tools-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+}
+
+/* Card header with icon */
+.analysis-tools-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.analysis-tools-card-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+}
+
+.analysis-tools-card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Mobile: 1-column, constrained height with scroll */
+@media (max-width: 767px) {
+  .analysis-tools-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+
+  .analysis-tools-panel-inner {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--spacing-2);
+  }
+
+  .analysis-tools-card {
+    padding: var(--spacing-2);
+  }
+
+  .analysis-tools-card-header {
+    margin-bottom: var(--spacing-1);
+    padding-bottom: var(--spacing-1);
+  }
+}
+
+/* Tablet: 1-column with more height */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .analysis-tools-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .analysis-tools-panel-inner {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+/* Desktop: 2-column, no height constraint */
+@media (min-width: 1024px) {
+  .analysis-tools-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .analysis-tools-panel-inner {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Touch-friendly panel header */
+@media (pointer: coarse) {
+  .analysis-tools-panel-header {
+    min-height: 48px;
+    padding: var(--spacing-3);
+  }
+
+  .analysis-tools-card {
+    padding: var(--spacing-3);
+  }
+}
