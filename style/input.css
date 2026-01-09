@@ -4184,7 +4184,7 @@ body {
   order: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2); /* Tighter canvas-legend connection */
 }
 
 .brain-viewer-canvas-wrapper {
@@ -4314,7 +4314,7 @@ body {
     order: 2;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-3);
+    gap: var(--spacing-2); /* Tighter canvas-legend connection */
     min-width: 24rem; /* 384px minimum for canvas readability */
   }
 
@@ -4625,26 +4625,31 @@ body {
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2); /* Increased spacing between detail items */
 }
 
 /* Detail items - label + value pairs */
 .legend-detail-item {
   display: flex;
   gap: var(--spacing-1);
-  font-size: 0.85rem;
+  font-size: 0.8125rem; /* Slightly smaller for compact details */
   line-height: 1.5;
   color: var(--color-text-muted);
 }
 
+/* Micro-headings for detail labels */
 .legend-detail-label {
-  font-weight: 500;
+  font-weight: 600; /* Bolder for visual hierarchy */
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
 .legend-detail-value {
   color: var(--color-text-muted);
+  font-size: 0.8125rem;
 }
 
 .legend-detail-note {

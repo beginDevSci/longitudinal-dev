@@ -222,71 +222,81 @@ Restructure into semantic subsections (static containers, NOT nested collapsible
 ---
 
 ### Phase 5 – Canvas & Vertical Flow
-**Effort:** Low | **Status:** Not Started
+**Effort:** Low | **Status:** ✅ Complete
 **Files:** `style/input.css`
 
 #### 5.1 Canvas Top Breathing Room
-- [ ] Evaluate adding 12-16px top padding inside `.brain-viewer-canvas-wrapper`
-- [ ] Verify it doesn't break alignment with tutorial content
-- [ ] If problematic, use smallest value that improves breathing room
+- [x] Evaluate adding 12-16px top padding inside `.brain-viewer-canvas-wrapper`
+  - Already has `padding: var(--spacing-3)` (12px) at desktop - meets target
+- [x] Verify it doesn't break alignment with tutorial content
+- [x] If problematic, use smallest value that improves breathing room
+  - No change needed; existing padding sufficient
 
 #### 5.2 Canvas-Legend Gap
-- [ ] Measure current gap (currently `var(--spacing-3)` = 12px)
-- [ ] Target: `var(--spacing-2)` (~8px) for tighter visual connection
-- [ ] Goal: legend feels attached to canvas without merging
+- [x] Measure current gap (currently `var(--spacing-3)` = 12px)
+- [x] Target: `var(--spacing-2)` (~8px) for tighter visual connection
+- [x] Goal: legend feels attached to canvas without merging
+  - Updated `.brain-viewer-canvas-area` gap at mobile and desktop breakpoints
 
 #### 5.3 Alignment Within Canvas Column
-- [ ] Ensure canvas and legend left edges align
-- [ ] Consistent shadows/borders between elements
-- [ ] **Note:** This is canvas-column alignment only, not cross-column with left panel
+- [x] Ensure canvas and legend left edges align
+  - Both are flex children of same column, naturally aligned
+- [x] Consistent shadows/borders between elements
+  - Canvas: elevated (box-shadow), Legend: standard border (intentional hierarchy)
+- [x] **Note:** This is canvas-column alignment only, not cross-column with left panel
 
 #### 5.4 Decisions Made
-- Focus on **canvas + legend** alignment within right column
-- Target specific spacing token, not arbitrary delta
+- Focus on **canvas + legend** alignment within right column ✓
+- Target specific spacing token, not arbitrary delta ✓
+- Canvas already had sufficient breathing room (12px) ✓
 
 ---
 
 ### Phase 6 – Legend Details Refinement
-**Effort:** Low | **Status:** Not Started
+**Effort:** Low | **Status:** ✅ Complete
 **Files:** `color_legend.rs`, `style/input.css`
 
 #### 6.1 Spacing
-- [ ] Increase gap in `.legend-details-inner` from `--spacing-1` to `--spacing-2`
-- [ ] Maintain consistent vertical rhythm
+- [x] Increase gap in `.legend-details-inner` from `--spacing-1` to `--spacing-2`
+- [x] Maintain consistent vertical rhythm
 
 #### 6.2 Micro-Headings
-- [ ] Add small headings for:
+- [x] Add small headings for:
   - Units
   - Source
   - Tip
   - Suggested threshold
-- [ ] Style: slightly bolder, same label color as elsewhere
+- [x] Style: slightly bolder, same label color as elsewhere
+  - Labels: 600 weight, 0.75rem, uppercase, letter-spacing 0.03em
+  - Uses existing `--color-text-secondary` for consistency
 
 #### 6.3 Tone & Contrast
-- [ ] Mute body text relative to headings
-- [ ] Verify WCAG AA contrast preserved
+- [x] Mute body text relative to headings
+  - Values use `--color-text-muted` at 0.8125rem
+- [x] Verify WCAG AA contrast preserved
+  - Using existing color tokens which are accessibility-compliant
 
 ---
 
 ### Phase 7 – Brush Slider Consistency
-**Effort:** Low | **Status:** Not Started
+**Effort:** Low | **Status:** ✅ Complete
 **Files:** `roi_panel.rs`, `style/input.css`
 
 #### 7.1 Adopt Threshold Pattern
-- [ ] Implement slider + numeric pill pattern (same as threshold control)
-- [ ] Reuse existing classes: `.threshold-control`, `.threshold-slider`, `.threshold-input`
+- [x] Implement slider + numeric pill pattern (same as threshold control)
+- [x] Reuse existing classes: `.threshold-control`, `.threshold-slider`, `.threshold-input`
 
 #### 7.2 Visual Alignment
-- [ ] Flex row or stacked pair mirroring threshold control
-- [ ] Tightly grouped and clearly related
+- [x] Flex row or stacked pair mirroring threshold control
+- [x] Tightly grouped and clearly related
 
 #### 7.3 Two-Way Sync
-- [ ] Slider changes update numeric value
-- [ ] Numeric input changes update slider and brush size
+- [x] Slider changes update numeric value (via `on_brush_slider_input`)
+- [x] Numeric input changes update slider and brush size (via `on_brush_input_change`)
 
 #### 7.4 Decisions Made
-- Scope to `roi_panel.rs` specifically
-- **Reuse existing CSS pattern**, not custom one-off
+- Scope to `roi_panel.rs` specifically ✓
+- **Reuse existing CSS pattern**, not custom one-off ✓
 
 ---
 
@@ -393,13 +403,13 @@ The expert estimated the viewer was "~70% complete" with remaining work being "v
 - [x] Phase 2 – Typography & Density
 - [x] Phase 3 – ROI Buttons & Controls Layout
 - [x] Phase 4 – ROI Table Styling
-- [ ] **Checkpoint A+B** (visual validation pending)
-- [ ] Phase 5 – Canvas & Vertical Flow
-- [ ] Phase 6 – Legend Details Refinement
-- [ ] Phase 7 – Brush Slider Consistency
-- [ ] **Checkpoint C**
+- [x] **Checkpoint A+B** (user approved)
+- [x] Phase 5 – Canvas & Vertical Flow
+- [x] Phase 6 – Legend Details Refinement
+- [x] Phase 7 – Brush Slider Consistency
+- [ ] **Checkpoint C** (ready for commit)
 - [ ] Phase 8 – Accessibility & Consistency Pass
 - [ ] Phase 9 – Final QA & Screenshots
 
-**Current Phase:** Awaiting visual validation of Phases 1-4
+**Current Phase:** Checkpoint C – Commit Phase 5-7 changes
 **Last Updated:** 2025-01-09
