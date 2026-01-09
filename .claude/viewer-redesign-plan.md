@@ -369,6 +369,51 @@ git tag -a viewer-redesign-phase1 -m "Phase 1: 2-column layout complete"
 
 ---
 
+## Development Workflow
+
+### Running the Development Server
+
+**IMPORTANT:** This project uses Static Site Generation (SSG), not Server-Side Rendering (SSR). The correct way to run locally is:
+
+```bash
+# Build and serve with interactive brain viewer (RECOMMENDED)
+make serve
+
+# This runs: WEBGPU_VIEWER=1 cargo xtask build-ssg + python3 http.server
+# Site available at: http://localhost:8000
+```
+
+### Why NOT to use `cargo leptos watch`
+
+While `cargo leptos watch/serve` is configured in `Cargo.toml`, this project generates static HTML pages and exits. The Leptos server doesn't stay running because it's in SSG mode, not SSR mode. Use `make serve` instead.
+
+### Feature Flags
+
+The `webgpu-viewer` feature must be enabled for the interactive brain viewer:
+
+| Build Command | webgpu-viewer | Result |
+|---------------|---------------|--------|
+| `make serve` | ✅ Included | Interactive viewer works |
+| `make ssg` | ✅ Included | Interactive viewer works |
+| `make ssg-minimal` | ❌ Excluded | "requires webgpu-viewer" message |
+
+### Architecture Notes
+
+1. **SSG Build** (`src/bin/xtask.rs`): Builds WASM + generates static HTML
+2. **blmm_demo/**: Contains viewer components (gitignored, not tracked)
+3. **style/input.css**: All viewer CSS (tracked, changes visible after `make serve`)
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "requires webgpu-viewer feature" | WASM built without feature | Run `make serve` (not `make ssg-minimal`) |
+| Server exits immediately | SSG mode, not SSR | Use `make serve`, not `cargo leptos watch` |
+| CSS changes not visible | Old build in dist/ | Run `make serve` to rebuild |
+| Port 3000 conflicts | Wrong server | Kill with `pkill -f cargo-leptos`, use `make serve` |
+
+---
+
 ## Session Handoff Notes
 
 When resuming work on this plan:

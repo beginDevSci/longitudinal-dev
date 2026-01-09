@@ -3,22 +3,31 @@
 # Default target shows help
 help:
 	@echo "Available targets:"
+	@echo ""
+	@echo "  DEVELOPMENT:"
+	@echo "  make serve                  - Build and serve site at http://localhost:8000 (with brain viewer)"
+	@echo "  make watch                  - Run development server with live reload (cargo-leptos)"
 	@echo "  make bootstrap              - Check prerequisites and install tools (first-time setup)"
-	@echo "  make watch                  - Run development server with live reload"
+	@echo ""
+	@echo "  BUILD:"
+	@echo "  make ssg                    - Generate static site to ./dist (with brain viewer)"
+	@echo "  make ssg-minimal            - Generate static site without brain viewer (faster)"
+	@echo "  make build                  - Build the project (library and binaries)"
+	@echo "  make deploy                 - Build and deploy to GitHub Pages"
+	@echo ""
+	@echo "  VALIDATION:"
 	@echo "  make content                - Build, test, and lint (main workflow)"
 	@echo "  make validate-json          - Validate JSON syntax with Rust validator (fast)"
-	@echo "  make validate-tutorials      - Validate all tutorial markdown files (5-stage pipeline)"
+	@echo "  make validate-tutorials     - Validate all tutorial markdown files (5-stage pipeline)"
 	@echo "  make validate-tutorials-force - Force validate all tutorials (bypass cache)"
 	@echo "  make validate               - Alias for validate-json"
-	@echo "  make build                  - Build the project"
+	@echo "  make check-guide-hierarchy  - Verify guide heading counts (max 10 H2s)"
+	@echo ""
+	@echo "  OTHER:"
 	@echo "  make test                   - Run all tests"
 	@echo "  make clippy                 - Run clippy linter"
 	@echo "  make all                    - Run validate-json + content"
 	@echo "  make hook-install           - Install pre-commit hook"
-	@echo "  make ssg                    - Generate static site to ./dist"
-	@echo "  make serve                  - Generate and serve static site on http://localhost:8000"
-	@echo "  make deploy                 - Build and deploy to GitHub Pages"
-	@echo "  make check-guide-hierarchy  - Verify guide heading counts (max 10 H2s)"
 
 # Main content workflow: validate → build → test → clippy
 content: build test clippy
@@ -72,13 +81,17 @@ hook-install:
 
 # Generate static site
 ssg:
-	@cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
+	@WEBGPU_VIEWER=1 cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
 
-# Generate and serve static site
+# Generate and serve static site (with interactive brain viewer)
 serve: ssg
 	@echo "🌐 Serving site at http://localhost:8000"
 	@echo "Press Ctrl+C to stop"
 	@cd dist && python3 -m http.server 8000
+
+# Generate SSG without brain viewer (smaller WASM, faster build)
+ssg-minimal:
+	@cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
 
 # Deploy to GitHub Pages
 deploy:
