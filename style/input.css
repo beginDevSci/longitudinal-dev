@@ -4376,7 +4376,41 @@ body {
   }
 }
 
-/* Vertex info bar - compact inline hover/selection display */
+/* Actions bar below canvas - share/export buttons only */
+.brain-viewer-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  min-height: 28px;
+}
+
+.brain-viewer-actions-bar .brain-viewer-actions-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.brain-viewer-actions-bar .share-link-display {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Desktop: slim ribbon style */
+@media (min-width: 1024px) {
+  .brain-viewer-actions-bar {
+    margin-top: -4px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-top-color: transparent;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+}
+
+/* Legacy - vertex-info-bar styles (kept for reference) */
 .vertex-info-bar {
   display: flex;
   align-items: center;
@@ -5093,7 +5127,8 @@ body {
   border-radius: 0;
 }
 
-.brain-viewer-layout-focus .brain-viewer-legend-strip {
+.brain-viewer-layout-focus .brain-viewer-legend-strip,
+.brain-viewer-layout-focus .brain-viewer-actions-bar {
   display: none;
 }
 
@@ -5484,16 +5519,23 @@ body {
   line-height: 1.2;
 }
 
+/* Sticky header for vertex table within scrollable container */
+.vertex-table-compact thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 .vertex-table-header {
   border-bottom: 1px solid var(--color-border-default);
-  background: var(--color-accent-500)/10;
 }
 
 .vertex-table-header th {
-  padding: 2px 4px;
+  padding: 4px 6px;
   font-size: 10px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-accent-400);
+  background: var(--color-bg-elevated);
 }
 
 .vertex-table-row {
@@ -5510,6 +5552,32 @@ body {
   padding: 2px 4px;
   font-size: 10px;
   height: 18px;
+}
+
+/* Constrain vertex table to ~5 visible rows with scroll */
+.vertex-table-wrapper {
+  max-height: 180px; /* ~5 rows + header at ~20px each */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+
+.vertex-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.vertex-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vertex-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 2px;
+}
+
+.vertex-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-accent);
 }
 
 /* Collapsed card hint - minimal single-line state */
@@ -6022,101 +6090,275 @@ body {
 }
 
 /* =========================================
-   On-Canvas Threshold Slider Overlay
+   On-Canvas Consolidated Info Overlay
+   Modern dark glass design
    ========================================= */
 
-.threshold-overlay {
+.canvas-info-overlay {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  /* Dark glass effect */
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.88) 0%,
+    rgba(30, 41, 59, 0.85) 100%
+  );
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  z-index: 10;
+  min-width: 150px;
+}
+
+/* Stat name and range row */
+.canvas-info-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.canvas-info-stat-name {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.canvas-info-stat-range {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.9);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+/* Threshold slider row */
+.canvas-info-threshold {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  background: rgba(var(--color-bg-surface-rgb, 255, 255, 255), 0.9);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-default);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  gap: 0.5rem;
+  padding: 0.125rem 0;
 }
 
-/* "T" label */
+/* "T" label - badge style */
 .threshold-label {
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   font-weight: 700;
-  color: var(--color-text-muted);
+  color: rgba(56, 189, 248, 0.9);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  padding: 0.125rem 0.375rem;
+  background: rgba(56, 189, 248, 0.12);
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
-/* Compact slider */
+/* Modern slider track */
 .threshold-slider {
-  width: 80px;
+  flex: 1;
+  min-width: 70px;
   height: 4px;
   border-radius: 2px;
-  background: var(--color-border-default);
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.6) 0%,
+    rgba(100, 116, 139, 0.5) 100%
+  );
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  transition: background 150ms ease;
 }
 
+.threshold-slider:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(71, 85, 105, 0.8) 0%,
+    rgba(100, 116, 139, 0.7) 100%
+  );
+}
+
+/* Slider thumb - glowing accent */
 .threshold-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--color-accent-500);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 8px rgba(56, 189, 248, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.threshold-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 12px rgba(56, 189, 248, 0.7),
+    0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .threshold-slider::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--color-accent-500);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 8px rgba(56, 189, 248, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
-/* Threshold value display */
-.threshold-overlay .threshold-value {
-  font-size: 0.625rem;
+.threshold-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 12px rgba(56, 189, 248, 0.7),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Threshold value - prominent display */
+.threshold-value {
+  font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--color-text-secondary);
-  min-width: 1.5rem;
+  color: rgba(255, 255, 255, 0.95);
+  min-width: 2rem;
   text-align: right;
   font-family: var(--font-mono);
+  letter-spacing: -0.02em;
 }
 
-/* Mobile: slightly larger touch target */
+/* Selected vertex info row */
+.canvas-info-selection {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.canvas-info-selection-text {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(251, 191, 36, 0.95);
+  font-family: var(--font-mono);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.canvas-info-selection-clear {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.canvas-info-selection-clear:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: rgba(252, 165, 165, 0.95);
+}
+
+/* Mobile: slightly larger touch targets */
 @media (pointer: coarse) {
-  .threshold-overlay {
-    padding: 0.375rem 0.625rem;
+  .canvas-info-overlay {
+    padding: 0.75rem 0.875rem;
+    gap: 0.625rem;
+    min-width: 170px;
+  }
+
+  .canvas-info-stat-name {
+    font-size: 0.75rem;
+  }
+
+  .canvas-info-stat-range {
+    font-size: 0.6875rem;
+  }
+
+  .threshold-label {
+    font-size: 0.625rem;
+    padding: 0.1875rem 0.5rem;
   }
 
   .threshold-slider {
-    width: 100px;
     height: 6px;
+    min-width: 80px;
   }
 
   .threshold-slider::-webkit-slider-thumb {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .threshold-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .threshold-value {
+    font-size: 0.75rem;
+  }
+
+  .canvas-info-selection-text {
+    font-size: 0.6875rem;
+  }
+
+  .canvas-info-selection-clear {
+    width: 20px;
+    height: 20px;
+    font-size: 0.875rem;
   }
 }
 
-/* Fullscreen mode: adjust position */
-.fullscreen-canvas-container .threshold-overlay {
-  top: 1rem;
-  right: 1rem;
+/* Fullscreen mode: adjust position and size */
+.fullscreen-canvas-container .canvas-info-overlay {
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.fullscreen-canvas-container .canvas-info-stat-name {
+  font-size: 0.75rem;
+}
+
+.fullscreen-canvas-container .canvas-info-stat-range {
+  font-size: 0.6875rem;
+}
+
+.fullscreen-canvas-container .threshold-value {
+  font-size: 0.75rem;
 }
