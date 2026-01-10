@@ -4331,8 +4331,7 @@ body {
 
   /* Canvas wrapper: visual emphasis with stronger styling */
   .brain-viewer-canvas-wrapper {
-    flex: 1;
-    min-height: 420px; /* Slightly taller for presence */
+    flex: none; /* Don't grow beyond canvas content */
     padding: var(--spacing-3);
     background: var(--color-bg-elevated);
     border-radius: var(--radius-panel);
@@ -4627,6 +4626,16 @@ body {
   text-overflow: ellipsis;
   max-width: 100px;
   flex-shrink: 0;
+}
+
+/* Range display - compact [min, max] format */
+.legend-range {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 /* Min/max values - slim, monospace for alignment */
