@@ -5283,8 +5283,8 @@ body {
 
 /* GPU acceleration for canvas container */
 .brain-viewer-canvas-wrapper {
-  will-change: contents;
-  contain: layout style;
+  will-change: transform;
+  /* Note: removed contain: layout which was breaking absolute positioning */
 }
 
 /* Promote canvas to its own compositing layer */
@@ -5292,10 +5292,12 @@ body {
   will-change: transform;
 }
 
-/* Optimize overlay transitions */
-.brain-viewer-canvas-controls,
-.brain-viewer-canvas-wrapper .absolute {
-  contain: layout paint;
+/* On-canvas controls - explicit absolute positioning */
+.brain-viewer-canvas-controls {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
 }
 
 /* Prevent layout thrashing from sidebar animations */
