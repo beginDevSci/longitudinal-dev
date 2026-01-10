@@ -6009,3 +6009,103 @@ body {
   gap: var(--spacing-2);
   padding-left: var(--spacing-2);
 }
+
+/* =========================================
+   On-Canvas Threshold Slider Overlay
+   ========================================= */
+
+.threshold-overlay {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(var(--color-bg-surface-rgb, 255, 255, 255), 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* "T" label */
+.threshold-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Compact slider */
+.threshold-slider {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border-default);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.threshold-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent-500);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.threshold-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent-500);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Threshold value display */
+.threshold-overlay .threshold-value {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 1.5rem;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+/* Mobile: slightly larger touch target */
+@media (pointer: coarse) {
+  .threshold-overlay {
+    padding: 0.375rem 0.625rem;
+  }
+
+  .threshold-slider {
+    width: 100px;
+    height: 6px;
+  }
+
+  .threshold-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .threshold-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Fullscreen mode: adjust position */
+.fullscreen-canvas-container .threshold-overlay {
+  top: 1rem;
+  right: 1rem;
+}
