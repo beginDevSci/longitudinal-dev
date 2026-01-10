@@ -5684,6 +5684,9 @@ body {
 
 /* Card body text - smaller for density */
 .analysis-tools-card .analysis-tools-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
   font-size: 0.75rem;
   line-height: 1.4;
 }
