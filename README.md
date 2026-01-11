@@ -33,4 +33,35 @@ A huge thanks to all contributors and supporters—your involvement makes this p
 
 ---
 
+## 🧠 Brain Viewer
+
+The repository includes an interactive 3D brain surface viewer for visualizing neuroimaging statistical results. Built with Rust/WebAssembly and WebGPU.
+
+### Crate Structure
+
+| Crate | Description |
+|-------|-------------|
+| `brain_viewer_facade` | Entry point - Leptos island component for embedding in tutorials |
+| `viewer_app` | Main Leptos viewer application |
+| `core_render` | wgpu-based rendering engine |
+| `io_formats` | FreeSurfer/GIFTI/NIfTI file format parsers |
+| `neuro_surface` | Neuroimaging domain types and colormaps |
+| `interaction` | Selection, hover, and ROI state management |
+
+### Building the Viewer
+
+```bash
+# Build the viewer facade (requires wasm32 target)
+cargo build --target wasm32-unknown-unknown -p brain_viewer_facade --features webgpu-viewer
+
+# Run io_formats tests
+cargo test -p io_formats
+```
+
+### Usage
+
+The viewer is embedded in tutorials via the `BrainViewerIsland` component from `brain_viewer_facade`. See `crates/brain_viewer_facade/src/lib.rs` for usage examples.
+
+---
+
 **For developers and contributors:** Technical documentation, build instructions, and development workflows can be found in the `docs/` directory.

@@ -16,10 +16,10 @@ This plan addresses horizontal space constraints in the brain viewer by restruct
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Viewer layout | `blmm_demo/crates/viewer_app/src/components/brain_viewer.rs` | Main 3-column layout (lines 1828-2200) |
-| Control panel | `blmm_demo/crates/viewer_app/src/components/control_panel.rs` | Left panel controls |
-| Color legend | `blmm_demo/crates/viewer_app/src/components/color_legend.rs` | Right panel legend |
-| Collapsible | `blmm_demo/crates/viewer_app/src/components/collapsible_section.rs` | Reusable collapse component |
+| Viewer layout | `crates/viewer_app/src/components/brain_viewer.rs` | Main 3-column layout (lines 1828-2200) |
+| Control panel | `crates/viewer_app/src/components/control_panel.rs` | Left panel controls |
+| Color legend | `crates/viewer_app/src/components/color_legend.rs` | Right panel legend |
+| Collapsible | `crates/viewer_app/src/components/collapsible_section.rs` | Reusable collapse component |
 | Viewer CSS | `style/input.css` | Lines 4172-4320 |
 | Page layout | `src/layout/post_layout.rs` | Tutorial page 3-column grid |
 | Left nav | `src/layout/left_nav.rs` | Tutorial navigation sidebar |
@@ -400,7 +400,7 @@ The `webgpu-viewer` feature must be enabled for the interactive brain viewer:
 ### Architecture Notes
 
 1. **SSG Build** (`src/bin/xtask.rs`): Builds WASM + generates static HTML
-2. **blmm_demo/**: Contains viewer components (gitignored, not tracked)
+2. **crates/viewer_app/**: Contains viewer components (integrated into repo)
 3. **style/input.css**: All viewer CSS (tracked, changes visible after `make serve`)
 
 ### Common Issues
@@ -427,13 +427,13 @@ When resuming work on this plan:
 
 ```bash
 # Viewer layout
-code blmm_demo/crates/viewer_app/src/components/brain_viewer.rs
+code crates/viewer_app/src/components/brain_viewer.rs
 
 # Control panel
-code blmm_demo/crates/viewer_app/src/components/control_panel.rs
+code crates/viewer_app/src/components/control_panel.rs
 
 # Color legend
-code blmm_demo/crates/viewer_app/src/components/color_legend.rs
+code crates/viewer_app/src/components/color_legend.rs
 
 # Viewer CSS
 code style/input.css +4172

@@ -23,15 +23,13 @@ These changes build on the completed 2-column layout work and address remaining 
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| ROI Panel | `blmm_demo/crates/viewer_app/src/components/roi_panel.rs` | ROI tools, brush slider, buttons |
-| Vertex Table | `blmm_demo/crates/viewer_app/src/components/vertex_summary_table.rs` | Top 10 vertices table |
-| Control Panel | `blmm_demo/crates/viewer_app/src/components/control_panel.rs` | Hemisphere, threshold, colormap controls |
-| Color Legend | `blmm_demo/crates/viewer_app/src/components/color_legend.rs` | Legend strip with expandable details |
-| Brain Viewer | `blmm_demo/crates/viewer_app/src/components/brain_viewer.rs` | Main layout container |
-| Collapsible | `blmm_demo/crates/viewer_app/src/components/collapsible_section.rs` | Reusable collapse component |
+| ROI Panel | `crates/viewer_app/src/components/roi_panel.rs` | ROI tools, brush slider, buttons |
+| Vertex Table | `crates/viewer_app/src/components/vertex_summary_table.rs` | Top 10 vertices table |
+| Control Panel | `crates/viewer_app/src/components/control_panel.rs` | Hemisphere, threshold, colormap controls |
+| Color Legend | `crates/viewer_app/src/components/color_legend.rs` | Legend strip with expandable details |
+| Brain Viewer | `crates/viewer_app/src/components/brain_viewer.rs` | Main layout container |
+| Collapsible | `crates/viewer_app/src/components/collapsible_section.rs` | Reusable collapse component |
 | Viewer CSS | `style/input.css` | Lines ~4172-4970 contain viewer styles |
-
-**Note:** `blmm_demo/` is a symlink to `/Users/shawes/Desktop/blmm_demo`
 
 ---
 
@@ -57,7 +55,7 @@ make serve
 - **Mobile testing** at each phase (especially button wrapping, touch targets, table readability)
 
 ### Scope Boundaries
-- ✅ Viewer components (`blmm_demo/crates/viewer_app/src/components/*`)
+- ✅ Viewer components (`crates/viewer_app/src/components/*`)
 - ✅ Viewer CSS (`style/input.css` viewer sections)
 - ❌ Site-level layout, sidebars, page asides
 - ❌ Global typography tokens or layout shells
@@ -377,10 +375,10 @@ Restructure into semantic subsections (static containers, NOT nested collapsible
 
 ### Files Most Likely to Change
 
-1. `blmm_demo/crates/viewer_app/src/components/roi_panel.rs` - Phases 1, 3, 7
+1. `crates/viewer_app/src/components/roi_panel.rs` - Phases 1, 3, 7
 2. `style/input.css` - Phases 1-7
-3. `blmm_demo/crates/viewer_app/src/components/vertex_summary_table.rs` - Phase 4
-4. `blmm_demo/crates/viewer_app/src/components/color_legend.rs` - Phase 6
+3. `crates/viewer_app/src/components/vertex_summary_table.rs` - Phase 4
+4. `crates/viewer_app/src/components/color_legend.rs` - Phase 6
 
 ### Expert Review Context
 

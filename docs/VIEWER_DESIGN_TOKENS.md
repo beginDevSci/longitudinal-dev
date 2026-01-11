@@ -240,7 +240,7 @@ Replace Tailwind classes with site's utility classes where they exist (e.g., `.b
 
 ## Files to Modify
 
-### In viewer_app (blmm_demo/crates/viewer_app/src/components/):
+### In viewer_app (crates/viewer_app/src/components/):
 1. `brain_viewer.rs` - Main container, canvas, right panel
 2. `control_panel.rs` - Left sidebar, all form controls
 3. `collapsible_section.rs` - Section headers
