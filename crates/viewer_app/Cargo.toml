@@ -1,0 +1,70 @@
+[package]
+name = "brain-viewer"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["csr", "wgpu-renderer"]
+csr = ["leptos/csr"]
+# wgpu-renderer implies web-loaders for loading surfaces via HTTP
+wgpu-renderer = ["core_render", "glam", "web-loaders"]
+# Use io_formats for loading real FreeSurfer surfaces instead of custom .bin.gz
+io-formats-loader = []
+# Use io_formats for loading overlays (curv, GIFTI func, NIfTI, BLMM statistics)
+io-formats-overlay-loader = []
+# Enable async web loaders using gloo-net HTTP (WASM-only)
+web-loaders = ["gloo-net", "flate2"]
+
+[dependencies]
+leptos = { version = "0.8", default-features = false }
+send_wrapper = "0.6"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "HtmlCanvasElement",
+    "WebGl2RenderingContext",
+    "MouseEvent",
+    "TouchEvent",
+    "TouchList",
+    "Touch",
+    "WheelEvent",
+    "KeyboardEvent",
+    "Window",
+    "Document",
+    "DomRect",
+    "Storage",
+] }
+js-sys = "0.3"
+gloo-net = { version = "0.5", optional = true }
+byteorder = "1.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+futures = "0.3"
+log = "0.4"
+wasm-logger = "0.2"
+console_error_panic_hook = "0.1"
+thiserror = "1.0"
+flate2 = { version = "1.0", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[dependencies.io_formats]
+path = "../io_formats"
+
+[dependencies.interaction]
+path = "../interaction"
+
+[dependencies.core_render]
+path = "../core_render"
+optional = true
+
+[dependencies.glam]
+version = "0.27"
+optional = true
+
+[dependencies.neuro_surface]
+path = "../neuro_surface"

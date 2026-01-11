@@ -169,5 +169,11 @@ members = [
     "crates/writer",
     "crates/validator",
     "crates/brain_viewer_facade",
+    # Brain viewer crates (integrated from blmm_demo)
+    "crates/core_render",
+    "crates/io_formats",
+    "crates/neuro_surface",
+    "crates/interaction",
+    "crates/viewer_app",
 ]
 resolver = "2"

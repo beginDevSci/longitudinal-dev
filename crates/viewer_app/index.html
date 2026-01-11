@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLMM Brain Viewer</title>
+    <meta name="description" content="Interactive 3D visualization of BLMM statistical results on cortical surfaces">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+
+    <!-- Tailwind CSS (CDN for development) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom styles -->
+    <style>
+        /* Ensure the brain viewer container takes appropriate space */
+        .brain-viewer-container {
+            min-height: 400px;
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* WebGL canvas styling */
+        canvas {
+            display: block;
+            touch-action: none; /* Prevent touch scrolling on canvas */
+        }
+    </style>
+
+    <!-- Trunk will inject WASM bindings here -->
+    <link data-trunk rel="rust" data-wasm-opt="z" />
+
+    <!-- Copy data folder to dist -->
+    <link data-trunk rel="copy-dir" href="../../public/data" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading indicator shown before WASM loads -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-gray-900 text-white">
+        <div class="text-center">
+            <div class="text-6xl mb-4 animate-pulse">🧠</div>
+            <div class="text-xl">Loading Brain Viewer...</div>
+            <div class="text-sm text-gray-400 mt-2">This may take a few seconds</div>
+        </div>
+    </div>
+
+    <script>
+        // Hide loading indicator once WASM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            // The leptos app will mount and replace content
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            }, 100);
+        });
+    </script>
+
+    <noscript>
+        <div class="fixed inset-0 flex items-center justify-center bg-gray-900 text-white">
+            <div class="text-center p-8">
+                <div class="text-6xl mb-4">⚠️</div>
+                <div class="text-xl">JavaScript Required</div>
+                <div class="text-sm text-gray-400 mt-2">
+                    This application requires JavaScript and WebGL 2.0 to run.
+                    Please enable JavaScript in your browser settings.
+                </div>
+            </div>
+        </div>
+    </noscript>
+</body>
+</html>
