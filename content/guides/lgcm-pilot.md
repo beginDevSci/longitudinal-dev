@@ -77,7 +77,7 @@ LGCM works well when you have:
 | Requirement | Guideline |
 |-------------|-----------|
 | **Repeated measures** | 3+ waves (4+ preferred for testable fit) |
-| **Continuous outcome** | Or ordinal with 5+ categories |
+| **Outcome type** | Continuous (or ordinal; prefer categorical estimators such as WLSMV; 5+ categories often treated as approximately continuous—verify robustness) |
 | **Interest in individual differences** | Not just "did the mean change?" |
 | **Adequate sample** | 100+ for simple models; more for complex |
 
@@ -98,11 +98,13 @@ Every person in your study has two numbers you can't directly observe:
 
 These aren't measured directly—LGCM infers them from the pattern of observed scores across time.
 
+**Extensions**: Add time-varying covariates (TVCs) to predict the outcome at each occasion, and time-invariant covariates (TICs) to predict the latent intercept and slope. TVCs capture occasion-specific influences; TICs capture stable between-person differences.
+
 **A useful analogy**: In traditional factor analysis, multiple *items* measure one latent construct. In LGCM, multiple *time points* measure two latent constructs—where you start and how you change. The key difference is that LGCM's factor loadings aren't estimated from data; they're fixed to encode your time structure.
 
 ### Factor Loadings: Encoding Time
 
-In LGCM, loadings are **fixed**, not estimated:
+In the linear LGCM presented here, slope loadings are fixed to encode time (0, 1, 2, …). Variants like latent-basis or piecewise growth free or re-fix some loadings to capture nonlinearity.
 
 | Factor | Loadings | Why |
 |--------|----------|-----|
@@ -177,6 +179,8 @@ r = ψ₁₂ / √(ψ₁₁ × ψ₂₂)
 
 A correlation of -0.20 means a modest negative relationship: those who start higher grow slightly slower.
 
+If the slope variance (ψ₂₂) is very small or near a boundary, the intercept–slope covariance/correlation can be unstable; inspect confidence intervals and consider rescaling time or centering to improve estimation.
+
 ### Residuals: What the Trajectory Doesn't Explain
 
 ```
@@ -224,6 +228,8 @@ This means:
 - **ψ₁₁, ψ₂₂** = variances (individual differences in intercept and slope)
 - **ψ₁₂** = covariance (relationship between starting level and change)
 
+For identification, observed item/indicator intercepts are fixed to 0, and we estimate the latent factor means; the latent intercept mean is thus the expected score at time = 0 (given the chosen time coding).
+
 ### Model-Implied Covariance Structure
 
 LGCM is a structural equation model. It implies a specific covariance matrix:
@@ -248,6 +254,8 @@ Model fit tests whether your observed covariance matrix matches this implied str
 | Degrees of freedom | Observed − Estimated |
 
 For 5 waves with equal residual variances: df = (15 + 5) − (2 + 3 + 1) = 14
+
+Assumptions for this df: (a) observed means are included among the sample statistics but intercepts are fixed to 0 with two latent factor means freed (intercept and slope), and (b) residual variances are constrained equal across time (one θ parameter). If θ is freed per time point, df decreases accordingly.
 
 </details>
 
@@ -333,11 +341,15 @@ To build deeper intuition for how LGCM parameters affect trajectories, use the i
 
 LGCM requires at least **3 time points** for linear growth, with **4+ preferred**. With only two waves, simpler approaches (change scores, ANCOVA) work just as well. More waves provide better power to detect individual differences in growth and to test whether linear trajectories actually fit.
 
+With 3 waves, linear growth is identified but overall model fit is weakly testable. With 4 waves, you can begin to test linear vs. alternative forms (note: a quadratic model can be just-identified under common constraints).
+
 ### Missing Data
 
 Real longitudinal data almost always have missing observations. LGCM handles this gracefully through **Full Information Maximum Likelihood (FIML)**, which uses all available data without listwise deletion.
 
 The key assumption is **Missing At Random (MAR)**: missingness can depend on *observed* variables, but not on the missing values themselves. If participants drop out *because* their unobserved scores are extreme (Missing Not At Random), estimates may be biased. Understanding this distinction helps you evaluate whether your missing data pattern is problematic.
+
+FIML assumes MAR and correct model specification. Include auxiliary variables related to missingness (and the outcome) to bolster MAR plausibility and reduce bias.
 
 ---
 
@@ -389,9 +401,9 @@ The slope (line angle) is identical in all three; only the intercept reference p
 
 </details>
 
-> [!note] **The slope never changes**
+> [!note] **Centering and the slope**
 >
-> Recentering moves *where* the intercept is measured but doesn't change the rate of change. The slope means the same thing in all versions—only the intercept's reference point shifts.
+> Across different centerings, the meaning of the slope does not change; only the intercept's meaning shifts to the chosen time origin.
 
 **When does centering matter?** When you add predictors. If you ask "Does baseline depression predict growth?", the intercept-predictor relationship depends on where you defined the intercept.
 
@@ -408,6 +420,8 @@ If waves aren't equally spaced, use actual time values:
 | Follow-up 4 | Month 24 | 24 |
 
 Now slope = change per **month**. Rescale for interpretability if needed (e.g., divide by 12 for slope = change per year).
+
+Rescaling the time metric also rescales the slope mean and variance (e.g., per-month → per-year), which can improve interpretability and numerical stability.
 
 ---
 
@@ -447,6 +461,10 @@ You now have the conceptual foundation for understanding LGCM:
 - **LGCM produces testable fit**, allowing you to evaluate whether linear growth actually describes your data
 
 This is enough to understand what an LGCM does and why. To actually *fit* one, continue to the worked example.
+
+> [!info] **Scope**
+>
+> This hub focuses on linear LGCM for continuous outcomes. Not covered (yet): generalized growth for counts/binary, mixture/latent class growth, piecewise/latent-basis models, and measurement invariance testing when outcomes are latent factors measured by multiple items. See the tutorial links for code and estimation details.
 
 ---
 

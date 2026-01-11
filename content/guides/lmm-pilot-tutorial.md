@@ -189,6 +189,7 @@ ggplot(data_long, aes(x = time, y = y)) +
   geom_line(aes(group = id), alpha = 0.15, color = "gray40") +
   geom_line(data = mean_trajectory, aes(y = mean_y),
             color = "steelblue", linewidth = 1.5) +
+            # Note: ggplot2 < 3.4 used 'size' instead of 'linewidth'
   geom_point(data = mean_trajectory, aes(y = mean_y),
              color = "steelblue", size = 3) +
   scale_x_continuous(breaks = 0:4) +
@@ -281,7 +282,9 @@ time          2.021      0.085  199.000   23.78   <2e-16 ***
 | I-S correlation | -0.20 | -0.18 |
 | Residual variance | 25 | 24.89 |
 
-✅ **Checkpoint**: Estimates closely recover the true population parameters. This confirms the model is working correctly. (Your exact values will differ slightly due to random sampling.)
+*Numbers shown are illustrative from one simulated run; your results will differ with seed, RNG, and package versions.*
+
+✅ **Checkpoint**: Estimates closely recover the true population parameters. This confirms the model is working correctly.
 
 ---
 
@@ -311,6 +314,8 @@ mod_rs_ml    6 6142.8 6172.2 -3065.4   6130.8 95.68  2  < 2.2e-16 ***
 
 The random slope model fits significantly better (p < .001).
 
+Use ML (`REML = FALSE`) for model comparisons (AIC/BIC, LRT); use REML for final parameter estimation.
+
 ### Information Criteria
 
 ```r
@@ -320,6 +325,7 @@ data.frame(
   BIC = c(BIC(mod_ri_ml), BIC(mod_rs_ml))
 ) %>%
   mutate(across(where(is.numeric), \(x) round(x, 1)))
+  # Note: R < 4.1 use function(x) instead of \(x)
 ```
 
 ✅ **Checkpoint**: Both AIC and BIC should favor the random slope model (lower values = better fit).
@@ -353,6 +359,8 @@ qqline(ranef(mod_rs)$id[,1])
 | Q-Q plot (residuals) | Points on line | Heavy tails, skewness |
 | Q-Q plot (random effects) | Points on line | Heavy tails (less critical) |
 
+Examine Residuals vs Fitted (random scatter) and Normal Q-Q (approximate line). Heavier tails in random-effects Q-Q are common and typically less critical.
+
 ### Check for Singular Fit
 
 ```r
@@ -360,6 +368,8 @@ isSingular(mod_rs)  # Should be FALSE
 ```
 
 A singular fit warning means a variance component is estimated at zero—often indicating an over-specified model.
+
+If singular: try removing the random slope, rescaling or centering time, or collecting more waves; for Bayesian fits, consider informative priors.
 
 ### Variance Explained (R²)
 
@@ -383,6 +393,8 @@ icc(mod_ri)
 
 ICC ≈ 0.65 means 65% of total variance is between persons (stable individual differences), and 35% is within persons (change over time + noise). This justifies using mixed models—there's meaningful clustering to account for.
 
+With random slopes, ICC varies with time; the one-number ICC reported here comes from the random-intercept model and serves as a baseline clustering index.
+
 ✅ **Checkpoint**: Residual plots should show no obvious patterns. R² conditional should be high. ICC should justify the random intercept.
 
 ---
@@ -396,6 +408,8 @@ ICC ≈ 0.65 means 65% of total variance is between persons (stable individual d
 fixef(mod_rs)
 confint(mod_rs, parm = "beta_", method = "Wald")
 ```
+
+We use Wald CIs for speed; profile CIs can be more accurate but are slower.
 
 | Parameter | Estimate | 95% CI | Interpretation |
 |-----------|----------|--------|----------------|
@@ -429,12 +443,17 @@ A positive slope mean doesn't mean everyone improved. Check:
 slope_mean <- fixef(mod_rs)["time"]
 slope_sd <- sqrt(VarCorr(mod_rs)$id["time", "time"])
 
-# P(slope > 0)
+# P(slope > 0) — theoretical
 pnorm(0, mean = slope_mean, sd = slope_sd, lower.tail = FALSE)
 # ≈ 0.98
+
+# Empirical share with positive slopes using BLUPs
+re <- ranef(mod_rs)$id
+mean(fixef(mod_rs)["time"] + re$time > 0)
+# Should be close to the theoretical value
 ```
 
-✅ **Checkpoint**: ~98% of participants had positive slopes. With slope mean ≈ 2 and SD ≈ 1, almost everyone improved.
+✅ **Checkpoint**: ~98% of participants had positive slopes. With slope mean ≈ 2 and SD ≈ 1, almost everyone improved. The BLUP-based share should be close to the theoretical `pnorm()` result.
 
 ---
 
@@ -458,7 +477,7 @@ head(re)
 ...
 ```
 
-These are person-specific **deviations** from the fixed effects.
+These are BLUP/EBLUP estimates (conditional modes): person-specific deviations that are partially pooled toward the group mean.
 
 ### Individual Trajectories
 
@@ -502,8 +521,8 @@ A key advantage of mixed models is **shrinkage**—extreme individual estimates 
 ols_estimates <- data_long %>%
   group_by(id) %>%
   summarise(
-    ols_intercept = coef(lm(y ~ time))[1],
-    ols_slope = coef(lm(y ~ time))[2],
+    ols_intercept = coef(lm(y ~ time, data = cur_data()))[1],
+    ols_slope     = coef(lm(y ~ time, data = cur_data()))[2],
     .groups = "drop"
   )
 
@@ -641,8 +660,8 @@ Time must be numeric for growth models:
 ```r
 class(data_long$time)  # Should be "numeric" or "integer"
 
-# If it's a factor, convert:
-data_long$time <- as.numeric(as.character(data_long$time))
+# If it's a factor with numeric labels (e.g., "0","1","2"):
+data_long$time <- readr::parse_number(as.character(data_long$time))
 ```
 
 ### 3. Update Model Formula
@@ -660,9 +679,13 @@ If waves are unequally spaced, use actual time values:
 
 ```r
 # Measurements at baseline, 1, 3, 6, and 12 months:
-data_long$time <- c(0, 1, 3, 6, 12)[data_long$wave]
+# Create a mapping from wave labels to time values
+time_map <- c("1"=0, "2"=1, "3"=3, "4"=6, "5"=12)
+data_long$time <- unname(time_map[as.character(data_long$wave)])
 # Now slope = change per month
 ```
+
+Set time = 0 at a meaningful reference (e.g., baseline) so the intercept is interpretable.
 
 ✅ **Checkpoint**: Once your basic model runs, layer on diagnostics, model comparisons, and random effects extraction exactly as shown above.
 

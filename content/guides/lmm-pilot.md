@@ -17,7 +17,7 @@ Consider a simple example: 200 participants measured at 5 time points each. You 
 |----------|--------------|---------|
 | **Ignore nesting** | Treat all 1,000 observations as independent | SEs too small, p-values too optimistic |
 | **Aggregate** | Compute person-means, analyze 200 means | Loses within-person information about change |
-| **Repeated measures ANOVA** | Model time as fixed factor | Assumes compound symmetry; limited to balanced data |
+| **Repeated measures ANOVA** | Model time as fixed factor | Assumes sphericity (often violated); historically easier with balanced data |
 | **Mixed models** | Model between- and within-person variation | Appropriate standard errors; individual trajectories |
 
 **Linear Mixed Models (LMM)** solve this by explicitly modeling the dependency structure. The "mixed" refers to a mixture of:
@@ -45,6 +45,8 @@ Real longitudinal data are messy: participants miss waves, measurement timing va
 
 Time can be equally spaced (0, 1, 2, 3, 4), unequally spaced (0, 3, 6, 12, 24 months), or person-specific (actual dates of measurement). Just code time as a continuous variable with appropriate values.
 
+For person-specific timing, set time = 0 at a common within-person reference (e.g., each person's baseline/first visit) so the intercept is interpretable.
+
 ### Separates Within- and Between-Person Variation
 
 LMM explicitly partitions variance into:
@@ -60,6 +62,8 @@ Adding predictors is straightforward:
 
 - **Time-invariant predictors** (e.g., treatment group, gender): Predict individual differences in trajectories
 - **Time-varying predictors** (e.g., daily stress, current medication): Predict occasion-specific deviations
+
+For time-varying predictors, separate within-person effects (xᵢₜ − x̄ᵢ) from between-person effects (x̄ᵢ) to avoid conflating processes. Report both coefficients explicitly.
 
 ---
 
@@ -121,7 +125,7 @@ LMM simultaneously answers two questions: *How do people change on average?* (fi
 
 **Notation**: u₀ᵢ, u₁ᵢ (the deviations); τ₀₀, τ₁₁ (their variances)
 
-**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the *average* intercept (fixed) and the *variance* of intercepts across people (random). Person-specific estimates are derived quantities (BLUPs), not directly estimated coefficients.
+**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the *average* intercept (fixed) and the *variance* of intercepts across people (random). Person-specific estimates are derived quantities (BLUP/EBLUP estimates), not directly estimated coefficients.
 
 ### The Combined Model
 
@@ -178,7 +182,7 @@ yᵢₜ = [γ₀₀ + u₀ᵢ] + γ₁₀(Time) + εᵢₜ
 
 Each person has their own starting level, but lines are **parallel**—everyone changes at the same rate.
 
-**When this is enough**: If you have few time points, or if slope variance is genuinely small.
+**When this is enough**: If you have few time points, or if slope variance is genuinely small. Estimating a random slope typically benefits from ≥4 observations per person; with fewer, consider random-intercept-only.
 
 ### Model 2: Random Intercept and Slope
 
@@ -280,6 +284,8 @@ Where the random effects follow a bivariate normal distribution:
 [u₁ᵢ] ~ N([0], [τ₁₀  τ₁₁])
 ```
 
+(The random-effects covariance matrix is symmetric: τ₀₁ = τ₁₀.)
+
 ### Combined Model
 
 Substituting Level 2 into Level 1:
@@ -301,6 +307,8 @@ The covariance between two observations from the same person at times t and t':
 ```
 Cov(yᵢₜ, yᵢₜ') = τ₀₀ + (t + t')·τ₀₁ + (t × t')·τ₁₁
 ```
+
+These expressions hold for any numeric time coding; centering time (e.g., at baseline or midpoint) improves interpretability and numerical stability.
 
 </details>
 
@@ -359,13 +367,15 @@ How you code time affects interpretation:
 
 **Recommendation**: Start with zero at baseline (0, 1, 2, ...). Adjust if your research question focuses on a different time point.
 
+Rescaling time (e.g., months → years) rescales the slope and its variance; choose units that are meaningful for interpretation.
+
 ### Missing Data
 
 LMM handles missing observations gracefully:
 
-- Uses all available data (no listwise deletion)
-- Assumes data are **Missing at Random (MAR)**: missingness can depend on observed variables but not on the missing values themselves
-- No special syntax needed—just include all observations you have
+- Uses all available outcome data under ML (observations can differ per person)
+- Assumes **MAR** given the variables in the model; include auxiliary covariates when plausible
+- Rows with missing predictors are typically dropped; consider imputation or modeling missingness
 
 **Caution**: If dropout is related to the outcome trajectory itself (MNAR), estimates may be biased. Consider sensitivity analyses.
 
@@ -379,6 +389,8 @@ The ICC tells you what proportion of total variance is between-person (stable in
 </figure>
 
 An ICC of 0.65 means 65% of variance is between persons—observations within a person are more similar to each other than to other people's observations. This justifies using mixed models: there's meaningful clustering to account for.
+
+With random slopes, the ICC is time-dependent; the single-number ICC interpretation applies to random-intercept-only models.
 
 ---
 
@@ -394,17 +406,19 @@ Before applying LMM, be aware of these frequent mistakes.
 
 **Treating BLUPs as data** — Using extracted random effects in secondary analyses as if they were observed data. *Reality:* BLUPs are estimates with uncertainty. Include predictors in the model, not in post-hoc analyses of BLUPs.
 
-**Time coded as factor** — Treating time as categorical when you want a continuous slope. *Reality:* Factor time gives dummy variables, not a growth trajectory. Keep time numeric for growth models.
+**Time coded as factor** — Treating time as categorical when you want a continuous slope. *Reality:* Factor time gives dummy variables, not a growth trajectory. (It's fine if your goal is a nonparametric mean profile; you'll lose a single 'slope' interpretation.)
 
 **Misinterpreting ICC** — "ICC = 0.65 means the model explains 65%." *Reality:* ICC is variance *partitioning*, not variance *explained*. It tells you how much is between- vs. within-person.
 
-**Ignoring residual assumptions** — Not checking whether residuals are approximately normal and homoscedastic. *Reality:* Severe violations can bias standard errors. Always plot residuals vs. fitted.
+**Ignoring residual assumptions** — Not checking whether residuals are approximately normal and homoscedastic. *Reality:* Severe violations can bias standard errors. Always plot residuals vs. fitted. If measurements are closely spaced, consider AR(1) residual correlation and/or time-varying residual variance; inspect residual ACFs and plots.
 
 **Confusing marginal and conditional R²** — Reporting only marginal R² when random effects matter. *Reality:* Marginal = fixed effects only; Conditional = fixed + random. Report both.
 
 **Centering confusion** — Not being clear about what the intercept represents. *Reality:* The intercept's meaning depends on where time = 0. Be explicit about your centering choice.
 
 **Conflating statistical and practical significance** — "Slope variance is significant, so individual differences matter." *Reality:* With large samples, even tiny variances are significant. Interpret effect sizes substantively.
+
+**Denominator d.f. and p-values** — Mixed-model degrees of freedom depend on the design; use Satterthwaite or Kenward–Roger approximations when reporting tests for fixed effects.
 
 ---
 
