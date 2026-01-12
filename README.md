@@ -6,17 +6,17 @@ Welcome! 👋
 
 ## 🚧 Early Days
 
-This project is actively under development—expect new content, features, and improvements to roll out regularly. Things might shift around as we find the best ways to serve the community. Your patience and feedback are greatly appreciated!
+This project is actively under development—expect new content, features, and improvements to roll out regularly. Things might shift around as we find the best ways to serve the community. We value your feedback.
 
 ## 🤝 Get Involved
 
-We believe open knowledge drives innovation and scientific progress. This platform thrives on community contributions:
+Open knowledge advances science. This platform thrives on community contributions:
 
 - **Share your expertise** - Submit tutorials, tools, or research insights
 - **Suggest improvements** - Found a typo? Have an idea? Use the "Suggest changes" button on any tutorial page
 - **Join the discussion** - Connect with us on [GitHub Discussions](https://github.com/beginDevSci/longitudinal-dev/discussions) or [Discord](https://discord.gg/WXMv25rf)
 
-Whether you're an experienced researcher or just getting started with longitudinal analysis, your contributions help everyone learn and grow.
+Whether you're an experienced researcher or just getting started with longitudinal analysis, your contributions benefit the community.
 
 ## 📬 Contact
 
@@ -29,7 +29,7 @@ Questions, suggestions, or just want to say hi?
 
 ## 🙏 Thank You
 
-A huge thanks to all contributors and supporters—your involvement makes this project possible!
+Thank you to all contributors and supporters.
 
 ---
 

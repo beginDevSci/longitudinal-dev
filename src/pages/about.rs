@@ -56,13 +56,13 @@ pub fn AboutPage() -> impl IntoView {
                 <section class="space-y-4">
                     <p class="text-sm uppercase tracking-[0.3em] text-teal-300">"Community and Collaboration"</p>
                     <p class="text-slate-200 leading-relaxed">
-                        "Open knowledge fosters innovation and accelerates scientific progress. This platform is built upon the collective expertise and shared contributions of its community."
+                        "Open knowledge supports scientific progress and collaboration. This platform is built upon the collective expertise and shared contributions of its community."
                     </p>
                     <p class="text-slate-200 leading-relaxed">
                         "We encourage participation: by sharing tools, tutorials, or research insights, you drive the continuous improvement and expansion of this platform. Those interested in sharing content, submitting improvements, or getting involved are welcome to review our contribution guide."
                     </p>
                     <p class="text-slate-200 leading-relaxed">
-                        "We extend our gratitude to all contributors and supporters whose involvement is essential to this project."
+                        "Thank you to all contributors and supporters."
                     </p>
                 </section>
 

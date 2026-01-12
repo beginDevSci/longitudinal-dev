@@ -129,7 +129,7 @@ pub fn ToolsPage(tools: Tools) -> impl IntoView {
                     </a>
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"Open Source Tools"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
-                        "Essential tools for data science research: programming languages, development environments, version control, and more."
+                        "Tools for data science research: programming languages, development environments, version control, and more."
                     </p>
                 </div>
             </section>
