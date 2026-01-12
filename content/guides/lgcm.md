@@ -1,10 +1,10 @@
 ---
 title: "Latent Growth Curve Models"
-slug: "lgcm-pilot"
+slug: "lgcm"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
 tags: ["LGCM", "guide", "SEM", "lavaan"]
-guide_type: "hub"
+guide_type: "overview"
 ---
 
 ## Why Study Growth?
@@ -472,7 +472,7 @@ This is enough to understand what an LGCM does and why. To actually *fit* one, c
 
 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
 
-**[Tutorial: Worked Example →](/guides/lgcm-pilot-tutorial)**
+**[Walkthrough: Worked Example →](/guides/lgcm-walkthrough)**
 Step-by-step R code to simulate data, fit models, and interpret results.
 
 </div>

@@ -1,12 +1,12 @@
 ---
-title: "LGCM Tutorial: Worked Example"
-slug: "lgcm-pilot-tutorial"
+title: "LGCM Walkthrough: Worked Example"
+slug: "lgcm-walkthrough"
 description: "Step-by-step LGCM analysis from setup to interpretation using simulated data in R."
 category: "growth-models"
-tags: ["LGCM", "tutorial", "lavaan", "R"]
+tags: ["LGCM", "walkthrough", "lavaan", "R"]
 r_packages: ["lavaan", "tidyverse", "MASS"]
-guide_type: "tutorial"
-parent_method: "lgcm-pilot"
+guide_type: "walkthrough"
+parent_method: "lgcm"
 ---
 
 ## LGCM Tutorial
@@ -290,7 +290,7 @@ fitmeasures(fit_linear, c("chisq", "df", "pvalue", "cfi", "rmsea", "srmr"))
 
 With small df, RMSEA can be unstable; interpret alongside CFI and SRMR.
 
-See [Reference](/guides/lgcm-pilot-reference#fit-indices) for threshold details.
+See [Reference](/guides/lgcm-reference#fit-indices) for threshold details.
 
 ### Modification Indices
 
@@ -333,7 +333,7 @@ parameterEstimates(fit_linear) %>%
 - Try `estimator = "MLR"` and/or rescale time to reduce collinearity
 - Temporarily constrain problematic residual variances to a small positive lower bound while diagnosing
 
-✅ **Confirm**: All variance estimates should be positive. If any are negative, see [Troubleshooting](/guides/lgcm-pilot-reference#troubleshooting).
+✅ **Confirm**: All variance estimates should be positive. If any are negative, see [Troubleshooting](/guides/lgcm-reference#troubleshooting).
 
 ---
 
@@ -532,6 +532,6 @@ Rescaling time (e.g., months → years) rescales the slope mean and variance (pe
 
 ## Next Steps
 
-- **Need syntax or thresholds?** → [Reference](/guides/lgcm-pilot-reference)
-- **Hit an error?** → [Reference: Troubleshooting](/guides/lgcm-pilot-reference#troubleshooting)
-- **Back to overview** → [LGCM Guide](/guides/lgcm-pilot)
+- **Need syntax or thresholds?** → [Reference](/guides/lgcm-reference)
+- **Hit an error?** → [Reference: Troubleshooting](/guides/lgcm-reference#troubleshooting)
+- **Back to overview** → [LGCM Guide](/guides/lgcm)

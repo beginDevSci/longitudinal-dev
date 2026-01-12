@@ -9,7 +9,7 @@ use crate::ThemeToggle;
 #[component]
 pub fn TopNav() -> impl IntoView {
     let home_href = base_path::base_path();
-    let abcd_examples_href = base_path::join("tutorials/");
+    let abcd_analyses_href = base_path::join("abcd-analyses/");
     let guides_href = base_path::join("guides/");
     let resources_href = base_path::join("resources/");
     let tools_href = base_path::join("tools/");
@@ -28,7 +28,7 @@ pub fn TopNav() -> impl IntoView {
 
                 <nav class="flex items-center gap-2 text-sm font-medium">
                     <a href=home_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Home"</a>
-                    <a href=abcd_examples_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"ABCD Examples"</a>
+                    <a href=abcd_analyses_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"ABCD Analyses"</a>
                     <a href=guides_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Method Guides"</a>
                     <a href=resources_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Resources"</a>
                     <a href=tools_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Tools"</a>

@@ -1,12 +1,12 @@
 ---
-title: "LMM Tutorial: Worked Example"
-slug: "lmm-pilot-tutorial"
+title: "LMM Walkthrough: Worked Example"
+slug: "lmm-walkthrough"
 description: "Step-by-step LMM analysis from setup to interpretation using simulated data in R."
 category: "mixed-models"
-tags: ["LMM", "tutorial", "lme4", "R"]
+tags: ["LMM", "walkthrough", "lme4", "R"]
 r_packages: ["lme4", "lmerTest", "tidyverse", "MASS", "performance"]
-guide_type: "tutorial"
-parent_method: "lmm-pilot"
+guide_type: "walkthrough"
+parent_method: "lmm"
 ---
 
 ## LMM Tutorial
@@ -693,6 +693,6 @@ Set time = 0 at a meaningful reference (e.g., baseline) so the intercept is inte
 
 ## Next Steps
 
-- **Need syntax or thresholds?** → [Reference](/guides/lmm-pilot-reference)
-- **Hit an error?** → [Reference: Troubleshooting](/guides/lmm-pilot-reference#troubleshooting)
-- **Back to overview** → [LMM Guide](/guides/lmm-pilot)
+- **Need syntax or thresholds?** → [Reference](/guides/lmm-reference)
+- **Hit an error?** → [Reference: Troubleshooting](/guides/lmm-reference#troubleshooting)
+- **Back to overview** → [LMM Guide](/guides/lmm)

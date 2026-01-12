@@ -1,10 +1,10 @@
 ---
 title: "Linear Mixed Models"
-slug: "lmm-pilot"
+slug: "lmm"
 description: "Model individual trajectories while accounting for the nested structure of longitudinal data."
 category: "mixed-models"
 tags: ["LMM", "guide", "lme4", "multilevel"]
-guide_type: "hub"
+guide_type: "overview"
 ---
 
 ## Why Mixed Models?
@@ -440,7 +440,7 @@ This is enough to understand what LMM does and why. To actually _fit_ one, conti
 
 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
 
-**[Tutorial: Worked Example →](/guides/lmm-pilot-tutorial)**
+**[Walkthrough: Worked Example →](/guides/lmm-walkthrough)**
 Step-by-step R code to simulate data, fit models, and interpret results.
 
 </div>

@@ -75,10 +75,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
-                            href={base_path::join("tutorials/")}
+                            href={base_path::join("abcd-analyses/")}
                             class="px-8 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                         >
-                            "ABCD Examples"
+                            "ABCD Analyses"
                         </a>
                         <a
                             href={base_path::join("guides/")}
@@ -97,7 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(site_root.join("index.html"), index_html)?;
     eprintln!("Wrote {}", site_root.join("index.html").display());
 
-    // 2. Generate tutorial catalog page at /tutorials/index.html
+    // 2. Generate tutorial catalog page at /abcd-analyses/index.html
     let posts_with_metadata: Vec<_> = posts()
         .into_iter()
         .filter(|p| p.metadata.is_some())
@@ -242,7 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // Static hero section
                 <section class="relative overflow-hidden bg-subtle">
                     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-                        <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Examples"</h1>
+                        <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Analyses"</h1>
                         <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
                             "Examples of longitudinal analysis methods using data from the ABCD Study® dataset."
                         </p>
@@ -263,10 +263,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     .to_html();
 
-    let tutorials_dir = site_root.join("tutorials");
-    create_dir_all(&tutorials_dir)?;
-    write(tutorials_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", tutorials_dir.join("index.html").display());
+    let abcd_analyses_dir = site_root.join("abcd-analyses");
+    create_dir_all(&abcd_analyses_dir)?;
+    write(abcd_analyses_dir.join("index.html"), &tutorial_catalog_html)?;
+    eprintln!("Wrote {}", abcd_analyses_dir.join("index.html").display());
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
@@ -309,7 +309,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(tools_dir.join("index.html"), &tools_html)?;
     eprintln!("Wrote {}", tools_dir.join("index.html").display());
 
-    // 4. Generate one page per tutorial at /tutorials/<family>/<slug>/index.html
+    // 4. Generate one page per tutorial at /abcd-analyses/<family>/<slug>/index.html
     // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
     let posts_dir = site_root.join("posts");
     create_dir_all(&posts_dir)?;
@@ -349,10 +349,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Build canonical URL for this tutorial
         let base_path_prefix = std::env::var("SITE_BASE_PATH").unwrap_or_default();
         let canonical_url = if base_path_prefix.is_empty() {
-            format!("/tutorials/{}/{}/", method_family, slug)
+            format!("/abcd-analyses/{}/{}/", method_family, slug)
         } else {
             format!(
-                "{}/tutorials/{}/{}/",
+                "{}/abcd-analyses/{}/{}/",
                 base_path_prefix.trim_end_matches('/'),
                 method_family,
                 slug
@@ -366,8 +366,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .to_html();
 
-        // Write tutorial to new canonical URL: /tutorials/<family>/<slug>/
-        let tutorial_dir = tutorials_dir.join(&method_family).join(&slug);
+        // Write tutorial to new canonical URL: /abcd-analyses/<family>/<slug>/
+        let tutorial_dir = abcd_analyses_dir.join(&method_family).join(&slug);
         create_dir_all(&tutorial_dir)?;
         write(tutorial_dir.join("index.html"), &html)?;
         eprintln!("Wrote {}", tutorial_dir.join("index.html").display());

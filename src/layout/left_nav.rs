@@ -410,7 +410,7 @@ pub fn LeftNav(
                     }>
                         <div>
                             <h2 class="left-nav-brand-title">
-                                "ABCD Examples"
+                                "ABCD Analyses"
                             </h2>
                         </div>
                     </div>
