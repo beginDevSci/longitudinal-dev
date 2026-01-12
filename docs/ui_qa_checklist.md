@@ -95,14 +95,14 @@ Quality assurance checklist for Resources and Tools page refinements.
 
 ## Test Pages
 
-1. **Resources** (`/resources/`)
+1. **Learning Resources** (`/toolkit/learning/`)
    - Hero section
    - Books grid (4 columns max)
    - Videos grid (3 columns max)
    - Tutorials grid (2 columns max)
    - Cheatsheets grid (3 columns max)
 
-2. **Tools** (`/tools/`)
+2. **Software Tools** (`/toolkit/software/`)
    - Hero section
    - Languages grid (5 columns max)
    - IDEs grid (6 columns max)
