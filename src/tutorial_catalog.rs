@@ -689,11 +689,6 @@ pub fn TutorialCard(
             href={href}
             class="group block rounded-xl transition-all duration-200 hover:scale-102 hover:shadow-xl bg-elevated border border-stroke p-6"
         >
-            <div class="flex items-center gap-2 mb-2">
-                <span class="text-xs text-muted">
-                    "Updated " {tutorial.updated_at.clone()}
-                </span>
-            </div>
             <h3
                 class="text-lg font-semibold group-hover:underline group-hover:text-accent transition-colors duration-200 text-primary"
                 inner_html=title_display
