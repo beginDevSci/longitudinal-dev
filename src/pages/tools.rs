@@ -5,6 +5,7 @@
 //! Data is loaded from content/tools.yaml at build time.
 
 use leptos::prelude::*;
+use longitudinal_dev::base_path;
 use longitudinal_dev::tools_catalog::{ToolCategory, ToolItem, ToolsCatalogIsland};
 use serde::{Deserialize, Serialize};
 
@@ -112,12 +113,20 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
 #[component]
 pub fn ToolsPage(tools: Tools) -> impl IntoView {
     let items = tools_to_items(&tools);
+    let toolkit_href = base_path::join("toolkit/");
 
     view! {
         <main class="min-h-screen bg-surface">
             // Header
             <section class="relative overflow-hidden bg-subtle">
                 <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                    <a
+                        href=toolkit_href
+                        class="inline-flex items-center gap-1 text-sm text-secondary hover:text-accent transition-colors mb-4"
+                    >
+                        <span>"←"</span>
+                        <span>"Back to Toolkit"</span>
+                    </a>
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"Open Source Tools"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
                         "Essential tools for data science research: programming languages, development environments, version control, and more."

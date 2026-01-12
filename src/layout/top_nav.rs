@@ -11,8 +11,7 @@ pub fn TopNav() -> impl IntoView {
     let home_href = base_path::base_path();
     let abcd_analyses_href = base_path::join("abcd/");
     let guides_href = base_path::join("guides/");
-    let resources_href = base_path::join("resources/");
-    let tools_href = base_path::join("tools/");
+    let toolkit_href = base_path::join("toolkit/");
     let about_href = base_path::join("about/");
 
     view! {
@@ -30,8 +29,7 @@ pub fn TopNav() -> impl IntoView {
                     <a href=home_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Home"</a>
                     <a href=abcd_analyses_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"ABCD Analyses"</a>
                     <a href=guides_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Method Guides"</a>
-                    <a href=resources_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Resources"</a>
-                    <a href=tools_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Tools"</a>
+                    <a href=toolkit_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"Toolkit"</a>
                     <a href=about_href class="rounded-lg px-4 py-2 text-primary hover:text-accent hover:bg-subtle transition-all duration-200">"About"</a>
                     <span class="rounded-lg px-4 py-2 text-tertiary cursor-not-allowed opacity-50" title="Coming soon">"Writer"</span>
 

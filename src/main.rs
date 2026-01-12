@@ -26,6 +26,7 @@ use longitudinal_writer::WriterApp;
 use pages::abcd_overview::AbcdOverviewPage;
 use pages::about::AboutPage;
 use pages::resources::{load_resources, ResourcesPage};
+use pages::toolkit::ToolkitPage;
 use pages::tools::{load_tools, ToolsPage};
 use sha2::{Digest, Sha256};
 use std::fs::{create_dir_all, read_to_string, write};
@@ -295,7 +296,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(about_dir.join("index.html"), &about_html)?;
     eprintln!("Wrote {}", about_dir.join("index.html").display());
 
-    // 3b. Generate Resources page at /resources/index.html
+    // 3b. Generate Toolkit hub page at /toolkit/index.html
+    let toolkit_html = view! {
+        <SiteLayout options=opts.clone()>
+            <ToolkitPage/>
+        </SiteLayout>
+    }
+    .to_html();
+
+    let toolkit_dir = site_root.join("toolkit");
+    create_dir_all(&toolkit_dir)?;
+    write(toolkit_dir.join("index.html"), &toolkit_html)?;
+    eprintln!("Wrote {}", toolkit_dir.join("index.html").display());
+
+    // 3c. Generate Resources page at /toolkit/learning/index.html
     let resources_data = load_resources();
     let resources_html = view! {
         <SiteLayout options=opts.clone()>
@@ -304,12 +318,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     .to_html();
 
-    let resources_dir = site_root.join("resources");
-    create_dir_all(&resources_dir)?;
-    write(resources_dir.join("index.html"), &resources_html)?;
-    eprintln!("Wrote {}", resources_dir.join("index.html").display());
+    let learning_dir = toolkit_dir.join("learning");
+    create_dir_all(&learning_dir)?;
+    write(learning_dir.join("index.html"), &resources_html)?;
+    eprintln!("Wrote {}", learning_dir.join("index.html").display());
 
-    // 3c. Generate Tools page at /tools/index.html
+    // 3d. Generate Tools page at /toolkit/software/index.html
     let tools_data = load_tools();
     let tools_html = view! {
         <SiteLayout options=opts.clone()>
@@ -318,10 +332,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     .to_html();
 
-    let tools_dir = site_root.join("tools");
-    create_dir_all(&tools_dir)?;
-    write(tools_dir.join("index.html"), &tools_html)?;
-    eprintln!("Wrote {}", tools_dir.join("index.html").display());
+    let software_dir = toolkit_dir.join("software");
+    create_dir_all(&software_dir)?;
+    write(software_dir.join("index.html"), &tools_html)?;
+    eprintln!("Wrote {}", software_dir.join("index.html").display());
 
     // 4. Generate one page per tutorial at /abcd/<family>/<slug>/index.html
     // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
