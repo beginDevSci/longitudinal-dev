@@ -181,6 +181,7 @@ pub fn CategoryItem(
     // Store values in StoredValue for shared access across closures
     let current_slug_stored = StoredValue::new(current_slug.clone());
     let base_path_stored = StoredValue::new(base_path.clone());
+    let category_id_stored = StoredValue::new(category.id.clone());
 
     // Check if current post is in this category (auto-expand if so)
     let contains_current = current_slug
@@ -302,10 +303,11 @@ pub fn CategoryItem(
                         filtered_tutorials.get().into_iter().map(move |item| {
                             let is_active = current_slug_stored.get_value().as_ref() == Some(&item.slug);
                             let base = base_path_stored.get_value();
+                            let family = category_id_stored.get_value();
                             let href = if base == "/" {
-                                format!("/posts/{}", item.slug)
+                                format!("/abcd-analyses/{}/{}/", family, item.slug)
                             } else {
-                                format!("{}posts/{}", base.trim_end_matches('/'), item.slug)
+                                format!("{}abcd-analyses/{}/{}/", base.trim_end_matches('/'), family, item.slug)
                             };
 
                             view! {

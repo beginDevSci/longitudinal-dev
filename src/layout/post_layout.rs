@@ -99,8 +99,9 @@ pub fn PostLayout(
     // Store current post slug for active highlighting
     let current_slug = post.slug.to_string();
 
-    // Generate page URL for suggestions
-    let page_url = format!("https://swhawes.github.io/longitudinal-dev/posts/{}/", current_slug);
+    // Generate page URL for suggestions (using canonical abcd-analyses URL)
+    let method_family = post.metadata.as_ref().map(|m| m.method_family.clone()).unwrap_or_default();
+    let page_url = format!("https://swhawes.github.io/longitudinal-dev/abcd-analyses/{}/{}/", method_family, current_slug);
 
     // Move fields out before view! to own the data
     let title = post.title;
