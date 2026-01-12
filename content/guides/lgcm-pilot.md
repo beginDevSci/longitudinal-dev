@@ -475,8 +475,5 @@ This is enough to understand what an LGCM does and why. To actually *fit* one, c
 **[Tutorial: Worked Example →](/guides/lgcm-pilot-tutorial)**
 Step-by-step R code to simulate data, fit models, and interpret results.
 
-**[Quick Reference →](/guides/lgcm-pilot-reference)**
-Syntax patterns, fit index thresholds, and troubleshooting.
-
 </div>
 

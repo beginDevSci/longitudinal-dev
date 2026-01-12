@@ -443,7 +443,4 @@ This is enough to understand what LMM does and why. To actually *fit* one, conti
 **[Tutorial: Worked Example →](/guides/lmm-pilot-tutorial)**
 Step-by-step R code to simulate data, fit models, and interpret results.
 
-**[Quick Reference →](/guides/lmm-pilot-reference)**
-Syntax patterns, fit evaluation, and troubleshooting.
-
 </div>
