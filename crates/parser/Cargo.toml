@@ -19,6 +19,6 @@ anyhow = "1.0"
 thiserror = "1.0"
 
 [dev-dependencies]
-assert_cmd = "2.0"
+assert_cmd = "2.1"
 predicates = "3.0"
 tempfile = "3.0"
