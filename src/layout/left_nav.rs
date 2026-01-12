@@ -305,9 +305,9 @@ pub fn CategoryItem(
                             let base = base_path_stored.get_value();
                             let family = category_id_stored.get_value();
                             let href = if base == "/" {
-                                format!("/abcd-analyses/{}/{}/", family, item.slug)
+                                format!("/abcd/{}/{}/", family, item.slug)
                             } else {
-                                format!("{}abcd-analyses/{}/{}/", base.trim_end_matches('/'), family, item.slug)
+                                format!("{}abcd/{}/{}/", base.trim_end_matches('/'), family, item.slug)
                             };
 
                             view! {

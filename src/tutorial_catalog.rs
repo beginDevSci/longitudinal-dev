@@ -679,7 +679,7 @@ pub fn TutorialCard(
     #[prop(optional)] summary_html: Option<String>,
 ) -> impl IntoView {
     let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
-    let href = base_path::join(&format!("abcd-analyses/{}/{}/", family_slug, tutorial.slug));
+    let href = base_path::join(&format!("abcd/{}/{}/", family_slug, tutorial.slug));
 
     let title_display = title_html.unwrap_or_else(|| tutorial.title.clone());
     let summary_display = summary_html.unwrap_or_else(|| tutorial.summary.clone());
@@ -780,7 +780,7 @@ pub fn TutorialTable(tutorials: Vec<TutorialData>, sort_by: RwSignal<SortOption>
                 <tbody class="divide-y divide-stroke">
                     {tutorials.into_iter().map(|tutorial| {
                         let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
-                        let href = base_path::join(&format!("abcd-analyses/{}/{}/", family_slug, tutorial.slug));
+                        let href = base_path::join(&format!("abcd/{}/{}/", family_slug, tutorial.slug));
                         view! {
                             <tr class="hover:bg-subtle transition-colors">
                                 <td class="px-4 py-3">
@@ -839,7 +839,7 @@ fn FeaturedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {tutorials.into_iter().map(|tutorial| {
                         let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
-                        let href = base_path::join(&format!("abcd-analyses/{}/{}/", family_slug, tutorial.slug));
+                        let href = base_path::join(&format!("abcd/{}/{}/", family_slug, tutorial.slug));
 
                         view! {
                             <a
@@ -910,7 +910,7 @@ fn WorkflowsSection(workflows: Vec<WorkflowGroup>) -> impl IntoView {
                             <div class="px-4 pb-4 space-y-1 border-t border-stroke/50">
                                 {workflow.tutorials.into_iter().map(|tutorial| {
                                     let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
-                                    let href = base_path::join(&format!("abcd-analyses/{}/{}/", family_slug, tutorial.slug));
+                                    let href = base_path::join(&format!("abcd/{}/{}/", family_slug, tutorial.slug));
                                     view! {
                                         <a
                                             href={href}
@@ -1000,7 +1000,7 @@ fn RecentlyUpdatedSection(tutorials: Vec<TutorialData>) -> impl IntoView {
             <div class="divide-y divide-stroke/50">
                 {tutorials.into_iter().map(|tutorial| {
                     let family_slug = tutorial.method_family.to_lowercase().replace(' ', "-");
-                    let href = base_path::join(&format!("abcd-analyses/{}/{}/", family_slug, tutorial.slug));
+                    let href = base_path::join(&format!("abcd/{}/{}/", family_slug, tutorial.slug));
 
                     view! {
                         <a

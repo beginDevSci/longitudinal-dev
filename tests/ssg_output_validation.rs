@@ -71,7 +71,7 @@ fn dist_output_contains_required_files() {
 
     // 1. Check core HTML files
     assert_file_exists_and_non_empty(&dist.join("index.html"), "main index");
-    assert_file_exists_and_non_empty(&dist.join("abcd-analyses/index.html"), "abcd-analyses index");
+    assert_file_exists_and_non_empty(&dist.join("abcd/index.html"), "abcd index");
     assert_file_exists_and_non_empty(&dist.join("writer/index.html"), "writer page");
 
     // 2. Check WASM artifacts

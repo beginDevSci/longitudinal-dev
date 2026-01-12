@@ -23,6 +23,7 @@ use longitudinal_dev::tutorial_catalog::{
     FamilySummary, LandingSectionsData, TutorialCatalogFetch, TutorialData, WorkflowGroup,
 };
 use longitudinal_writer::WriterApp;
+use pages::abcd_overview::AbcdOverviewPage;
 use pages::about::AboutPage;
 use pages::resources::{load_resources, ResourcesPage};
 use pages::tools::{load_tools, ToolsPage};
@@ -75,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
-                            href={base_path::join("abcd-analyses/")}
+                            href={base_path::join("abcd/")}
                             class="px-8 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                         >
                             "ABCD Analyses"
@@ -97,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(site_root.join("index.html"), index_html)?;
     eprintln!("Wrote {}", site_root.join("index.html").display());
 
-    // 2. Generate tutorial catalog page at /abcd-analyses/index.html
+    // 2. Generate tutorial catalog page at /abcd/index.html
     let posts_with_metadata: Vec<_> = posts()
         .into_iter()
         .filter(|p| p.metadata.is_some())
@@ -263,10 +264,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     .to_html();
 
-    let abcd_analyses_dir = site_root.join("abcd-analyses");
-    create_dir_all(&abcd_analyses_dir)?;
-    write(abcd_analyses_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", abcd_analyses_dir.join("index.html").display());
+    let abcd_dir = site_root.join("abcd");
+    create_dir_all(&abcd_dir)?;
+    write(abcd_dir.join("index.html"), &tutorial_catalog_html)?;
+    eprintln!("Wrote {}", abcd_dir.join("index.html").display());
+
+    // 2b. Generate ABCD Overview page at /abcd/overview/index.html
+    let abcd_overview_html = view! {
+        <SiteLayout options=opts.clone()>
+            <AbcdOverviewPage/>
+        </SiteLayout>
+    }
+    .to_html();
+
+    let abcd_overview_dir = abcd_dir.join("overview");
+    create_dir_all(&abcd_overview_dir)?;
+    write(abcd_overview_dir.join("index.html"), &abcd_overview_html)?;
+    eprintln!("Wrote {}", abcd_overview_dir.join("index.html").display());
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
@@ -309,7 +323,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(tools_dir.join("index.html"), &tools_html)?;
     eprintln!("Wrote {}", tools_dir.join("index.html").display());
 
-    // 4. Generate one page per tutorial at /abcd-analyses/<family>/<slug>/index.html
+    // 4. Generate one page per tutorial at /abcd/<family>/<slug>/index.html
     // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
     let posts_dir = site_root.join("posts");
     create_dir_all(&posts_dir)?;
@@ -349,10 +363,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Build canonical URL for this tutorial
         let base_path_prefix = std::env::var("SITE_BASE_PATH").unwrap_or_default();
         let canonical_url = if base_path_prefix.is_empty() {
-            format!("/abcd-analyses/{}/{}/", method_family, slug)
+            format!("/abcd/{}/{}/", method_family, slug)
         } else {
             format!(
-                "{}/abcd-analyses/{}/{}/",
+                "{}/abcd/{}/{}/",
                 base_path_prefix.trim_end_matches('/'),
                 method_family,
                 slug
@@ -366,8 +380,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .to_html();
 
-        // Write tutorial to new canonical URL: /abcd-analyses/<family>/<slug>/
-        let tutorial_dir = abcd_analyses_dir.join(&method_family).join(&slug);
+        // Write tutorial to new canonical URL: /abcd/<family>/<slug>/
+        let tutorial_dir = abcd_dir.join(&method_family).join(&slug);
         create_dir_all(&tutorial_dir)?;
         write(tutorial_dir.join("index.html"), &html)?;
         eprintln!("Wrote {}", tutorial_dir.join("index.html").display());

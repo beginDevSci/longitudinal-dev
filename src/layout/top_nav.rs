@@ -9,7 +9,7 @@ use crate::ThemeToggle;
 #[component]
 pub fn TopNav() -> impl IntoView {
     let home_href = base_path::base_path();
-    let abcd_analyses_href = base_path::join("abcd-analyses/");
+    let abcd_analyses_href = base_path::join("abcd/");
     let guides_href = base_path::join("guides/");
     let resources_href = base_path::join("resources/");
     let tools_href = base_path::join("tools/");
