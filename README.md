@@ -14,7 +14,7 @@ Open knowledge advances science. This platform thrives on community contribution
 
 - **Share your expertise** - Submit tutorials, tools, or research insights
 - **Suggest improvements** - Found a typo? Have an idea? Use the "Suggest changes" button on any tutorial page
-- **Join the discussion** - Connect with us on [GitHub Discussions](https://github.com/beginDevSci/longitudinal-dev/discussions) or [Discord](https://discord.gg/WXMv25rf)
+- **Join the discussion** - Connect with us on [GitHub Discussions](https://github.com/beginDevSci/longitudinal-dev/discussions) or [Discord](https://discord.gg/D796Bdy8)
 
 Whether you're an experienced researcher or just getting started with longitudinal analysis, your contributions benefit the community.
 
@@ -25,7 +25,7 @@ Questions, suggestions, or just want to say hi?
 - **Email:** support@longitudinal.dev
 - **GitHub:** [github.com/beginDevSci/longitudinal-dev](https://github.com/beginDevSci/longitudinal-dev)
 - **Discussions:** [Join the conversation](https://github.com/beginDevSci/longitudinal-dev/discussions)
-- **Discord:** [Join our community](https://discord.gg/WXMv25rf)
+- **Discord:** [Join our community](https://discord.gg/D796Bdy8)
 
 ## 🙏 Thank You
 

@@ -26,7 +26,7 @@ Found a bug or have an idea? [Open an issue](https://github.com/beginDevSci/long
 Connect with the community:
 
 - **GitHub Discussions**: [github.com/beginDevSci/longitudinal-dev/discussions](https://github.com/beginDevSci/longitudinal-dev/discussions)
-- **Discord**: [discord.gg/WXMv25rf](https://discord.gg/WXMv25rf)
+- **Discord**: [discord.gg/D796Bdy8](https://discord.gg/D796Bdy8)
 
 Share ideas, ask questions, or help others!
 
@@ -181,7 +181,7 @@ Before submitting a PR:
 
 - Check existing [issues](https://github.com/beginDevSci/longitudinal-dev/issues)
 - Ask in [Discussions](https://github.com/beginDevSci/longitudinal-dev/discussions)
-- Join our [Discord](https://discord.gg/WXMv25rf)
+- Join our [Discord](https://discord.gg/D796Bdy8)
 - Email: support@longitudinal.dev
 
 ---
