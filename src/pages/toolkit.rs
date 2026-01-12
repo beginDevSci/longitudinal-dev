@@ -12,7 +12,7 @@ pub fn ToolkitPage() -> impl IntoView {
         <main class="min-h-screen bg-surface">
             // Hero section
             <section class="relative overflow-hidden bg-subtle">
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"Toolkit"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
                         "Curated resources and tools for longitudinal data science research."

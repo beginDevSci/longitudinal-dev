@@ -243,7 +243,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             <main class="min-h-screen bg-surface">
                 // Static hero section
                 <section class="relative overflow-hidden bg-subtle">
-                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
                         <h1 class="text-4xl md:text-5xl font-bold text-primary">"ABCD Analyses"</h1>
                         <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
                             "Examples of longitudinal analysis methods using data from the ABCD Study® dataset."
@@ -460,12 +460,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         <SiteLayout options=opts.clone()>
             <main class="min-h-screen bg-surface">
                 <section class="relative overflow-hidden bg-subtle">
-                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
                         <h1 class="text-4xl md:text-5xl font-bold text-primary">"Method Guides"</h1>
                         <p class="mt-3 text-lg md:text-xl text-secondary">
                             "Comprehensive tutorials on longitudinal analysis methods with simulated data examples."
                         </p>
-                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        <div class="mt-4 flex flex-col sm:flex-row gap-3">
                             <a href="#catalog" class="inline-block px-6 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors">
                                 "Browse Guides"
                             </a>
