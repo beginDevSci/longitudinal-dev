@@ -13,12 +13,12 @@ When you measure the same people repeatedly, your observations aren't independen
 
 Consider a simple example: 200 participants measured at 5 time points each. You have 1,000 observations, but they're not 1,000 independent pieces of information. The 5 observations from Person 1 are more similar to each other than to observations from Person 47.
 
-| Approach | What It Does | Problem |
-|----------|--------------|---------|
-| **Ignore nesting** | Treat all 1,000 observations as independent | SEs too small, p-values too optimistic |
-| **Aggregate** | Compute person-means, analyze 200 means | Loses within-person information about change |
-| **Repeated measures ANOVA** | Model time as fixed factor | Assumes sphericity (often violated); historically easier with balanced data |
-| **Mixed models** | Model between- and within-person variation | Appropriate standard errors; individual trajectories |
+| Approach                    | What It Does                                | Problem                                                                     |
+| --------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Ignore nesting**          | Treat all 1,000 observations as independent | SEs too small, p-values too optimistic                                      |
+| **Aggregate**               | Compute person-means, analyze 200 means     | Loses within-person information about change                                |
+| **Repeated measures ANOVA** | Model time as fixed factor                  | Assumes sphericity (often violated); historically easier with balanced data |
+| **Mixed models**            | Model between- and within-person variation  | Appropriate standard errors; individual trajectories                        |
 
 **Linear Mixed Models (LMM)** solve this by explicitly modeling the dependency structure. The "mixed" refers to a mixture of:
 
@@ -71,18 +71,18 @@ For time-varying predictors, separate within-person effects (xᵢₜ − x̄ᵢ)
 
 LMM works well when you have:
 
-| Requirement | Guideline |
-|-------------|-----------|
-| **Repeated measures** | 3+ observations per person (fewer limits what you can estimate) |
-| **Continuous outcome** | Or ordinal with many categories; see GLMM for binary/count |
-| **Nested structure** | Observations clearly belong to individuals |
-| **Interest in change** | Not just "do groups differ?" but "how do individuals change?" |
-| **Adequate sample** | 50+ individuals for simple models; 100+ recommended |
+| Requirement            | Guideline                                                       |
+| ---------------------- | --------------------------------------------------------------- |
+| **Repeated measures**  | 3+ observations per person (fewer limits what you can estimate) |
+| **Continuous outcome** | Or ordinal with many categories; see GLMM for binary/count      |
+| **Nested structure**   | Observations clearly belong to individuals                      |
+| **Interest in change** | Not just "do groups differ?" but "how do individuals change?"   |
+| **Adequate sample**    | 50+ individuals for simple models; 100+ recommended             |
 
 **Example scenarios where LMM shines:**
 
-- **Therapy outcome study**: 150 clients complete depression inventories at 8 weekly sessions. Some miss sessions. You want to estimate average symptom reduction and identify who improves faster.
-- **Cognitive aging study**: 300 older adults complete memory tests every 2 years over a decade. Timing varies slightly. You want to model decline and test whether education predicts slower decline.
+- **Therapy outcome study**: 150 participants complete depression inventories at 8 weekly sessions. Some miss sessions. You want to estimate average symptom reduction and identify who improves faster.
+- **Cognitive aging study**: 300 participants complete memory tests every 2 years over a decade. Timing varies slightly. You want to model decline and test whether education predicts slower decline.
 - **Intensive longitudinal diary study**: 80 participants report daily mood for 30 days. You're interested in how daily stress relates to mood within persons, while capturing stable individual differences.
 
 > [!note] **When to consider alternatives**
@@ -103,11 +103,11 @@ Level 2: Persons (i = 1, 2, ..., N)
     └── Level 1: Observations within persons (t = 1, 2, ..., Tᵢ)
 ```
 
-**Level 1** describes what happens *within* each person over time. This is where change lives.
+**Level 1** describes what happens _within_ each person over time. This is where change lives.
 
-**Level 2** describes how people *differ from each other*. This is where individual differences live.
+**Level 2** describes how people _differ from each other_. This is where individual differences live.
 
-LMM simultaneously answers two questions: *How do people change on average?* (fixed effects) and *How do individuals differ in that change?* (random effects).
+LMM simultaneously answers two questions: _How do people change on average?_ (fixed effects) and _How do individuals differ in that change?_ (random effects).
 
 ### Fixed Effects
 
@@ -125,7 +125,7 @@ LMM simultaneously answers two questions: *How do people change on average?* (fi
 
 **Notation**: u₀ᵢ, u₁ᵢ (the deviations); τ₀₀, τ₁₁ (their variances)
 
-**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the *average* intercept (fixed) and the *variance* of intercepts across people (random). Person-specific estimates are derived quantities (BLUP/EBLUP estimates), not directly estimated coefficients.
+**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the _average_ intercept (fixed) and the _variance_ of intercepts across people (random). Person-specific estimates are derived quantities (BLUP/EBLUP estimates), not directly estimated coefficients.
 
 ### The Combined Model
 
@@ -141,12 +141,12 @@ This is the "mixed" model: fixed effects (γ) plus random effects (u) plus resid
 
 ### When to Treat an Effect as Random
 
-| Treat as Fixed | Treat as Random |
-|----------------|-----------------|
-| Small number of categories | Many units sampled from larger population |
+| Treat as Fixed                       | Treat as Random                           |
+| ------------------------------------ | ----------------------------------------- |
+| Small number of categories           | Many units sampled from larger population |
 | Categories are the focus of interest | Units are incidental to research question |
-| Want to compare specific categories | Want to generalize beyond sample |
-| Example: Treatment vs. Control | Example: Individual participants |
+| Want to compare specific categories  | Want to generalize beyond sample          |
+| Example: Treatment vs. Control       | Example: Individual participants          |
 
 In longitudinal analysis, **person** is almost always random (you want to generalize beyond your specific participants). **Time** is typically fixed when modeled as a continuous covariate.
 
@@ -236,11 +236,11 @@ Mixed models "shrink" extreme individual estimates toward the group mean. The am
 
 ### Three Approaches to Individual Estimation
 
-| Approach | What it does | Limitation |
-|----------|--------------|------------|
-| **Complete pooling** | Everyone gets the grand mean | Misses real heterogeneity |
-| **No pooling (OLS)** | Separate regression per person | Extreme estimates with sparse data |
-| **Partial pooling (LMM)** | Weighted average of individual data and group mean | Best of both worlds |
+| Approach                  | What it does                                       | Limitation                         |
+| ------------------------- | -------------------------------------------------- | ---------------------------------- |
+| **Complete pooling**      | Everyone gets the grand mean                       | Misses real heterogeneity          |
+| **No pooling (OLS)**      | Separate regression per person                     | Extreme estimates with sparse data |
+| **Partial pooling (LMM)** | Weighted average of individual data and group mean | Best of both worlds                |
 
 LMM's partial pooling gives more weight to an individual's data when they have many observations and the data are consistent, and more weight to the group mean when observations are sparse or variable.
 
@@ -359,11 +359,11 @@ id   y_t1  y_t2  y_t3             id   time   y
 
 How you code time affects interpretation:
 
-| Coding | Time values | Intercept means |
-|--------|-------------|-----------------|
-| Zero at start | 0, 1, 2, 3, 4 | Expected score at baseline |
-| Zero at center | -2, -1, 0, 1, 2 | Expected score at middle wave |
-| Actual time | 0, 6, 12, 18, 24 (months) | Expected score at month 0; slope = change per month |
+| Coding         | Time values               | Intercept means                                     |
+| -------------- | ------------------------- | --------------------------------------------------- |
+| Zero at start  | 0, 1, 2, 3, 4             | Expected score at baseline                          |
+| Zero at center | -2, -1, 0, 1, 2           | Expected score at middle wave                       |
+| Actual time    | 0, 6, 12, 18, 24 (months) | Expected score at month 0; slope = change per month |
 
 **Recommendation**: Start with zero at baseline (0, 1, 2, ...). Adjust if your research question focuses on a different time point.
 
@@ -398,25 +398,25 @@ With random slopes, the ICC is time-dependent; the single-number ICC interpretat
 
 Before applying LMM, be aware of these frequent mistakes.
 
-**Using REML for fixed effects comparison** — Comparing models with different fixed effects using REML. *Reality:* REML likelihoods aren't comparable when fixed effects differ. Use ML (`REML = FALSE`) for model comparison.
+**Using REML for fixed effects comparison** — Comparing models with different fixed effects using REML. _Reality:_ REML likelihoods aren't comparable when fixed effects differ. Use ML (`REML = FALSE`) for model comparison.
 
-**Ignoring singular fit warnings** — Dismissing "boundary (singular) fit" messages. *Reality:* A variance at zero often means the model is over-specified. Check `VarCorr()` and consider simplifying.
+**Ignoring singular fit warnings** — Dismissing "boundary (singular) fit" messages. _Reality:_ A variance at zero often means the model is over-specified. Check `VarCorr()` and consider simplifying.
 
-**Over-specifying random effects** — Including random quadratic with only 4 time points. *Reality:* You need enough within-person observations to estimate complex random effects. Start simple.
+**Over-specifying random effects** — Including random quadratic with only 4 time points. _Reality:_ You need enough within-person observations to estimate complex random effects. Start simple.
 
-**Treating BLUPs as data** — Using extracted random effects in secondary analyses as if they were observed data. *Reality:* BLUPs are estimates with uncertainty. Include predictors in the model, not in post-hoc analyses of BLUPs.
+**Treating BLUPs as data** — Using extracted random effects in secondary analyses as if they were observed data. _Reality:_ BLUPs are estimates with uncertainty. Include predictors in the model, not in post-hoc analyses of BLUPs.
 
-**Time coded as factor** — Treating time as categorical when you want a continuous slope. *Reality:* Factor time gives dummy variables, not a growth trajectory. (It's fine if your goal is a nonparametric mean profile; you'll lose a single 'slope' interpretation.)
+**Time coded as factor** — Treating time as categorical when you want a continuous slope. _Reality:_ Factor time gives dummy variables, not a growth trajectory. (It's fine if your goal is a nonparametric mean profile; you'll lose a single 'slope' interpretation.)
 
-**Misinterpreting ICC** — "ICC = 0.65 means the model explains 65%." *Reality:* ICC is variance *partitioning*, not variance *explained*. It tells you how much is between- vs. within-person.
+**Misinterpreting ICC** — "ICC = 0.65 means the model explains 65%." _Reality:_ ICC is variance _partitioning_, not variance _explained_. It tells you how much is between- vs. within-person.
 
-**Ignoring residual assumptions** — Not checking whether residuals are approximately normal and homoscedastic. *Reality:* Severe violations can bias standard errors. Always plot residuals vs. fitted. If measurements are closely spaced, consider AR(1) residual correlation and/or time-varying residual variance; inspect residual ACFs and plots.
+**Ignoring residual assumptions** — Not checking whether residuals are approximately normal and homoscedastic. _Reality:_ Severe violations can bias standard errors. Always plot residuals vs. fitted. If measurements are closely spaced, consider AR(1) residual correlation and/or time-varying residual variance; inspect residual ACFs and plots.
 
-**Confusing marginal and conditional R²** — Reporting only marginal R² when random effects matter. *Reality:* Marginal = fixed effects only; Conditional = fixed + random. Report both.
+**Confusing marginal and conditional R²** — Reporting only marginal R² when random effects matter. _Reality:_ Marginal = fixed effects only; Conditional = fixed + random. Report both.
 
-**Centering confusion** — Not being clear about what the intercept represents. *Reality:* The intercept's meaning depends on where time = 0. Be explicit about your centering choice.
+**Centering confusion** — Not being clear about what the intercept represents. _Reality:_ The intercept's meaning depends on where time = 0. Be explicit about your centering choice.
 
-**Conflating statistical and practical significance** — "Slope variance is significant, so individual differences matter." *Reality:* With large samples, even tiny variances are significant. Interpret effect sizes substantively.
+**Conflating statistical and practical significance** — "Slope variance is significant, so individual differences matter." _Reality:_ With large samples, even tiny variances are significant. Interpret effect sizes substantively.
 
 **Denominator d.f. and p-values** — Mixed-model degrees of freedom depend on the design; use Satterthwaite or Kenward–Roger approximations when reporting tests for fixed effects.
 
@@ -432,7 +432,7 @@ You now have the conceptual foundation for understanding LMM:
 - **Time coding** determines what the intercept represents and must match your research question
 - **ICC** tells you how much variance is between- vs. within-person, justifying the mixed model approach
 
-This is enough to understand what LMM does and why. To actually *fit* one, continue to the worked example.
+This is enough to understand what LMM does and why. To actually _fit_ one, continue to the worked example.
 
 ---
 

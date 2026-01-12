@@ -234,14 +234,6 @@ pub fn PostLayout(
                                                     });
                                                 }
 
-                                                if !meta.updated_at.is_empty() {
-                                                    pills.push(view! {
-                                                        <span class="hero-pill hero-pill--primary">
-                                                            {format!("Updated {}", meta.updated_at)}
-                                                        </span>
-                                                    });
-                                                }
-
                                                 if !meta.tags.is_empty() {
                                                     // Filter out tags that duplicate the engine to avoid showing "blmm" twice
                                                     let engine_lower = meta.statistical_engine.to_lowercase();

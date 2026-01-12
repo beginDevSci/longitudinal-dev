@@ -1615,7 +1615,7 @@ pub fn TutorialCatalogFetch(
 
                             // Main content: curated sections
                             <div class="flex-1 space-y-12">
-                                // Search bar and view toggle
+                                // Search bar (ViewToggle only shown in Browse mode)
                                 <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                                     <div class="flex-1 max-w-2xl">
                                         <div class="relative">
@@ -1641,7 +1641,6 @@ pub fn TutorialCatalogFetch(
                                             </svg>
                                         </div>
                                     </div>
-                                    <ViewToggle view_mode />
                                 </div>
 
                                 // Curated sections (if data provided)

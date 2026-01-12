@@ -391,7 +391,7 @@ pub fn LeftNav(
     view! {
         <aside class=move || {
             format!(
-                "left-nav-container sticky top-0 h-screen transition-all duration-300 ease-in-out overflow-hidden {}",
+                "left-nav-container sticky top-16 h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out overflow-hidden {}",
                 if is_collapsed.get() { "w-14" } else { "w-[280px]" }
             )
         }>

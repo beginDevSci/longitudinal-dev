@@ -78,7 +78,7 @@ pub fn TableOfContents(
 
     view! {
         <aside
-            class="hidden md:block sticky top-6 h-[calc(100vh-3rem)]"
+            class="hidden md:block sticky top-[4.5rem] h-[calc(100vh-4.5rem)]"
             style=move || {
                 let width = if is_collapsed.get() { 48 } else { 280 };
                 format!("width: {width}px;")
