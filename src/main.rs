@@ -100,9 +100,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     eprintln!("Wrote {}", site_root.join("index.html").display());
 
     // 2. Generate tutorial catalog page at /abcd/index.html
+    // Filter out posts without metadata and posts marked as drafts
     let posts_with_metadata: Vec<_> = posts()
         .into_iter()
-        .filter(|p| p.metadata.is_some())
+        .filter(|p| {
+            p.metadata.is_some()
+                && !p.metadata.as_ref().map_or(false, |m| m.draft.unwrap_or(false))
+        })
         .collect();
 
     // 2.1 Generate tutorial index JSON artifacts (needed for curations)

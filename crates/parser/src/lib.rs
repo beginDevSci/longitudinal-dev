@@ -144,6 +144,7 @@ fn parse_post(
                 summary: fm.summary,
                 difficulty: fm.difficulty,
                 timepoints: fm.timepoints,
+                draft: fm.draft,
             })
         } else {
             None

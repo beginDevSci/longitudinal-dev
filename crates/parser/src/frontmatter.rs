@@ -55,6 +55,7 @@ fn parse_yaml_frontmatter(yaml: &str) -> Result<Frontmatter, serde_yaml::Error> 
         summary: Option<String>,
         difficulty: Option<String>,
         timepoints: Option<String>,
+        draft: Option<bool>,
     }
 
     let parsed: YamlFrontmatter = serde_yaml::from_str(yaml)?;
@@ -74,6 +75,7 @@ fn parse_yaml_frontmatter(yaml: &str) -> Result<Frontmatter, serde_yaml::Error> 
         summary: parsed.summary,
         difficulty: parsed.difficulty,
         timepoints: parsed.timepoints,
+        draft: parsed.draft,
     })
 }
 

@@ -41,6 +41,9 @@ pub struct PostMetadata {
     /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timepoints: Option<String>,
+    /// Draft flag - if true, tutorial is hidden from catalog but still renders
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft: Option<bool>,
 }
 
 /// Stat item - either simple string or object with custom label
@@ -206,6 +209,8 @@ pub struct Frontmatter {
     pub difficulty: Option<String>,
     /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
     pub timepoints: Option<String>,
+    /// Draft flag - if true, tutorial is hidden from catalog but still renders
+    pub draft: Option<bool>,
 }
 
 // ============================================================================
