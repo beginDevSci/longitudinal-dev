@@ -248,6 +248,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
                             "Examples of longitudinal analysis methods using data from the ABCD Study® dataset."
                         </p>
+                        <a
+                            href={base_path::join("abcd/overview/")}
+                            class="inline-flex items-center gap-1 mt-4 text-sm text-accent hover:text-accent/80 transition-colors"
+                        >
+                            <span>"Learn more about the ABCD Study"</span>
+                            <span>"→"</span>
+                        </a>
                     </div>
                 </section>
 
