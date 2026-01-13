@@ -33,6 +33,9 @@ pub struct SelectionState {
 /// - Group 1: Overlay data + params
 /// - Group 2: Colormap + Parcellation (texture, sampler, labels, region colors)
 /// - Group 3: ROI mask
+/// Depth texture format used for depth testing.
+pub const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
+
 pub struct WgpuRenderer {
     ctx: DeviceContext,
     resources: ResourceManager,
@@ -43,6 +46,9 @@ pub struct WgpuRenderer {
     camera_selection_bind_group: wgpu::BindGroup,
     orbit: OrbitController,
     surface_id: Option<SurfaceId>,
+    /// Depth texture for proper surface rendering
+    depth_texture: wgpu::Texture,
+    depth_view: wgpu::TextureView,
     // Overlay state
     /// Group 1: Overlay bind group
     overlay_bind_group: Option<wgpu::BindGroup>,
@@ -290,6 +296,9 @@ impl WgpuRenderer {
             usage: wgpu::BufferUsages::VERTEX,
         });
 
+        // Create depth buffer for proper surface rendering
+        let (depth_texture, depth_view) = Self::create_depth_texture(&ctx.device, ctx.config.width, ctx.config.height);
+
         #[cfg(target_arch = "wasm32")]
         {
             use wasm_bindgen::JsValue;
@@ -306,6 +315,8 @@ impl WgpuRenderer {
             picking_camera_bind_group,
             orbit,
             surface_id: None,
+            depth_texture,
+            depth_view,
             overlay_bind_group: None,
             overlay_id: None,
             colormap_kind: ColormapKind::RdBu,
@@ -933,7 +944,14 @@ impl WgpuRenderer {
                         store: wgpu::StoreOp::Store,
                     },
                 })],
-                depth_stencil_attachment: None,
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: if i == 0 { wgpu::LoadOp::Clear(1.0) } else { wgpu::LoadOp::Load },
+                        store: wgpu::StoreOp::Store,
+                    }),
+                    stencil_ops: None,
+                }),
                 ..Default::default()
             });
 
@@ -981,7 +999,14 @@ impl WgpuRenderer {
                         store: wgpu::StoreOp::Store,
                     },
                 })],
-                depth_stencil_attachment: None,
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Load,  // Keep depth from surface pass
+                        store: wgpu::StoreOp::Store,
+                    }),
+                    stencil_ops: None,
+                }),
                 ..Default::default()
             });
 
@@ -1001,6 +1026,26 @@ impl WgpuRenderer {
 }
 
 impl WgpuRenderer {
+    /// Create a depth texture for the given dimensions.
+    fn create_depth_texture(device: &wgpu::Device, width: u32, height: u32) -> (wgpu::Texture, wgpu::TextureView) {
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("depth_texture"),
+            size: wgpu::Extent3d {
+                width: width.max(1),
+                height: height.max(1),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: DEPTH_FORMAT,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
+        });
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        (texture, view)
+    }
+
     /// Perform a pick operation at the given screen coordinates.
     ///
     /// Renders each visible surface to the picking buffer with its surface ID,
@@ -1145,6 +1190,11 @@ impl BrainRendererBackend for WgpuRenderer {
         self.ctx
             .surface
             .configure(&self.ctx.device, &self.ctx.config);
+
+        // Resize depth buffer to match
+        let (depth_texture, depth_view) = Self::create_depth_texture(&self.ctx.device, width, height);
+        self.depth_texture = depth_texture;
+        self.depth_view = depth_view;
 
         // Resize picking system to match
         self.picking.resize(&self.ctx.device, width, height);

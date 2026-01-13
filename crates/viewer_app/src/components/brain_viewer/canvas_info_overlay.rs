@@ -70,7 +70,16 @@ pub fn CanvasInfoOverlay(
                 <input
                     type="range"
                     min="0"
-                    max="10"
+                    max=move || {
+                        // Dynamic max based on data range (max absolute value, rounded up)
+                        stat_range.get()
+                            .map(|(min, max)| {
+                                let abs_max = min.abs().max(max.abs());
+                                // Round up to nearest integer for cleaner slider
+                                abs_max.ceil()
+                            })
+                            .unwrap_or(10.0)
+                    }
                     step="0.1"
                     class="threshold-slider"
                     prop:value=move || threshold.get().unwrap_or(0.0)

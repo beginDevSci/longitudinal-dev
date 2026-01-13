@@ -40,6 +40,7 @@ pub fn AnalysisToolsPanel(
 
     // CameraPresets props
     on_view_preset: Callback<BrainViewPreset>,
+    current_view: ReadSignal<Option<BrainViewPreset>>,
 
     // Shared
     disabled: ReadSignal<bool>,
@@ -180,6 +181,7 @@ pub fn AnalysisToolsPanel(
                                     // Camera presets
                                     <CameraPresets
                                         on_preset=on_view_preset
+                                        current_view=current_view
                                         disabled=disabled.into()
                                     />
                                 </div>

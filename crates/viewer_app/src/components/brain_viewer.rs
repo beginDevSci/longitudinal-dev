@@ -63,6 +63,7 @@ pub fn BrainViewer(
     let prefs = preferences::load_preferences();
 
     let (hemisphere, set_hemisphere) = signal(Hemisphere::Left);
+    let (current_view, set_current_view) = signal(Option::<BrainViewPreset>::None);
     let (analysis, set_analysis) = signal(Analysis::Design1);
     let (statistic, set_statistic) = signal(Statistic::TStat);
     let (volume_idx, set_volume_idx) = signal(0u32);
@@ -678,10 +679,11 @@ pub fn BrainViewer(
     {
         Effect::new(move |_| {
             let vol = volume_idx.get();
+            let thr = threshold.get();  // Read threshold unconditionally to ensure tracking
             renderer.update_value(|cell| {
                 if let Some(r) = cell.borrow_mut().as_mut() {
                     r.set_volume(vol);
-                    r.set_threshold(threshold.get());
+                    r.set_threshold(thr);
                 }
             });
             // Update stat_range when volume changes
@@ -1258,6 +1260,7 @@ pub fn BrainViewer(
     // Create callback for view preset changes
     let on_view_preset = {
         Callback::new(move |preset: BrainViewPreset| {
+            set_current_view.set(Some(preset));
             renderer.update_value(|cell| {
                 if let Some(r) = cell.borrow_mut().as_mut() {
                     r.set_view_preset(preset);
@@ -1830,6 +1833,7 @@ pub fn BrainViewer(
                     set_statistic=set_statistic
                     // CameraPresets props
                     on_view_preset=on_view_preset
+                    current_view=current_view
                     // Shared
                     disabled=is_loading
                     // VertexSummaryTable props

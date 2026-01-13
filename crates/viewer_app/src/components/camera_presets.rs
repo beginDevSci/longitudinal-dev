@@ -10,6 +10,8 @@ use crate::types::BrainViewPreset;
 pub fn CameraPresets(
     /// Callback when a preset is selected.
     on_preset: Callback<BrainViewPreset>,
+    /// Currently selected view preset (if any).
+    current_view: ReadSignal<Option<BrainViewPreset>>,
     /// Whether the controls are disabled.
     #[prop(default = false.into())]
     disabled: Signal<bool>,
@@ -38,6 +40,11 @@ pub fn CameraPresets(
         }
     };
 
+    // Base and active button styles
+    let base_class = "px-2.5 py-1 text-[10px] font-medium rounded-[var(--radius-sm)] border disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+    let inactive_class = "bg-[var(--color-bg-subtle)] hover:bg-[var(--color-neutral-200)] border-[var(--color-border-default)] text-[var(--color-text-primary)]";
+    let active_class = "bg-[var(--color-accent-emphasis)] border-[var(--color-accent-emphasis)] text-white";
+
     view! {
         <div class="space-y-1">
             // Hemisphere-specific views grouped
@@ -54,7 +61,10 @@ pub fn CameraPresets(
                             view! {
                                 <button
                                     type="button"
-                                    class="px-2.5 py-1 text-[10px] font-medium bg-[var(--color-bg-subtle)] hover:bg-[var(--color-neutral-200)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)] text-[var(--color-text-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    class=move || {
+                                        let is_selected = current_view.get() == Some(preset);
+                                        format!("{} {}", base_class, if is_selected { active_class } else { inactive_class })
+                                    }
                                     on:click=on_click
                                     disabled=move || disabled.get()
                                     title=preset.name()
@@ -78,7 +88,10 @@ pub fn CameraPresets(
                     view! {
                         <button
                             type="button"
-                            class="px-2.5 py-1 text-[10px] font-medium bg-[var(--color-bg-subtle)] hover:bg-[var(--color-neutral-200)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)] text-[var(--color-text-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            class=move || {
+                                let is_selected = current_view.get() == Some(preset);
+                                format!("{} {}", base_class, if is_selected { active_class } else { inactive_class })
+                            }
                             on:click=on_click
                             disabled=move || disabled.get()
                             title=preset.name()
