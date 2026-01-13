@@ -499,15 +499,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             <h3 class="text-lg font-semibold text-tertiary">"Generalized Estimating Equations (GEE)"</h3>
                             <p class="mt-2 text-sm text-tertiary">"Population-averaged models for correlated data with robust standard errors."</p>
                         </div>
-                        // SEM placeholder
+                        // LCS placeholder
                         <div class="rounded-xl bg-subtle border border-stroke p-6 opacity-50">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600">
                                     "Coming Soon"
                                 </span>
                             </div>
-                            <h3 class="text-lg font-semibold text-tertiary">"Structural Equation Modeling (SEM)"</h3>
-                            <p class="mt-2 text-sm text-tertiary">"Latent variable models for complex relationships between observed and unobserved constructs."</p>
+                            <h3 class="text-lg font-semibold text-tertiary">"Latent Change Score Models (LCS)"</h3>
+                            <p class="mt-2 text-sm text-tertiary">"Structural equation models for examining true change over time while accounting for measurement error."</p>
                         </div>
                     </div>
                 </section>
