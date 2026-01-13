@@ -65,11 +65,6 @@
         "description": {
           "type": "string",
           "description": "Brief description of the tutorial for display in title section"
-        },
-        "draft": {
-          "type": "boolean",
-          "default": false,
-          "description": "If true, tutorial is hidden from catalog but still renders for preview"
         }
       }
     },

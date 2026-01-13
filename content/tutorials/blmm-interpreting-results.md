@@ -13,7 +13,6 @@ outcome_type: Continuous
 covariates: Multiple
 difficulty: advanced
 timepoints: 3_5
-draft: true
 summary: "Understanding and interpreting mass-univariate Linear Mixed Model results from neuroimaging analyses using the BLMM toolbox."
 description: "Understanding and interpreting mass-univariate Linear Mixed Model results from neuroimaging analyses using the BLMM toolbox."
 tags:

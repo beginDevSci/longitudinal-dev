@@ -57,9 +57,6 @@ pub struct PostMetadata {
     /// Timepoint count bucket: 2, 3_5, 6_plus, irregular
     #[serde(default)]
     pub timepoints: Option<String>,
-    /// Draft flag - if true, tutorial is hidden from catalog but still renders
-    #[serde(default)]
-    pub draft: Option<bool>,
 }
 
 /// Overview section: summary and key statistics.
