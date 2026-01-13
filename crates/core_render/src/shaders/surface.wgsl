@@ -89,6 +89,7 @@ struct VertexOutput {
     @location(2) @interpolate(flat) vertex_id: u32,
     @location(3) @interpolate(flat) region_id: u32,
     @location(4) roi_value: f32,
+    @location(5) world_position: vec3<f32>,  // For pseudo-curvature calculation
 };
 
 @vertex
@@ -100,6 +101,7 @@ fn vs_main(in: VertexInput) -> VertexOutput {
     out.normal = normalize(in.normal);
     out.data_value = overlay_data[in.vertex_id];
     out.vertex_id = in.vertex_id;
+    out.world_position = in.position;  // Original position for curvature calculation
 
     // Parcellation label (default to 0 if not available)
     out.region_id = parcellation_labels[in.vertex_id];
@@ -121,11 +123,15 @@ fn get_region_color(region_id: u32) -> vec4<f32> {
 }
 
 // Apply lighting to a color
+// Lighting model: Lambertian diffuse with ambient fill
+// - Key light from top-front-right for clear sulcal definition
+// - Reduced ambient (0.25) to strengthen directional shadows
+// - Increased diffuse (0.75) for better depth perception
 fn apply_lighting(color: vec3<f32>, normal: vec3<f32>) -> vec3<f32> {
     let n = normalize(normal);
-    let light_dir = normalize(vec3<f32>(0.3, 0.5, 0.8));
+    let light_dir = normalize(vec3<f32>(0.4, 0.6, 0.7));  // Top-front-right key light
     let ndotl = max(dot(n, light_dir), 0.0);
-    return color * (0.4 + 0.6 * ndotl);
+    return color * (0.25 + 0.75 * ndotl);  // ambient + diffuse
 }
 
 // Apply ROI tint/highlight
@@ -145,6 +151,29 @@ fn apply_selection_highlight(color: vec3<f32>, is_selected: bool) -> vec3<f32> {
         return mix(color, highlight_color, 0.7);
     }
     return color;
+}
+
+// Compute pseudo-curvature from vertex normal
+// Approximates sulcal/gyral structure: gyri (outward normals) are lighter, sulci (inward) are darker
+// Returns a value in [0, 1] where 0 = deep sulcus, 1 = gyrus crown
+fn compute_pseudo_curvature(normal: vec3<f32>, position: vec3<f32>) -> f32 {
+    // Use radial direction from origin as reference (brain is roughly centered)
+    let radial = normalize(position);
+    // Dot product: 1.0 = normal points outward (gyrus), 0 or negative = sulcus
+    let alignment = dot(normalize(normal), radial);
+    // Map from [-1, 1] to [0, 1] with bias toward middle range for subtlety
+    // sulci: ~0.3, gyri: ~0.7
+    return clamp(alignment * 0.3 + 0.5, 0.3, 0.7);
+}
+
+// Get curvature-modulated base gray
+// Creates visible sulcal/gyral contrast while maintaining readable surface
+fn get_curvature_gray(normal: vec3<f32>, position: vec3<f32>) -> vec3<f32> {
+    let curv = compute_pseudo_curvature(normal, position);
+    // Map curvature to gray: sulci (0.3) -> darker gray, gyri (0.7) -> lighter gray
+    // Range: 0.45 (dark) to 0.75 (light) for subtle but visible contrast
+    let gray_value = 0.45 + curv * 0.4;
+    return vec3<f32>(gray_value, gray_value, gray_value);
 }
 
 @fragment
@@ -218,9 +247,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
         // Edge detection for parcellation boundaries
         // Note: For proper edge detection, we'd need neighbor information.
-        // This simplified version darkens low-alpha regions as "unknown"
+        // This simplified version uses curvature-shaded gray for "unknown" regions
         if region_color.a < 0.5 {
-            base_color = vec3<f32>(0.3, 0.3, 0.3); // Gray for unknown regions
+            base_color = get_curvature_gray(in.normal, in.world_position);
         }
 
         // Apply parcellation display mode
@@ -251,9 +280,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Level 0.0 is fine since our colormap is a simple 1D/2D texture without mipmaps
         let sampled = textureSampleLevel(colormap_texture, colormap_sampler, vec2<f32>(t, 0.5), 0.0).rgb;
 
-        // Choose between gray and sampled color without data-dependent control flow
-        let gray = vec3<f32>(0.3, 0.3, 0.3);
-        base_color = select(gray, sampled, !suppress_overlay);
+        // Base cortical surface: curvature-modulated gray for visible sulcal/gyral structure
+        let curv_gray = get_curvature_gray(in.normal, in.world_position);
+
+        // Blend overlay with curvature-shaded base using alpha mixing
+        // When overlay is suppressed (NaN or below threshold), show curvature-shaded base
+        // When overlay is active, blend with 85% overlay to retain some depth cues from curvature
+        let overlay_alpha = select(0.0, 0.85, !suppress_overlay);
+        base_color = mix(curv_gray, sampled, overlay_alpha);
     }
 
     // Apply lighting
