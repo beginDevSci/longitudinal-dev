@@ -264,8 +264,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Overlay mode (default)
         let is_nan = value != value;
         let use_threshold = overlay_params.use_threshold > 0.5;
-        let below_threshold = abs(value) < overlay_params.threshold;
-        let suppress_overlay = is_nan || (use_threshold && below_threshold);
+        let threshold = overlay_params.threshold;
+        let abs_value = abs(value);
 
         // Normalize value to [0, 1] for colormap lookup
         let range = overlay_params.data_max - overlay_params.data_min;
@@ -283,10 +283,24 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Base cortical surface: curvature-modulated gray for visible sulcal/gyral structure
         let curv_gray = get_curvature_gray(in.normal, in.world_position);
 
-        // Blend overlay with curvature-shaded base using alpha mixing
-        // When overlay is suppressed (NaN or below threshold), show curvature-shaded base
-        // When overlay is active, blend with 85% overlay to retain some depth cues from curvature
-        let overlay_alpha = select(0.0, 0.85, !suppress_overlay);
+        // Compute overlay alpha with smooth transition near threshold
+        // This prevents abrupt appearance/disappearance of overlay clusters
+        // Max alpha capped at 0.85 to preserve underlying curvature detail
+        let max_overlay_alpha = 0.85;
+        var overlay_alpha = 0.0;
+
+        if !is_nan {
+            if use_threshold {
+                // Smooth ramp: fade in over 20% of threshold value above the threshold
+                // smoothstep provides smooth interpolation: 0 at threshold, 1 at threshold + soft_width
+                let soft_width = max(threshold * 0.2, 0.1);  // At least 0.1 to avoid division issues
+                overlay_alpha = smoothstep(threshold, threshold + soft_width, abs_value) * max_overlay_alpha;
+            } else {
+                // No threshold: show full overlay
+                overlay_alpha = max_overlay_alpha;
+            }
+        }
+
         base_color = mix(curv_gray, sampled, overlay_alpha);
     }
 

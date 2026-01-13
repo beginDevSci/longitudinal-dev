@@ -17,8 +17,11 @@ impl Default for OrbitController {
         Self {
             target: Vec3::ZERO,
             distance: 200.0,
+            // Default to a slightly elevated lateral view (10°)
+            // This shows most of the lateral surface while giving some depth
+            // perception. Pure lateral (phi=0) can look too flat.
             theta: 0.0,
-            phi: std::f32::consts::FRAC_PI_4,
+            phi: 0.17,  // ~10 degrees elevation
             is_dragging: false,
             last_mouse: None,
         }
