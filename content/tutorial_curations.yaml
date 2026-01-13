@@ -28,7 +28,7 @@ workflows:
     tutorials:
       - lgcm-multiple-groups
       - lgcm-nesting
-      - glmm-interactions
+      - mlgcm
 
   growth_and_change:
     label: "Growth & Change"
