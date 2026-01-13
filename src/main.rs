@@ -468,6 +468,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 <section id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-10">
                     <GroupedGuideCatalog groups=method_groups.clone() />
                 </section>
+
+                // Coming Soon section
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-2xl">"🚧"</span>
+                        <div>
+                            <h2 class="text-xl font-bold text-primary">"Coming Soon"</h2>
+                            <p class="text-sm text-secondary">"Additional method guides in development"</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        // GLMM placeholder
+                        <div class="rounded-xl bg-subtle border border-stroke p-6 opacity-50">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600">
+                                    "Coming Soon"
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-tertiary">"Generalized Linear Mixed Models (GLMM)"</h3>
+                            <p class="mt-2 text-sm text-tertiary">"Mixed-effects models for non-normal outcomes including binary, count, and categorical data."</p>
+                        </div>
+                        // GEE placeholder
+                        <div class="rounded-xl bg-subtle border border-stroke p-6 opacity-50">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600">
+                                    "Coming Soon"
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-tertiary">"Generalized Estimating Equations (GEE)"</h3>
+                            <p class="mt-2 text-sm text-tertiary">"Population-averaged models for correlated data with robust standard errors."</p>
+                        </div>
+                        // SEM placeholder
+                        <div class="rounded-xl bg-subtle border border-stroke p-6 opacity-50">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 border border-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600">
+                                    "Coming Soon"
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-tertiary">"Structural Equation Modeling (SEM)"</h3>
+                            <p class="mt-2 text-sm text-tertiary">"Latent variable models for complex relationships between observed and unobserved constructs."</p>
+                        </div>
+                    </div>
+                </section>
             </main>
         </SiteLayout>
     }
