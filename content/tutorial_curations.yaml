@@ -24,7 +24,7 @@ workflows:
       - gee-time-varying-covariate
 
   complex_designs:
-    label: "Complex Designs"
+    label: "Multi-Group & Nested Models"
     tutorials:
       - lgcm-multiple-groups
       - lgcm-nesting
