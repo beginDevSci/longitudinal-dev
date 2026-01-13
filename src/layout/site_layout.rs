@@ -13,12 +13,14 @@ use crate::layout::TopNav;
 ///
 /// Usage:
 /// ```rust,ignore
-/// view! { <SiteLayout options><PostLayout post/></SiteLayout> }
+/// view! { <SiteLayout options current_path="/abcd"><PostLayout post/></SiteLayout> }
 /// ```
 #[component]
 pub fn SiteLayout(
     options: leptos::config::LeptosOptions,
     #[prop(optional, into)] canonical_url: Option<String>,
+    /// Current page path for active nav link detection (e.g., "/", "/abcd", "/guides")
+    current_path: Option<String>,
     children: Children,
 ) -> impl IntoView {
     // Always compute base path (defaults to "/" if SITE_BASE_PATH not set)
@@ -50,7 +52,7 @@ pub fn SiteLayout(
             </head>
             <body>
                 <div class="min-h-screen flex flex-col">
-                    <TopNav/>
+                    <TopNav current_path=current_path/>
                     <div class="flex-1 flex flex-col">
                         {children()}
                     </div>

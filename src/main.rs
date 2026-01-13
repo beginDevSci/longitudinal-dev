@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let post_count = all_posts.len();
 
     let index_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/".to_string())>
             <main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface via-subtle to-muted px-4">
                 <div class="text-center max-w-4xl mx-auto">
                     <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
@@ -225,7 +225,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     let tutorial_catalog_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/abcd".to_string())>
             <main class="min-h-screen bg-surface">
                 // Static hero section
                 <section class="relative overflow-hidden bg-subtle">
@@ -265,7 +265,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 2b. Generate ABCD Overview page at /abcd/overview/index.html
     let abcd_overview_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/abcd".to_string())>
             <AbcdOverviewPage/>
         </SiteLayout>
     }
@@ -278,7 +278,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/about".to_string())>
             <AboutPage/>
         </SiteLayout>
     }
@@ -291,7 +291,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 3b. Generate Toolkit hub page at /toolkit/index.html
     let toolkit_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
             <ToolkitPage/>
         </SiteLayout>
     }
@@ -305,7 +305,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3c. Generate Resources page at /toolkit/learning/index.html
     let resources_data = load_resources();
     let resources_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
             <ResourcesPage resources=resources_data />
         </SiteLayout>
     }
@@ -319,7 +319,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3d. Generate Tools page at /toolkit/software/index.html
     let tools_data = load_tools();
     let tools_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
             <ToolsPage tools=tools_data />
         </SiteLayout>
     }
@@ -381,7 +381,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
 
         let html = view! {
-            <SiteLayout options=opts.clone() canonical_url=canonical_url.clone()>
+            <SiteLayout options=opts.clone() canonical_url=canonical_url.clone() current_path=Some("/abcd".to_string())>
                 <PostLayout post prefill_markdown baseline_hash/>
             </SiteLayout>
         }
@@ -419,7 +419,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 5. Generate Writer page at /writer/index.html
     let writer_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=None>
             <WriterApp/>
         </SiteLayout>
     }
@@ -443,7 +443,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let method_groups = group_guides_by_method(guide_catalog_items);
 
     let guides_catalog_html = view! {
-        <SiteLayout options=opts.clone()>
+        <SiteLayout options=opts.clone() current_path=Some("/guides".to_string())>
             <main class="min-h-screen bg-surface">
                 <section class="relative overflow-hidden bg-subtle">
                     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
@@ -523,7 +523,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let slug = guide.slug.to_string();
 
         let html = view! {
-            <SiteLayout options=opts.clone()>
+            <SiteLayout options=opts.clone() current_path=Some("/guides".to_string())>
                 <GuideLayout guide />
             </SiteLayout>
         }

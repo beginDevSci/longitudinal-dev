@@ -109,7 +109,7 @@ pub fn ThemeToggle() -> impl IntoView {
         <div class="relative inline-block text-left">
             <button
                 type="button"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-default/60 bg-transparent hover:text-primary hover:bg-subtle transition-all duration-200"
+                class="top-nav-theme-toggle"
                 on:click=move |_| set_menu_open.update(|open| *open = !*open)
                 aria-haspopup="true"
                 aria-expanded=move || menu_open.get()

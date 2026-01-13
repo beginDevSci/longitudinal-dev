@@ -256,26 +256,26 @@ pub fn CategoryItem(
     let category_name = category.name.clone();
 
     view! {
-        <div class="mb-4">
+        <div class="left-nav-category">
             // Category header (clickable to expand/collapse)
             <button
                 class=move || {
-                    let base = "w-full flex items-center justify-between px-4 py-3.5 rounded-lg transition-all duration-200 border-l-3 border-transparent focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-accent-400)]";
+                    let base = "left-nav-category-btn";
                     if contains_current {
-                        format!("{base} bg-accent/5 border-l-accent")
+                        format!("{base} left-nav-category-btn--active")
                     } else {
-                        format!("{base} hover:bg-aside-hover-bg")
+                        base.to_string()
                     }
                 }
                 on:click=move |_| is_expanded.update(|exp| *exp = !*exp)
             >
                 <div class="flex items-center gap-3 flex-1">
-                    // Expand/collapse arrow
+                    // Expand/collapse chevron
                     <svg
                         class=move || {
                             format!(
-                                "w-4 h-4 transition-transform duration-200 flex-shrink-0 {}",
-                                if is_expanded.get() { "rotate-90" } else { "" }
+                                "left-nav-chevron {}",
+                                if is_expanded.get() { "left-nav-chevron--expanded" } else { "" }
                             )
                         }
                         fill="currentColor"
@@ -284,21 +284,21 @@ pub fn CategoryItem(
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
 
-                    // Category name and count
-                    <div class="flex-1 text-left">
-                        <div class="font-bold text-lg" style="color: var(--color-accent-300); text-shadow: 0 0 25px rgba(6, 182, 212, 0.35);">
-                            {category_name}
-                        </div>
-                        <div class="text-xs mt-1" style="color: var(--color-aside-text-muted);">
-                            {move || filtered_tutorials.get().len()} " tutorials"
-                        </div>
-                    </div>
+                    // Category name
+                    <span class="left-nav-category-name">
+                        {category_name}
+                    </span>
+
+                    // Tutorial count
+                    <span class="left-nav-category-count">
+                        {move || filtered_tutorials.get().len()}
+                    </span>
                 </div>
             </button>
 
             // Tutorials list (shown when expanded)
             <Show when=move || is_expanded.get()>
-                <div class="mt-3 ml-4 pl-5 border-l-2 border-aside-border space-y-2">
+                <div class="left-nav-items">
                     {move || {
                         filtered_tutorials.get().into_iter().map(move |item| {
                             let is_active = current_slug_stored.get_value().as_ref() == Some(&item.slug);
@@ -314,17 +314,14 @@ pub fn CategoryItem(
                                 <a
                                     href=href
                                     class=if is_active {
-                                        "left-nav-link left-nav-link-active px-4 py-3"
+                                        "left-nav-link left-nav-link-active"
                                     } else {
-                                        "left-nav-link px-4 py-3"
+                                        "left-nav-link"
                                     }
                                 >
-                                    // Content
-                                    <div class="flex-1">
-                                        <div class="left-nav-link-title" title={item.title.clone()}>
-                                            {item.title.clone()}
-                                        </div>
-                                    </div>
+                                    <span class="left-nav-link-title" title={item.title.clone()}>
+                                        {item.title.clone()}
+                                    </span>
                                 </a>
                             }
                         }).collect_view()
@@ -393,28 +390,28 @@ pub fn LeftNav(
     view! {
         <aside class=move || {
             format!(
-                "left-nav-container sticky top-16 h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out overflow-hidden {}",
+                "left-nav-container sticky top-16 h-[calc(100vh-4rem)] transition-all duration-200 ease-in-out overflow-hidden {}",
                 if is_collapsed.get() { "w-14" } else { "w-[280px]" }
             )
         }>
             <div class="h-full flex flex-col">
                 // Sidebar Header with Branding
-                <div class="left-nav-header flex items-center justify-between h-16 px-4 flex-shrink-0">
+                <div class="left-nav-header flex items-center justify-between px-4 flex-shrink-0">
                     <div class=move || {
                         format!(
-                            "flex items-center space-x-3 transition-opacity duration-200 {}",
+                            "flex items-center space-x-3 transition-opacity {}",
                             if is_collapsed.get() {
                                 "opacity-0 w-0 overflow-hidden"
                             } else {
                                 "opacity-100"
                             }
                         )
-                    }>
-                        <div>
-                            <h2 class="left-nav-brand-title">
-                                "ABCD Analyses"
-                            </h2>
-                        </div>
+                    }
+                    style="transition-duration: var(--motion-fast);"
+                    >
+                        <h2 class="left-nav-brand-title">
+                            "ABCD Analyses"
+                        </h2>
                     </div>
 
                     // Collapse/Expand Toggle (always visible)
