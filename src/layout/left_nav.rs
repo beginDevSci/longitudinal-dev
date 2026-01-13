@@ -403,7 +403,7 @@ pub fn LeftNav(
                             <div class="relative flex-1">
                                 <input
                                     type="text"
-                                    placeholder="Search tutorials..."
+                                    placeholder="Search..."
                                     class="left-nav-search"
                                     on:input=move |ev| {
                                         search_query.set(event_target_value(&ev));
