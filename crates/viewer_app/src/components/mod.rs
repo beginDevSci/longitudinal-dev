@@ -1,4 +1,5 @@
 pub mod analysis_tools_panel;
+#[cfg(target_arch = "wasm32")]
 pub mod brain_viewer;
 pub mod camera_presets;
 pub mod color_legend;

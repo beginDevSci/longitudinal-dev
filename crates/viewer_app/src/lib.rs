@@ -81,23 +81,46 @@ pub mod preferences;
 mod renderer;
 pub mod types;
 
+#[cfg(target_arch = "wasm32")]
 use components::brain_viewer::BrainViewer;
 
 // Re-export BrainViewer for external use (e.g., brain_viewer_facade)
+#[cfg(target_arch = "wasm32")]
 pub use components::brain_viewer::BrainViewer as BrainViewerComponent;
 
+/// Main application component.
+///
+/// On WASM targets, this renders the full BrainViewer interface.
+/// On other targets, this renders a placeholder (for build verification).
 #[component]
 pub fn App() -> impl IntoView {
-    view! {
-        <main class="min-h-screen bg-gray-50 text-gray-900">
-            <section class="max-w-6xl mx-auto py-8 px-4">
-                <h1 class="text-2xl font-bold mb-4">"BLMM Brain Viewer"</h1>
-                <p class="mb-4 text-sm text-gray-700">
-                    "Interactive 3D visualization of BLMM statistical results on cortical surfaces."
-                </p>
-                <BrainViewer data_base_path="/data".to_string() />
-            </section>
-        </main>
+    #[cfg(target_arch = "wasm32")]
+    {
+        view! {
+            <main class="min-h-screen bg-gray-50 text-gray-900">
+                <section class="max-w-6xl mx-auto py-8 px-4">
+                    <h1 class="text-2xl font-bold mb-4">"BLMM Brain Viewer"</h1>
+                    <p class="mb-4 text-sm text-gray-700">
+                        "Interactive 3D visualization of BLMM statistical results on cortical surfaces."
+                    </p>
+                    <BrainViewer data_base_path="/data".to_string() />
+                </section>
+            </main>
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        view! {
+            <main class="min-h-screen bg-gray-50 text-gray-900">
+                <section class="max-w-6xl mx-auto py-8 px-4">
+                    <h1 class="text-2xl font-bold mb-4">"BLMM Brain Viewer"</h1>
+                    <p class="text-gray-700">
+                        "This component requires a WASM target. Build with --target wasm32-unknown-unknown"
+                    </p>
+                </section>
+            </main>
+        }
     }
 }
 
