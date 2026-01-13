@@ -2779,43 +2779,6 @@ body {
     box-shadow: var(--shadow-nav);
   }
 
-  /* Left nav header section with branding */
-  .left-nav-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: linear-gradient(to right, var(--color-aside-bg-solid), rgba(51, 65, 85, 0.9));
-    padding-top: var(--spacing-6);
-    padding-bottom: var(--spacing-4);
-  }
-
-  /* Brand icon container */
-  .left-nav-brand-icon {
-    width: 2rem;
-    height: 2rem;
-    background: linear-gradient(to bottom right, var(--color-accent-400), var(--color-accent-600));
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Brand title with gradient text */
-  .left-nav-brand-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    background: linear-gradient(to right, var(--color-accent-300), var(--color-accent-400));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-  }
-
-  /* Brand subtitle */
-  .left-nav-brand-subtitle {
-    font-size: 0.75rem;
-    color: var(--color-aside-text-muted);
-    line-height: 1.2;
-    margin-top: 0.125rem;
-  }
-
   /* Collapse/expand button */
   .left-nav-collapse-btn {
     padding: var(--spacing-2);
@@ -2834,9 +2797,9 @@ body {
     box-shadow: 0 0 0 2px var(--color-accent-400);
   }
 
-  /* Search input container - tighter spacing */
+  /* Search input container with collapse toggle */
   .left-nav-search-container {
-    padding: var(--spacing-3) var(--spacing-4);
+    padding: var(--spacing-4);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 

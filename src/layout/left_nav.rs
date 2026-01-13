@@ -395,84 +395,73 @@ pub fn LeftNav(
             )
         }>
             <div class="h-full flex flex-col">
-                // Sidebar Header with Branding
-                <div class="left-nav-header flex items-center justify-between px-4 flex-shrink-0">
-                    <div class=move || {
-                        format!(
-                            "flex items-center space-x-3 transition-opacity {}",
-                            if is_collapsed.get() {
-                                "opacity-0 w-0 overflow-hidden"
-                            } else {
-                                "opacity-100"
-                            }
-                        )
-                    }
-                    style="transition-duration: var(--motion-fast);"
-                    >
-                        <h2 class="left-nav-brand-title">
-                            "ABCD Analyses"
-                        </h2>
-                    </div>
+                // Search bar with integrated collapse toggle
+                <div class="left-nav-search-container flex-shrink-0">
+                    <div class="flex items-center gap-2">
+                        // Search input (hidden when collapsed)
+                        <Show when=move || !is_collapsed.get()>
+                            <div class="relative flex-1">
+                                <input
+                                    type="text"
+                                    placeholder="Search tutorials..."
+                                    class="left-nav-search"
+                                    on:input=move |ev| {
+                                        search_query.set(event_target_value(&ev));
+                                    }
+                                    on:focus=move |_| set_search_focused.set(true)
+                                    on:blur=move |_| set_search_focused.set(false)
+                                />
+                                <svg
+                                    class="left-nav-search-icon"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
 
-                    // Collapse/Expand Toggle (always visible)
-                    <button
-                        class="left-nav-collapse-btn flex-shrink-0"
-                        on:click=move |_| set_is_collapsed.update(|collapsed| *collapsed = !*collapsed)
-                        title=move || if is_collapsed.get() { "Expand sidebar" } else { "Collapse sidebar" }
-                    >
-                        <svg
+                                // Clear button
+                                <Show when=move || !search_query.get().is_empty()>
+                                    <button
+                                        class="left-nav-search-clear"
+                                        on:click=move |_| search_query.set(String::new())
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </Show>
+                            </div>
+                        </Show>
+
+                        // Collapse/Expand Toggle (always visible, centered when collapsed)
+                        <button
                             class=move || {
-                                format!(
-                                    "w-5 h-5 transform transition-transform duration-300 {}",
-                                    if is_collapsed.get() { "rotate-180" } else { "rotate-0" }
-                                )
-                            }
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                </div>
-
-                // Search bar (when expanded)
-                <Show when=move || !is_collapsed.get()>
-                    <div class="left-nav-search-container flex-shrink-0">
-                        <div class="relative">
-                            <input
-                                type="text"
-                                placeholder="Search tutorials..."
-                                class="left-nav-search"
-                                on:input=move |ev| {
-                                    search_query.set(event_target_value(&ev));
+                                if is_collapsed.get() {
+                                    "left-nav-collapse-btn flex-shrink-0 mx-auto"
+                                } else {
+                                    "left-nav-collapse-btn flex-shrink-0"
                                 }
-                                on:focus=move |_| set_search_focused.set(true)
-                                on:blur=move |_| set_search_focused.set(false)
-                            />
+                            }
+                            on:click=move |_| set_is_collapsed.update(|collapsed| *collapsed = !*collapsed)
+                            title=move || if is_collapsed.get() { "Expand sidebar" } else { "Collapse sidebar" }
+                        >
                             <svg
-                                class="left-nav-search-icon"
+                                class=move || {
+                                    format!(
+                                        "w-5 h-5 transform transition-transform duration-200 {}",
+                                        if is_collapsed.get() { "rotate-180" } else { "rotate-0" }
+                                    )
+                                }
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 19l-7-7 7-7" />
                             </svg>
-
-                            // Clear button
-                            <Show when=move || !search_query.get().is_empty()>
-                                <button
-                                    class="left-nav-search-clear"
-                                    on:click=move |_| search_query.set(String::new())
-                                >
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </Show>
-                        </div>
+                        </button>
                     </div>
-                </Show>
+                </div>
 
                 // Navigation Categories (scrollable)
                 <nav class="flex-1 overflow-y-auto mt-4 px-3 pb-4">
