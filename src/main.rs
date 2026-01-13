@@ -71,24 +71,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         <span class="text-primary">"Platform"</span>
                     </h1>
 
-                    <p class="text-lg md:text-xl text-secondary mb-10 max-w-2xl mx-auto">
+                    <p class="text-lg md:text-xl text-secondary max-w-2xl mx-auto">
                         "Open source tools, code examples, and templates for reproducible longitudinal research."
                     </p>
-
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <a
-                            href={base_path::join("abcd/")}
-                            class="px-8 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
-                        >
-                            "ABCD Analyses"
-                        </a>
-                        <a
-                            href={base_path::join("guides/")}
-                            class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
-                        >
-                            "Method Guides"
-                        </a>
-                    </div>
                 </div>
             </main>
         </SiteLayout>
