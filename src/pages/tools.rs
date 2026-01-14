@@ -168,7 +168,7 @@ pub fn ToolsPage(tools: Tools) -> impl IntoView {
         <main class="min-h-screen bg-surface">
             // Header
             <section class="relative overflow-hidden bg-subtle">
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
                     <a
                         href=toolkit_href
                         class="inline-flex items-center gap-1 text-sm text-secondary hover:text-accent transition-colors mb-4"
