@@ -96,7 +96,7 @@ pub fn MethodCard(group: MethodGroup) -> impl IntoView {
                         href={href}
                         class="text-accent hover:underline font-medium"
                     >
-                        "→ Tutorial"
+                        "→ Worked Example"
                     </a>
                 })}
                 {reference_href.map(|href| view! {
