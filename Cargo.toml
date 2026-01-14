@@ -6,6 +6,12 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+# Main SSG binary (requires SSR features for index generation and rendering)
+[[bin]]
+name = "longitudinal_dev"
+path = "src/main.rs"
+required-features = ["ssr"]
+
 [[bin]]
 name = "validate-json"
 path = "src/bin/validate-json.rs"

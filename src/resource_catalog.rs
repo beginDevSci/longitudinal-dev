@@ -2,6 +2,7 @@
 //!
 //! Provides interactive filtering for the Resources page via Leptos islands.
 
+use crate::base_path;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -12,6 +13,7 @@ pub enum ResourceCategory {
     Videos,
     Tutorials,
     Cheatsheets,
+    RPackages,
 }
 
 impl ResourceCategory {
@@ -21,6 +23,7 @@ impl ResourceCategory {
             ResourceCategory::Videos => "Videos",
             ResourceCategory::Tutorials => "Tutorials",
             ResourceCategory::Cheatsheets => "Cheatsheets",
+            ResourceCategory::RPackages => "R Packages",
         }
     }
 
@@ -30,6 +33,7 @@ impl ResourceCategory {
             ResourceCategory::Videos => "videos",
             ResourceCategory::Tutorials => "tutorials",
             ResourceCategory::Cheatsheets => "cheatsheets",
+            ResourceCategory::RPackages => "r-packages",
         }
     }
 
@@ -39,8 +43,16 @@ impl ResourceCategory {
             ResourceCategory::Videos,
             ResourceCategory::Tutorials,
             ResourceCategory::Cheatsheets,
+            ResourceCategory::RPackages,
         ]
     }
+}
+
+/// Additional resource link for packages (vignettes, tutorials, etc.)
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ResourceLink {
+    pub label: String,
+    pub url: String,
 }
 
 /// Flattened resource item for search/filter
@@ -78,6 +90,9 @@ pub struct ResourceItem {
     /// Tags for categorization and filtering
     #[serde(default)]
     pub tags: Vec<String>,
+    /// Additional resource links (vignettes, tutorials, GitHub, etc.)
+    #[serde(default)]
+    pub resource_links: Vec<ResourceLink>,
 }
 
 /// Search bar island component for resources
@@ -445,6 +460,7 @@ fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>, index: 
         ResourceCategory::Videos => "Video courses and tutorials covering R programming, statistical modeling, and data analysis workflows.",
         ResourceCategory::Tutorials => "Hands-on interactive tutorials for learning R syntax, data wrangling, and statistical concepts at your own pace.",
         ResourceCategory::Cheatsheets => "Quick reference guides for R syntax, tidyverse verbs, and common statistical functions—keep these handy.",
+        ResourceCategory::RPackages => "Core packages for mixed models, growth curves, SEM, Bayesian methods, and missing data handling used throughout longitudinal.dev.",
     };
 
     let grid_class = match category {
@@ -452,6 +468,7 @@ fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>, index: 
         ResourceCategory::Videos => "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
         ResourceCategory::Tutorials => "grid grid-cols-1 md:grid-cols-2 gap-6",
         ResourceCategory::Cheatsheets => "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
+        ResourceCategory::RPackages => "grid grid-cols-1 md:grid-cols-2 gap-4",
     };
 
     // Alternating backgrounds: odd indices get bg-subtle. Increased padding for better visual rhythm.
@@ -484,6 +501,7 @@ fn ResourceCard(item: ResourceItem) -> impl IntoView {
         ResourceCategory::Videos => view! { <VideoCardInner item=item /> }.into_any(),
         ResourceCategory::Tutorials => view! { <TutorialCardInner item=item /> }.into_any(),
         ResourceCategory::Cheatsheets => view! { <CheatsheetCardInner item=item /> }.into_any(),
+        ResourceCategory::RPackages => view! { <RPackageCardInner item=item /> }.into_any(),
     }
 }
 
@@ -552,7 +570,14 @@ fn ResourceBadges(
 #[component]
 fn BookCardInner(item: ResourceItem) -> impl IntoView {
     let has_image = item.image.is_some();
-    let image_url = item.image.clone().unwrap_or_default();
+    // Apply base_path to image URLs that start with /
+    let image_url = item.image.clone().map(|url| {
+        if url.starts_with('/') {
+            base_path::join(&url[1..])
+        } else {
+            url
+        }
+    }).unwrap_or_default();
     let author = item.author.clone().unwrap_or_default();
     let is_featured = item.is_featured == Some(true);
     let card_class = if is_featured {
@@ -782,5 +807,111 @@ fn CheatsheetCardInner(item: ResourceItem) -> impl IntoView {
                 </svg>
             </div>
         </a>
+    }
+}
+
+/// R Package card with resource links (vignettes, tutorials, etc.)
+#[component]
+fn RPackageCardInner(item: ResourceItem) -> impl IntoView {
+    let is_open_source = item.is_open_source == Some(true);
+    let level = item.level.clone().unwrap_or_default();
+    let has_level = !level.is_empty();
+    let has_resource_links = !item.resource_links.is_empty();
+    let resource_links = item.resource_links.clone();
+    // Apply base_path to logo URLs that start with /
+    let logo_url = item.image.clone().map(|url| {
+        if url.starts_with('/') {
+            base_path::join(&url[1..])
+        } else {
+            url
+        }
+    }).unwrap_or_default();
+    let has_logo = !logo_url.is_empty();
+
+    view! {
+        <div class="flex flex-col p-4 rounded-lg border border-stroke bg-surface hover:bg-subtle transition-colors">
+            // Header row with logo, title, and badges
+            <div class="flex items-start gap-3 mb-2">
+                // Small hex logo
+                {has_logo.then(|| view! {
+                    <img
+                        src=logo_url
+                        alt=""
+                        class="w-8 h-8 flex-shrink-0 object-contain"
+                        loading="lazy"
+                    />
+                })}
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                        <a
+                            href=item.url.clone()
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="font-semibold text-primary hover:text-accent transition-colors"
+                        >
+                            {item.title.clone()}
+                        </a>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            {has_level.then(|| {
+                                let badge_class = get_level_badge_class(&level);
+                                let label = get_level_label(&level);
+                                view! {
+                                    <span class=format!("px-1.5 py-0.5 text-xs font-medium rounded-full {}", badge_class)>
+                                        {label}
+                                    </span>
+                                }
+                            })}
+                            {is_open_source.then(|| view! {
+                                <span class="px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                    "Open"
+                                </span>
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            // Description
+            <p class="text-sm text-secondary mb-3 line-clamp-2">{item.description}</p>
+
+            // Resource links row
+            <div class="flex items-center gap-2 flex-wrap mt-auto">
+                // Main CRAN/package link
+                <a
+                    href=item.url.clone()
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
+                >
+                    <span>"CRAN"</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+                // Additional resource links
+                {has_resource_links.then(move || {
+                    view! {
+                        <>
+                            {resource_links.into_iter().map(|link| {
+                                view! {
+                                    <span class="text-tertiary">"·"</span>
+                                    <a
+                                        href=link.url
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
+                                    >
+                                        <span>{link.label}</span>
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </a>
+                                }
+                            }).collect_view()}
+                        </>
+                    }
+                })}
+            </div>
+        </div>
     }
 }

@@ -5,7 +5,7 @@
 
 use leptos::prelude::*;
 use longitudinal_dev::base_path;
-use longitudinal_dev::resource_catalog::{ResourceCatalogIsland, ResourceCategory, ResourceItem};
+use longitudinal_dev::resource_catalog::{ResourceCatalogIsland, ResourceCategory, ResourceItem, ResourceLink as CatalogResourceLink};
 use serde::{Deserialize, Serialize};
 
 /// Learning path for "Start Here" section.
@@ -97,6 +97,34 @@ pub struct Cheatsheet {
     pub tags: Vec<String>,
 }
 
+/// Additional resource link for R packages.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ResourceLink {
+    pub label: String,
+    pub url: String,
+}
+
+/// R package for longitudinal analysis.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RPackage {
+    pub title: String,
+    pub url: String,
+    pub blurb: String,
+    #[serde(default)]
+    pub logo: Option<String>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
+    /// Additional resource links (vignettes, tutorials, GitHub, etc.)
+    #[serde(default)]
+    pub resources: Vec<ResourceLink>,
+}
+
 /// Container for all resources loaded from YAML.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Resources {
@@ -106,6 +134,8 @@ pub struct Resources {
     pub videos: Vec<Video>,
     pub tutorials: Vec<Tutorial>,
     pub cheatsheets: Vec<Cheatsheet>,
+    #[serde(default)]
+    pub r_packages: Vec<RPackage>,
 }
 
 /// Load resources from YAML file at build time.
@@ -137,6 +167,7 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             is_open_source: book.is_open_source,
             is_featured: book.is_featured,
             tags: book.tags.clone(),
+            resource_links: vec![],
         });
     }
 
@@ -159,6 +190,7 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             is_open_source: video.is_open_source,
             is_featured: video.is_featured,
             tags: video.tags.clone(),
+            resource_links: vec![],
         });
     }
 
@@ -181,6 +213,7 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             is_open_source: tutorial.is_open_source,
             is_featured: tutorial.is_featured,
             tags: tutorial.tags.clone(),
+            resource_links: vec![],
         });
     }
 
@@ -203,6 +236,33 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             is_open_source: cheatsheet.is_open_source,
             is_featured: cheatsheet.is_featured,
             tags: cheatsheet.tags.clone(),
+            resource_links: vec![],
+        });
+    }
+
+    // R Packages
+    for package in &resources.r_packages {
+        items.push(ResourceItem {
+            title: package.title.clone(),
+            description: package.blurb.clone(),
+            url: package.url.clone(),
+            category: ResourceCategory::RPackages,
+            image: package.logo.clone(),
+            embed_url: None,
+            author: None,
+            source: None,
+            platform: None,
+            access: None,
+            format: None,
+            icon: None,
+            level: package.level.clone(),
+            is_open_source: package.is_open_source,
+            is_featured: package.is_featured,
+            tags: package.tags.clone(),
+            resource_links: package.resources.iter().map(|r| CatalogResourceLink {
+                label: r.label.clone(),
+                url: r.url.clone(),
+            }).collect(),
         });
     }
 

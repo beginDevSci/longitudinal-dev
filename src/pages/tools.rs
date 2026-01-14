@@ -31,8 +31,6 @@ pub struct Tool {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Tools {
     pub programming_languages: Vec<Tool>,
-    #[serde(default)]
-    pub r_packages: Vec<Tool>,
     pub ides: Vec<Tool>,
     pub version_control: Vec<Tool>,
     pub data_formats: Vec<Tool>,
@@ -57,21 +55,6 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             description: tool.blurb.clone(),
             url: tool.url.clone(),
             category: ToolCategory::ProgrammingLanguages,
-            logo: tool.logo.clone(),
-            level: tool.level.clone(),
-            is_open_source: tool.is_open_source,
-            is_featured: tool.is_featured,
-            tags: tool.tags.clone(),
-        });
-    }
-
-    // R Packages
-    for tool in &tools.r_packages {
-        items.push(ToolItem {
-            title: tool.title.clone(),
-            description: tool.blurb.clone(),
-            url: tool.url.clone(),
-            category: ToolCategory::RPackages,
             logo: tool.logo.clone(),
             level: tool.level.clone(),
             is_open_source: tool.is_open_source,

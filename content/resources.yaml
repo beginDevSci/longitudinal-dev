@@ -168,53 +168,6 @@ books:
     is_featured: false
     tags: ["history", "design", "programming"]
 
-  # --- Longitudinal Analysis & Statistics ---
-  - title: "Applied Longitudinal Data Analysis"
-    author: "Judith D. Singer & John B. Willett"
-    url: "https://oxford.universitypressscholarship.com/view/10.1093/acprof:oso/9780195152968.001.0001/acprof-9780195152968"
-    blurb: "The definitive text on multilevel models for change. Essential reading for anyone doing longitudinal analysis."
-    level: "advanced"
-    is_open_source: false
-    is_featured: true
-    tags: ["longitudinal", "multilevel models", "growth curves", "classic"]
-
-  - title: "Latent Curve Models"
-    author: "Kenneth A. Bollen & Patrick J. Curran"
-    url: "https://www.wiley.com/en-us/Latent+Curve+Models:+A+Structural+Equation+Perspective-p-9780471455929"
-    blurb: "A comprehensive guide to modeling change using latent growth curves within the SEM framework."
-    level: "advanced"
-    is_open_source: false
-    is_featured: true
-    tags: ["longitudinal", "SEM", "growth curves", "latent variables"]
-
-  - title: "lavaan Tutorial"
-    author: "Yves Rosseel"
-    url: "https://lavaan.ugent.be/tutorial/"
-    blurb: "Official tutorial for lavaan, the leading R package for structural equation modeling. Covers CFA, SEM, and growth models."
-    level: "intermediate"
-    is_open_source: true
-    is_featured: true
-    tags: ["SEM", "lavaan", "CFA", "tutorial"]
-
-  - title: "Mixed Models with R"
-    author: "Michael Clark"
-    url: "https://m-clark.github.io/mixed-models-with-R/"
-    blurb: "A practical introduction to mixed effects models using lme4. Excellent balance of theory and application."
-    level: "intermediate"
-    is_open_source: true
-    is_featured: true
-    tags: ["mixed models", "lme4", "random effects", "tutorial"]
-
-  - title: "An Introduction to Statistical Learning"
-    author: "Gareth James, Daniela Witten, Trevor Hastie & Robert Tibshirani"
-    url: "https://www.statlearning.com/"
-    blurb: "The modern classic for machine learning and statistical modeling. Includes R code throughout."
-    image: "/images/books/an-introduction-to-statistical-learning.jpg"
-    level: "intermediate"
-    is_open_source: true
-    is_featured: true
-    tags: ["machine learning", "statistics", "modeling"]
-
 # =============================================================================
 # VIDEOS
 # =============================================================================
@@ -393,3 +346,293 @@ cheatsheets:
     is_open_source: true
     is_featured: false
     tags: ["tidyverse", "strings", "text processing"]
+
+# =============================================================================
+# R PACKAGES - Longitudinal Analysis
+# =============================================================================
+# Core packages for mixed models, SEM, growth curves, and missing data handling.
+# Each package includes links to documentation, vignettes, and tutorials.
+
+r_packages:
+  # --- Core Tidyverse ---
+  - title: "tidyverse"
+    url: "https://www.tidyverse.org/"
+    blurb: "Collection of R packages for data science: ggplot2, dplyr, tidyr, readr, and more. The modern R workflow."
+    logo: "/images/logos/tidyverse-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["data wrangling", "visualization", "tidyverse"]
+    resources:
+      - label: "Getting Started"
+        url: "https://www.tidyverse.org/learn/"
+      - label: "R for Data Science"
+        url: "https://r4ds.hadley.nz/"
+
+  - title: "ggplot2"
+    url: "https://ggplot2.tidyverse.org/"
+    blurb: "Create elegant, publication-quality graphics using the grammar of graphics. The gold standard for R visualization."
+    logo: "/images/logos/ggplot2-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["visualization", "graphics", "tidyverse"]
+    resources:
+      - label: "Vignettes"
+        url: "https://ggplot2.tidyverse.org/articles/"
+      - label: "Reference"
+        url: "https://ggplot2.tidyverse.org/reference/"
+      - label: "Book"
+        url: "https://ggplot2-book.org/"
+
+  - title: "dplyr"
+    url: "https://dplyr.tidyverse.org/"
+    blurb: "A grammar of data manipulation. Filter, select, mutate, summarize, and join data with intuitive verbs."
+    logo: "/images/logos/dplyr-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["data wrangling", "tidyverse"]
+    resources:
+      - label: "Vignettes"
+        url: "https://dplyr.tidyverse.org/articles/"
+      - label: "Cheatsheet"
+        url: "https://rstudio.github.io/cheatsheets/data-transformation.pdf"
+
+  # --- Mixed Models ---
+  - title: "lme4"
+    url: "https://cran.r-project.org/package=lme4"
+    blurb: "The workhorse for linear and generalized linear mixed-effects models. Essential for longitudinal analysis."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["mixed models", "longitudinal", "random effects"]
+    resources:
+      - label: "Getting Started"
+        url: "https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf"
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/lme4/vignettes/"
+      - label: "GitHub"
+        url: "https://github.com/lme4/lme4"
+
+  - title: "nlme"
+    url: "https://cran.r-project.org/package=nlme"
+    blurb: "Linear and nonlinear mixed-effects models. More flexible correlation structures than lme4."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["mixed models", "longitudinal", "nonlinear"]
+    resources:
+      - label: "Documentation"
+        url: "https://cran.r-project.org/web/packages/nlme/nlme.pdf"
+      - label: "CRAN"
+        url: "https://cran.r-project.org/package=nlme"
+
+  - title: "lmerTest"
+    url: "https://cran.r-project.org/package=lmerTest"
+    blurb: "Adds p-values and hypothesis tests to lme4 models using Satterthwaite and Kenward-Roger approximations."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["mixed models", "inference", "p-values"]
+    resources:
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/lmerTest/vignettes/"
+      - label: "Documentation"
+        url: "https://cran.r-project.org/web/packages/lmerTest/lmerTest.pdf"
+
+  - title: "glmmTMB"
+    url: "https://cran.r-project.org/package=glmmTMB"
+    blurb: "Generalized linear mixed models with flexible distributions: zero-inflation, beta, negative binomial, and more."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["mixed models", "GLM", "zero-inflation"]
+    resources:
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/glmmTMB/vignettes/"
+      - label: "GitHub"
+        url: "https://github.com/glmmTMB/glmmTMB"
+
+  # --- SEM / Latent Variable ---
+  - title: "lavaan"
+    url: "https://lavaan.ugent.be/"
+    blurb: "Latent Variable Analysis. Fit structural equation models, growth curves, and confirmatory factor analysis."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["SEM", "latent variables", "growth curves", "CFA"]
+    resources:
+      - label: "Tutorial"
+        url: "https://lavaan.ugent.be/tutorial/"
+      - label: "Vignettes"
+        url: "https://lavaan.ugent.be/tutorial/index.html"
+      - label: "GitHub"
+        url: "https://github.com/yrosseel/lavaan"
+
+  - title: "semTools"
+    url: "https://cran.r-project.org/package=semTools"
+    blurb: "Extensions for lavaan: measurement invariance, reliability, missing data, and model comparison utilities."
+    logo: "/images/logos/r-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["SEM", "measurement invariance", "lavaan"]
+    resources:
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/semTools/vignettes/"
+      - label: "GitHub"
+        url: "https://github.com/simsem/semTools"
+
+  - title: "OpenMx"
+    url: "https://openmx.ssri.psu.edu/"
+    blurb: "Advanced SEM and matrix algebra. Maximum flexibility for complex models including twin studies."
+    logo: "/images/logos/r-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["SEM", "advanced", "twin studies"]
+    resources:
+      - label: "Documentation"
+        url: "https://openmx.ssri.psu.edu/documentation"
+      - label: "GitHub"
+        url: "https://github.com/OpenMx/OpenMx"
+
+  - title: "blavaan"
+    url: "https://cran.r-project.org/package=blavaan"
+    blurb: "Bayesian SEM using lavaan syntax. Integrates with Stan and JAGS for MCMC estimation."
+    logo: "/images/logos/r-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["SEM", "Bayesian", "lavaan"]
+    resources:
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/blavaan/vignettes/"
+      - label: "GitHub"
+        url: "https://github.com/ecmerkle/blavaan"
+
+  # --- Bayesian ---
+  - title: "brms"
+    url: "https://paul-buerkner.github.io/brms/"
+    blurb: "Bayesian regression models using Stan. Multilevel models, GAMs, and more with intuitive R formula syntax."
+    logo: "/images/logos/brms-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: true
+    tags: ["Bayesian", "Stan", "multilevel"]
+    resources:
+      - label: "Vignettes"
+        url: "https://paul-buerkner.github.io/brms/articles/"
+      - label: "GitHub"
+        url: "https://github.com/paul-buerkner/brms"
+      - label: "Reference"
+        url: "https://paul-buerkner.github.io/brms/reference/"
+
+  - title: "rstanarm"
+    url: "https://mc-stan.org/rstanarm/"
+    blurb: "Bayesian applied regression modeling via Stan. Pre-compiled models for faster iteration."
+    logo: "/images/logos/stan-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["Bayesian", "Stan", "regression"]
+    resources:
+      - label: "Vignettes"
+        url: "https://mc-stan.org/rstanarm/articles/"
+      - label: "GitHub"
+        url: "https://github.com/stan-dev/rstanarm"
+
+  # --- GEE / Other Longitudinal ---
+  - title: "geepack"
+    url: "https://cran.r-project.org/package=geepack"
+    blurb: "Generalized Estimating Equations for population-averaged models with correlated data."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["GEE", "longitudinal", "population-averaged"]
+    resources:
+      - label: "Documentation"
+        url: "https://cran.r-project.org/web/packages/geepack/geepack.pdf"
+      - label: "CRAN"
+        url: "https://cran.r-project.org/package=geepack"
+
+  - title: "mgcv"
+    url: "https://cran.r-project.org/package=mgcv"
+    blurb: "Generalized Additive Models with smooth terms. Flexible modeling of nonlinear relationships."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["GAM", "smoothing", "nonlinear"]
+    resources:
+      - label: "Documentation"
+        url: "https://cran.r-project.org/web/packages/mgcv/mgcv.pdf"
+      - label: "Book"
+        url: "https://www.maths.ed.ac.uk/~swood34/mgcv/"
+
+  # --- Missing Data ---
+  - title: "mice"
+    url: "https://amices.org/mice/"
+    blurb: "Multivariate Imputation by Chained Equations. The standard for multiple imputation in R."
+    logo: "/images/logos/mice-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["missing data", "imputation", "MICE"]
+    resources:
+      - label: "Vignettes"
+        url: "https://amices.org/mice/articles/"
+      - label: "GitHub"
+        url: "https://github.com/amices/mice"
+      - label: "Book"
+        url: "https://stefvanbuuren.name/fimd/"
+
+  - title: "Amelia"
+    url: "https://cran.r-project.org/package=Amelia"
+    blurb: "Multiple imputation for cross-sectional and time-series data using bootstrapping and EM algorithm."
+    logo: "/images/logos/r-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["missing data", "imputation", "time-series"]
+    resources:
+      - label: "Vignettes"
+        url: "https://cran.r-project.org/web/packages/Amelia/vignettes/"
+      - label: "Documentation"
+        url: "https://cran.r-project.org/web/packages/Amelia/Amelia.pdf"
+
+  # --- Visualization Extensions ---
+  - title: "patchwork"
+    url: "https://patchwork.data-imaginist.com/"
+    blurb: "Combine multiple ggplot2 plots into a single figure with intuitive operators."
+    logo: "/images/logos/patchwork-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["visualization", "ggplot2", "composition"]
+    resources:
+      - label: "Getting Started"
+        url: "https://patchwork.data-imaginist.com/articles/patchwork.html"
+      - label: "Guides"
+        url: "https://patchwork.data-imaginist.com/articles/"
+
+  - title: "gganimate"
+    url: "https://gganimate.com/"
+    blurb: "Create animated visualizations showing change over time. Perfect for longitudinal data."
+    logo: "/images/logos/gganimate-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["visualization", "animation", "ggplot2"]
+    resources:
+      - label: "Getting Started"
+        url: "https://gganimate.com/articles/gganimate.html"
+      - label: "GitHub"
+        url: "https://github.com/thomasp85/gganimate"

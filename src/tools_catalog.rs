@@ -2,6 +2,7 @@
 //!
 //! Provides interactive filtering for the Tools page via Leptos islands.
 
+use crate::base_path;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +10,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ToolCategory {
     ProgrammingLanguages,
-    RPackages,
     IDEs,
     VersionControl,
     DataFormats,
@@ -21,7 +21,6 @@ impl ToolCategory {
     pub fn label(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Languages",
-            ToolCategory::RPackages => "R Packages",
             ToolCategory::IDEs => "IDEs",
             ToolCategory::VersionControl => "Version Control",
             ToolCategory::DataFormats => "Data Formats",
@@ -33,7 +32,6 @@ impl ToolCategory {
     pub fn full_label(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Programming Languages",
-            ToolCategory::RPackages => "R Packages for Longitudinal Analysis",
             ToolCategory::IDEs => "Development Environments",
             ToolCategory::VersionControl => "Version Control & Reproducibility",
             ToolCategory::DataFormats => "Data Formats",
@@ -45,7 +43,6 @@ impl ToolCategory {
     pub fn description(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Core languages for statistical computing—R and Python power most longitudinal analyses and reproducible workflows.",
-            ToolCategory::RPackages => "These R packages power the linear mixed models, growth curves, SEM, and missing data handling used throughout longitudinal.dev.",
             ToolCategory::IDEs => "Development environments optimized for R and data science—write, debug, and visualize your analyses.",
             ToolCategory::VersionControl => "Version control and reproducibility tools—track changes, manage package versions, and create reproducible pipelines.",
             ToolCategory::DataFormats => "File formats for storing and sharing data—from simple CSV to high-performance columnar formats.",
@@ -57,7 +54,6 @@ impl ToolCategory {
     pub fn id(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "languages",
-            ToolCategory::RPackages => "r-packages",
             ToolCategory::IDEs => "ides",
             ToolCategory::VersionControl => "version-control",
             ToolCategory::DataFormats => "data-formats",
@@ -69,7 +65,6 @@ impl ToolCategory {
     pub fn all() -> Vec<ToolCategory> {
         vec![
             ToolCategory::ProgrammingLanguages,
-            ToolCategory::RPackages,
             ToolCategory::IDEs,
             ToolCategory::VersionControl,
             ToolCategory::DataFormats,
@@ -524,7 +519,6 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
     // Different grid layouts for different categories
     let grid_class = match category {
         ToolCategory::ProgrammingLanguages => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
-        ToolCategory::RPackages => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
         ToolCategory::IDEs => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4",
         ToolCategory::VersionControl => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
         ToolCategory::DataFormats => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4",
@@ -545,86 +539,27 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
                 <h2 class="text-2xl font-bold text-primary mb-2">{section_title}</h2>
                 <p class="text-secondary">{description}</p>
             </div>
-            // Use compact list for R Packages, cards for others
-            {if matches!(category, ToolCategory::RPackages) {
-                view! {
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {items.into_iter().map(|item| {
-                            view! { <PackageListItem item=item /> }
-                        }).collect_view()}
-                    </div>
-                }.into_any()
-            } else {
-                view! {
-                    <div class=grid_class>
-                        {items.into_iter().map(|item| {
-                            let large_logo = matches!(category, ToolCategory::Notebooks);
-                            view! { <ToolCard item=item large_logo=large_logo /> }
-                        }).collect_view()}
-                    </div>
-                }.into_any()
-            }}
-        </section>
-    }
-}
-
-/// Compact list item for R packages
-#[component]
-fn PackageListItem(item: ToolItem) -> impl IntoView {
-    let is_featured = item.is_featured == Some(true);
-    let is_open_source = item.is_open_source == Some(true);
-    let level = item.level.clone().unwrap_or_default();
-    let has_level = !level.is_empty();
-
-    let row_class = if is_featured {
-        "flex items-start gap-3 p-3 rounded-lg border-2 border-accent bg-surface hover:bg-subtle transition-colors"
-    } else {
-        "flex items-start gap-3 p-3 rounded-lg border border-stroke bg-surface hover:bg-subtle transition-colors"
-    };
-
-    view! {
-        <a
-            href=item.url.clone()
-            target="_blank"
-            rel="noopener noreferrer"
-            class=row_class
-        >
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-semibold text-primary hover:text-accent">{item.title}</span>
-                    {is_featured.then(|| view! {
-                        <span class="px-1.5 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                            "★"
-                        </span>
-                    })}
-                    {has_level.then(|| {
-                        let badge_class = get_level_badge_class(&level);
-                        let label = get_level_label(&level);
-                        view! {
-                            <span class=format!("px-1.5 py-0.5 text-xs font-medium rounded-full {}", badge_class)>
-                                {label}
-                            </span>
-                        }
-                    })}
-                    {is_open_source.then(|| view! {
-                        <span class="px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                            "Open"
-                        </span>
-                    })}
-                </div>
-                <p class="text-sm text-secondary mt-1 line-clamp-2">{item.description}</p>
+            <div class=grid_class>
+                {items.into_iter().map(|item| {
+                    let large_logo = matches!(category, ToolCategory::Notebooks);
+                    view! { <ToolCard item=item large_logo=large_logo /> }
+                }).collect_view()}
             </div>
-            <svg class="w-4 h-4 text-tertiary flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
-        </a>
+        </section>
     }
 }
 
 /// Individual tool card component
 #[component]
 fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl IntoView {
-    let logo_url = item.logo.clone().unwrap_or_default();
+    // Apply base_path to logo URLs that start with /
+    let logo_url = item.logo.clone().map(|url| {
+        if url.starts_with('/') {
+            base_path::join(&url[1..])
+        } else {
+            url
+        }
+    }).unwrap_or_default();
     let has_logo = !logo_url.is_empty();
     let first_char = item.title.chars().next().unwrap_or('?');
     let is_featured = item.is_featured == Some(true);
