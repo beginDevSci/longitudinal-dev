@@ -1072,8 +1072,6 @@ impl WgpuRenderer {
             });
 
         // Render pick pass for each surface with its transform
-        // Note: Later surfaces will overwrite earlier ones at the same pixel (painter's algorithm)
-        // For proper depth handling, we'd need a depth buffer in the picking pass
         for (surf_id, transform) in surfaces {
             // Update camera uniform with this surface's transform
             self.update_camera_with_offset(transform.translation);

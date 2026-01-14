@@ -235,8 +235,10 @@ def convert_dat_to_brs1(dat_path: Path, output_path: Path, expected_volumes: int
     if n_values != n_vertices * n_volumes:
         raise ValueError(f"Data size mismatch: {n_values} values for {n_vertices}x{n_volumes}")
 
-    # Reshape to (n_volumes, n_vertices) for per-volume stats
-    data = raw_data.reshape((n_volumes, n_vertices))
+    # Original BLMM .dat files are stored in vertex-major order (n_vertices, n_volumes)
+    # i.e., all volumes for vertex 0, then all volumes for vertex 1, etc.
+    # We need (n_volumes, n_vertices) for the BRS1 format, so reshape and transpose.
+    data = raw_data.reshape((n_vertices, n_volumes)).T  # Now (n_volumes, n_vertices)
 
     # Compute statistics
     nan_mask = np.isnan(data)
@@ -273,8 +275,8 @@ def convert_dat_to_brs1(dat_path: Path, output_path: Path, expected_volumes: int
     for vmin, vmax in volume_ranges:
         buf.extend(struct.pack("<ff", vmin, vmax))
 
-    # Data values (already in correct order: volume-major)
-    buf.extend(raw_data.tobytes())
+    # Data values in volume-major order (n_volumes, n_vertices)
+    buf.extend(data.astype(np.float32).tobytes())
 
     # Write gzip-compressed
     output_path.parent.mkdir(parents=True, exist_ok=True)

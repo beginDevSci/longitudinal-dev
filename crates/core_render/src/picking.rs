@@ -27,6 +27,8 @@ pub struct PendingPick {
 pub struct PickingSystem {
     texture: wgpu::Texture,
     view: wgpu::TextureView,
+    depth_texture: wgpu::Texture,
+    depth_view: wgpu::TextureView,
     readback_buffer: wgpu::Buffer,
     width: u32,
     height: u32,
@@ -42,11 +44,14 @@ impl PickingSystem {
     /// Create a new picking system with the given dimensions.
     pub fn new(device: &wgpu::Device, width: u32, height: u32) -> Self {
         let (texture, view) = Self::create_texture(device, width, height);
+        let (depth_texture, depth_view) = Self::create_depth_texture(device, width, height);
         let readback_buffer = Self::create_readback_buffer(device);
 
         Self {
             texture,
             view,
+            depth_texture,
+            depth_view,
             readback_buffer,
             width,
             height,
@@ -76,6 +81,26 @@ impl PickingSystem {
         (texture, view)
     }
 
+    /// Create the depth texture for the picking pass.
+    fn create_depth_texture(device: &wgpu::Device, width: u32, height: u32) -> (wgpu::Texture, wgpu::TextureView) {
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("picking_depth_texture"),
+            size: wgpu::Extent3d {
+                width: width.max(1),
+                height: height.max(1),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        (texture, view)
+    }
+
     /// Create the buffer used to read back pixel data.
     fn create_readback_buffer(device: &wgpu::Device) -> wgpu::Buffer {
         device.create_buffer(&wgpu::BufferDescriptor {
@@ -92,8 +117,11 @@ impl PickingSystem {
             return;
         }
         let (texture, view) = Self::create_texture(device, width, height);
+        let (depth_texture, depth_view) = Self::create_depth_texture(device, width, height);
         self.texture = texture;
         self.view = view;
+        self.depth_texture = depth_texture;
+        self.depth_view = depth_view;
         self.width = width;
         self.height = height;
     }
@@ -130,7 +158,14 @@ impl PickingSystem {
                     store: wgpu::StoreOp::Store,
                 },
             })],
-            depth_stencil_attachment: None,
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: &self.depth_view,
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: wgpu::StoreOp::Store,
+                }),
+                stencil_ops: None,
+            }),
             ..Default::default()
         });
 

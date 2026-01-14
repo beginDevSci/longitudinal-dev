@@ -14,9 +14,9 @@ use std::f32::consts::{FRAC_PI_2, PI};
 /// - Z-axis: Superior (+) / Inferior (-)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BrainViewPreset {
-    /// View from the left side (looking at right hemisphere's lateral surface).
+    /// View from the left side (looking at left hemisphere's lateral surface).
     LateralLeft,
-    /// View from the right side (looking at left hemisphere's lateral surface).
+    /// View from the right side (looking at right hemisphere's lateral surface).
     LateralRight,
     /// View from inside looking at left hemisphere's medial surface.
     MedialLeft,

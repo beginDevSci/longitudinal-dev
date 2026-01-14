@@ -37,7 +37,8 @@ impl OrbitController {
     }
 
     pub fn view_matrix(&self) -> Mat4 {
-        Mat4::look_at_rh(self.eye(), self.target, Vec3::Y)
+        // Use Z-up to match RAS coordinate convention (X=Right, Y=Anterior, Z=Superior)
+        Mat4::look_at_rh(self.eye(), self.target, Vec3::Z)
     }
 
     pub fn handle_event(&mut self, event: &ViewerEvent) -> bool {
