@@ -289,10 +289,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(about_dir.join("index.html"), &about_html)?;
     eprintln!("Wrote {}", about_dir.join("index.html").display());
 
-    // 3b. Generate Toolkit hub page at /toolkit/index.html
+    // 3b. Load toolkit data (used by hub page and sub-pages)
+    let resources_data = load_resources();
+    let tools_data = load_tools();
+
+    // Clone data for use across multiple view macros
+    let resources_for_toolkit = resources_data.clone();
+    let tools_for_toolkit = tools_data.clone();
+
+    // 3c. Generate Toolkit hub page at /toolkit/index.html
     let toolkit_html = view! {
         <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
-            <ToolkitPage/>
+            <ToolkitPage resources=resources_for_toolkit tools=tools_for_toolkit />
         </SiteLayout>
     }
     .to_html();
@@ -302,8 +310,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(toolkit_dir.join("index.html"), &toolkit_html)?;
     eprintln!("Wrote {}", toolkit_dir.join("index.html").display());
 
-    // 3c. Generate Resources page at /toolkit/learning/index.html
-    let resources_data = load_resources();
+    // 3d. Generate Resources page at /toolkit/learning/index.html
     let resources_html = view! {
         <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
             <ResourcesPage resources=resources_data />
@@ -316,8 +323,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write(learning_dir.join("index.html"), &resources_html)?;
     eprintln!("Wrote {}", learning_dir.join("index.html").display());
 
-    // 3d. Generate Tools page at /toolkit/software/index.html
-    let tools_data = load_tools();
+    // 3e. Generate Tools page at /toolkit/software/index.html
     let tools_html = view! {
         <SiteLayout options=opts.clone() current_path=Some("/toolkit".to_string())>
             <ToolsPage tools=tools_data />
