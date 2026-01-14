@@ -3,11 +3,13 @@
 use leptos::callback::Callback;
 use leptos::prelude::*;
 
-use crate::types::BrainViewPreset;
+use crate::types::{BrainViewPreset, Hemisphere};
 
 /// Props for the CameraPresets component.
 #[component]
 pub fn CameraPresets(
+    /// Currently selected hemisphere - filters which presets are shown.
+    hemisphere: ReadSignal<Hemisphere>,
     /// Callback when a preset is selected.
     on_preset: Callback<BrainViewPreset>,
     /// Currently selected view preset (if any).
@@ -16,11 +18,11 @@ pub fn CameraPresets(
     #[prop(default = false.into())]
     disabled: Signal<bool>,
 ) -> impl IntoView {
-    // Group presets logically for better UX
-    let hemisphere_views = [
-        ("Left", vec![BrainViewPreset::LateralLeft, BrainViewPreset::MedialLeft]),
-        ("Right", vec![BrainViewPreset::LateralRight, BrainViewPreset::MedialRight]),
-    ];
+    // Hemisphere-specific presets - filtered based on selected hemisphere
+    let left_presets = [BrainViewPreset::LateralLeft, BrainViewPreset::MedialLeft];
+    let right_presets = [BrainViewPreset::LateralRight, BrainViewPreset::MedialRight];
+
+    // Standard views available for both hemispheres
     let standard_views = [
         BrainViewPreset::Dorsal,
         BrainViewPreset::Ventral,
@@ -47,36 +49,43 @@ pub fn CameraPresets(
 
     view! {
         <div class="space-y-1">
-            // Hemisphere-specific views grouped
-            {hemisphere_views.iter().map(|(hemi_label, presets)| {
-                view! {
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[9px] text-[var(--color-text-muted)] w-6">{*hemi_label}</span>
-                        {presets.iter().map(|preset| {
-                            let preset = *preset;
-                            let on_preset = on_preset.clone();
-                            let on_click = move |_| {
-                                on_preset.run(preset);
-                            };
-                            view! {
-                                <button
-                                    type="button"
-                                    class=move || {
-                                        let is_selected = current_view.get() == Some(preset);
-                                        format!("{} {}", base_class, if is_selected { active_class } else { inactive_class })
-                                    }
-                                    on:click=on_click
-                                    disabled=move || disabled.get()
-                                    title=preset.name()
-                                >
-                                    {friendly_label(preset)}
-                                </button>
-                            }
-                        }).collect::<Vec<_>>()}
-                    </div>
-                }
-            }).collect::<Vec<_>>()}
-            // Standard views row
+            // Hemisphere-specific presets (filtered based on selected hemisphere)
+            <div class="flex items-center gap-1.5">
+                <span class="text-[9px] text-[var(--color-text-muted)] w-6">
+                    {move || match hemisphere.get() {
+                        Hemisphere::Left => "Left",
+                        Hemisphere::Right => "Right",
+                    }}
+                </span>
+                {move || {
+                    let presets = match hemisphere.get() {
+                        Hemisphere::Left => &left_presets[..],
+                        Hemisphere::Right => &right_presets[..],
+                    };
+                    presets.iter().map(|preset| {
+                        let preset = *preset;
+                        let on_preset = on_preset.clone();
+                        let on_click = move |_| {
+                            on_preset.run(preset);
+                        };
+                        view! {
+                            <button
+                                type="button"
+                                class=move || {
+                                    let is_selected = current_view.get() == Some(preset);
+                                    format!("{} {}", base_class, if is_selected { active_class } else { inactive_class })
+                                }
+                                on:click=on_click
+                                disabled=move || disabled.get()
+                                title=preset.name()
+                            >
+                                {friendly_label(preset)}
+                            </button>
+                        }
+                    }).collect::<Vec<_>>()
+                }}
+            </div>
+            // Standard views row (always available)
             <div class="flex items-center gap-1.5">
                 <span class="text-[9px] text-[var(--color-text-muted)] w-6">"View"</span>
                 {standard_views.iter().map(|preset| {

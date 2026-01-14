@@ -178,8 +178,9 @@ pub fn AnalysisToolsPanel(
                                             </button>
                                         </div>
                                     </div>
-                                    // Camera presets
+                                    // Camera presets (filtered by selected hemisphere)
                                     <CameraPresets
+                                        hemisphere=hemisphere
                                         on_preset=on_view_preset
                                         current_view=current_view
                                         disabled=disabled.into()
