@@ -239,13 +239,12 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
                         </span>
                         " are freely available."
                     </p>
-                    <div class="mt-6 p-4 rounded-lg bg-surface border border-stroke">
+                    <div class="mt-4 p-3 rounded-lg bg-surface border border-stroke">
                         <p class="text-sm text-secondary">
-                            <span class="font-medium text-primary">"How to use this page: "</span>
-                            "Start with a learning path below, or use the filters to find resources by category, skill level, or topic. "
-                            "Items marked "
+                            <span class="font-medium text-primary">"Tip: "</span>
+                            "Start with a learning path below, or filter by category, level, or topic. Items marked "
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                                "★ Recommended"
+                                "★"
                             </span>
                             " are particularly good starting points."
                         </p>
@@ -270,7 +269,7 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
                                     _ => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
                                 };
                                 let level_label = match path.level.as_str() {
-                                    "beginner" => "Beginner".to_string(),
+                                    "beginner" => "Foundational".to_string(),
                                     "intermediate" => "Intermediate".to_string(),
                                     "advanced" => "Advanced".to_string(),
                                     _ => path.level.clone(),

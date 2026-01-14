@@ -187,15 +187,14 @@ pub fn ToolsPage(tools: Tools) -> impl IntoView {
                         </span>
                         " are free to use."
                     </p>
-                    <div class="mt-6 p-4 rounded-lg bg-surface border border-stroke">
+                    <div class="mt-4 p-3 rounded-lg bg-surface border border-stroke">
                         <p class="text-sm text-secondary">
-                            <span class="font-medium text-primary">"How to use this page: "</span>
-                            "Browse by category, filter by skill level, or use the Focus filters to find tools for specific tasks like reproducibility or mixed models. "
-                            "Tools marked "
+                            <span class="font-medium text-primary">"Tip: "</span>
+                            "Filter by category, level, or focus area. Items marked "
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                                 "★"
                             </span>
-                            " are particularly recommended for longitudinal analysis."
+                            " are particularly good for longitudinal analysis."
                         </p>
                     </div>
                 </div>

@@ -265,7 +265,7 @@ pub fn TopicFilterChips(selected_topic: RwSignal<String>) -> impl IntoView {
 pub fn LevelFilterChips(selected_level: RwSignal<String>) -> impl IntoView {
     let levels = vec![
         ("all", "All Levels"),
-        ("beginner", "Beginner"),
+        ("beginner", "Foundational"),
         ("intermediate", "Intermediate"),
         ("advanced", "Advanced"),
     ];
@@ -500,7 +500,7 @@ fn get_level_badge_class(level: &str) -> &'static str {
 /// Get display label for level
 fn get_level_label(level: &str) -> &'static str {
     match level.to_lowercase().as_str() {
-        "beginner" => "Beginner",
+        "beginner" => "Foundational",
         "intermediate" => "Intermediate",
         "advanced" => "Advanced",
         _ => "All Levels",
@@ -542,7 +542,7 @@ fn ResourceBadges(
             // Featured badge
             {is_featured.then(|| view! {
                 <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                    "★ Recommended"
+                    "★"
                 </span>
             })}
         </div>
