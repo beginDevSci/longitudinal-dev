@@ -44,13 +44,13 @@ impl ToolCategory {
 
     pub fn description(&self) -> &'static str {
         match self {
-            ToolCategory::ProgrammingLanguages => "Core languages for statistical computing and data analysis.",
-            ToolCategory::RPackages => "R packages for mixed models, SEM, growth curves, and missing data handling.",
-            ToolCategory::IDEs => "Editors and IDEs for writing and debugging code.",
-            ToolCategory::VersionControl => "Tools for version control, reproducibility, and workflow management.",
-            ToolCategory::DataFormats => "Common file formats for storing and exchanging data.",
-            ToolCategory::Notebooks => "Interactive environments for reproducible research.",
-            ToolCategory::Databases => "Systems for storing and querying structured data.",
+            ToolCategory::ProgrammingLanguages => "Core languages for statistical computing—R and Python power most longitudinal analyses and reproducible workflows.",
+            ToolCategory::RPackages => "These R packages power the linear mixed models, growth curves, SEM, and missing data handling used throughout longitudinal.dev.",
+            ToolCategory::IDEs => "Development environments optimized for R and data science—write, debug, and visualize your analyses.",
+            ToolCategory::VersionControl => "Version control and reproducibility tools—track changes, manage package versions, and create reproducible pipelines.",
+            ToolCategory::DataFormats => "File formats for storing and sharing data—from simple CSV to high-performance columnar formats.",
+            ToolCategory::Notebooks => "Literate programming environments that combine code, output, and narrative for reproducible research.",
+            ToolCategory::Databases => "Database systems for storing and querying structured data, from lightweight SQLite to scalable PostgreSQL.",
         }
     }
 
@@ -219,6 +219,68 @@ fn matches_category(item: &ToolItem, categories: &[ToolCategory]) -> bool {
     categories.contains(&item.category)
 }
 
+/// Get CSS classes for level badge
+fn get_level_badge_class(level: &str) -> &'static str {
+    match level.to_lowercase().as_str() {
+        "beginner" => "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+        "intermediate" => "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+        "advanced" => "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+        _ => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
+    }
+}
+
+/// Get display label for level
+fn get_level_label(level: &str) -> &'static str {
+    match level.to_lowercase().as_str() {
+        "beginner" => "Beginner",
+        "intermediate" => "Intermediate",
+        "advanced" => "Advanced",
+        _ => "All Levels",
+    }
+}
+
+/// Render badge row with level, open source, and featured badges for tools
+#[component]
+fn ToolBadges(
+    #[prop(default = String::new())] level: String,
+    #[prop(default = false)] is_open_source: bool,
+    #[prop(default = false)] is_featured: bool,
+) -> impl IntoView {
+    let has_level = !level.is_empty();
+    let has_any_badge = has_level || is_open_source || is_featured;
+
+    if !has_any_badge {
+        return view! { <div></div> }.into_any();
+    }
+
+    view! {
+        <div class="flex flex-wrap justify-center gap-1 mb-2">
+            // Level badge
+            {has_level.then(|| {
+                let badge_class = get_level_badge_class(&level);
+                let label = get_level_label(&level);
+                view! {
+                    <span class=format!("px-1.5 py-0.5 text-xs font-medium rounded-full {}", badge_class)>
+                        {label}
+                    </span>
+                }
+            })}
+            // Open Source badge
+            {is_open_source.then(|| view! {
+                <span class="px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    "Open"
+                </span>
+            })}
+            // Featured badge
+            {is_featured.then(|| view! {
+                <span class="px-1.5 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    "★"
+                </span>
+            })}
+        </div>
+    }.into_any()
+}
+
 /// Main tools catalog island that orchestrates filtering
 #[island]
 pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
@@ -377,6 +439,7 @@ fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl I
     let logo_url = item.logo.clone().unwrap_or_default();
     let has_logo = !logo_url.is_empty();
     let first_char = item.title.chars().next().unwrap_or('?');
+    let is_featured = item.is_featured == Some(true);
 
     let logo_class = if large_logo {
         "aspect-[4/3] w-full logo-tile logo-tile-lg"
@@ -384,12 +447,18 @@ fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl I
         "aspect-[4/3] w-full logo-tile"
     };
 
+    let card_class = if is_featured {
+        "resource-card resource-card-featured group block"
+    } else {
+        "resource-card group block"
+    };
+
     view! {
         <a
             href=item.url.clone()
             target="_blank"
             rel="noopener noreferrer"
-            class="resource-card group block"
+            class=card_class
         >
             <div class=logo_class>
                 {if has_logo {
@@ -410,6 +479,11 @@ fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl I
                 }}
             </div>
             <div class="p-4">
+                <ToolBadges
+                    level=item.level.clone().unwrap_or_default()
+                    is_open_source=item.is_open_source.unwrap_or(false)
+                    is_featured=item.is_featured.unwrap_or(false)
+                />
                 <h3 class="font-semibold text-primary group-hover:text-accent transition-colors text-center mb-2">
                     {item.title}
                 </h3>

@@ -319,10 +319,10 @@ fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>, index: 
     let section_id = category.id();
     let section_title = category.label();
     let description = match category {
-        ResourceCategory::Books => "Includes both modern tidyverse-era resources and classic texts that remain influential.",
-        ResourceCategory::Videos => "Video courses and tutorials from the R community.",
-        ResourceCategory::Tutorials => "Interactive online tutorials and learning platforms.",
-        ResourceCategory::Cheatsheets => "Quick reference guides and one-page summaries.",
+        ResourceCategory::Books => "From R fundamentals to advanced mixed models and SEM—these texts cover the methods essential for longitudinal research.",
+        ResourceCategory::Videos => "Video courses and tutorials covering R programming, statistical modeling, and data analysis workflows.",
+        ResourceCategory::Tutorials => "Hands-on interactive tutorials for learning R syntax, data wrangling, and statistical concepts at your own pace.",
+        ResourceCategory::Cheatsheets => "Quick reference guides for R syntax, tidyverse verbs, and common statistical functions—keep these handy.",
     };
 
     let grid_class = match category {
@@ -365,18 +365,86 @@ fn ResourceCard(item: ResourceItem) -> impl IntoView {
     }
 }
 
+/// Get CSS classes for level badge
+fn get_level_badge_class(level: &str) -> &'static str {
+    match level.to_lowercase().as_str() {
+        "beginner" => "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+        "intermediate" => "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+        "advanced" => "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+        _ => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
+    }
+}
+
+/// Get display label for level
+fn get_level_label(level: &str) -> &'static str {
+    match level.to_lowercase().as_str() {
+        "beginner" => "Beginner",
+        "intermediate" => "Intermediate",
+        "advanced" => "Advanced",
+        _ => "All Levels",
+    }
+}
+
+/// Render badge row with level, open source, and featured badges
+#[component]
+fn ResourceBadges(
+    #[prop(default = String::new())] level: String,
+    #[prop(default = false)] is_open_source: bool,
+    #[prop(default = false)] is_featured: bool,
+) -> impl IntoView {
+    let has_level = !level.is_empty();
+    let has_any_badge = has_level || is_open_source || is_featured;
+
+    if !has_any_badge {
+        return view! { <div></div> }.into_any();
+    }
+
+    view! {
+        <div class="flex flex-wrap gap-1.5 mb-2">
+            // Level badge
+            {has_level.then(|| {
+                let badge_class = get_level_badge_class(&level);
+                let label = get_level_label(&level);
+                view! {
+                    <span class=format!("px-2 py-0.5 text-xs font-medium rounded-full {}", badge_class)>
+                        {label}
+                    </span>
+                }
+            })}
+            // Open Source badge
+            {is_open_source.then(|| view! {
+                <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    "Open Source"
+                </span>
+            })}
+            // Featured badge
+            {is_featured.then(|| view! {
+                <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    "★ Recommended"
+                </span>
+            })}
+        </div>
+    }.into_any()
+}
+
 #[component]
 fn BookCardInner(item: ResourceItem) -> impl IntoView {
     let has_image = item.image.is_some();
     let image_url = item.image.clone().unwrap_or_default();
     let author = item.author.clone().unwrap_or_default();
+    let is_featured = item.is_featured == Some(true);
+    let card_class = if is_featured {
+        "resource-card resource-card-featured group block"
+    } else {
+        "resource-card group block"
+    };
 
     view! {
         <a
             href=item.url.clone()
             target="_blank"
             rel="noopener noreferrer"
-            class="resource-card group block"
+            class=card_class
         >
             <div class="aspect-[4/3] w-full cover-frame">
                 {if has_image {
@@ -397,6 +465,11 @@ fn BookCardInner(item: ResourceItem) -> impl IntoView {
                 }}
             </div>
             <div class="p-4">
+                <ResourceBadges
+                    level=item.level.clone().unwrap_or_default()
+                    is_open_source=item.is_open_source.unwrap_or(false)
+                    is_featured=item.is_featured.unwrap_or(false)
+                />
                 <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-1">
                     {item.title}
                 </h3>
@@ -413,9 +486,15 @@ fn VideoCardInner(item: ResourceItem) -> impl IntoView {
     let embed_url = item.embed_url.clone().unwrap_or_default();
     let source = item.source.clone().unwrap_or_default();
     let iframe_title = item.title.clone();
+    let is_featured = item.is_featured == Some(true);
+    let card_class = if is_featured {
+        "resource-card resource-card-featured group"
+    } else {
+        "resource-card group"
+    };
 
     view! {
-        <div class="resource-card group">
+        <div class=card_class>
             <div class="aspect-video w-full bg-black overflow-hidden">
                 {if has_embed {
                     view! {
@@ -440,6 +519,11 @@ fn VideoCardInner(item: ResourceItem) -> impl IntoView {
                 }}
             </div>
             <div class="p-4">
+                <ResourceBadges
+                    level=item.level.clone().unwrap_or_default()
+                    is_open_source=item.is_open_source.unwrap_or(false)
+                    is_featured=item.is_featured.unwrap_or(false)
+                />
                 <a
                     href=item.url.clone()
                     target="_blank"
@@ -468,14 +552,25 @@ fn TutorialCardInner(item: ResourceItem) -> impl IntoView {
         "px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
     };
     let access_label = if access.to_lowercase() == "freemium" { "Freemium" } else { "Open" };
+    let is_featured = item.is_featured == Some(true);
+    let card_class = if is_featured {
+        "resource-card resource-card-featured group block p-6"
+    } else {
+        "resource-card group block p-6"
+    };
 
     view! {
         <a
             href=item.url.clone()
             target="_blank"
             rel="noopener noreferrer"
-            class="resource-card group block p-6"
+            class=card_class
         >
+            <ResourceBadges
+                level=item.level.clone().unwrap_or_default()
+                is_open_source=item.is_open_source.unwrap_or(false)
+                is_featured=item.is_featured.unwrap_or(false)
+            />
             <div class="flex items-start gap-4 mb-4">
                 <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <span class="text-2xl">"🎓"</span>
@@ -522,14 +617,25 @@ fn get_cheatsheet_icon_path(icon: &str) -> &'static str {
 fn CheatsheetCardInner(item: ResourceItem) -> impl IntoView {
     let format_badge = item.format.clone().map(|f| f.to_uppercase());
     let icon_path = get_cheatsheet_icon_path(&item.icon.clone().unwrap_or_default());
+    let is_featured = item.is_featured == Some(true);
+    let card_class = if is_featured {
+        "resource-card resource-card-featured group block p-6"
+    } else {
+        "resource-card group block p-6"
+    };
 
     view! {
         <a
             href=item.url.clone()
             target="_blank"
             rel="noopener noreferrer"
-            class="resource-card group block p-6"
+            class=card_class
         >
+            <ResourceBadges
+                level=item.level.clone().unwrap_or_default()
+                is_open_source=item.is_open_source.unwrap_or(false)
+                is_featured=item.is_featured.unwrap_or(false)
+            />
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" inner_html=icon_path />
             </div>

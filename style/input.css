@@ -709,6 +709,16 @@ body {
     }
   }
 
+  /* Featured/recommended card highlight */
+  .resource-card-featured {
+    border-color: var(--color-accent);
+    border-width: 2px;
+  }
+
+  .resource-card-featured:hover {
+    border-color: var(--color-accent);
+  }
+
   /* ========================================
      COVER FRAME - Book cover treatment
      Reduces visual dominance of varied cover images
