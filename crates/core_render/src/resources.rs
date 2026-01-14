@@ -73,15 +73,16 @@ fn sample_colormap(kind: ColormapKind, t: f32) -> [u8; 4] {
     let t = t.clamp(0.0, 1.0);
     match kind {
         ColormapKind::RdBu => {
-            // Blue (t=0) -> white (t=0.5) -> red (t=1)
+            // Red (t=0) -> white (t=0.5) -> blue (t=1)
+            // Matches matplotlib RdBu convention
             let (r, g, b) = if t < 0.5 {
-                // Blue to white
+                // Red to white
                 let s = t * 2.0;
-                (s, s, 1.0)
+                (1.0, s, s)
             } else {
-                // White to red
+                // White to blue
                 let s = (t - 0.5) * 2.0;
-                (1.0, 1.0 - s, 1.0 - s)
+                (1.0 - s, 1.0 - s, 1.0)
             };
             [(r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8, 255]
         }
