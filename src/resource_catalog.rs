@@ -66,6 +66,18 @@ pub struct ResourceItem {
     pub format: Option<String>,
     /// Optional icon (for cheatsheets)
     pub icon: Option<String>,
+    /// Skill level: beginner, intermediate, advanced
+    #[serde(default)]
+    pub level: Option<String>,
+    /// Whether this is an open-source/free resource
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    /// Whether this resource is featured/recommended
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    /// Tags for categorization and filtering
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Search bar island component for resources

@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ToolCategory {
     ProgrammingLanguages,
+    RPackages,
     IDEs,
     VersionControl,
     DataFormats,
@@ -20,6 +21,7 @@ impl ToolCategory {
     pub fn label(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Languages",
+            ToolCategory::RPackages => "R Packages",
             ToolCategory::IDEs => "IDEs",
             ToolCategory::VersionControl => "Version Control",
             ToolCategory::DataFormats => "Data Formats",
@@ -31,8 +33,9 @@ impl ToolCategory {
     pub fn full_label(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Programming Languages",
+            ToolCategory::RPackages => "R Packages for Longitudinal Analysis",
             ToolCategory::IDEs => "Development Environments",
-            ToolCategory::VersionControl => "Version Control",
+            ToolCategory::VersionControl => "Version Control & Reproducibility",
             ToolCategory::DataFormats => "Data Formats",
             ToolCategory::Notebooks => "Notebooks & Literate Programming",
             ToolCategory::Databases => "Databases",
@@ -42,8 +45,9 @@ impl ToolCategory {
     pub fn description(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "Core languages for statistical computing and data analysis.",
+            ToolCategory::RPackages => "R packages for mixed models, SEM, growth curves, and missing data handling.",
             ToolCategory::IDEs => "Editors and IDEs for writing and debugging code.",
-            ToolCategory::VersionControl => "Tools for tracking changes and collaborating on code.",
+            ToolCategory::VersionControl => "Tools for version control, reproducibility, and workflow management.",
             ToolCategory::DataFormats => "Common file formats for storing and exchanging data.",
             ToolCategory::Notebooks => "Interactive environments for reproducible research.",
             ToolCategory::Databases => "Systems for storing and querying structured data.",
@@ -53,6 +57,7 @@ impl ToolCategory {
     pub fn id(&self) -> &'static str {
         match self {
             ToolCategory::ProgrammingLanguages => "languages",
+            ToolCategory::RPackages => "r-packages",
             ToolCategory::IDEs => "ides",
             ToolCategory::VersionControl => "version-control",
             ToolCategory::DataFormats => "data-formats",
@@ -64,6 +69,7 @@ impl ToolCategory {
     pub fn all() -> Vec<ToolCategory> {
         vec![
             ToolCategory::ProgrammingLanguages,
+            ToolCategory::RPackages,
             ToolCategory::IDEs,
             ToolCategory::VersionControl,
             ToolCategory::DataFormats,
@@ -81,6 +87,18 @@ pub struct ToolItem {
     pub url: String,
     pub category: ToolCategory,
     pub logo: Option<String>,
+    /// Skill level: beginner, intermediate, advanced
+    #[serde(default)]
+    pub level: Option<String>,
+    /// Whether this is an open-source tool
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    /// Whether this tool is featured/recommended
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    /// Tags for categorization and filtering
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Search bar island component for tools
@@ -322,6 +340,7 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
     // Different grid layouts for different categories
     let grid_class = match category {
         ToolCategory::ProgrammingLanguages => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
+        ToolCategory::RPackages => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
         ToolCategory::IDEs => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4",
         ToolCategory::VersionControl => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
         ToolCategory::DataFormats => "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4",

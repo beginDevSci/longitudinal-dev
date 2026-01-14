@@ -8,6 +8,17 @@ use longitudinal_dev::base_path;
 use longitudinal_dev::resource_catalog::{ResourceCatalogIsland, ResourceCategory, ResourceItem};
 use serde::{Deserialize, Serialize};
 
+/// Learning path for "Start Here" section.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct LearningPath {
+    pub id: String,
+    pub title: String,
+    pub audience: String,
+    pub summary: String,
+    pub level: String,
+    pub steps: Vec<String>,
+}
+
 /// Book resource with cover image.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Book {
@@ -17,6 +28,14 @@ pub struct Book {
     pub blurb: String,
     #[serde(default)]
     pub image: Option<String>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Video resource with embed URL.
@@ -28,6 +47,14 @@ pub struct Video {
     #[serde(default)]
     pub embed_url: Option<String>,
     pub blurb: String,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Interactive tutorial resource.
@@ -40,6 +67,14 @@ pub struct Tutorial {
     pub platform: Option<String>,
     #[serde(default)]
     pub access: Option<String>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Cheatsheet/quick reference resource.
@@ -52,11 +87,21 @@ pub struct Cheatsheet {
     pub format: Option<String>,
     #[serde(default)]
     pub icon: Option<String>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Container for all resources loaded from YAML.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Resources {
+    #[serde(default)]
+    pub paths: Vec<LearningPath>,
     pub books: Vec<Book>,
     pub videos: Vec<Video>,
     pub tutorials: Vec<Tutorial>,
@@ -88,6 +133,10 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             access: None,
             format: None,
             icon: None,
+            level: book.level.clone(),
+            is_open_source: book.is_open_source,
+            is_featured: book.is_featured,
+            tags: book.tags.clone(),
         });
     }
 
@@ -106,6 +155,10 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             access: None,
             format: None,
             icon: None,
+            level: video.level.clone(),
+            is_open_source: video.is_open_source,
+            is_featured: video.is_featured,
+            tags: video.tags.clone(),
         });
     }
 
@@ -124,6 +177,10 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             access: tutorial.access.clone(),
             format: None,
             icon: None,
+            level: tutorial.level.clone(),
+            is_open_source: tutorial.is_open_source,
+            is_featured: tutorial.is_featured,
+            tags: tutorial.tags.clone(),
         });
     }
 
@@ -142,6 +199,10 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             access: None,
             format: cheatsheet.format.clone(),
             icon: cheatsheet.icon.clone(),
+            level: cheatsheet.level.clone(),
+            is_open_source: cheatsheet.is_open_source,
+            is_featured: cheatsheet.is_featured,
+            tags: cheatsheet.tags.clone(),
         });
     }
 
@@ -153,6 +214,7 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
 pub fn ResourcesPage(resources: Resources) -> impl IntoView {
     let items = resources_to_items(&resources);
     let toolkit_href = base_path::join("toolkit/");
+    let paths = resources.paths.clone();
 
     view! {
         <main class="min-h-screen bg-surface">
@@ -168,10 +230,69 @@ pub fn ResourcesPage(resources: Resources) -> impl IntoView {
                     </a>
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"R Learning Resources"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
-                        "A curated, browseable collection of open-source R learning resources for research workflows."
+                        "A curated collection of open-source R learning resources for longitudinal data analysis and research workflows."
+                    </p>
+                    <p class="mt-2 text-sm text-tertiary">
+                        "All resources marked with "
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            "Open Source"
+                        </span>
+                        " are freely available."
                     </p>
                 </div>
             </section>
+
+            // Start Here paths section
+            {if !paths.is_empty() {
+                Some(view! {
+                    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-b border-stroke">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-primary">"Start Here"</h2>
+                            <p class="text-secondary mt-1">"Choose a learning path based on your experience level and goals."</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {paths.into_iter().map(|path| {
+                                let level_class = match path.level.as_str() {
+                                    "beginner" => "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                                    "intermediate" => "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+                                    "advanced" => "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+                                    _ => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
+                                };
+                                let level_label = match path.level.as_str() {
+                                    "beginner" => "Beginner".to_string(),
+                                    "intermediate" => "Intermediate".to_string(),
+                                    "advanced" => "Advanced".to_string(),
+                                    _ => path.level.clone(),
+                                };
+                                view! {
+                                    <div class="resource-card p-6">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <span class=format!("px-2 py-0.5 rounded-full text-xs font-medium {}", level_class)>
+                                                {level_label}
+                                            </span>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-primary mb-2">{path.title}</h3>
+                                        <p class="text-sm text-tertiary mb-3">"Best for: " {path.audience}</p>
+                                        <p class="text-sm text-secondary mb-4">{path.summary}</p>
+                                        <div class="space-y-1">
+                                            {path.steps.into_iter().enumerate().map(|(i, step)| {
+                                                view! {
+                                                    <div class="flex items-start gap-2 text-sm">
+                                                        <span class="text-accent font-medium">{format!("{}.", i + 1)}</span>
+                                                        <span class="text-secondary">{step}</span>
+                                                    </div>
+                                                }
+                                            }).collect_view()}
+                                        </div>
+                                    </div>
+                                }
+                            }).collect_view()}
+                        </div>
+                    </section>
+                })
+            } else {
+                None
+            }}
 
             // Interactive catalog with search and filtering
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
