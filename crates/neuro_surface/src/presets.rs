@@ -87,13 +87,13 @@ impl BrainViewPreset {
     /// - phi > 0 looks from above, phi < 0 looks from below
     pub fn orbit_angles(&self) -> (f32, f32) {
         match self {
-            // Lateral left: view from -X (looking at right hemisphere from left side)
+            // Lateral left: view from -X (left hemisphere's outer/lateral surface)
             BrainViewPreset::LateralLeft => (PI, 0.0),
-            // Lateral right: view from +X (looking at left hemisphere from right side)
+            // Lateral right: view from +X (right hemisphere's outer/lateral surface)
             BrainViewPreset::LateralRight => (0.0, 0.0),
-            // Medial left: view from +X but slightly rotated to see left medial
+            // Medial left: view from +X (left hemisphere's inner/medial surface)
             BrainViewPreset::MedialLeft => (0.0, 0.0),
-            // Medial right: view from -X to see right medial
+            // Medial right: view from -X (right hemisphere's inner/medial surface)
             BrainViewPreset::MedialRight => (PI, 0.0),
             // Dorsal: view from +Z (looking down from above)
             BrainViewPreset::Dorsal => (0.0, FRAC_PI_2 - 0.01),
