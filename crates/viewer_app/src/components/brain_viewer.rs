@@ -1131,11 +1131,11 @@ pub fn BrainViewer(
             let native_ev: &web_sys::TouchEvent = ev.as_ref();
             let touches = native_ev.touches();
 
-            if let Some(rect) = input_helpers::canvas_rect_from_touch(native_ev) {
+            if let Some((canvas, rect)) = input_helpers::canvas_and_rect_from_touch(native_ev) {
                 if touches.length() == 1 {
                     // Single finger - track position for drag rotation
                     if let Some(touch) = touches.get(0) {
-                        let (x, y) = input_helpers::canvas_coords_from_touch(&touch, &rect);
+                        let (x, y) = input_helpers::canvas_coords_from_touch(&touch, &canvas, &rect);
                         set_last_touch_center.set(Some((x, y)));
                         set_touch_start_distance.set(None);
                     }
@@ -1162,11 +1162,11 @@ pub fn BrainViewer(
             let native_ev: &web_sys::TouchEvent = ev.as_ref();
             let touches = native_ev.touches();
 
-            if let Some(rect) = input_helpers::canvas_rect_from_touch(native_ev) {
+            if let Some((canvas, rect)) = input_helpers::canvas_and_rect_from_touch(native_ev) {
                 if touches.length() == 1 {
                     // Single finger drag - rotate view
                     if let Some(touch) = touches.get(0) {
-                        let (x, y) = input_helpers::canvas_coords_from_touch(&touch, &rect);
+                        let (x, y) = input_helpers::canvas_coords_from_touch(&touch, &canvas, &rect);
 
                         if let Some((last_x, last_y)) = last_touch_center.get() {
                             let delta = (x - last_x, y - last_y);
