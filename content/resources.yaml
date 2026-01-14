@@ -168,6 +168,53 @@ books:
     is_featured: false
     tags: ["history", "design", "programming"]
 
+  # --- Longitudinal Analysis & Statistics ---
+  - title: "Applied Longitudinal Data Analysis"
+    author: "Judith D. Singer & John B. Willett"
+    url: "https://oxford.universitypressscholarship.com/view/10.1093/acprof:oso/9780195152968.001.0001/acprof-9780195152968"
+    blurb: "The definitive text on multilevel models for change. Essential reading for anyone doing longitudinal analysis."
+    level: "advanced"
+    is_open_source: false
+    is_featured: true
+    tags: ["longitudinal", "multilevel models", "growth curves", "classic"]
+
+  - title: "Latent Curve Models"
+    author: "Kenneth A. Bollen & Patrick J. Curran"
+    url: "https://www.wiley.com/en-us/Latent+Curve+Models:+A+Structural+Equation+Perspective-p-9780471455929"
+    blurb: "A comprehensive guide to modeling change using latent growth curves within the SEM framework."
+    level: "advanced"
+    is_open_source: false
+    is_featured: true
+    tags: ["longitudinal", "SEM", "growth curves", "latent variables"]
+
+  - title: "lavaan Tutorial"
+    author: "Yves Rosseel"
+    url: "https://lavaan.ugent.be/tutorial/"
+    blurb: "Official tutorial for lavaan, the leading R package for structural equation modeling. Covers CFA, SEM, and growth models."
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["SEM", "lavaan", "CFA", "tutorial"]
+
+  - title: "Mixed Models with R"
+    author: "Michael Clark"
+    url: "https://m-clark.github.io/mixed-models-with-R/"
+    blurb: "A practical introduction to mixed effects models using lme4. Excellent balance of theory and application."
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["mixed models", "lme4", "random effects", "tutorial"]
+
+  - title: "An Introduction to Statistical Learning"
+    author: "Gareth James, Daniela Witten, Trevor Hastie & Robert Tibshirani"
+    url: "https://www.statlearning.com/"
+    blurb: "The modern classic for machine learning and statistical modeling. Includes R code throughout."
+    image: "/images/books/an-introduction-to-statistical-learning.jpg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["machine learning", "statistics", "modeling"]
+
 # =============================================================================
 # VIDEOS
 # =============================================================================
