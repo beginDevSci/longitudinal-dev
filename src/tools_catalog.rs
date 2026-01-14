@@ -227,6 +227,56 @@ fn matches_level(item: &ToolItem, level: &str) -> bool {
     item.level.as_ref().map(|l| l.to_lowercase() == level.to_lowercase()).unwrap_or(false)
 }
 
+/// Check if a tool matches the selected focus area
+fn matches_focus(item: &ToolItem, focus: &str) -> bool {
+    if focus.is_empty() {
+        return true;
+    }
+    let focus_lower = focus.to_lowercase();
+    item.tags.iter().any(|t| t.to_lowercase().contains(&focus_lower))
+}
+
+/// Focus filter chips for tool categories
+#[island]
+pub fn FocusFilterChips(selected_focus: RwSignal<String>) -> impl IntoView {
+    let focuses = vec![
+        ("", "All Focus Areas"),
+        ("longitudinal", "Longitudinal"),
+        ("reproducibility", "Reproducibility"),
+        ("mixed models", "Mixed Models"),
+        ("sem", "SEM"),
+        ("visualization", "Visualization"),
+    ];
+
+    view! {
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by focus area">
+            {focuses.into_iter().map(|(value, label)| {
+                let value_for_check = value.to_string();
+                let value_for_click = value.to_string();
+                view! {
+                    <button
+                        class=move || {
+                            let base = "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200";
+                            let selected = selected_focus.get();
+                            let is_selected = selected == value_for_check;
+                            if is_selected {
+                                format!("{base} bg-accent text-white")
+                            } else {
+                                format!("{base} bg-surface border border-stroke text-secondary hover:border-accent hover:text-accent")
+                            }
+                        }
+                        on:click=move |_| {
+                            selected_focus.set(value_for_click.clone());
+                        }
+                    >
+                        {label}
+                    </button>
+                }
+            }).collect_view()}
+        </div>
+    }
+}
+
 /// Level filter chips island component for tools
 #[island]
 pub fn ToolLevelFilterChips(selected_level: RwSignal<String>) -> impl IntoView {
@@ -338,6 +388,7 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
     let search_query = RwSignal::new(String::new());
     let selected_categories = RwSignal::new(Vec::<ToolCategory>::new());
     let selected_level = RwSignal::new(String::new());
+    let selected_focus = RwSignal::new(String::new());
 
     // Calculate category counts
     let category_counts: Vec<(ToolCategory, usize)> = ToolCategory::all()
@@ -356,10 +407,16 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
         let query = search_query.get();
         let categories = selected_categories.get();
         let level = selected_level.get();
+        let focus = selected_focus.get();
         tools_signal
             .get_value()
             .into_iter()
-            .filter(|t| matches_search(t, &query) && matches_category(t, &categories) && matches_level(t, &level))
+            .filter(|t| {
+                matches_search(t, &query)
+                    && matches_category(t, &categories)
+                    && matches_level(t, &level)
+                    && matches_focus(t, &focus)
+            })
             .collect::<Vec<_>>()
     });
 
@@ -403,10 +460,16 @@ pub fn ToolsCatalogIsland(tools: Vec<ToolItem>) -> impl IntoView {
                 category_counts=category_counts
             />
 
-            // Level filter
-            <div class="flex items-center gap-3">
-                <span class="text-sm text-secondary font-medium">"Level:"</span>
-                <ToolLevelFilterChips selected_level=selected_level />
+            // Level and Focus filters
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-secondary font-medium">"Level:"</span>
+                    <ToolLevelFilterChips selected_level=selected_level />
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-secondary font-medium">"Focus:"</span>
+                    <FocusFilterChips selected_focus=selected_focus />
+                </div>
             </div>
 
             // Tool sections

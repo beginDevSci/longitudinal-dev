@@ -210,6 +210,56 @@ fn matches_level(item: &ResourceItem, level: &str) -> bool {
     item.level.as_ref().map(|l| l.to_lowercase() == level.to_lowercase()).unwrap_or(false)
 }
 
+/// Check if a resource matches the selected topic tag
+fn matches_topic(item: &ResourceItem, topic: &str) -> bool {
+    if topic.is_empty() {
+        return true;
+    }
+    let topic_lower = topic.to_lowercase();
+    item.tags.iter().any(|t| t.to_lowercase().contains(&topic_lower))
+}
+
+/// Topic quick filter chips for common research areas
+#[island]
+pub fn TopicFilterChips(selected_topic: RwSignal<String>) -> impl IntoView {
+    let topics = vec![
+        ("", "All Topics"),
+        ("longitudinal", "Longitudinal"),
+        ("mixed models", "Mixed Models"),
+        ("sem", "SEM"),
+        ("tidyverse", "Tidyverse"),
+        ("visualization", "Visualization"),
+    ];
+
+    view! {
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by topic">
+            {topics.into_iter().map(|(value, label)| {
+                let value_for_check = value.to_string();
+                let value_for_click = value.to_string();
+                view! {
+                    <button
+                        class=move || {
+                            let base = "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200";
+                            let selected = selected_topic.get();
+                            let is_selected = selected == value_for_check;
+                            if is_selected {
+                                format!("{base} bg-accent text-white")
+                            } else {
+                                format!("{base} bg-surface border border-stroke text-secondary hover:border-accent hover:text-accent")
+                            }
+                        }
+                        on:click=move |_| {
+                            selected_topic.set(value_for_click.clone());
+                        }
+                    >
+                        {label}
+                    </button>
+                }
+            }).collect_view()}
+        </div>
+    }
+}
+
 /// Level filter chips island component
 #[island]
 pub fn LevelFilterChips(selected_level: RwSignal<String>) -> impl IntoView {
@@ -259,6 +309,7 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
     let search_query = RwSignal::new(String::new());
     let selected_categories = RwSignal::new(Vec::<ResourceCategory>::new());
     let selected_level = RwSignal::new(String::new());
+    let selected_topic = RwSignal::new(String::new());
 
     // Calculate category counts
     let category_counts: Vec<(ResourceCategory, usize)> = ResourceCategory::all()
@@ -277,10 +328,16 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
         let query = search_query.get();
         let categories = selected_categories.get();
         let level = selected_level.get();
+        let topic = selected_topic.get();
         resources_signal
             .get_value()
             .into_iter()
-            .filter(|r| matches_search(r, &query) && matches_category(r, &categories) && matches_level(r, &level))
+            .filter(|r| {
+                matches_search(r, &query)
+                    && matches_category(r, &categories)
+                    && matches_level(r, &level)
+                    && matches_topic(r, &topic)
+            })
             .collect::<Vec<_>>()
     });
 
@@ -324,10 +381,16 @@ pub fn ResourceCatalogIsland(resources: Vec<ResourceItem>) -> impl IntoView {
                 category_counts=category_counts
             />
 
-            // Level filter
-            <div class="flex items-center gap-3">
-                <span class="text-sm text-secondary font-medium">"Level:"</span>
-                <LevelFilterChips selected_level=selected_level />
+            // Level and Topic filters
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-secondary font-medium">"Level:"</span>
+                    <LevelFilterChips selected_level=selected_level />
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-secondary font-medium">"Topic:"</span>
+                    <TopicFilterChips selected_topic=selected_topic />
+                </div>
             </div>
 
             // Resource sections
