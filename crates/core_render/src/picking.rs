@@ -17,8 +17,10 @@ pub struct PendingPick {
     /// Screen coordinates where the pick was requested
     pub screen_x: f32,
     pub screen_y: f32,
-    /// Whether the buffer has been mapped (callback fired)
-    pub mapped: Arc<AtomicBool>,
+    /// Whether the buffer mapping callback has fired (success or failure)
+    pub callback_fired: Arc<AtomicBool>,
+    /// Whether the mapping was successful (only valid if callback_fired is true)
+    pub mapping_succeeded: Arc<AtomicBool>,
 }
 
 /// GPU picking system for determining which vertex was clicked.
@@ -129,6 +131,7 @@ impl PickingSystem {
     /// Render the picking pass to the offscreen texture.
     ///
     /// The `picking_bg` bind group should contain the surface_id uniform.
+    /// Set `clear` to true for the first surface, false for subsequent ones.
     pub fn render_pick_pass(
         &self,
         encoder: &mut wgpu::CommandEncoder,
@@ -137,9 +140,27 @@ impl PickingSystem {
         picking_bg: &wgpu::BindGroup,
         resources: &ResourceManager,
         surface_id: SurfaceId,
+        clear: bool,
     ) {
         let Some(bufs) = resources.get_surface(surface_id) else {
             return;
+        };
+
+        let color_load = if clear {
+            wgpu::LoadOp::Clear(wgpu::Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 0.0,
+            })
+        } else {
+            wgpu::LoadOp::Load
+        };
+
+        let depth_load = if clear {
+            wgpu::LoadOp::Clear(1.0)
+        } else {
+            wgpu::LoadOp::Load
         };
 
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -148,20 +169,14 @@ impl PickingSystem {
                 view: &self.view,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    // Clear to 0 (no vertex = vertex_id 0 with alpha 0)
-                    load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.0,
-                        g: 0.0,
-                        b: 0.0,
-                        a: 0.0,
-                    }),
+                    load: color_load,
                     store: wgpu::StoreOp::Store,
                 },
             })],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: &self.depth_view,
                 depth_ops: Some(wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(1.0),
+                    load: depth_load,
                     store: wgpu::StoreOp::Store,
                 }),
                 stencil_ops: None,
@@ -276,7 +291,8 @@ impl PickingSystem {
         self.pending = Some(PendingPick {
             screen_x: x as f32,
             screen_y: y as f32,
-            mapped: Arc::new(AtomicBool::new(false)),
+            callback_fired: Arc::new(AtomicBool::new(false)),
+            mapping_succeeded: Arc::new(AtomicBool::new(false)),
         });
 
         true
@@ -290,14 +306,17 @@ impl PickingSystem {
 
         let buffer_slice = self.readback_buffer.slice(..);
 
-        // Clone the Arc for the closure
-        let mapped = pending.mapped.clone();
+        // Clone the Arcs for the closure
+        let callback_fired = pending.callback_fired.clone();
+        let mapping_succeeded = pending.mapping_succeeded.clone();
 
         // Start async mapping (non-blocking)
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+            // Set success flag first, then signal callback fired
             if result.is_ok() {
-                mapped.store(true, Ordering::Release);
+                mapping_succeeded.store(true, Ordering::Release);
             }
+            callback_fired.store(true, Ordering::Release);
         });
     }
 
@@ -309,9 +328,16 @@ impl PickingSystem {
         // Non-blocking poll
         device.poll(wgpu::Maintain::Poll);
 
-        // Check if mapped
-        if !pending.mapped.load(Ordering::Acquire) {
+        // Check if callback has fired
+        if !pending.callback_fired.load(Ordering::Acquire) {
             return None; // Not ready yet
+        }
+
+        // Check if mapping succeeded
+        if !pending.mapping_succeeded.load(Ordering::Acquire) {
+            // Mapping failed - clear pending state and return None
+            self.pending = None;
+            return None;
         }
 
         // Read the result

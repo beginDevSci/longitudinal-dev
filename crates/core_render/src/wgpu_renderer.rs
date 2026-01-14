@@ -1072,7 +1072,7 @@ impl WgpuRenderer {
             });
 
         // Render pick pass for each surface with its transform
-        for (surf_id, transform) in surfaces {
+        for (i, (surf_id, transform)) in surfaces.into_iter().enumerate() {
             // Update camera uniform with this surface's transform
             self.update_camera_with_offset(transform.translation);
 
@@ -1092,7 +1092,7 @@ impl WgpuRenderer {
                 }],
             });
 
-            // Render pick pass for this surface
+            // Render pick pass for this surface (clear only on first surface)
             self.picking.render_pick_pass(
                 &mut encoder,
                 &self.pipelines,
@@ -1100,6 +1100,7 @@ impl WgpuRenderer {
                 &picking_bg,
                 &self.resources,
                 surf_id,
+                i == 0, // clear on first surface only
             );
         }
 
@@ -1134,7 +1135,7 @@ impl WgpuRenderer {
             label: Some("pick_encoder"),
         });
 
-        for (surf_id, transform) in surfaces {
+        for (i, (surf_id, transform)) in surfaces.into_iter().enumerate() {
             self.update_camera_with_offset(transform.translation);
 
             let surf_id_bytes = bytemuck::bytes_of(&surf_id);
@@ -1156,6 +1157,7 @@ impl WgpuRenderer {
                 &picking_bg,
                 &self.resources,
                 surf_id,
+                i == 0, // clear on first surface only
             );
         }
 
