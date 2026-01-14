@@ -454,16 +454,16 @@ fn ResourceSection(category: ResourceCategory, items: Vec<ResourceItem>, index: 
         ResourceCategory::Cheatsheets => "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
     };
 
-    // Alternating backgrounds: odd indices get bg-subtle
+    // Alternating backgrounds: odd indices get bg-subtle. Increased padding for better visual rhythm.
     let section_class = if index % 2 == 1 {
-        "py-12 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-subtle"
+        "py-14 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-subtle"
     } else {
-        "py-12"
+        "py-14"
     };
 
     view! {
         <section id=section_id class=section_class>
-            <div class="mb-6">
+            <div class="mb-8 pb-4 border-b border-stroke">
                 <h2 class="text-2xl font-bold text-primary mb-2">{section_title}</h2>
                 <p class="text-secondary">{description}</p>
             </div>
