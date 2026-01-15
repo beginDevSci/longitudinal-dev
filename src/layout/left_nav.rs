@@ -2,6 +2,20 @@ use crate::models::post::Post;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
+// Icon constants for statistical method families
+mod icons {
+    pub const LGCM: &str = "📈";   // Latent Growth Curve Model
+    pub const LCSM: &str = "📊";   // Latent Change Score Model
+    pub const LMM: &str = "🔀";    // Linear Mixed Model
+    pub const LM: &str = "📉";     // Linear Model
+    pub const GLMM: &str = "🔬";   // Generalized Linear Mixed Model
+    pub const GEE: &str = "🧮";    // Generalized Estimating Equations
+    pub const GMM: &str = "🎯";    // Growth Mixture Model
+    pub const LCGA: &str = "👥";   // Latent Class Growth Analysis
+    pub const MLGCM: &str = "🌐";  // Multivariate Latent Growth Curve Model
+    pub const DEFAULT: &str = "📄"; // Default icon
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NavItem {
     pub title: String,
@@ -132,23 +146,23 @@ fn determine_icon(slug: &str) -> String {
 
     // Match common statistical method patterns
     if slug_lower.contains("lgcm") || slug_lower.contains("growth-curve") {
-        "📈".to_string()
+        icons::LGCM.to_string()
     } else if slug_lower.contains("lmm") || slug_lower.contains("mixed") {
-        "🔀".to_string()
+        icons::LMM.to_string()
     } else if slug_lower.contains("glmm") || slug_lower.contains("generalized") {
-        "🔬".to_string()
+        icons::GLMM.to_string()
     } else if slug_lower.contains("gmm") || slug_lower.contains("mixture") {
-        "🎯".to_string()
+        icons::GMM.to_string()
     } else if slug_lower.contains("lcga") || slug_lower.contains("class") {
-        "👥".to_string()
+        icons::LCGA.to_string()
     } else if slug_lower.contains("lcsm") || slug_lower.contains("change-score") {
-        "📊".to_string()
+        icons::LCSM.to_string()
     } else if slug_lower.contains("mlgcm") || slug_lower.contains("multivariate") {
-        "🌐".to_string()
+        icons::MLGCM.to_string()
     } else if slug_lower.contains("residual") {
-        "📉".to_string()
+        icons::LM.to_string()
     } else {
-        "📄".to_string() // Default icon
+        icons::DEFAULT.to_string()
     }
 }
 
@@ -157,16 +171,16 @@ fn determine_icon(slug: &str) -> String {
 /// Maps method family abbreviations to appropriate icons
 fn get_family_icon(family: &str) -> String {
     match family {
-        "LGCM" => "📈".to_string(),  // Latent Growth Curve Model
-        "LCSM" => "📊".to_string(),  // Latent Change Score Model
-        "LMM" => "🔀".to_string(),   // Linear Mixed Model
-        "LM" => "📉".to_string(),    // Linear Model
-        "GLMM" => "🔬".to_string(),  // Generalized Linear Mixed Model
-        "GEE" => "🧮".to_string(),   // Generalized Estimating Equations
-        "GMM" => "🎯".to_string(),   // Growth Mixture Model
-        "LCGA" => "👥".to_string(),  // Latent Class Growth Analysis
-        "MLGCM" => "🌐".to_string(), // Multivariate Latent Growth Curve Model
-        _ => "📄".to_string(),       // Default icon
+        "LGCM" => icons::LGCM.to_string(),
+        "LCSM" => icons::LCSM.to_string(),
+        "LMM" => icons::LMM.to_string(),
+        "LM" => icons::LM.to_string(),
+        "GLMM" => icons::GLMM.to_string(),
+        "GEE" => icons::GEE.to_string(),
+        "GMM" => icons::GMM.to_string(),
+        "LCGA" => icons::LCGA.to_string(),
+        "MLGCM" => icons::MLGCM.to_string(),
+        _ => icons::DEFAULT.to_string(),
     }
 }
 

@@ -47,6 +47,14 @@ pub use section_container::SectionContainer;
 pub use theme_toggle::ThemeToggle;
 pub use work_in_progress_badge::WorkInProgressBadge;
 
+// Utility functions
+/// Convert a method family name to a URL-safe slug
+///
+/// Transforms "Linear Mixed Model" to "linear-mixed-model"
+pub fn method_family_to_slug(family: &str) -> String {
+    family.to_lowercase().replace(' ', "-")
+}
+
 /// The application root: render the fixed-layout post (legacy single-page mode)
 ///
 /// NOTE: This component now uses SiteLayout as the canonical wrapper.
