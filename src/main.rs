@@ -5,7 +5,7 @@ mod pages;
 use leptos::config::get_configuration;
 use leptos::prelude::*;
 use leptos::tachys::view::RenderHtml;
-use longitudinal_dev::base_path;
+use longitudinal_dev::{base_path, method_family_to_slug};
 use longitudinal_dev::guide_catalog::GroupedGuideCatalog;
 use longitudinal_dev::guides::{group_guides_by_method, guides};
 use longitudinal_dev::index_generator::{
@@ -30,7 +30,23 @@ use pages::toolkit::ToolkitPage;
 use pages::tools::{load_tools, ToolsPage};
 use sha2::{Digest, Sha256};
 use std::fs::{create_dir_all, read_to_string, write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+/// Write an HTML file to a directory, creating the directory if needed.
+fn write_html_page(dir: &Path, content: &str) -> Result<(), Box<dyn std::error::Error>> {
+    create_dir_all(dir)?;
+    write(dir.join("index.html"), content)?;
+    eprintln!("Wrote {}", dir.join("index.html").display());
+    Ok(())
+}
+
+/// Write an HTML file and log as a redirect.
+fn write_redirect_page(dir: &Path, content: &str) -> Result<(), Box<dyn std::error::Error>> {
+    create_dir_all(dir)?;
+    write(dir.join("index.html"), content)?;
+    eprintln!("Wrote redirect {}", dir.join("index.html").display());
+    Ok(())
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load Leptos options (cargo-leptos provides these during builds)
@@ -80,9 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     .to_html();
 
-    create_dir_all(site_root)?;
-    write(site_root.join("index.html"), index_html)?;
-    eprintln!("Wrote {}", site_root.join("index.html").display());
+    write_html_page(site_root, &index_html)?;
 
     // 2. Generate tutorial catalog page at /abcd/index.html
     // Filter out posts without metadata
@@ -259,9 +273,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let abcd_dir = site_root.join("abcd");
-    create_dir_all(&abcd_dir)?;
-    write(abcd_dir.join("index.html"), &tutorial_catalog_html)?;
-    eprintln!("Wrote {}", abcd_dir.join("index.html").display());
+    write_html_page(&abcd_dir, &tutorial_catalog_html)?;
 
     // 2b. Generate ABCD Overview page at /abcd/overview/index.html
     let abcd_overview_html = view! {
@@ -272,9 +284,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let abcd_overview_dir = abcd_dir.join("overview");
-    create_dir_all(&abcd_overview_dir)?;
-    write(abcd_overview_dir.join("index.html"), &abcd_overview_html)?;
-    eprintln!("Wrote {}", abcd_overview_dir.join("index.html").display());
+    write_html_page(&abcd_overview_dir, &abcd_overview_html)?;
 
     // 3. Generate About page at /about/index.html
     let about_html = view! {
@@ -285,9 +295,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let about_dir = site_root.join("about");
-    create_dir_all(&about_dir)?;
-    write(about_dir.join("index.html"), &about_html)?;
-    eprintln!("Wrote {}", about_dir.join("index.html").display());
+    write_html_page(&about_dir, &about_html)?;
 
     // 3b. Load toolkit data (used by hub page and sub-pages)
     let resources_data = load_resources();
@@ -306,9 +314,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let toolkit_dir = site_root.join("toolkit");
-    create_dir_all(&toolkit_dir)?;
-    write(toolkit_dir.join("index.html"), &toolkit_html)?;
-    eprintln!("Wrote {}", toolkit_dir.join("index.html").display());
+    write_html_page(&toolkit_dir, &toolkit_html)?;
 
     // 3d. Generate Resources page at /toolkit/learning/index.html
     let resources_html = view! {
@@ -319,9 +325,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let learning_dir = toolkit_dir.join("learning");
-    create_dir_all(&learning_dir)?;
-    write(learning_dir.join("index.html"), &resources_html)?;
-    eprintln!("Wrote {}", learning_dir.join("index.html").display());
+    write_html_page(&learning_dir, &resources_html)?;
 
     // 3e. Generate Tools page at /toolkit/software/index.html
     let tools_html = view! {
@@ -332,14 +336,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let software_dir = toolkit_dir.join("software");
-    create_dir_all(&software_dir)?;
-    write(software_dir.join("index.html"), &tools_html)?;
-    eprintln!("Wrote {}", software_dir.join("index.html").display());
+    write_html_page(&software_dir, &tools_html)?;
 
     // 4. Generate one page per tutorial at /abcd/<family>/<slug>/index.html
     // Also generate redirect pages at /posts/<slug>/index.html for backward compatibility
     let posts_dir = site_root.join("posts");
-    create_dir_all(&posts_dir)?;
     for post in all_posts.into_iter() {
         let slug = post.slug.to_string();
 
@@ -347,7 +348,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let method_family = post
             .metadata
             .as_ref()
-            .map(|m| m.method_family.to_lowercase().replace(' ', "-"))
+            .map(|m| method_family_to_slug(&m.method_family))
             .unwrap_or_else(|| "other".to_string());
 
         // Read the original markdown file for prefill
@@ -395,9 +396,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Write tutorial to new canonical URL: /abcd/<family>/<slug>/
         let tutorial_dir = abcd_dir.join(&method_family).join(&slug);
-        create_dir_all(&tutorial_dir)?;
-        write(tutorial_dir.join("index.html"), &html)?;
-        eprintln!("Wrote {}", tutorial_dir.join("index.html").display());
+        write_html_page(&tutorial_dir, &html)?;
 
         // Generate redirect page at old URL: /posts/<slug>/
         // (canonical_url already computed above)
@@ -418,9 +417,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         let redirect_dir = posts_dir.join(&slug);
-        create_dir_all(&redirect_dir)?;
-        write(redirect_dir.join("index.html"), redirect_html)?;
-        eprintln!("Wrote redirect {}", redirect_dir.join("index.html").display());
+        write_redirect_page(&redirect_dir, &redirect_html)?;
     }
 
     // 5. Generate Writer page at /writer/index.html
@@ -432,9 +429,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let writer_dir = site_root.join("writer");
-    create_dir_all(&writer_dir)?;
-    write(writer_dir.join("index.html"), &writer_html)?;
-    eprintln!("Wrote {}", writer_dir.join("index.html").display());
+    write_html_page(&writer_dir, &writer_html)?;
 
     // 6. Generate Method Guides catalog page at /guides/index.html
     let all_guides = guides();
@@ -520,9 +515,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .to_html();
 
     let guides_dir = site_root.join("guides");
-    create_dir_all(&guides_dir)?;
-    write(guides_dir.join("index.html"), &guides_catalog_html)?;
-    eprintln!("Wrote {}", guides_dir.join("index.html").display());
+    write_html_page(&guides_dir, &guides_catalog_html)?;
 
     // 7. Generate one page per guide at /guides/<slug>/index.html
     for guide in all_guides.into_iter() {
@@ -536,9 +529,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_html();
 
         let guide_dir = site_root.join("guides").join(&slug);
-        create_dir_all(&guide_dir)?;
-        write(guide_dir.join("index.html"), html)?;
-        eprintln!("Wrote {}", guide_dir.join("index.html").display());
+        write_html_page(&guide_dir, &html)?;
     }
 
     eprintln!("\n✅ Generated {post_count} posts + {guide_count} guides + home + tutorials + about + writer");

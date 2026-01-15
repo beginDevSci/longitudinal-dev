@@ -6,6 +6,12 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+# Main SSG binary (requires SSR features for index generation and rendering)
+[[bin]]
+name = "longitudinal_dev"
+path = "src/main.rs"
+required-features = ["ssr"]
+
 [[bin]]
 name = "validate-json"
 path = "src/bin/validate-json.rs"
@@ -112,7 +118,7 @@ once_cell = "1.19"
 walkdir = "2"
 blake3 = "1"
 tempfile = "3"
-uuid = { version = "=1.18.1", features = ["v4"] }
+uuid = { version = "=1.18.1", features = ["v4", "serde", "js"] }
 
 [features]
 default = []

@@ -2095,7 +2095,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
- "thiserror 2.0.17",
+ "thiserror 1.0.69",
  "uuid",
  "wasm-bindgen",
  "web-sys",

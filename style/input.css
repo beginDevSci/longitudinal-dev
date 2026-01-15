@@ -709,6 +709,16 @@ body {
     }
   }
 
+  /* Featured/recommended card highlight */
+  .resource-card-featured {
+    border-color: var(--color-accent);
+    border-width: 2px;
+  }
+
+  .resource-card-featured:hover {
+    border-color: var(--color-accent);
+  }
+
   /* ========================================
      COVER FRAME - Book cover treatment
      Reduces visual dominance of varied cover images
@@ -775,6 +785,7 @@ body {
   .logo-tile img {
     max-height: 6rem;    /* 96px - larger logos for better visibility */
     max-width: 12rem;    /* 192px */
+    min-height: 4.5rem;  /* 72px - scale up small logos */
     width: auto;
     height: auto;
     object-fit: contain;

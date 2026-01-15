@@ -9,7 +9,7 @@ fn is_active_path(current: &Option<String>, path_prefix: &str) -> bool {
         Some(current_path) => {
             if path_prefix == "/" {
                 // Home is only active on exact match
-                current_path == "/" || current_path == ""
+                current_path == "/" || current_path.is_empty()
             } else {
                 // Other paths match by prefix
                 current_path.starts_with(path_prefix)

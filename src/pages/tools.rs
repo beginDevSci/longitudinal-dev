@@ -1,7 +1,7 @@
 //! Open Source Tools page component.
 //!
 //! Displays tools for data science: programming languages, IDEs, version control,
-//! data formats, notebooks, and databases.
+//! data formats, notebooks, databases, and R packages.
 //! Data is loaded from content/tools.yaml at build time.
 
 use leptos::prelude::*;
@@ -17,6 +17,14 @@ pub struct Tool {
     pub blurb: String,
     #[serde(default)]
     pub logo: Option<String>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default)]
+    pub is_open_source: Option<bool>,
+    #[serde(default)]
+    pub is_featured: Option<bool>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 /// Container for all tools loaded from YAML.
@@ -48,6 +56,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::ProgrammingLanguages,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -59,6 +71,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::IDEs,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -70,6 +86,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::VersionControl,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -81,6 +101,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::DataFormats,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -92,6 +116,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::Notebooks,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -103,6 +131,10 @@ pub fn tools_to_items(tools: &Tools) -> Vec<ToolItem> {
             url: tool.url.clone(),
             category: ToolCategory::Databases,
             logo: tool.logo.clone(),
+            level: tool.level.clone(),
+            is_open_source: tool.is_open_source,
+            is_featured: tool.is_featured,
+            tags: tool.tags.clone(),
         });
     }
 
@@ -119,7 +151,7 @@ pub fn ToolsPage(tools: Tools) -> impl IntoView {
         <main class="min-h-screen bg-surface">
             // Header
             <section class="relative overflow-hidden bg-subtle">
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
                     <a
                         href=toolkit_href
                         class="inline-flex items-center gap-1 text-sm text-secondary hover:text-accent transition-colors mb-4"
@@ -129,8 +161,25 @@ pub fn ToolsPage(tools: Tools) -> impl IntoView {
                     </a>
                     <h1 class="text-4xl md:text-5xl font-bold text-primary">"Open Source Tools"</h1>
                     <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
-                        "Tools for data science research: programming languages, development environments, version control, and more."
+                        "Tools for longitudinal data analysis and reproducible research: programming languages, R packages, development environments, and more."
                     </p>
+                    <p class="mt-2 text-sm text-tertiary">
+                        "All tools marked with "
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            "Open Source"
+                        </span>
+                        " are free to use."
+                    </p>
+                    <div class="mt-4 p-3 rounded-lg bg-surface border border-stroke">
+                        <p class="text-sm text-secondary">
+                            <span class="font-medium text-primary">"Tip: "</span>
+                            "Filter by category, level, or focus area. Items marked "
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                "★"
+                            </span>
+                            " are particularly good for longitudinal analysis."
+                        </p>
+                    </div>
                 </div>
             </section>
 

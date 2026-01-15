@@ -599,7 +599,7 @@ mod tests {
         let s = "The formula $E = mc^2$ is famous.";
         let result = find_next_math(s);
         assert!(result.is_some());
-        let (start, end, is_display, expr) = result.unwrap();
+        let (start, _end, is_display, expr) = result.unwrap();
         assert_eq!(start, 12); // position of $
         assert_eq!(expr, "E = mc^2");
         assert!(!is_display);

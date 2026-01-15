@@ -1,158 +1,338 @@
 # Open Source Tools for Data Science
-# Enhanced with logo images from Nuxt prototype
+# Curated tools for longitudinal data analysis and reproducible research workflows
+
+# =============================================================================
+# PROGRAMMING LANGUAGES
+# =============================================================================
 
 programming_languages:
-  - title: "Python"
-    url: "https://www.python.org/"
-    blurb: "General-purpose programming language widely used for data analysis, machine learning, and scientific computing."
-    logo: "/images/logos/python-logo.svg"
-
   - title: "R"
     url: "https://www.r-project.org/"
-    blurb: "Statistical computing language with extensive packages for data analysis and visualization."
+    blurb: "The lingua franca of statistical computing. Extensive ecosystem for longitudinal analysis, SEM, and mixed models."
     logo: "/images/logos/r-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["statistics", "data analysis", "visualization"]
+
+  - title: "Python"
+    url: "https://www.python.org/"
+    blurb: "General-purpose language with strong data science libraries. Excellent for machine learning and automation."
+    logo: "/images/logos/python-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["general purpose", "machine learning", "automation"]
 
   - title: "Julia"
     url: "https://julialang.org/"
-    blurb: "High-performance language for technical computing, combining ease of use with speed."
+    blurb: "High-performance language combining ease of use with C-like speed. Growing ecosystem for scientific computing."
     logo: "/images/logos/julia-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["performance", "scientific computing"]
 
   - title: "SQL"
-    url: "https://www.mysql.com/"
-    blurb: "Standard language for managing and querying relational databases."
+    url: "https://en.wikipedia.org/wiki/SQL"
+    blurb: "Standard language for querying and managing relational databases. Essential for working with large datasets."
     logo: "/images/logos/sql-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["databases", "querying"]
 
   - title: "C++"
     url: "https://isocpp.org/"
-    blurb: "High-performance language often used for computationally intensive algorithms and system-level programming."
+    blurb: "High-performance language for computationally intensive algorithms. Often used via Rcpp for R package development."
     logo: "/images/logos/cpp-logo.svg"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["performance", "systems programming"]
+
+# =============================================================================
+# DEVELOPMENT ENVIRONMENTS
+# =============================================================================
 
 ides:
+  - title: "RStudio"
+    url: "https://posit.co/products/open-source/rstudio/"
+    blurb: "The premier IDE for R. Integrated console, editor, plots, and package management in one interface."
+    logo: "/images/logos/rstudiologo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["R", "IDE", "integrated"]
+
   - title: "VS Code"
     url: "https://code.visualstudio.com/"
-    blurb: "Lightweight, extensible code editor with support for multiple languages and integrated terminal."
+    blurb: "Lightweight, extensible editor with excellent R and Python support via extensions."
     logo: "/images/logos/vscodelogo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["multi-language", "extensible", "lightweight"]
 
-  - title: "RStudio"
-    url: "https://www.rstudio.com/"
-    blurb: "Integrated development environment designed specifically for R programming and data science."
-    logo: "/images/logos/rstudiologo.svg"
+  - title: "Positron"
+    url: "https://github.com/posit-dev/positron"
+    blurb: "Next-generation data science IDE from Posit. Built on VS Code with native R and Python support."
+    logo: "/images/logos/positron-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["R", "Python", "modern"]
 
   - title: "Neovim"
     url: "https://neovim.io/"
-    blurb: "Highly configurable text editor built for efficient coding with extensible plugin architecture."
+    blurb: "Highly configurable text editor for power users. Extensible with LSP support for R and Python."
     logo: "/images/logos/neovimlogo.svg"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["terminal", "extensible", "power users"]
 
-  - title: "Conda"
-    url: "https://docs.conda.io/"
-    blurb: "Package and environment manager for Python and R, simplifying dependency management."
-    logo: "/images/logos/condalogo.svg"
-
-  - title: "Emacs"
-    url: "https://www.gnu.org/software/emacs/"
-    blurb: "Extensible, customizable text editor with powerful support for programming and literate computing."
+  - title: "Emacs + ESS"
+    url: "https://ess.r-project.org/"
+    blurb: "Emacs Speaks Statistics. Powerful environment for statistical programming with deep R integration."
     logo: "/images/logos/emacslogo.svg"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["terminal", "statistics", "power users"]
 
   - title: "Zed"
     url: "https://zed.dev/"
-    blurb: "Modern, high-performance code editor built for collaborative development."
+    blurb: "Modern, high-performance code editor built for speed and collaboration."
     logo: "/images/logos/zed-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["modern", "fast", "collaboration"]
+
+# =============================================================================
+# VERSION CONTROL & REPRODUCIBILITY
+# =============================================================================
 
 version_control:
   - title: "Git"
     url: "https://git-scm.com/"
-    blurb: "Distributed version control system for tracking changes and collaborating on code."
+    blurb: "Distributed version control for tracking changes and collaborating on code. The foundation of modern development."
     logo: "/images/logos/git-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["version control", "collaboration", "essential"]
 
   - title: "GitHub"
     url: "https://github.com/"
-    blurb: "Web-based platform for hosting Git repositories with collaboration and CI/CD features."
+    blurb: "Web platform for Git repositories. Collaboration, CI/CD, and the home of open-source R packages."
     logo: "/images/logos/github-logo.png"
+    level: "beginner"
+    is_open_source: false
+    is_featured: true
+    tags: ["hosting", "collaboration", "CI/CD"]
 
   - title: "GitLab"
     url: "https://about.gitlab.com/"
-    blurb: "DevOps platform providing Git repository management, CI/CD, and project planning."
+    blurb: "DevOps platform with Git hosting, CI/CD pipelines, and project management. Self-hostable option available."
     logo: "/images/logos/gitlab_logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["DevOps", "self-hosted", "CI/CD"]
 
-  - title: "GitKraken"
-    url: "https://www.gitkraken.com/"
-    blurb: "Visual Git client with intuitive interface for managing repositories and branches."
-    logo: "/images/logos/gitkraken-logo.svg"
+  - title: "renv"
+    url: "https://rstudio.github.io/renv/"
+    blurb: "Project-local R package environments. Lock package versions to ensure analyses reproduce exactly."
+    logo: "/images/logos/renv-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["reproducibility", "R", "environments"]
 
-  - title: "Gitea"
-    url: "https://gitea.io/en-us/"
-    blurb: "Lightweight, self-hosted Git service for teams preferring on-premises solutions."
-    logo: "/images/logos/gitea-logo.svg"
+  - title: "targets"
+    url: "https://docs.ropensci.org/targets/"
+    blurb: "Pipeline toolkit for R. Define analysis workflows as DAGs, skip up-to-date steps, and scale to clusters."
+    logo: "/images/logos/targets-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["reproducibility", "pipelines", "workflows"]
+
+  - title: "Docker"
+    url: "https://www.docker.com/"
+    blurb: "Containerization platform. Package your entire analysis environment for perfect reproducibility."
+    logo: "/images/logos/docker-logo.png"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["containers", "reproducibility", "deployment"]
+
+  - title: "groundhog"
+    url: "https://groundhogr.com/"
+    blurb: "Load R packages as they existed on a specific date. Simple approach to version control for packages."
+    logo: "/images/logos/r-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["reproducibility", "R", "simple"]
+
+# =============================================================================
+# DATA FORMATS
+# =============================================================================
 
 data_formats:
-  - title: "Markdown"
-    url: "https://www.markdownguide.org/"
-    blurb: "Lightweight markup language for creating formatted text using plain-text syntax."
-    logo: "/images/logos/markdown-logo.png"
-
   - title: "CSV"
     url: "https://en.wikipedia.org/wiki/Comma-separated_values"
-    blurb: "Simple, widely-supported format for storing tabular data as plain text."
+    blurb: "Simple, universal format for tabular data. Human-readable and supported everywhere."
     logo: "/images/logos/csv-logo.jpeg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["tabular", "universal", "simple"]
 
   - title: "Apache Parquet"
     url: "https://parquet.apache.org/"
-    blurb: "Columnar storage format optimized for efficient data processing and analytics."
+    blurb: "Columnar storage format optimized for analytics. Fast reads, efficient compression, and type safety."
     logo: "/images/logos/parquet-logo.svg"
-
-  - title: "JSON"
-    url: "https://www.json.org/"
-    blurb: "Lightweight data interchange format that is easy to read and write."
-    logo: "/images/logos/json-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["columnar", "analytics", "efficient"]
 
   - title: "Apache Arrow"
     url: "https://arrow.apache.org/"
-    blurb: "Cross-language development platform for in-memory analytics with columnar data."
+    blurb: "Cross-language development platform for in-memory analytics. Zero-copy data sharing between R and Python."
     logo: "/images/logos/arrow-logo.png"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["interoperability", "performance", "in-memory"]
+
+  - title: "JSON"
+    url: "https://www.json.org/"
+    blurb: "Lightweight data interchange format. Standard for APIs and nested/hierarchical data."
+    logo: "/images/logos/json-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["APIs", "nested data", "web"]
+
+  - title: "Markdown"
+    url: "https://www.markdownguide.org/"
+    blurb: "Lightweight markup for formatted text. The foundation of R Markdown, Quarto, and documentation."
+    logo: "/images/logos/markdown-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["documentation", "text", "simple"]
 
   - title: "XML"
     url: "https://en.wikipedia.org/wiki/XML"
-    blurb: "Markup language for encoding documents in a format readable by both humans and machines."
+    blurb: "Extensible markup language for structured documents. Common in legacy systems and some data standards."
     logo: "/images/logos/xml-logo.webp"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["structured", "legacy", "standards"]
+
+# =============================================================================
+# NOTEBOOKS & LITERATE PROGRAMMING
+# =============================================================================
 
 notebooks:
   - title: "Quarto"
     url: "https://quarto.org/"
-    blurb: "Open-source publishing system for creating reproducible documents, presentations, and websites."
+    blurb: "Next-generation scientific publishing. Create reproducible documents, slides, websites, and books from R, Python, or Julia."
     logo: "/images/logos/quarto-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["publishing", "reproducibility", "multi-language"]
 
   - title: "Jupyter"
     url: "https://jupyter.org/"
-    blurb: "Interactive computing environment for creating notebooks with code, visualizations, and narrative."
+    blurb: "Interactive notebooks for code, visualizations, and narrative. Supports R via IRkernel."
     logo: "/images/logos/jupyter-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: true
+    tags: ["interactive", "notebooks", "multi-language"]
+
+  - title: "R Markdown"
+    url: "https://rmarkdown.rstudio.com/"
+    blurb: "Combine R code with narrative in reproducible documents. The predecessor to Quarto, still widely used."
+    logo: "/images/logos/rmarkdown-logo.png"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["reproducibility", "R", "documents"]
 
   - title: "Observable"
     url: "https://observablehq.com/"
-    blurb: "Collaborative platform for creating interactive data visualizations and exploratory analysis."
+    blurb: "Collaborative platform for interactive data visualization using JavaScript. Great for sharing insights."
     logo: "/images/logos/observable-logo.webp"
+    level: "intermediate"
+    is_open_source: false
+    is_featured: false
+    tags: ["interactive", "JavaScript", "visualization"]
+
+# =============================================================================
+# DATABASES
+# =============================================================================
 
 databases:
+  - title: "DuckDB"
+    url: "https://duckdb.org/"
+    blurb: "In-process analytical database. Query local files (CSV, Parquet) with SQL. Perfect for R data workflows."
+    logo: "/images/logos/duckdb-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: true
+    tags: ["analytics", "SQL", "local"]
+
   - title: "PostgreSQL"
     url: "https://www.postgresql.org/"
-    blurb: "Powerful open-source relational database with extensive features and reliability."
+    blurb: "Powerful open-source relational database. Excellent for storing and querying research data."
     logo: "/images/logos/postgresql-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["relational", "enterprise", "robust"]
+
+  - title: "SQLite"
+    url: "https://www.sqlite.org/"
+    blurb: "Serverless, file-based SQL database. Zero configuration, perfect for single-user research projects."
+    logo: "/images/logos/sqlite-logo.svg"
+    level: "beginner"
+    is_open_source: true
+    is_featured: false
+    tags: ["simple", "file-based", "portable"]
 
   - title: "MySQL"
     url: "https://www.mysql.com/"
-    blurb: "Popular open-source relational database known for speed and ease of use."
+    blurb: "Popular open-source relational database known for speed and reliability."
     logo: "/images/logos/mysql-logo.svg"
-
-  - title: "DuckDB"
-    url: "https://duckdb.org/"
-    blurb: "In-process analytical database designed for fast queries on local data files."
-    logo: "/images/logos/duckdb-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["relational", "popular", "web"]
 
   - title: "MongoDB"
     url: "https://www.mongodb.com/"
-    blurb: "Document-oriented NoSQL database for flexible, scalable data storage."
+    blurb: "Document-oriented NoSQL database for flexible, schema-less data storage."
     logo: "/images/logos/mongodb-logo.svg"
+    level: "intermediate"
+    is_open_source: true
+    is_featured: false
+    tags: ["NoSQL", "documents", "flexible"]
 
   - title: "Redis"
     url: "https://redis.io/"
-    blurb: "In-memory data store used for caching, real-time analytics, and message queuing."
+    blurb: "In-memory data store for caching, real-time analytics, and message queuing."
     logo: "/images/logos/redis-logo.svg"
+    level: "advanced"
+    is_open_source: true
+    is_featured: false
+    tags: ["caching", "in-memory", "real-time"]
