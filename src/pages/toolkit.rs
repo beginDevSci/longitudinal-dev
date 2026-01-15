@@ -12,6 +12,20 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
     let learning_href = base_path::join("toolkit/learning/");
     let software_href = base_path::join("toolkit/software/");
 
+    // Category-specific anchor links for Learning Resources
+    let books_href = format!("{}#books", base_path::join("toolkit/learning/"));
+    let videos_href = format!("{}#videos", base_path::join("toolkit/learning/"));
+    let tutorials_href = format!("{}#tutorials", base_path::join("toolkit/learning/"));
+    let cheatsheets_href = format!("{}#cheatsheets", base_path::join("toolkit/learning/"));
+
+    // Category-specific anchor links for Software & Tools
+    let languages_href = format!("{}#languages", base_path::join("toolkit/software/"));
+    let ides_href = format!("{}#ides", base_path::join("toolkit/software/"));
+    let vc_href = format!("{}#version-control", base_path::join("toolkit/software/"));
+    let formats_href = format!("{}#data-formats", base_path::join("toolkit/software/"));
+    let notebooks_href = format!("{}#notebooks", base_path::join("toolkit/software/"));
+    let databases_href = format!("{}#databases", base_path::join("toolkit/software/"));
+
     // Compute stats
     let book_count = resources.books.len();
     let video_count = resources.videos.len();
@@ -29,7 +43,10 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
     // Featured items for Getting Started section
     let featured_book = resources.books.first().cloned();
-    let featured_tutorial = resources.tutorials.first().cloned();
+    let featured_tutorial = resources.tutorials.iter()
+        .find(|t| t.title.contains("CS50"))
+        .cloned()
+        .or_else(|| resources.tutorials.first().cloned());
     let featured_cheatsheet = resources.cheatsheets.first().cloned();
     let featured_ide = tools.ides.iter().find(|t| t.title == "RStudio").cloned()
         .or_else(|| tools.ides.first().cloned());
@@ -53,6 +70,21 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
     let notebook_logos: Vec<_> = tools.notebooks.iter()
         .filter_map(|t| t.logo.clone())
         .take(2)
+        .collect();
+
+    let vc_logos: Vec<_> = tools.version_control.iter()
+        .filter_map(|t| t.logo.clone())
+        .take(3)
+        .collect();
+
+    let format_logos: Vec<_> = tools.data_formats.iter()
+        .filter_map(|t| t.logo.clone())
+        .take(4)
+        .collect();
+
+    let db_logos: Vec<_> = tools.databases.iter()
+        .filter_map(|t| t.logo.clone())
+        .take(3)
         .collect();
 
     view! {
@@ -173,6 +205,8 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
                         // Featured Cheatsheet - Base R
                         {featured_cheatsheet.map(|cs| {
+                            let image_url = cs.image.clone().unwrap_or_default();
+                            let has_image = !image_url.is_empty();
                             view! {
                                 <a
                                     href=cs.url.clone()
@@ -185,9 +219,24 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                             "Cheatsheet"
                                         </span>
                                     </div>
-                                    <div class="aspect-[3/2] mb-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
-                                        <span class="text-4xl">"📄"</span>
-                                    </div>
+                                    {if has_image {
+                                        view! {
+                                            <div class="aspect-[3/2] mb-3 rounded-lg overflow-hidden bg-subtle">
+                                                <img
+                                                    src=image_url
+                                                    alt=cs.title.clone()
+                                                    class="w-full h-full object-contain"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        }.into_any()
+                                    } else {
+                                        view! {
+                                            <div class="aspect-[3/2] mb-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                                                <span class="text-4xl">"📄"</span>
+                                            </div>
+                                        }.into_any()
+                                    }}
                                     <h3 class="font-semibold text-primary group-hover:text-accent transition-colors">
                                         {cs.title}
                                     </h3>
@@ -245,7 +294,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     // Books category
                     <a
-                        href=learning_href.clone()
+                        href=books_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -272,7 +321,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
                     // Videos category
                     <a
-                        href=learning_href.clone()
+                        href=videos_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -282,14 +331,19 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{video_count}" courses"</p>
                             </div>
                         </div>
-                        <div class="h-16 rounded-lg bg-gradient-to-br from-red-500/10 to-red-500/5 flex items-center justify-center">
-                            <span class="text-3xl opacity-60">"▶️"</span>
+                        <div class="flex gap-3 h-12 items-center justify-center">
+                            <img
+                                src="/images/logos/youtube-logo.svg"
+                                alt="YouTube"
+                                class="h-10 w-auto object-contain"
+                                loading="lazy"
+                            />
                         </div>
                     </a>
 
                     // Tutorials category
                     <a
-                        href=learning_href.clone()
+                        href=tutorials_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -299,14 +353,31 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{tutorial_count}" interactive"</p>
                             </div>
                         </div>
-                        <div class="h-16 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center">
-                            <span class="text-3xl opacity-60">"🎓"</span>
+                        <div class="flex gap-3 h-12 items-center justify-center">
+                            <img
+                                src="/images/logos/swirl-logo.png"
+                                alt="swirl"
+                                class="h-10 w-auto object-contain"
+                                loading="lazy"
+                            />
+                            <img
+                                src="/images/logos/harvard-logo.svg"
+                                alt="Harvard"
+                                class="h-10 w-auto object-contain"
+                                loading="lazy"
+                            />
+                            <img
+                                src="/images/logos/github-logo.png"
+                                alt="GitHub"
+                                class="h-10 w-auto object-contain"
+                                loading="lazy"
+                            />
                         </div>
                     </a>
 
                     // Cheatsheets category
                     <a
-                        href=learning_href.clone()
+                        href=cheatsheets_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -316,8 +387,25 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{cheatsheet_count}" references"</p>
                             </div>
                         </div>
-                        <div class="h-16 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 flex items-center justify-center">
-                            <span class="text-3xl opacity-60">"📋"</span>
+                        <div class="flex gap-1 h-16 overflow-hidden rounded-lg">
+                            <img
+                                src="/images/cheatsheets/base-r-thumb.png"
+                                alt="Base R cheatsheet"
+                                class="h-full w-auto object-contain rounded"
+                                loading="lazy"
+                            />
+                            <img
+                                src="/images/cheatsheets/dplyr-thumb.png"
+                                alt="dplyr cheatsheet"
+                                class="h-full w-auto object-contain rounded"
+                                loading="lazy"
+                            />
+                            <img
+                                src="/images/cheatsheets/ggplot2-thumb.png"
+                                alt="ggplot2 cheatsheet"
+                                class="h-full w-auto object-contain rounded"
+                                loading="lazy"
+                            />
                         </div>
                     </a>
                 </div>
@@ -349,7 +437,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     // Languages category
                     <a
-                        href=software_href.clone()
+                        href=languages_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -375,7 +463,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
                     // IDEs category
                     <a
-                        href=software_href.clone()
+                        href=ides_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -401,7 +489,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
                     // Version Control category
                     <a
-                        href=software_href.clone()
+                        href=vc_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -411,14 +499,23 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{vc_count}" tools"</p>
                             </div>
                         </div>
-                        <div class="h-12 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-500/5 flex items-center justify-center">
-                            <span class="text-2xl opacity-60">"Git • GitHub • GitLab"</span>
+                        <div class="flex gap-3 h-12 items-center justify-center">
+                            {vc_logos.into_iter().map(|logo| {
+                                view! {
+                                    <img
+                                        src=logo
+                                        alt="Version control logo"
+                                        class="h-10 w-auto object-contain"
+                                        loading="lazy"
+                                    />
+                                }
+                            }).collect_view()}
                         </div>
                     </a>
 
                     // Data Formats category
                     <a
-                        href=software_href.clone()
+                        href=formats_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -428,14 +525,23 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{format_count}" formats"</p>
                             </div>
                         </div>
-                        <div class="h-12 rounded-lg bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 flex items-center justify-center">
-                            <span class="text-sm text-secondary opacity-80">"CSV • JSON • Parquet • Arrow"</span>
+                        <div class="flex gap-2 h-12 items-center justify-center overflow-hidden">
+                            {format_logos.into_iter().map(|logo| {
+                                view! {
+                                    <img
+                                        src=logo
+                                        alt="Data format logo"
+                                        class="h-8 max-w-[3.5rem] object-contain"
+                                        loading="lazy"
+                                    />
+                                }
+                            }).collect_view()}
                         </div>
                     </a>
 
                     // Notebooks category
                     <a
-                        href=software_href.clone()
+                        href=notebooks_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -461,7 +567,7 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
                     // Databases category
                     <a
-                        href=software_href.clone()
+                        href=databases_href
                         class="group block p-5 rounded-xl bg-subtle border border-default hover:border-accent/50 transition-all hover:shadow-md"
                     >
                         <div class="flex items-center gap-3 mb-3">
@@ -471,8 +577,17 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
                                 <p class="text-sm text-tertiary">{db_count}" systems"</p>
                             </div>
                         </div>
-                        <div class="h-12 rounded-lg bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 flex items-center justify-center">
-                            <span class="text-sm text-secondary opacity-80">"PostgreSQL • DuckDB • Redis"</span>
+                        <div class="flex gap-3 h-12 items-center justify-center">
+                            {db_logos.into_iter().map(|logo| {
+                                view! {
+                                    <img
+                                        src=logo
+                                        alt="Database logo"
+                                        class="h-10 w-auto object-contain"
+                                        loading="lazy"
+                                    />
+                                }
+                            }).collect_view()}
                         </div>
                     </a>
                 </div>

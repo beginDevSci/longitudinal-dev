@@ -572,11 +572,9 @@ fn BookCardInner(item: ResourceItem) -> impl IntoView {
     let has_image = item.image.is_some();
     // Apply base_path to image URLs that start with /
     let image_url = item.image.clone().map(|url| {
-        if url.starts_with('/') {
-            base_path::join(&url[1..])
-        } else {
-            url
-        }
+        url.strip_prefix('/')
+            .map(base_path::join)
+            .unwrap_or(url)
     }).unwrap_or_default();
     let author = item.author.clone().unwrap_or_default();
     let is_featured = item.is_featured == Some(true);
@@ -747,29 +745,24 @@ fn TutorialCardInner(item: ResourceItem) -> impl IntoView {
     }
 }
 
-/// Get icon SVG path for cheatsheet based on icon type.
-fn get_cheatsheet_icon_path(icon: &str) -> &'static str {
-    match icon {
-        "chart" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>"#,
-        "wrench" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.276 3.276a3.004 3.004 0 0 0 2.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852Z"/>"#,
-        "graph" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/>"#,
-        "document" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>"#,
-        "sparkles" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>"#,
-        "text" => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>"#,
-        _ => r#"<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>"#,
-    }
-}
-
 #[component]
 fn CheatsheetCardInner(item: ResourceItem) -> impl IntoView {
     let format_badge = item.format.clone().map(|f| f.to_uppercase());
-    let icon_path = get_cheatsheet_icon_path(&item.icon.clone().unwrap_or_default());
     let is_featured = item.is_featured == Some(true);
     let card_class = if is_featured {
-        "resource-card resource-card-featured group block p-6"
+        "resource-card resource-card-featured group block"
     } else {
-        "resource-card group block p-6"
+        "resource-card group block"
     };
+
+    // Apply base_path to image URLs that start with /
+    let image_url = item.image.clone().map(|url| {
+        url.strip_prefix('/')
+            .map(base_path::join)
+            .unwrap_or(url)
+    });
+    let has_image = image_url.is_some();
+    let image_src = image_url.unwrap_or_default();
 
     view! {
         <a
@@ -778,33 +771,51 @@ fn CheatsheetCardInner(item: ResourceItem) -> impl IntoView {
             rel="noopener noreferrer"
             class=card_class
         >
-            <ResourceBadges
-                level=item.level.clone().unwrap_or_default()
-                is_open_source=item.is_open_source.unwrap_or(false)
-                is_featured=item.is_featured.unwrap_or(false)
-            />
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" inner_html=icon_path />
-            </div>
-
-            <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-2">
-                {item.title}
-            </h3>
-            <p class="text-sm text-secondary line-clamp-3 mb-4">{item.description}</p>
-
-            <div class="flex items-center justify-between">
-                {if let Some(badge) = format_badge {
+            // PDF preview thumbnail
+            <div class="aspect-[4/3] w-full overflow-hidden rounded-t-lg bg-slate-100 dark:bg-slate-800">
+                {if has_image {
                     view! {
-                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-accent/10 text-accent">
-                            {badge}
-                        </span>
+                        <img
+                            src=image_src
+                            alt=item.title.clone()
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                        />
                     }.into_any()
                 } else {
-                    view! { <span></span> }.into_any()
+                    view! {
+                        <div class="w-full h-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                            <span class="text-6xl opacity-50">"📄"</span>
+                        </div>
+                    }.into_any()
                 }}
-                <svg class="w-5 h-5 text-tertiary group-hover:text-accent group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                </svg>
+            </div>
+
+            <div class="p-4">
+                <ResourceBadges
+                    level=item.level.clone().unwrap_or_default()
+                    is_open_source=item.is_open_source.unwrap_or(false)
+                    is_featured=item.is_featured.unwrap_or(false)
+                />
+                <h3 class="font-semibold text-primary group-hover:text-accent transition-colors mb-2">
+                    {item.title}
+                </h3>
+                <p class="text-sm text-secondary line-clamp-2 mb-3">{item.description}</p>
+
+                <div class="flex items-center justify-between">
+                    {if let Some(badge) = format_badge {
+                        view! {
+                            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-accent/10 text-accent">
+                                {badge}
+                            </span>
+                        }.into_any()
+                    } else {
+                        view! { <span></span> }.into_any()
+                    }}
+                    <svg class="w-5 h-5 text-tertiary group-hover:text-accent group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </div>
             </div>
         </a>
     }
@@ -820,11 +831,9 @@ fn RPackageCardInner(item: ResourceItem) -> impl IntoView {
     let resource_links = item.resource_links.clone();
     // Apply base_path to logo URLs that start with /
     let logo_url = item.image.clone().map(|url| {
-        if url.starts_with('/') {
-            base_path::join(&url[1..])
-        } else {
-            url
-        }
+        url.strip_prefix('/')
+            .map(base_path::join)
+            .unwrap_or(url)
     }).unwrap_or_default();
     let has_logo = !logo_url.is_empty();
 

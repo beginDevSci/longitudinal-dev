@@ -554,11 +554,9 @@ fn ToolSection(category: ToolCategory, items: Vec<ToolItem>, index: usize) -> im
 fn ToolCard(item: ToolItem, #[prop(default = false)] large_logo: bool) -> impl IntoView {
     // Apply base_path to logo URLs that start with /
     let logo_url = item.logo.clone().map(|url| {
-        if url.starts_with('/') {
-            base_path::join(&url[1..])
-        } else {
-            url
-        }
+        url.strip_prefix('/')
+            .map(base_path::join)
+            .unwrap_or(url)
     }).unwrap_or_default();
     let has_logo = !logo_url.is_empty();
     let first_char = item.title.chars().next().unwrap_or('?');

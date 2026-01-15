@@ -84,6 +84,8 @@ pub struct Cheatsheet {
     pub url: String,
     pub blurb: String,
     #[serde(default)]
+    pub image: Option<String>,
+    #[serde(default)]
     pub format: Option<String>,
     #[serde(default)]
     pub icon: Option<String>,
@@ -224,7 +226,7 @@ pub fn resources_to_items(resources: &Resources) -> Vec<ResourceItem> {
             description: cheatsheet.blurb.clone(),
             url: cheatsheet.url.clone(),
             category: ResourceCategory::Cheatsheets,
-            image: None,
+            image: cheatsheet.image.clone(),
             embed_url: None,
             author: None,
             source: None,
