@@ -26,12 +26,11 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
     let notebooks_href = format!("{}#notebooks", base_path::join("toolkit/software/"));
     let databases_href = format!("{}#databases", base_path::join("toolkit/software/"));
 
-    // Compute stats
+    // Compute category counts for display
     let book_count = resources.books.len();
     let video_count = resources.videos.len();
     let tutorial_count = resources.tutorials.len();
     let cheatsheet_count = resources.cheatsheets.len();
-    let total_resources = book_count + video_count + tutorial_count + cheatsheet_count;
 
     let lang_count = tools.programming_languages.len();
     let ide_count = tools.ides.len();
@@ -39,7 +38,6 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
     let format_count = tools.data_formats.len();
     let notebook_count = tools.notebooks.len();
     let db_count = tools.databases.len();
-    let total_tools = lang_count + ide_count + vc_count + format_count + notebook_count + db_count;
 
     // Featured items for Getting Started section
     let featured_book = resources.books.first().cloned();
@@ -89,26 +87,13 @@ pub fn ToolkitPage(resources: Resources, tools: Tools) -> impl IntoView {
 
     view! {
         <main class="min-h-screen bg-surface">
-            // Hero section with stats
-            <section class="relative overflow-hidden bg-subtle">
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-                    <h1 class="text-4xl md:text-5xl font-bold text-primary">"Toolkit"</h1>
-                    <p class="mt-3 text-lg md:text-xl text-secondary max-w-3xl">
-                        "Curated resources and tools for longitudinal data science research."
-                    </p>
-                    // Stats badges
-                    <div class="mt-6 flex flex-wrap gap-3">
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent font-medium">
-                            <span class="text-lg">"📚"</span>
-                            <span>{total_resources}" Resources"</span>
-                        </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent font-medium">
-                            <span class="text-lg">"🔧"</span>
-                            <span>{total_tools}" Tools"</span>
-                        </span>
-                    </div>
-                </div>
-            </section>
+            // Page header (lightweight - lets category cards be the focus)
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-2">
+                <h1 class="text-3xl md:text-4xl font-bold text-primary">"Toolkit"</h1>
+                <p class="mt-2 text-lg text-secondary">
+                    "Curated resources and tools for longitudinal data science research."
+                </p>
+            </div>
 
             // Getting Started - Featured Section
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
