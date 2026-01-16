@@ -30,66 +30,28 @@ pub fn CanvasInfoOverlay(
     /// Setter for selected vertex (to clear selection)
     set_selected_vertex: WriteSignal<Option<VertexInfo>>,
 ) -> impl IntoView {
+    let _ = symmetric;
+    let (display_threshold, set_display_threshold) = signal(0.0f32);
+    let (display_initialized, set_display_initialized) = signal(false);
+
+    create_effect(move |_| {
+        if !display_initialized.get() {
+            if let Some(value) = threshold.get() {
+                set_display_threshold.set(value);
+                set_display_initialized.set(true);
+            }
+        }
+    });
     let on_threshold_change = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
         if let Ok(v) = value.parse::<f32>() {
-            set_threshold.set(Some(v));
+            set_display_threshold.set(v);
+            set_threshold.set(Some(v.abs()));
         }
     };
 
     view! {
         <div class="canvas-info-overlay">
-            // Stat name and range row
-            {move || {
-                if let Some(meta) = stat_metadata.get() {
-                    let name = meta.display_name.clone();
-                    let (min, max) = stat_range.get().unwrap_or((0.0, 0.0));
-                    // Use user's symmetric preference to center range at 0
-                    let (display_min, display_max) = if symmetric.get() && min < 0.0 && max > 0.0 {
-                        let abs_max = min.abs().max(max.abs());
-                        (-abs_max, abs_max)
-                    } else {
-                        (min, max)
-                    };
-                    view! {
-                        <div class="canvas-info-stat">
-                            <span class="canvas-info-stat-name">{name}</span>
-                            <span class="canvas-info-stat-range">
-                                {format!("[{:.1}, {:.1}]", display_min, display_max)}
-                            </span>
-                        </div>
-                    }.into_any()
-                } else {
-                    view! {}.into_any()
-                }
-            }}
-
-            // Threshold slider row
-            <div class="canvas-info-threshold">
-                <span class="threshold-label">"T"</span>
-                <input
-                    type="range"
-                    min="0"
-                    max=move || {
-                        // Dynamic max based on data range (max absolute value, rounded up)
-                        stat_range.get()
-                            .map(|(min, max)| {
-                                let abs_max = min.abs().max(max.abs());
-                                // Round up to nearest integer for cleaner slider
-                                abs_max.ceil()
-                            })
-                            .unwrap_or(10.0)
-                    }
-                    step="0.1"
-                    class="threshold-slider"
-                    prop:value=move || threshold.get().unwrap_or(0.0)
-                    on:input=on_threshold_change
-                />
-                <span class="threshold-value">
-                    {move || format!("{:.1}", threshold.get().unwrap_or(0.0))}
-                </span>
-            </div>
-
             // Selected vertex info row (only when something is selected)
             {move || {
                 if let Some(v) = selected_vertex.get() {
@@ -109,25 +71,90 @@ pub fn CanvasInfoOverlay(
                         .map(|r| format!(" [{}]", r))
                         .unwrap_or_default();
                     view! {
-                        <div class="canvas-info-selection">
-                            <span class="canvas-info-selection-text">
-                                {if !hemi.is_empty() { format!("{} ", hemi) } else { String::new() }}
-                                "Idx " {v.index} " = " {value_str}
-                                {region_text}
-                            </span>
-                            <button
-                                class="canvas-info-selection-clear"
-                                on:click=move |_| set_selected_vertex.set(None)
-                                title="Clear selection"
-                            >
-                                "×"
-                            </button>
+                        <div class="canvas-info-panel">
+                            <div class="canvas-info-selection">
+                                <span class="canvas-info-selection-text">
+                                    {if !hemi.is_empty() { format!("{} ", hemi) } else { String::new() }}
+                                    "Idx " {v.index} " = " {value_str}
+                                    {region_text}
+                                </span>
+                                <button
+                                    class="canvas-info-selection-clear"
+                                    on:click=move |_| set_selected_vertex.set(None)
+                                    title="Clear selection"
+                                >
+                                    "×"
+                                </button>
+                            </div>
                         </div>
                     }.into_any()
                 } else {
                     view! {}.into_any()
                 }
             }}
+
+            // Vertical threshold slider (right side)
+            <div class="canvas-info-vertical-slider">
+                <div class="canvas-info-vertical-title">
+                    {move || {
+                        stat_metadata.get()
+                            .map(|m| {
+                                m.display_name
+                                    .replace("T-Statistics", "T-Stats")
+                                    .replace(" (DES1)", "")
+                            })
+                            .unwrap_or_else(|| "T-Stats".to_string())
+                    }}
+                </div>
+                <div class="canvas-info-vertical-strip">
+                    <div class="canvas-info-vertical-track">
+                        <div class="canvas-info-vertical-ticks" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <input
+                            type="range"
+                            min=move || {
+                                stat_range.get()
+                                    .map(|(min, max)| {
+                                        let abs_max = min.abs().max(max.abs());
+                                        -abs_max.ceil()
+                                    })
+                                    .unwrap_or(-10.0)
+                            }
+                            max=move || {
+                                stat_range.get()
+                                    .map(|(min, max)| {
+                                        let abs_max = min.abs().max(max.abs());
+                                        abs_max.ceil()
+                                    })
+                                    .unwrap_or(10.0)
+                            }
+                            step="0.1"
+                            class="threshold-slider-vertical"
+                            prop:value=move || display_threshold.get()
+                            on:input=on_threshold_change
+                        />
+                    </div>
+                    <div class="canvas-info-vertical-labels">
+                        <span>{move || {
+                            let (min, max) = stat_range.get().unwrap_or((0.0, 0.0));
+                            let abs_max = min.abs().max(max.abs());
+                            format!("{:.1}", abs_max)
+                        }}</span>
+                        <span>{move || "0".to_string()}</span>
+                        <span>{move || {
+                            let (min, max) = stat_range.get().unwrap_or((0.0, 0.0));
+                            let abs_max = min.abs().max(max.abs());
+                            format!("{:.1}", -abs_max)
+                        }}</span>
+                    </div>
+                </div>
+                <div class="canvas-info-vertical-value">
+                    {move || format!("T {:.1}", display_threshold.get())}
+                </div>
+            </div>
         </div>
     }
 }

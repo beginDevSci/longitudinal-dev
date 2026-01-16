@@ -5279,6 +5279,35 @@ body {
   right: var(--spacing-4);
 }
 
+/* Viewer placeholder (pre-load state) */
+.viewer-placeholder-overlay {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.viewer-placeholder-image {
+  filter: blur(6px) saturate(0.9) brightness(0.85);
+  transform: scale(1.02);
+}
+
+.viewer-placeholder-button {
+  background: linear-gradient(180deg, rgba(138, 223, 255, 0.98), rgba(90, 200, 240, 0.98));
+  color: #0b1020;
+  border: 1px solid rgba(14, 34, 66, 0.15);
+}
+
+.viewer-placeholder-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(8, 16, 32, 0.25);
+}
+
+.viewer-placeholder-cta {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 /* Focus mode mobile adjustments */
 @media (max-width: 767px) {
   .brain-viewer-focus-header {
@@ -6154,6 +6183,13 @@ body {
   top: 0.75rem;
   right: 0.75rem;
   display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.canvas-info-panel {
+  display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.625rem 0.75rem;
@@ -6171,7 +6207,6 @@ body {
     0 4px 24px rgba(0, 0, 0, 0.25),
     0 1px 2px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  z-index: 10;
   min-width: 150px;
 }
 
@@ -6193,36 +6228,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: 0.01em;
-}
-
-.canvas-info-stat-range {
-  font-size: 0.625rem;
-  font-weight: 500;
-  color: rgba(148, 163, 184, 0.9);
-  font-family: var(--font-mono);
-  white-space: nowrap;
-  letter-spacing: -0.02em;
-}
-
-/* Threshold slider row */
-.canvas-info-threshold {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.125rem 0;
-}
-
-/* "T" label - badge style */
-.threshold-label {
-  font-size: 0.5625rem;
-  font-weight: 700;
-  color: rgba(56, 189, 248, 0.9);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.125rem 0.375rem;
-  background: rgba(56, 189, 248, 0.12);
-  border-radius: 4px;
-  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
 /* Modern slider track */
@@ -6292,17 +6297,6 @@ body {
     0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* Threshold value - prominent display */
-.threshold-value {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
-  min-width: 2rem;
-  text-align: right;
-  font-family: var(--font-mono);
-  letter-spacing: -0.02em;
-}
-
 /* Selected vertex info row */
 .canvas-info-selection {
   display: flex;
@@ -6348,6 +6342,131 @@ body {
   color: rgba(252, 165, 165, 0.95);
 }
 
+/* Vertical threshold slider (interactive) */
+.canvas-info-vertical-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: auto;
+}
+
+.canvas-info-vertical-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.9);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.canvas-info-vertical-strip {
+  display: grid;
+  grid-template-columns: 36px auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.92) 0%,
+    rgba(30, 41, 59, 0.92) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.canvas-info-vertical-track {
+  width: 36px;
+  height: 440px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ef4444 0%, #f97316 18%, #f8fafc 50%, #3b82f6 82%, #1d4ed8 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 6px 16px rgba(15, 23, 42, 0.45);
+  position: relative;
+}
+
+.threshold-slider-vertical {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 440px;
+  height: 40px;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.threshold-slider-vertical::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border: none;
+}
+
+.threshold-slider-vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  margin-top: -9px;
+}
+
+.threshold-slider-vertical::-moz-range-track {
+  height: 6px;
+  background: transparent;
+  border: none;
+}
+
+.threshold-slider-vertical::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.canvas-info-vertical-ticks {
+  position: absolute;
+  inset: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.canvas-info-vertical-ticks span {
+  display: block;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.canvas-info-vertical-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 440px;
+  font-size: 0.65rem;
+  color: rgba(226, 232, 240, 0.9);
+  font-family: var(--font-mono);
+}
+
+.canvas-info-vertical-value {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(94, 234, 212, 0.95);
+  letter-spacing: 0.08em;
+}
+
 /* Mobile: slightly larger touch targets */
 @media (pointer: coarse) {
   .canvas-info-overlay {
@@ -6358,15 +6477,6 @@ body {
 
   .canvas-info-stat-name {
     font-size: 0.75rem;
-  }
-
-  .canvas-info-stat-range {
-    font-size: 0.6875rem;
-  }
-
-  .threshold-label {
-    font-size: 0.625rem;
-    padding: 0.1875rem 0.5rem;
   }
 
   .threshold-slider {
@@ -6382,10 +6492,6 @@ body {
   .threshold-slider::-moz-range-thumb {
     width: 16px;
     height: 16px;
-  }
-
-  .threshold-value {
-    font-size: 0.75rem;
   }
 
   .canvas-info-selection-text {
@@ -6407,13 +6513,5 @@ body {
 }
 
 .fullscreen-canvas-container .canvas-info-stat-name {
-  font-size: 0.75rem;
-}
-
-.fullscreen-canvas-container .canvas-info-stat-range {
-  font-size: 0.6875rem;
-}
-
-.fullscreen-canvas-container .threshold-value {
   font-size: 0.75rem;
 }

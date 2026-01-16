@@ -1662,7 +1662,7 @@ pub fn BrainViewer(
                     </Show>
 
                     // On-canvas control buttons (responsive sizing via CSS)
-                    <div class="brain-viewer-canvas-controls absolute bottom-2 right-2 sm:bottom-4 sm:right-4 flex flex-col gap-0.5 sm:gap-1 bg-[var(--color-bg-surface)]/90 backdrop-blur-sm rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-0.5 sm:p-1 shadow-lg">
+                    <div class="brain-viewer-canvas-controls absolute bottom-2 right-2 sm:bottom-4 sm:right-4 flex flex-row gap-0.5 sm:gap-1 bg-[var(--color-bg-surface)]/90 backdrop-blur-sm rounded-[var(--radius-md)] border border-[var(--color-border-default)] px-1 py-0.5 sm:px-1.5 sm:py-1 shadow-lg">
                         <button
                             class="w-8 h-8 flex items-center justify-center text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:ring-offset-1"
                             on:click=handle_zoom_in
@@ -1688,7 +1688,7 @@ pub fn BrainViewer(
                                 <line x1="8" y1="11" x2="14" y2="11"></line>
                             </svg>
                         </button>
-                        <div class="w-6 h-px bg-[var(--color-border-default)] mx-auto"></div>
+                        <div class="h-6 w-px bg-[var(--color-border-default)] my-auto"></div>
                         <button
                             class="w-8 h-8 flex items-center justify-center text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:ring-offset-1"
                             on:click=handle_reset_view
@@ -1700,7 +1700,7 @@ pub fn BrainViewer(
                                 <path d="M3 3v5h5"></path>
                             </svg>
                         </button>
-                        <div class="w-6 h-px bg-[var(--color-border-default)] mx-auto"></div>
+                        <div class="h-6 w-px bg-[var(--color-border-default)] my-auto"></div>
                         // Focus mode (expand) button
                         <button
                             class=move || {

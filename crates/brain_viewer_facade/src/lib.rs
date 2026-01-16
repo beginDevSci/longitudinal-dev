@@ -125,26 +125,32 @@ mod viewer_impl {
                     } else {
                         // Show fallback with "Load viewer" button
                         view! {
-                            <div class="viewer-placeholder relative rounded-[var(--radius-panel)] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] overflow-hidden">
+                            <div class="viewer-placeholder min-h-[360px] relative rounded-[var(--radius-panel)] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] overflow-hidden">
                                 {fallback_src.clone().map(|src| view! {
                                     <img
                                         src=src
                                         alt=fallback_alt.clone()
-                                        class="w-full"
+                                        class="viewer-placeholder-image w-full"
                                         loading="lazy"
                                     />
                                 })}
-                                <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                                <div
+                                    class="viewer-placeholder-overlay absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 cursor-pointer"
+                                    role="button"
+                                    aria-label="Load interactive viewer"
+                                    on:click=move |_| set_viewer_started.set(true)
+                                >
+                                    <div class="viewer-placeholder-cta">
                                     <button
-                                        class="px-6 py-3 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] transition-colors flex items-center gap-2"
-                                        on:click=move |_| set_viewer_started.set(true)
+                                        class="viewer-placeholder-button px-8 py-4 text-base font-semibold rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] transition-all flex items-center gap-2"
                                     >
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 7l6 3-6 3-6-3 6-3z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 10v6l6 3 6-3v-6"/>
                                         </svg>
                                         "Load Interactive Viewer"
                                     </button>
+                                    </div>
                                 </div>
                             </div>
                         }.into_any()
