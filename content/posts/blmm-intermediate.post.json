@@ -25,7 +25,7 @@
     "timepoints": "3_5"
   },
   "overview": {
-    "summary": "Big Linear Mixed Models (BLMM) is a Python toolbox designed for fitting mass-univariate linear mixed models at scale, particularly for neuroimaging analyses involving large sample sizes and high-dimensional outcomes. This tutorial demonstrates how to understand and interpret BLMM outputs using results from an analysis of ABCD Study neuroimaging data. Rather than running the analysis, we focus on interpreting pre-computed results to understand what BLMM produces and how to draw scientific conclusions from its outputs.",
+    "summary": "Big Linear Mixed Models (BLMM) is a Python toolbox designed for fitting mass-univariate linear mixed models at scale—an approach especially well-suited for neuroimaging applications involving large cohorts and high-dimensional surface or voxelwise outcomes. In this tutorial, we walk through how to understand and interpret BLMM outputs using results derived from ABCD Study® neuroimaging data.\n\nThe analyses featured here come from two mass-univariate linear mixed models applied to cortical surface data collected during the ABCD working-memory N-back task. In this experiment, the response variable of interest was the percent BOLD (Blood Oxygenation Level Dependent) signal, examined across thousands of brain locations. In this example we focus on interpreting the BLMM results, examining what the BLMM toolbox produces, how to read its statistical outputs, and how to draw clear scientific conclusions from them.",
     "stats_panel": {
       "title": "Stats",
       "items": [
