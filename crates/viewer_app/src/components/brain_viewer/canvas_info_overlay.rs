@@ -34,7 +34,7 @@ pub fn CanvasInfoOverlay(
     let (display_threshold, set_display_threshold) = signal(0.0f32);
     let (display_initialized, set_display_initialized) = signal(false);
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if !display_initialized.get() {
             if let Some(value) = threshold.get() {
                 set_display_threshold.set(value);
