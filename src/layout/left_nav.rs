@@ -16,6 +16,8 @@ mod icons {
     pub const DEFAULT: &str = "📄"; // Default icon
 }
 
+const HIDDEN_METHOD_FAMILIES: &[&str] = &["blmm"];
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NavItem {
     pub title: String,
@@ -67,6 +69,13 @@ impl NavCategory {
                 Some(metadata) => metadata.method_family.clone(),
                 None => continue,
             };
+
+            if HIDDEN_METHOD_FAMILIES
+                .iter()
+                .any(|family| method_family.eq_ignore_ascii_case(family))
+            {
+                continue;
+            }
 
             let nav_item = NavItem::from_post(post);
 
