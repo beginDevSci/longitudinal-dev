@@ -1,4 +1,4 @@
-//! Guide navigation tabs for switching between hub, tutorial, and reference pages.
+//! Guide navigation tabs for switching between overview and walkthrough pages.
 //!
 //! Provides a horizontal tab bar that appears below the guide header,
 //! allowing users to navigate between related guide sections.
@@ -11,7 +11,7 @@ use leptos::prelude::*;
 pub struct GuideTabInfo {
     /// The method slug (e.g., "lgcm-pilot")
     pub method_slug: String,
-    /// Current guide type: "hub", "tutorial", or "reference"
+    /// Current guide type: "overview" or "tutorial"
     pub current_type: String,
 }
 
@@ -25,18 +25,24 @@ impl GuideTabInfo {
         guide_type: Option<&str>,
         parent_method: Option<&str>,
     ) -> Option<Self> {
-        let current_type = guide_type.unwrap_or("hub").to_string();
+        let current_type = match guide_type.unwrap_or("overview") {
+            "hub" => "overview",
+            "walkthrough" => "tutorial",
+            other => other,
+        }
+        .to_string();
 
         // Determine the method slug
         let method_slug = match current_type.as_str() {
-            "hub" => slug.to_string(),
+            "overview" => slug.to_string(),
             "tutorial" | "reference" => {
                 // Use parent_method if available, otherwise derive from slug
                 parent_method
                     .map(|s| s.to_string())
                     .unwrap_or_else(|| {
-                        // Fallback: strip -tutorial or -reference suffix
-                        slug.trim_end_matches("-tutorial")
+                        // Fallback: strip known suffixes
+                        slug.trim_end_matches("-walkthrough")
+                            .trim_end_matches("-tutorial")
                             .trim_end_matches("-reference")
                             .to_string()
                     })
@@ -50,19 +56,14 @@ impl GuideTabInfo {
         })
     }
 
-    /// Get the URL for the hub/overview page.
+    /// Get the URL for the overview page.
     pub fn hub_url(&self) -> String {
         base_path::join(&format!("guides/{}/", self.method_slug))
     }
 
     /// Get the URL for the tutorial page.
     pub fn tutorial_url(&self) -> String {
-        base_path::join(&format!("guides/{}-tutorial/", self.method_slug))
-    }
-
-    /// Get the URL for the reference page.
-    pub fn reference_url(&self) -> String {
-        base_path::join(&format!("guides/{}-reference/", self.method_slug))
+        base_path::join(&format!("guides/{}-walkthrough/", self.method_slug))
     }
 }
 
@@ -75,7 +76,7 @@ struct TabDef {
 
 /// Navigation tabs for switching between guide sections.
 ///
-/// Renders a horizontal tab bar with Overview, Tutorial, and Reference tabs.
+/// Renders a horizontal tab bar with Overview and Worked Example tabs.
 /// The current page's tab is highlighted.
 #[component]
 pub fn GuideNavTabs(info: GuideTabInfo) -> impl IntoView {
@@ -84,18 +85,13 @@ pub fn GuideNavTabs(info: GuideTabInfo) -> impl IntoView {
     let tabs = vec![
         TabDef {
             label: "Overview",
-            type_id: "hub",
+            type_id: "overview",
             url: info.hub_url(),
         },
         TabDef {
-            label: "Tutorial",
+            label: "Worked Example",
             type_id: "tutorial",
             url: info.tutorial_url(),
-        },
-        TabDef {
-            label: "Reference",
-            type_id: "reference",
-            url: info.reference_url(),
         },
     ];
 
