@@ -148,6 +148,12 @@ pub struct WorkflowOutput {
 pub fn generate_tutorial_index(posts: &[Post]) -> Vec<TutorialIndexEntry> {
     posts
         .iter()
+        .filter(|post| {
+            post.metadata
+                .as_ref()
+                .map(|meta| !meta.method_family.eq_ignore_ascii_case("blmm"))
+                .unwrap_or(true)
+        })
         .filter_map(TutorialIndexEntry::from_post)
         .collect()
 }
