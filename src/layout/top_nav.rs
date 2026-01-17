@@ -82,7 +82,7 @@ pub fn TopNav(
                             </svg>
                         </a>
                         <a
-                            href="https://discord.gg/D796Bdy8"
+                            href="https://discord.gg/Xh7mUFvK"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="top-nav-social"
