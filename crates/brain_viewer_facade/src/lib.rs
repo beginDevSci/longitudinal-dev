@@ -86,7 +86,7 @@ mod viewer_impl {
     pub fn BrainViewerIsland(data: ViewerData) -> impl IntoView {
         let (viewer_started, set_viewer_started) = signal(data.auto_start);
 
-        let data_base_path = data
+        let _data_base_path = data
             .manifest_path
             .rsplit_once('/')
             .map(|(base, _)| base.to_string())
@@ -109,7 +109,7 @@ mod viewer_impl {
                         {
                             view! {
                                 <div class="viewer-active">
-                                    <viewer_app::BrainViewerComponent data_base_path=data_base_path.clone() />
+                                    <viewer_app::BrainViewerComponent data_base_path=_data_base_path.clone() />
                                 </div>
                             }.into_any()
                         }
