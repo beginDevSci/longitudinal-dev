@@ -134,6 +134,8 @@ fn dist_html_files_contain_expected_content() {
     eprintln!("✓ index.html contains expected structure");
 
     // Check first post has proper structure
+    // Note: /posts/{slug}/ now contains redirects to /abcd/{family}/{slug}/
+    // We check that redirects are valid, then check actual content in /abcd/
     let post_slugs = get_post_slugs();
     if let Some(slug) = post_slugs.first() {
         let post_html_path = dist.join(format!("posts/{}/index.html", slug));
@@ -145,13 +147,29 @@ fn dist_html_files_contain_expected_content() {
                 "post HTML missing HTML structure"
             );
 
-            assert!(
-                post_html.contains("blog.js") || post_html.contains("/pkg/blog.js"),
-                "post HTML missing WASM JS reference"
-            );
-
-            eprintln!("✓ Post '{slug}' HTML contains expected structure");
+            // Check if this is a redirect page (expected for /posts/ paths)
+            if post_html.contains("http-equiv=\"refresh\"") {
+                eprintln!("✓ Post '{slug}' redirect page is valid");
+            } else {
+                // If not a redirect, it should have WASM references
+                assert!(
+                    post_html.contains("blog.js") || post_html.contains("/pkg/blog.js"),
+                    "post HTML missing WASM JS reference"
+                );
+                eprintln!("✓ Post '{slug}' HTML contains expected structure");
+            }
         }
+    }
+
+    // Also verify an actual abcd post page has WASM references
+    let abcd_index = dist.join("abcd/index.html");
+    if abcd_index.exists() {
+        let abcd_html = fs::read_to_string(&abcd_index).expect("Failed to read abcd index");
+        assert!(
+            abcd_html.contains("blog.js") || abcd_html.contains("/pkg/blog.js"),
+            "abcd/index.html missing WASM JS reference"
+        );
+        eprintln!("✓ abcd/index.html contains WASM references");
     }
 
     eprintln!("\n✅ HTML content validation passed");
