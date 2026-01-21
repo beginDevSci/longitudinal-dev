@@ -28,7 +28,7 @@ fn test_html_structure_integrity() {
     );
 
     // Verify the page contains links to ABCD analyses section
-    assert!(html.contains("/abcd-analyses/"), "Missing ABCD analyses section link");
+    assert!(html.contains("/abcd/"), "Missing ABCD analyses section link");
 
     println!("✅ Landing page structure verified:");
     println!("   - <h1> tags: {h1_count}");
@@ -121,7 +121,7 @@ fn test_each_tutorial_has_fixed_structure() {
 /// Verifies that tutorials have the Data Access section
 #[test]
 fn test_data_access_section_present() {
-    let html_path = Path::new("dist/abcd-analyses/lgcm/lgcm-basic/index.html");
+    let html_path = Path::new("dist/abcd/lgcm/lgcm-basic/index.html");
 
     if !html_path.exists() {
         println!("SKIP: lgcm-basic tutorial not found (run `make ssg` first)");
