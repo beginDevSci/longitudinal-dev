@@ -13,10 +13,11 @@ mod icons {
     pub const GMM: &str = "🎯";    // Growth Mixture Model
     pub const LCGA: &str = "👥";   // Latent Class Growth Analysis
     pub const MLGCM: &str = "🌐";  // Multivariate Latent Growth Curve Model
+    pub const BLMM: &str = "🧠";   // Big Linear Mixed Models (neuroimaging)
     pub const DEFAULT: &str = "📄"; // Default icon
 }
 
-const HIDDEN_METHOD_FAMILIES: &[&str] = &["blmm"];
+const HIDDEN_METHOD_FAMILIES: &[&str] = &[];
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NavItem {
@@ -124,9 +125,10 @@ fn extract_description(post: &Post) -> String {
         .unwrap_or(summary)
         .trim();
 
-    // Truncate to 120 chars if still too long
-    if first_sentence.len() > 120 {
-        format!("{}...", &first_sentence[..117])
+    // Truncate to 120 chars if still too long (respecting UTF-8 boundaries)
+    if first_sentence.chars().count() > 120 {
+        let truncated: String = first_sentence.chars().take(117).collect();
+        format!("{}...", truncated)
     } else {
         first_sentence.to_string()
     }
@@ -189,6 +191,7 @@ fn get_family_icon(family: &str) -> String {
         "GMM" => icons::GMM.to_string(),
         "LCGA" => icons::LCGA.to_string(),
         "MLGCM" => icons::MLGCM.to_string(),
+        "BLMM" => icons::BLMM.to_string(),
         _ => icons::DEFAULT.to_string(),
     }
 }
