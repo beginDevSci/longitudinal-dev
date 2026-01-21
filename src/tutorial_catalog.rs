@@ -299,8 +299,8 @@ fn rank_and_highlight(tutorial: &TutorialData, query: &str) -> (i32, String, Str
     (score, title_highlighted, summary_highlighted)
 }
 
-/// Search bar island component
-#[island]
+/// Search bar component - part of parent island's reactive scope
+#[component]
 pub fn SearchBar(search_query: RwSignal<String>, current_page: RwSignal<usize>) -> impl IntoView {
     view! {
         <div class="relative">
@@ -321,8 +321,8 @@ pub fn SearchBar(search_query: RwSignal<String>, current_page: RwSignal<usize>) 
     }
 }
 
-/// Active filter chips component
-#[island]
+/// Active filter chips component - part of parent island's reactive scope
+#[component]
 pub fn ActiveFilterChips(
     selected_families: RwSignal<Vec<String>>,
     selected_engines: RwSignal<Vec<String>>,
@@ -426,8 +426,8 @@ pub fn ActiveFilterChips(
     }
 }
 
-/// Pagination controls component
-#[island]
+/// Pagination controls component - part of parent island's reactive scope
+#[component]
 pub fn PaginationControls(
     current_page: RwSignal<usize>,
     total_count: usize,
@@ -499,8 +499,8 @@ pub fn PaginationControls(
     }
 }
 
-/// View toggle component
-#[island]
+/// View toggle component - part of parent island's reactive scope
+#[component]
 pub fn ViewToggle(view_mode: RwSignal<ViewMode>) -> impl IntoView {
     view! {
         <div class="flex items-center gap-2">
@@ -537,8 +537,8 @@ pub fn ViewToggle(view_mode: RwSignal<ViewMode>) -> impl IntoView {
     }
 }
 
-/// Sort dropdown component
-#[island]
+/// Sort dropdown component - part of parent island's reactive scope
+#[component]
 pub fn SortDropdown(sort_by: RwSignal<SortOption>) -> impl IntoView {
     view! {
         <div class="flex items-center gap-2">
@@ -570,8 +570,8 @@ pub fn SortDropdown(sort_by: RwSignal<SortOption>) -> impl IntoView {
     }
 }
 
-/// Collapsible filter section
-#[island]
+/// Collapsible filter section - part of parent island's reactive scope
+#[component]
 pub fn FilterSection(
     title: String,
     items: Vec<(String, usize)>,
@@ -633,8 +633,8 @@ pub fn FilterSection(
     }
 }
 
-/// Sidebar filters component with collapsible sections
-#[island]
+/// Sidebar filters component with collapsible sections - part of parent island's reactive scope
+#[component]
 pub fn SidebarFilters(
     selected_families: RwSignal<Vec<String>>,
     selected_engines: RwSignal<Vec<String>>,
@@ -719,8 +719,8 @@ pub fn TutorialCard(
     }
 }
 
-/// Table view component with sortable headers
-#[island]
+/// Table view component with sortable headers - part of parent island's reactive scope
+#[component]
 pub fn TutorialTable(tutorials: Vec<TutorialData>, sort_by: RwSignal<SortOption>) -> impl IntoView {
     let sort_indicator = move |column_asc: SortOption, column_desc: SortOption| -> &'static str {
         let current = sort_by.get();
@@ -1235,8 +1235,8 @@ pub fn TutorialCatalog(tutorials: Vec<TutorialData>) -> impl IntoView {
     }
 }
 
-/// Method family tabs component (simplified version)
-#[island]
+/// Method family tabs component (simplified version) - part of parent island's reactive scope
+#[component]
 pub fn MethodTabs(
     selected_method: RwSignal<Option<String>>,
     method_families: Vec<(String, usize)>,

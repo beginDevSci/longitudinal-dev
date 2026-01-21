@@ -197,12 +197,14 @@ fn get_family_icon(family: &str) -> String {
 }
 
 /// Collapsible category component with localStorage persistence
-#[island]
+/// Category item component - renders as part of parent LeftNav island
+/// Uses #[component] instead of #[island] so it shares reactive scope with parent
+#[component]
 pub fn CategoryItem(
     category: NavCategory,
     current_slug: Option<String>,
     base_path: String,
-    search_query: String,
+    search_query: Signal<String>,
 ) -> impl IntoView {
     // Store values in StoredValue for shared access across closures
     let current_slug_stored = StoredValue::new(current_slug.clone());
@@ -249,12 +251,12 @@ pub fn CategoryItem(
     });
 
     // Filter tutorials based on search (as a memo)
-    let search_is_active = !search_query.is_empty();
-    let search_query_signal = Signal::derive(move || search_query.clone());
+    let initial_query = search_query.get_untracked();
+    let search_is_active = !initial_query.is_empty();
     let all_tutorials = category.tutorials.clone();
 
     let filtered_tutorials = Memo::new(move |_| {
-        let query = search_query_signal.get();
+        let query = search_query.get();
         all_tutorials
             .iter()
             .filter(|item| {
@@ -495,16 +497,17 @@ pub fn LeftNav(
                         each=move || categories.clone()
                         key=|cat| cat.id.clone()
                         children=move |category| {
-                            let query = search_query.get();
                             let slug_clone = current_slug.clone();
                             let base_clone = base_path.clone();
+                            // Convert RwSignal to Signal for the component prop
+                            let search_signal = Signal::derive(move || search_query.get());
 
                             view! {
                                 <CategoryItem
                                     category=category
                                     current_slug=slug_clone
                                     base_path=base_clone
-                                    search_query=query
+                                    search_query=search_signal
                                 />
                             }
                         }
