@@ -8,6 +8,7 @@
 
 use crate::config::{RConfig, Stage4Config};
 use crate::executor::{self, ExecutionResult};
+use crate::privacy::scan_for_participant_ids;
 use crate::validators::ValidationResult;
 use anyhow::{bail, Context, Result};
 use std::env;
@@ -340,6 +341,35 @@ impl<'a> Stage4Validator<'a> {
         );
 
         if exec_result.success {
+            // PRIVACY CHECK: Scan output for participant IDs (CRITICAL for Stage 4 with real data)
+            if self.r_config.scan_output_for_ids {
+                let combined_output =
+                    format!("{}\n{}", exec_result.stdout, exec_result.stderr);
+                let scan_result = scan_for_participant_ids(
+                    &combined_output,
+                    &self.r_config.participant_id_patterns,
+                    &self.r_config.participant_id_action,
+                );
+
+                if scan_result.found_ids {
+                    // For Stage 4 with real data, always fail on ID exposure
+                    result.error(
+                        None,
+                        format!(
+                            "PRIVACY VIOLATION: {} participant ID(s) detected in R output (e.g., {}). \
+                             Real ABCD participant identifiers must never appear in output.",
+                            scan_result.count,
+                            scan_result.sample_ids.join(", ")
+                        ),
+                        Some(
+                            "Remove code that prints individual participant data (head, print, glimpse). \
+                             Use only aggregated summaries. This is a data use agreement requirement.".to_string()
+                        ),
+                    );
+                    return;
+                }
+            }
+
             // Check for warnings if configured
             if self.config.capture_warnings {
                 let warnings = executor::extract_warnings(&exec_result.stderr);

@@ -60,6 +60,11 @@ impl<'a> Stage2Validator<'a> {
             self.validate_library_calls(&r_blocks[0], &mut result);
         }
 
+        // Check for data exposure patterns (head, glimpse, View, etc.)
+        if self.config.check_data_exposure {
+            self.check_data_exposure_patterns(&r_blocks, &mut result);
+        }
+
         Ok(result)
     }
 
@@ -242,6 +247,44 @@ impl<'a> Stage2Validator<'a> {
                         .to_string(),
                 ),
             );
+        }
+    }
+
+    /// Check for patterns that might expose individual-level data to LLM stdout
+    ///
+    /// When R scripts run, their stdout is captured and sent to the LLM API.
+    /// Functions like head(), glimpse(), View() can print raw participant data,
+    /// which could expose sensitive information.
+    fn check_data_exposure_patterns(&self, blocks: &[RCodeBlock], result: &mut ValidationResult) {
+        let patterns = &self.config.data_exposure_patterns;
+
+        for block in blocks {
+            for pattern in patterns {
+                if block.content.contains(pattern.as_str()) {
+                    // Find the line number within the block
+                    let mut relative_line = 0;
+                    for (i, line) in block.content.lines().enumerate() {
+                        if line.contains(pattern.as_str()) {
+                            relative_line = i;
+                            break;
+                        }
+                    }
+
+                    result.warning(
+                        Some(block.line_number + relative_line),
+                        format!(
+                            "Potential data exposure: '{}' may print individual-level data to stdout",
+                            pattern.trim_end_matches('(')
+                        ),
+                        Some(
+                            "When LLM runs this code, stdout is captured. Use aggregated summaries \
+                             (e.g., summary(), nrow(), table()) instead of raw data previews. \
+                             If this is intentional (e.g., printing a summary table), you can ignore this warning."
+                                .to_string(),
+                        ),
+                    );
+                }
+            }
         }
     }
 }

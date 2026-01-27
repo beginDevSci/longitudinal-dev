@@ -118,8 +118,8 @@ library(emmeans)      # For marginal means and contrasts
 requested_vars <- c(
   "ab_g_dyn__design_site",
   "ab_g_stc__design_id__fam",
-  "su_y_tlfb__alc_use",           # Alcohol use indicator
-  "dm_y_demo__sex"                 # Sex (time-invariant covariate)
+  "su_y_tlfb__alc__1mo_ud",       # Alcohol use days (last 30 days)
+  "ab_g_stc__cohort_sex"          # Sex (time-invariant covariate)
 )
 
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
@@ -147,8 +147,8 @@ df_long <- abcd_data %>%
   rename(
     site = ab_g_dyn__design_site,
     family_id = ab_g_stc__design_id__fam,
-    alcohol_use = su_y_tlfb__alc_use,
-    sex = dm_y_demo__sex
+    alcohol_use = su_y_tlfb__alc__1mo_ud,
+    sex = ab_g_stc__cohort_sex
   ) %>%
   # Create binary outcome: any alcohol use vs. none
   mutate(
@@ -162,8 +162,8 @@ df_long <- abcd_data %>%
   # Create numeric time variable from session_id
   mutate(
     time = as.numeric(session_id) - 1,
-    # Ensure sex is a factor for proper coding
-    sex = factor(sex, levels = c("Male", "Female"))
+    # Convert sex codes to labeled factor (1=Male, 2=Female in ABCD)
+    sex = factor(sex, levels = c(1, 2), labels = c("Male", "Female"))
   )
 
 # Check the prevalence of use at each wave

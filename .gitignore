@@ -32,10 +32,11 @@ pnpm-lock.yaml
 # Generated code (build.rs output)
 /src/generated/
 
-# Environment
+# Environment (local paths, credentials, etc.)
 .env
 .env.local
 .env.*.local
+.envrc
 
 # OS
 .DS_Store
