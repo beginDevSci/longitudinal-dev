@@ -1,4 +1,4 @@
-.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg serve deploy bootstrap watch check-guide-hierarchy
+.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg serve deploy bootstrap watch check-guide-hierarchy stage4 refresh-tutorial generate-placeholders
 
 # Default target shows help
 help:
@@ -22,6 +22,11 @@ help:
 	@echo "  make validate-tutorials-force - Force validate all tutorials (bypass cache)"
 	@echo "  make validate               - Alias for validate-json"
 	@echo "  make check-guide-hierarchy  - Verify guide heading counts (max 10 H2s)"
+	@echo ""
+	@echo "  STAGE 4 (R Execution - requires ABCD data):"
+	@echo "  make stage4 TUTORIAL=<slug> - Run Stage 4 to generate artifacts for a tutorial"
+	@echo "  make refresh-tutorial TUTORIAL=<slug> - Regenerate JSON after artifacts update"
+	@echo "  make generate-placeholders TUTORIAL=<slug> - Create placeholder artifacts for new tutorial"
 	@echo ""
 	@echo "  OTHER:"
 	@echo "  make test                   - Run all tests"
@@ -129,3 +134,90 @@ check-guide-hierarchy:
 		exit 1; \
 	fi
 	@echo "✅ All guides have proper heading hierarchy!"
+
+# =============================================================================
+# STAGE 4: R Execution (requires local ABCD data access)
+# =============================================================================
+
+# Run Stage 4 for a specific tutorial to generate real artifacts
+# Usage: make stage4 TUTORIAL=glmm-binary
+stage4:
+	@if [ -z "$(TUTORIAL)" ]; then \
+		echo "❌ Error: TUTORIAL parameter required"; \
+		echo "Usage: make stage4 TUTORIAL=<tutorial-slug>"; \
+		echo ""; \
+		echo "Available tutorials:"; \
+		ls -1 content/tutorials/*.md | xargs -n1 basename | sed 's/.md$$/  /' | column; \
+		exit 1; \
+	fi
+	@if [ ! -f "content/tutorials/$(TUTORIAL).md" ]; then \
+		echo "❌ Error: Tutorial not found: content/tutorials/$(TUTORIAL).md"; \
+		exit 1; \
+	fi
+	@echo "🔬 Running Stage 4 (R execution) for $(TUTORIAL)..."
+	@echo "   This requires ABCD data at: $${ABCD_DATA_PATH:-/Users/shawes/abcd/6_0/phenotype}"
+	@cargo run --locked -p longitudinal_validator -- \
+		--force \
+		content/tutorials/$(TUTORIAL).md
+	@echo ""
+	@echo "✅ Stage 4 complete! Artifacts generated in public/stage4-artifacts/$(TUTORIAL)/"
+	@echo "   Run 'make refresh-tutorial TUTORIAL=$(TUTORIAL)' to update JSON"
+
+# Regenerate JSON for a tutorial after Stage 4 artifacts are updated
+# Usage: make refresh-tutorial TUTORIAL=glmm-binary
+refresh-tutorial:
+	@if [ -z "$(TUTORIAL)" ]; then \
+		echo "❌ Error: TUTORIAL parameter required"; \
+		echo "Usage: make refresh-tutorial TUTORIAL=<tutorial-slug>"; \
+		exit 1; \
+	fi
+	@if [ ! -f "content/tutorials/$(TUTORIAL).md" ]; then \
+		echo "❌ Error: Tutorial not found: content/tutorials/$(TUTORIAL).md"; \
+		exit 1; \
+	fi
+	@echo "🔄 Regenerating JSON for $(TUTORIAL)..."
+	@cargo run --locked -p longitudinal_parser --bin md2json -- \
+		content/tutorials/$(TUTORIAL).md \
+		--output content/posts/$(TUTORIAL).post.json
+	@echo "✅ JSON updated: content/posts/$(TUTORIAL).post.json"
+
+# Generate placeholder artifacts for a new tutorial
+# Usage: make generate-placeholders TUTORIAL=new-tutorial
+generate-placeholders:
+	@if [ -z "$(TUTORIAL)" ]; then \
+		echo "❌ Error: TUTORIAL parameter required"; \
+		echo "Usage: make generate-placeholders TUTORIAL=<tutorial-slug>"; \
+		exit 1; \
+	fi
+	@if [ ! -f "content/tutorials/$(TUTORIAL).md" ]; then \
+		echo "❌ Error: Tutorial not found: content/tutorials/$(TUTORIAL).md"; \
+		exit 1; \
+	fi
+	@echo "📝 Generating placeholder artifacts for $(TUTORIAL)..."
+	@mkdir -p "public/stage4-artifacts/$(TUTORIAL)"
+	@# Extract artifact filenames from markdown and create placeholders
+	@grep -oE 'stage4-artifacts/$(TUTORIAL)/[^")\s]+' "content/tutorials/$(TUTORIAL).md" | \
+		sed 's|stage4-artifacts/$(TUTORIAL)/||' | sort -u | while read artifact; do \
+		filepath="public/stage4-artifacts/$(TUTORIAL)/$$artifact"; \
+		if [ ! -f "$$filepath" ]; then \
+			case "$$artifact" in \
+				*.html) \
+					echo '<div class="placeholder-output">' > "$$filepath"; \
+					echo '  <p><em>Output will be generated when R code is executed.</em></p>' >> "$$filepath"; \
+					echo '</div>' >> "$$filepath"; \
+					echo "  Created: $$filepath"; \
+					;; \
+				*.png) \
+					printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82' > "$$filepath"; \
+					echo "  Created: $$filepath (1x1 placeholder)"; \
+					;; \
+				*) \
+					echo "Placeholder content" > "$$filepath"; \
+					echo "  Created: $$filepath"; \
+					;; \
+			esac \
+		else \
+			echo "  Exists: $$filepath"; \
+		fi \
+	done
+	@echo "✅ Placeholders ready in public/stage4-artifacts/$(TUTORIAL)/"
