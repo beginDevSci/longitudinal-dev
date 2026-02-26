@@ -108,8 +108,7 @@ library(tidyverse)    # For data manipulation & visualization
 library(gtsummary)    # For generating publication-quality summary tables
 library(lme4)         # Linear mixed-effects models (LMMs)
 library(lmerTest)     # P-values for lmer models
-library(kableExtra)   # Formatting & styling in HTML/Markdown reports
-library(performance)  # Model diagnostics & comparisons
+library(broom.mixed)  # Tidy output for mixed models
 library(gt)           # For creating formatted tables
 
 ### Load harmonized ABCD data required for this analysis
@@ -117,7 +116,7 @@ requested_vars <- c(
   "ab_g_dyn__design_site",
   "ab_g_stc__design_id__fam",
   "nc_y_nihtb__comp__fluid__fullcorr_tscore",  # Fluid cognition (outcome)
-  "ph_y_pds__pds_mean"                          # Pubertal development (TVC)
+  "ph_y_anthr__height_mean"                     # Height in inches (TVC)
 )
 
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
@@ -146,22 +145,22 @@ df_long <- abcd_data %>%
     site = ab_g_dyn__design_site,
     family_id = ab_g_stc__design_id__fam,
     cognition = nc_y_nihtb__comp__fluid__fullcorr_tscore,
-    puberty = ph_y_pds__pds_mean
+    height = ph_y_anthr__height_mean
   ) %>%
   # Keep only participants with at least 2 non-missing observations
   group_by(participant_id) %>%
-  filter(sum(!is.na(cognition) & !is.na(puberty)) >= 2) %>%
+  filter(sum(!is.na(cognition) & !is.na(height)) >= 2) %>%
   ungroup() %>%
-  drop_na(cognition, puberty) %>%
+  drop_na(cognition, height) %>%
   # Create numeric time variable from session_id
   mutate(time = as.numeric(session_id) - 1) %>%
   # CRITICAL: Person-mean centering of time-varying covariate
   group_by(participant_id) %>%
   mutate(
-    # Between-person component: person's average puberty across all waves
-    puberty_pm = mean(puberty, na.rm = TRUE),
+    # Between-person component: person's average height across all waves
+    height_pm = mean(height, na.rm = TRUE),
     # Within-person component: deviation from person's own average
-    puberty_cwc = puberty - puberty_pm
+    height_cwc = height - height_pm
   ) %>%
   ungroup()
 
@@ -169,7 +168,7 @@ df_long <- abcd_data %>%
 df_long %>%
   group_by(participant_id) %>%
   summarise(
-    mean_cwc = mean(puberty_cwc, na.rm = TRUE),
+    mean_cwc = mean(height_cwc, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   summary()  # Mean of cwc should be ~0 for each person
@@ -180,13 +179,13 @@ df_long %>%
 ```r
 # Create descriptive summary table by wave
 descriptives_table <- df_long %>%
-  select(session_id, cognition, puberty) %>%
+  select(session_id, cognition, height) %>%
   tbl_summary(
     by = session_id,
     missing = "no",
     label = list(
       cognition ~ "Fluid Cognition",
-      puberty ~ "Pubertal Development"
+      height ~ "Height (inches)"
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
@@ -219,7 +218,7 @@ descriptives_table
 ```r
 # Fit baseline model with just time
 m1 <- lmer(
-  cognition ~ time + (1 + time | site:family_id:participant_id),
+  cognition ~ time + (1 + time | participant_id),
   data = df_long,
   REML = TRUE
 )
@@ -230,10 +229,10 @@ summary(m1)
 ## Model 2: Raw TVC (Uncentered) {.code}
 
 ```r
-# Add raw (uncentered) puberty as predictor
+# Add raw (uncentered) height as predictor
 # WARNING: This conflates within- and between-person effects
 m2 <- lmer(
-  cognition ~ time + puberty + (1 + time | site:family_id:participant_id),
+  cognition ~ time + height + (1 + time | participant_id),
   data = df_long,
   REML = TRUE
 )
@@ -247,7 +246,7 @@ summary(m2)
 # Add decomposed TVC: within-person (cwc) + between-person (pm)
 # This is the recommended approach for causal inference
 m3 <- lmer(
-  cognition ~ time + puberty_cwc + puberty_pm + (1 + time | site:family_id:participant_id),
+  cognition ~ time + height_cwc + height_pm + (1 + time | participant_id),
   data = df_long,
   REML = TRUE
 )
@@ -255,12 +254,19 @@ m3 <- lmer(
 # Generate summary
 summary(m3)
 
-# Create formatted output table
-model_summary_table <- gtsummary::tbl_regression(m3,
-    digits = 3,
-    intercept = TRUE
-) %>%
-  gtsummary::as_gt()
+# Create formatted output table using broom.mixed + gt
+model_summary_table <- broom.mixed::tidy(m3, effects = "fixed") %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "Model 3: Decomposed Time-Varying Covariate") %>%
+  fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3) %>%
+  cols_label(
+    term = "Term",
+    estimate = "Estimate",
+    std.error = "Std. Error",
+    statistic = "t-value",
+    p.value = "P-Value"
+  )
 
 ### Save the gt table
 gt::gtsave(
@@ -269,16 +275,28 @@ gt::gtsave(
   inline_css = FALSE
 )
 
-# Generate alternative summary with variance components
-sjPlot::tab_model(m3,
-    show.se = TRUE, show.df = FALSE, show.ci = FALSE,
-    digits = 3,
-    pred.labels = c("Intercept", "Time", "Puberty (Within)", "Puberty (Between)"),
-    dv.labels = c("LMM with Time-Varying Covariate"),
-    string.se = "SE",
-    string.p = "P-Value",
-    file = "lmm_tvc_results.html"
-)
+# Generate alternative summary with custom labels using broom.mixed + gt
+lmm_tvc_table <- broom.mixed::tidy(m3, effects = "fixed") %>%
+  mutate(term = case_when(
+    term == "(Intercept)" ~ "Intercept",
+    term == "time" ~ "Time",
+    term == "height_cwc" ~ "Height (Within)",
+    term == "height_pm" ~ "Height (Between)",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "LMM with Time-Varying Covariate") %>%
+  fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3) %>%
+  cols_label(
+    term = "Predictor",
+    estimate = "Estimate",
+    std.error = "SE",
+    statistic = "t-value",
+    p.value = "P-Value"
+  )
+
+gt::gtsave(lmm_tvc_table, filename = "lmm_tvc_results.html")
 ```
 
 ## Model Summary Output-1 {.output}
@@ -317,13 +335,13 @@ gt::gtsave(comparison_table, filename = "model_comparison.html")
 
 ## Interpretation {.note}
 
-The key distinction in Model 3 is between the **within-person effect** (puberty_cwc) and the **between-person effect** (puberty_pm) of pubertal development on cognition:
+The key distinction in Model 3 is between the **within-person effect** (height_cwc) and the **between-person effect** (height_pm) of physical growth on cognition:
 
-**Within-person effect (puberty_cwc):** This coefficient answers: "When a participant's pubertal development is higher than their own average, how does their cognition compare to when they are at their average puberty level?" A negative coefficient would suggest that at times when a participant is more pubertally advanced than usual, their cognition tends to be lower. This effect controls for all stable between-person differences.
+**Within-person effect (height_cwc):** This coefficient answers: "When a participant is taller than their own average height, how does their cognition compare to when they are at their average height?" A positive coefficient would suggest that at times when a participant has grown more than usual, their cognition tends to be higher. This effect controls for all stable between-person differences.
 
-**Between-person effect (puberty_pm):** This coefficient answers: "Do participants who are, on average, more pubertally advanced tend to have different cognition scores?" This compares different people rather than the same person at different times.
+**Between-person effect (height_pm):** This coefficient answers: "Do participants who are, on average, taller tend to have different cognition scores?" This compares different people rather than the same person at different times.
 
-If these two effects differ substantially, it indicates that the relationship between puberty and cognition operates differently at the within-person vs. between-person level - a critical insight for understanding developmental processes.
+If these two effects differ substantially, it indicates that the relationship between physical growth and cognition operates differently at the within-person vs. between-person level - a critical insight for understanding developmental processes.
 
 ## Visualization {.code}
 
@@ -338,19 +356,19 @@ set.seed(123)
 sample_ids <- sample(unique(df_long$participant_id), min(100, length(unique(df_long$participant_id))))
 df_plot <- df_long %>% filter(participant_id %in% sample_ids)
 
-# Create spaghetti plot colored by puberty level
+# Create spaghetti plot colored by height level
 visualization <- ggplot(df_plot, aes(x = time, y = cognition, group = participant_id)) +
-  geom_line(aes(color = puberty_pm), alpha = 0.5) +
-  geom_point(aes(color = puberty_pm), alpha = 0.3, size = 1) +
-  scale_color_viridis_c(name = "Person-Mean\nPuberty", option = "plasma") +
+  geom_line(aes(color = height_pm), alpha = 0.5) +
+  geom_point(aes(color = height_pm), alpha = 0.3, size = 1) +
+  scale_color_viridis_c(name = "Person-Mean\nHeight", option = "plasma") +
   geom_smooth(aes(group = 1), method = "lm", color = "black", linewidth = 1.5, se = TRUE) +
   scale_x_continuous(
     breaks = 0:3,
     labels = c("Baseline", "Year 2", "Year 4", "Year 6")
   ) +
   labs(
-    title = "Cognition Trajectories by Average Pubertal Development",
-    subtitle = "Line color indicates person-mean puberty level (between-person effect)",
+    title = "Cognition Trajectories by Average Height",
+    subtitle = "Line color indicates person-mean height (between-person effect)",
     x = "Assessment Wave",
     y = "Fluid Cognition"
   ) +
@@ -368,19 +386,19 @@ ggsave(
 
 ## Visualization {.output}
 
-![Cognition Trajectories by Puberty Level](stage4-artifacts/lmm-time-varying-covariates/visualization.png)
+![Cognition Trajectories by Average Height](stage4-artifacts/lmm-time-varying-covariates/visualization.png)
 
 ## Visualization Notes {.note}
 
-The plot shows individual cognition trajectories colored by each participant's average pubertal development level. This visualization captures the **between-person effect** - whether participants with higher average puberty (warmer colors) tend to show systematically different cognition trajectories than those with lower average puberty (cooler colors). The black line shows the overall population trend. Note that the **within-person effect** is harder to visualize directly, as it represents how deviations from one's own average puberty relate to deviations from one's own expected cognition trajectory.
+The plot shows individual cognition trajectories colored by each participant's average height. This visualization captures the **between-person effect** - whether participants with higher average height (warmer colors) tend to show systematically different cognition trajectories than those with lower average height (cooler colors). The black line shows the overall population trend. Note that the **within-person effect** is harder to visualize directly, as it represents how deviations from one's own average height relate to deviations from one's own expected cognition trajectory.
 
 # Discussion
 
-This analysis demonstrates the importance of properly decomposing time-varying covariates in longitudinal models. The raw (uncentered) TVC coefficient in Model 2 represents a blend of within-person and between-person effects that can be misleading for causal inference. By contrast, Model 3's decomposition reveals how the puberty-cognition relationship operates at different levels.
+This analysis demonstrates the importance of properly decomposing time-varying covariates in longitudinal models. The raw (uncentered) TVC coefficient in Model 2 represents a blend of within-person and between-person effects that can be misleading for causal inference. By contrast, Model 3's decomposition reveals how the height-cognition relationship operates at different levels.
 
-The within-person effect is particularly valuable for causal inference because it controls for all stable individual differences (observed or unobserved) that might confound the relationship. If pubertal development causally affects cognition, we would expect to see a within-person effect: at times when a participant is more pubertally advanced than their own average, their cognition should differ in a predictable direction.
+The within-person effect is particularly valuable for causal inference because it controls for all stable individual differences (observed or unobserved) that might confound the relationship. If physical growth causally affects cognition, we would expect to see a within-person effect: at times when a participant has grown more than their own average, their cognition should differ in a predictable direction.
 
-However, even the within-person effect can be confounded by time-varying factors that change alongside puberty. Future analyses might address this through instrumental variables, lagged predictors, or cross-lagged panel models. Additionally, the current model assumes that the within-person effect is constant across individuals; random slopes for the TVC could be added to test whether the effect varies across participants.
+However, even the within-person effect can be confounded by time-varying factors that change alongside physical growth. Future analyses might address this through instrumental variables, lagged predictors, or cross-lagged panel models. Additionally, the current model assumes that the within-person effect is constant across individuals; random slopes for the TVC could be added to test whether the effect varies across participants.
 
 # Additional Resources
 

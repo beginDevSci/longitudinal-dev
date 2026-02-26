@@ -114,7 +114,7 @@ library(gt)           # For creating formatted tables
 requested_vars <- c(
     "ab_g_dyn__design_site",
     "ab_g_stc__design_id__fam",
-    "an_y_anthro__height_cm"
+    "ph_y_anthr__height_mean"
 )
 
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
@@ -136,9 +136,10 @@ abcd_data <- create_dataset(
 ```r
 ### Create a long-form dataset with relevant columns
 df_long <- abcd_data %>%
-  select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, an_y_anthro__height_cm) %>%
-  # Filter to Years 0-4 annual assessments using NBDCtools
-  filter_events_abcd(conditions = c("annual", ">=0", "<=4")) %>%
+  select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ph_y_anthr__height_mean) %>%
+  # Filter to annual assessments, then keep only baseline, year 2, and year 4
+  filter_events_abcd(conditions = c("annual")) %>%
+  filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
     session_id = factor(session_id,
@@ -148,7 +149,7 @@ df_long <- abcd_data %>%
   rename(
     site = ab_g_dyn__design_site,
     family_id = ab_g_stc__design_id__fam,
-    height = an_y_anthro__height_cm
+    height = ph_y_anthr__height_mean
   ) %>%
   droplevels() %>%
   drop_na(height)
