@@ -247,7 +247,7 @@ generate-placeholders:
 
 # Check R environment for required packages
 # This validates that all packages needed for Stage 4 are available
-REQUIRED_R_PACKAGES := tidyverse lavaan NBDCtools lme4 lcmm gtsummary broom gt glmmTMB arrow
+REQUIRED_R_PACKAGES := tidyverse lavaan NBDCtools lme4 lmerTest glmmTMB gtsummary broom broom.mixed gt arrow
 check-r-env:
 	@echo "🔍 Checking R environment..."
 	@echo ""
