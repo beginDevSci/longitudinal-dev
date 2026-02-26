@@ -11,7 +11,7 @@ parent_method: "lmm"
 
 ## LMM Quick Reference
 
-Fast lookup for syntax, diagnostics, and troubleshooting. For step-by-step learning, see the [Tutorial](/guides/lmm-walkthrough).
+Fast lookup for syntax, diagnostics, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lmm-walkthrough). For conceptual background, see the [Overview](/guides/lmm).
 
 **Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Checklists](#checklists) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
@@ -640,8 +640,19 @@ For basic growth models, LMM and LGCM produce **identical estimates**.
 
 ---
 
-## Links
+## Related Tutorials
 
-- [Tutorial](/guides/lmm-walkthrough) — Step-by-step worked example
+| Tutorial | Focus | Difficulty |
+|----------|-------|------------|
+| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model | Intro |
+| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes | Intro |
+| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors | Intermediate |
+| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors | Intermediate |
+
+---
+
+## Related Guides
+
 - [LMM Overview](/guides/lmm) — When to use, key concepts
+- [LMM Walkthrough](/guides/lmm-walkthrough) — Step-by-step worked example
 - [lme4 documentation](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) — Official vignette

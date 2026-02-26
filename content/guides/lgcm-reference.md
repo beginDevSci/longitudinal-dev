@@ -11,7 +11,7 @@ parent_method: "lgcm"
 
 ## LGCM Quick Reference
 
-Fast lookup for syntax, fit indices, and troubleshooting. For step-by-step learning, see the [Tutorial](/guides/lgcm-walkthrough).
+Fast lookup for syntax, fit indices, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lgcm-walkthrough). For conceptual background, see the [Overview](/guides/lgcm).
 
 **Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation--missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
@@ -427,8 +427,20 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 ---
 
-## Links
+## Related Tutorials
 
-- [Tutorial](/guides/lgcm-walkthrough) — Step-by-step worked example
+| Tutorial | Focus | Difficulty |
+|----------|-------|------------|
+| [LGCM Basic](/tutorials/lgcm-basic) | Linear growth with lavaan | Intro |
+| [LGCM Multiple Groups](/tutorials/lgcm-multiple-groups) | Group comparisons | Intermediate |
+| [LGCM Time-Invariant Covariates](/tutorials/lgcm-time-invariant-covariates) | Predictors of growth | Intermediate |
+| [LGCM Nesting](/tutorials/lgcm-nesting) | Nested/clustered data | Advanced |
+| [MLGCM](/tutorials/mlgcm) | Multivariate growth | Advanced |
+
+---
+
+## Related Guides
+
 - [LGCM Overview](/guides/lgcm) — When to use, key concepts, mathematical notation
+- [LGCM Walkthrough](/guides/lgcm-walkthrough) — Step-by-step worked example
 - [lavaan documentation](https://lavaan.ugent.be/tutorial/growth.html) — Official guide
