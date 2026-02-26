@@ -616,27 +616,16 @@ For basic growth models, LMM and LGCM produce **identical estimates**.
 
 ## Software
 
-### R Packages
-
-| Package | Use Case | Notes |
-|---------|----------|-------|
-| **lme4** | Primary choice | Fast, reliable, standard |
-| **lmerTest** | p-values for lme4 | Load before fitting |
-| **nlme** | Correlation structures | Different syntax |
-| **performance** | R², ICC, diagnostics | Companion to lme4 |
-| **brms** | Bayesian inference | Requires Stan |
-| **glmmTMB** | Complex GLMMs | Zero-inflation support |
-
-### Other Software
-
-| Software | Notes |
-|----------|-------|
+| Package | Use Case |
+|---------|----------|
+| **lme4** | Primary choice; fast, reliable, standard |
+| **lmerTest** | p-values for lme4; load before fitting |
+| **nlme** | Correlation structures; different syntax |
+| **performance** | R², ICC, diagnostics; companion to lme4 |
+| **brms** | Bayesian inference; requires Stan |
+| **glmmTMB** | Complex GLMMs; zero-inflation support |
 | **Stata (mixed)** | Good documentation |
 | **SAS (PROC MIXED)** | Established, powerful |
-| **SPSS (MIXED)** | GUI available |
-| **HLM** | Specialized for MLM |
-
-**Recommendation**: Use lme4 + lmerTest for most analyses. Use nlme for autocorrelated residuals. Use brms for Bayesian inference.
 
 ---
 
@@ -655,4 +644,6 @@ For basic growth models, LMM and LGCM produce **identical estimates**.
 
 - [LMM Overview](/guides/lmm) — When to use, key concepts
 - [LMM Walkthrough](/guides/lmm-walkthrough) — Step-by-step worked example
-- [lme4 documentation](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) — Official vignette
+- [LGCM Overview](/guides/lgcm) — SEM-based growth curves (equivalent for basic models)
+- [GLMM Overview](/guides/glmm) — Generalized mixed models for non-continuous outcomes
+- [GEE Overview](/guides/gee) — Population-averaged alternative to mixed models

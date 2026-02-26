@@ -405,8 +405,6 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 ## Software
 
-### R Packages
-
 | Package | Use Case |
 |---------|----------|
 | **lavaan** | Primary choice; free, flexible, active development |
@@ -414,16 +412,8 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 | **lme4 / nlme** | MLM approach; equivalent for basic models |
 | **semTools** | lavaan extensions (measurement invariance) |
 | **lcmm** | Latent class / mixture growth models |
-
-### Other Options
-
-| Software | Notes |
-|----------|-------|
 | **Mplus** | Gold standard for complex/mixture models; licensed |
 | **Stata (sem)** | Good documentation; integrates with Stata workflow |
-| **semopy** (Python) | SEM in Python; active development |
-
-**Recommendation:** Use lavaan for learning and most research. Use Mplus for mixture models or complex specifications.
 
 ---
 
@@ -443,4 +433,6 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 - [LGCM Overview](/guides/lgcm) — When to use, key concepts, mathematical notation
 - [LGCM Walkthrough](/guides/lgcm-walkthrough) — Step-by-step worked example
-- [lavaan documentation](https://lavaan.ugent.be/tutorial/growth.html) — Official guide
+- [LMM Overview](/guides/lmm) — Linear mixed models for continuous outcomes
+- [GLMM Overview](/guides/glmm) — Generalized mixed models for non-continuous outcomes
+- [GEE Overview](/guides/gee) — Population-averaged alternative to mixed models
