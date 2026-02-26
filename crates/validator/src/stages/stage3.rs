@@ -7,6 +7,7 @@
 //! - Expected objects are created
 
 use crate::config::{RConfig, Stage3Config};
+use crate::privacy::scan_for_participant_ids;
 use crate::validators::ValidationResult;
 use anyhow::{Context, Result};
 use std::fs;
@@ -95,6 +96,45 @@ impl<'a> Stage3Validator<'a> {
 
                 if exec_result.success {
                     // Execution succeeded
+
+                    // PRIVACY CHECK: Scan output for participant IDs
+                    if self.r_config.scan_output_for_ids {
+                        let combined_output =
+                            format!("{}\n{}", exec_result.stdout, exec_result.stderr);
+                        let scan_result = scan_for_participant_ids(
+                            &combined_output,
+                            &self.r_config.participant_id_patterns,
+                            &self.r_config.participant_id_action,
+                        );
+
+                        if scan_result.found_ids {
+                            if self.r_config.participant_id_action == "fail" {
+                                result.error(
+                                    None,
+                                    format!(
+                                        "PRIVACY VIOLATION: {} participant ID(s) detected in R output (e.g., {})",
+                                        scan_result.count,
+                                        scan_result.sample_ids.join(", ")
+                                    ),
+                                    Some(
+                                        "Remove code that prints individual participant data (head, print, glimpse). \
+                                         Use only aggregated summaries in output.".to_string()
+                                    ),
+                                );
+                                return Ok(result);
+                            } else {
+                                result.warning(
+                                    None,
+                                    format!(
+                                        "Participant IDs detected in output ({} found) - these have been redacted",
+                                        scan_result.count
+                                    ),
+                                    Some("Consider removing code that exposes participant IDs".to_string()),
+                                );
+                            }
+                        }
+                    }
+
                     // Check for warnings in output
                     if exec_result.has_warnings() {
                         result.warning(

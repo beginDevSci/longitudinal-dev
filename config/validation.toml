@@ -48,6 +48,18 @@ check_string_literals = true
 check_custom_functions = true
 allowed_functions_file = "config/allowed_functions.txt"
 require_libraries_first = true
+# Check for patterns that might expose individual-level data to LLM stdout
+check_data_exposure = true
+# Patterns that trigger warnings (functions that print raw data)
+data_exposure_patterns = [
+    "head(",
+    "tail(",
+    "glimpse(",
+    "View(",
+    "str(",
+    "print(head",
+    "print(tail",
+]
 
 [stage3]
 sample_rows = 500  # Increased to ensure sufficient data after filtering
@@ -73,7 +85,7 @@ validate_schema = true  # Validate against JSON schema (BUILD SCRIPT VALIDATES S
 # Can be overridden with R_EXECUTABLE environment variable.
 # Fallback logic tries: configured path → PATH → common locations
 executable = "Rscript"
-required_packages = ["tidyverse", "lavaan", "NBDCtools", "lme4", "lcmm", "gtsummary", "broom", "gt", "pagedown"]
+required_packages = ["tidyverse", "lavaan", "NBDCtools", "lme4", "lmerTest", "glmmTMB", "gtsummary", "broom", "broom.mixed", "gt", "arrow"]
 
 [output]
 terminal = true
