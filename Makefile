@@ -1,4 +1,4 @@
-.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg serve deploy bootstrap watch check-guide-hierarchy stage4 refresh-tutorial generate-placeholders
+.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg serve deploy bootstrap watch check-guide-hierarchy stage4 stage4-nix refresh-tutorial generate-placeholders check-r-env check-artifacts
 
 # Default target shows help
 help:
@@ -24,7 +24,10 @@ help:
 	@echo "  make check-guide-hierarchy  - Verify guide heading counts (max 10 H2s)"
 	@echo ""
 	@echo "  STAGE 4 (R Execution - requires ABCD data):"
+	@echo "  make check-r-env            - Verify R environment has required packages"
+	@echo "  make check-artifacts        - Show status of Stage 4 artifacts (real vs placeholder)"
 	@echo "  make stage4 TUTORIAL=<slug> - Run Stage 4 to generate artifacts for a tutorial"
+	@echo "  make stage4-nix TUTORIAL=<slug> - Run Stage 4 inside Nix R shell (recommended)"
 	@echo "  make refresh-tutorial TUTORIAL=<slug> - Regenerate JSON after artifacts update"
 	@echo "  make generate-placeholders TUTORIAL=<slug> - Create placeholder artifacts for new tutorial"
 	@echo ""
@@ -141,7 +144,8 @@ check-guide-hierarchy:
 
 # Run Stage 4 for a specific tutorial to generate real artifacts
 # Usage: make stage4 TUTORIAL=glmm-binary
-stage4:
+# Note: Checks R environment first. Use 'make stage4-nix' for automatic Nix shell.
+stage4: check-r-env
 	@if [ -z "$(TUTORIAL)" ]; then \
 		echo "❌ Error: TUTORIAL parameter required"; \
 		echo "Usage: make stage4 TUTORIAL=<tutorial-slug>"; \
@@ -154,14 +158,33 @@ stage4:
 		echo "❌ Error: Tutorial not found: content/tutorials/$(TUTORIAL).md"; \
 		exit 1; \
 	fi
-	@echo "🔬 Running Stage 4 (R execution) for $(TUTORIAL)..."
-	@echo "   This requires ABCD data at: $${ABCD_DATA_PATH:-/Users/shawes/abcd/6_0/phenotype}"
-	@cargo run --locked -p longitudinal_validator -- \
-		--force \
-		content/tutorials/$(TUTORIAL).md
-	@echo ""
-	@echo "✅ Stage 4 complete! Artifacts generated in public/stage4-artifacts/$(TUTORIAL)/"
-	@echo "   Run 'make refresh-tutorial TUTORIAL=$(TUTORIAL)' to update JSON"
+	@mkdir -p logs
+	@timestamp=$$(date +%Y%m%d_%H%M%S); \
+	logfile="logs/stage4_$(TUTORIAL)_$$timestamp.log"; \
+	echo "🔬 Running Stage 4 (R execution) for $(TUTORIAL)..."; \
+	echo "   ABCD data: $${ABCD_DATA_PATH:-/Users/shawes/abcd/6_0/phenotype}"; \
+	echo "   Log file: $$logfile"; \
+	echo ""; \
+	echo "=== Stage 4 Run: $(TUTORIAL) ===" > "$$logfile"; \
+	echo "Timestamp: $$(date)" >> "$$logfile"; \
+	echo "ABCD_DATA_PATH: $${ABCD_DATA_PATH:-/Users/shawes/abcd/6_0/phenotype}" >> "$$logfile"; \
+	echo "" >> "$$logfile"; \
+	if cargo run --locked -p longitudinal_validator -- --force content/tutorials/$(TUTORIAL).md 2>&1 | tee -a "$$logfile"; then \
+		echo "" >> "$$logfile"; \
+		echo "=== SUCCESS ===" >> "$$logfile"; \
+		echo ""; \
+		echo "✅ Stage 4 complete! Artifacts generated in public/stage4-artifacts/$(TUTORIAL)/"; \
+		echo "   Log saved: $$logfile"; \
+		echo "   Run 'make refresh-tutorial TUTORIAL=$(TUTORIAL)' to update JSON"; \
+	else \
+		echo "" >> "$$logfile"; \
+		echo "=== FAILED ===" >> "$$logfile"; \
+		echo ""; \
+		echo "❌ Stage 4 failed for $(TUTORIAL)"; \
+		echo "   Check log file: $$logfile"; \
+		echo "   Check temp R script in /tmp/ for debugging"; \
+		exit 1; \
+	fi
 
 # Regenerate JSON for a tutorial after Stage 4 artifacts are updated
 # Usage: make refresh-tutorial TUTORIAL=glmm-binary
@@ -221,3 +244,85 @@ generate-placeholders:
 		fi \
 	done
 	@echo "✅ Placeholders ready in public/stage4-artifacts/$(TUTORIAL)/"
+
+# Check R environment for required packages
+# This validates that all packages needed for Stage 4 are available
+REQUIRED_R_PACKAGES := tidyverse lavaan NBDCtools lme4 lcmm gtsummary broom gt glmmTMB arrow
+check-r-env:
+	@echo "🔍 Checking R environment..."
+	@echo ""
+	@rscript_path=$$(which Rscript 2>/dev/null); \
+	if [ -z "$$rscript_path" ]; then \
+		echo "❌ Rscript not found in PATH"; \
+		echo ""; \
+		echo "To fix: Enter the Nix R shell first:"; \
+		echo "  cd ~/dotfiles && nix develop .#r"; \
+		exit 1; \
+	fi; \
+	echo "  Rscript: $$rscript_path"; \
+	r_version=$$(Rscript --version 2>&1 | head -1); \
+	echo "  Version: $$r_version"; \
+	echo ""; \
+	echo "  Checking required packages..."; \
+	missing=""; \
+	for pkg in $(REQUIRED_R_PACKAGES); do \
+		result=$$(Rscript -e "cat(requireNamespace('$$pkg', quietly=TRUE))" 2>/dev/null); \
+		if [ "$$result" = "TRUE" ]; then \
+			echo "    ✅ $$pkg"; \
+		else \
+			echo "    ❌ $$pkg (missing)"; \
+			missing="$$missing $$pkg"; \
+		fi; \
+	done; \
+	echo ""; \
+	if [ -n "$$missing" ]; then \
+		echo "❌ Missing R packages:$$missing"; \
+		echo ""; \
+		echo "To fix: Enter the Nix R shell which has all packages:"; \
+		echo "  cd ~/dotfiles && nix develop .#r"; \
+		echo ""; \
+		echo "Then return to this directory and run Stage 4:"; \
+		echo "  cd $(CURDIR) && make stage4 TUTORIAL=<slug>"; \
+		exit 1; \
+	fi; \
+	echo "✅ R environment ready for Stage 4!"
+
+# Check status of Stage 4 artifacts across all tutorials
+# Shows which have real output vs placeholders
+check-artifacts:
+	@echo "🔍 Checking Stage 4 artifact status..."
+	@echo ""
+	@echo "  Tutorial                          Status       Size      Date"
+	@echo "  ────────────────────────────────  ───────────  ────────  ──────────"
+	@for dir in public/stage4-artifacts/*/; do \
+		name=$$(basename "$$dir"); \
+		if [ -f "$$dir/visualization.png" ]; then \
+			size=$$(wc -c < "$$dir/visualization.png" | tr -d ' '); \
+			date=$$(stat -f "%Sm" -t "%Y-%m-%d" "$$dir/visualization.png" 2>/dev/null || stat -c "%y" "$$dir/visualization.png" 2>/dev/null | cut -d' ' -f1); \
+			if [ "$$size" -lt 100 ]; then \
+				printf "  %-34s  ⚠ placeholder  %6s B  %s\n" "$$name" "$$size" "$$date"; \
+			else \
+				printf "  %-34s  ✅ real        %6s B  %s\n" "$$name" "$$size" "$$date"; \
+			fi; \
+		else \
+			printf "  %-34s  ❌ missing     -         -\n" "$$name"; \
+		fi; \
+	done
+	@echo ""
+	@echo "Legend: ✅ real = has actual R output, ⚠ placeholder = needs Stage 4 run"
+
+# Run Stage 4 inside Nix R shell (recommended approach)
+# Usage: make stage4-nix TUTORIAL=glmm-binary
+stage4-nix:
+	@if [ -z "$(TUTORIAL)" ]; then \
+		echo "❌ Error: TUTORIAL parameter required"; \
+		echo "Usage: make stage4-nix TUTORIAL=<tutorial-slug>"; \
+		exit 1; \
+	fi
+	@if [ ! -f "content/tutorials/$(TUTORIAL).md" ]; then \
+		echo "❌ Error: Tutorial not found: content/tutorials/$(TUTORIAL).md"; \
+		exit 1; \
+	fi
+	@echo "🔬 Running Stage 4 for $(TUTORIAL) inside Nix R shell..."
+	@echo ""
+	@./scripts/stage4/run-in-nix.sh $(TUTORIAL)
