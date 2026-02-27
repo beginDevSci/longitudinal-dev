@@ -108,8 +108,8 @@ library(tidyverse)    # Data wrangling & visualization
 library(gtsummary)    # Summary tables
 library(rstatix)      # Statistical tests in tidy format
 library(geepack)      # Generalized Estimating Equations (GEE) analysis
-library(ggeffects)    # Extract & visualize model predictions
-library(broom)      # Organizing model outputs
+library(broom)        # Organizing model outputs
+library(gt)           # Presentation-ready display tables
 
 ### Load harmonized ABCD data required for this analysis
 requested_vars <- c(
@@ -212,21 +212,31 @@ model <- geeglm(sleep_binary ~ session_id + site,
   corstr = "exchangeable"
 )
 
-# Generate summary table
-model_summary_table <- gtsummary::tbl_regression(model,
-  digits = 3,
-  intercept = TRUE
+# Generate summary table from model coefficients
+coefs <- as.data.frame(summary(model)$coefficients)
+model_summary_table <- data.frame(
+  Parameter = rownames(coefs),
+  Estimate = coefs$Estimate,
+  SE = coefs$Std.err,
+  Wald = coefs$Wald,
+  p_value = coefs[, "Pr(>|W|)"]
 ) %>%
-  gtsummary::as_gt()
+  gt() %>%
+  tab_header(title = "GEE Model: Sufficient Sleep ~ Time + Site") %>%
+  fmt_number(columns = c(Estimate, SE, Wald), decimals = 3) %>%
+  fmt_number(columns = p_value, decimals = 4) %>%
+  cols_label(
+    Parameter = "Parameter",
+    Estimate = "Estimate",
+    SE = "Robust SE",
+    Wald = "Wald",
+    p_value = "p-value"
+  )
 
 model_summary_table
 
 # Save as standalone HTML
-gt::gtsave(
-  data = model_summary_table,
-  filename = "model_summary.html",
-  inline_css = FALSE
-)
+gt::gtsave(model_summary_table, filename = "model_summary.html")
 ```
 
 ## Create Model Diagnostics Table {.code}
@@ -288,10 +298,21 @@ The estimated correlation parameter (α = 0.369) suggests moderate within-subjec
 ```r
 
 # Generate predicted probabilities from the GEE model
-preds <- ggeffect(model, terms = "session_id")
+# Create a prediction data frame with unique session_id levels (site at reference)
+newdata <- data.frame(
+  session_id = levels(df_long$session_id),
+  site = levels(df_long$site)[1]
+)
+newdata$predicted <- predict(model, newdata = newdata, type = "response")
+
+# Compute confidence intervals using SE of linear predictor
+linpred <- predict(model, newdata = newdata, type = "link")
+se_link <- sqrt(diag(vcov(model)[1:nrow(newdata), 1:nrow(newdata)]))
+newdata$conf.low <- plogis(linpred - 1.96 * se_link)
+newdata$conf.high <- plogis(linpred + 1.96 * se_link)
 
 # Plot predicted probabilities with confidence intervals
-visualization <- ggplot(preds, aes(x = x, y = predicted)) +
+visualization <- ggplot(newdata, aes(x = session_id, y = predicted)) +
   geom_point(size = 3, color = "blue") +
   geom_line(group = 1, color = "blue") +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
