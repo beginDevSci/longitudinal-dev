@@ -31,7 +31,7 @@ This tutorial extends the basic LGCM to include time-invariant covariates using 
 
 - **When to Use:** Choose OpenMx when you want explicit matrix control over how covariates enter the growth model, plan to add complex covariate interactions, or want to see the full path structure connecting predictors to latent growth factors.
 - **Key Advantage:** Each regression path from covariate to latent factor is a named `mxPath`, making it straightforward to add, remove, or constrain covariate effects and to extend the model with mediation or moderation paths.
-- **What You'll Learn:** How to specify an LGCM with time-invariant covariates in OpenMx using `mxModel` and `mxPath`; how to interpret conditional intercept and slope means; and how the specification compares to the equivalent lavaan model.
+- **What You'll Learn:** How to specify an LGCM with time-invariant covariates in OpenMx using `mxModel` and `mxPath`; how to interpret conditional intercept and slope means; and how to declare covariate regression paths in the RAM framework.
 
 # Data Access
 
@@ -441,7 +441,7 @@ The conditional LGCM estimates the mean intercept and slope of emotional suppres
 
 The **regression coefficients** (b_age_i, b_fem_i, etc.) quantify how each covariate shifts the intercept or slope. Positive values indicate higher covariate levels predict higher suppression (for intercept paths) or steeper growth (for slope paths). Because covariates are centered at their sample means, the conditional latent means are directly interpretable as values for a "typical" participant.
 
-The equal residual variance constraint assumes stable measurement precision across the four annual waves. OpenMx uses FIML estimation by default with raw data, handling any remaining missingness at the likelihood level. Unlike the lavaan companion tutorial, which uses cluster-robust standard errors via `cluster = "site"`, this OpenMx specification reports model-based standard errors.
+The equal residual variance constraint assumes stable measurement precision across the four annual waves. OpenMx uses FIML estimation by default with raw data, handling any remaining missingness at the likelihood level. This specification reports model-based standard errors; cluster-robust standard errors could be obtained by adding a sandwich estimator wrapper if site-level clustering is a concern.
 
 ## Visualization {.code}
 
@@ -490,7 +490,7 @@ This tutorial demonstrates how to add time-invariant covariates to a latent grow
 
 The RAM specification makes it natural to extend the covariate model. Adding interaction effects requires only creating a product variable and adding paths from it to the latent factors. Mediation chains — where a covariate affects the intercept, which in turn predicts the slope — can be specified by adding a directed path from `i` to `s`. Multiple-group models for comparing covariate effects across subpopulations extend the same logic by wrapping the model in `mxMultiGroup`. These extensions are straightforward because each new hypothesis corresponds to a new path or constraint.
 
-Compared to the lavaan companion tutorial, the OpenMx specification requires more explicit code — covariate variances, covariances, and means must all be declared rather than handled automatically. This verbosity is intentional: it ensures that every element of the model is visible and modifiable, which becomes valuable as models grow in complexity.
+The OpenMx specification requires explicitly declaring covariate variances, covariances, and means as part of the model. This ensures that every element of the model is visible and modifiable, which becomes valuable as models grow in complexity.
 
 # Additional Resources
 
@@ -507,13 +507,6 @@ Comprehensive textbook on latent variable approaches to longitudinal data, inclu
 
 **Badge:** BOOK
 **URL:** https://doi.org/10.1037/14440-000
-
-### lavaan Version of This Tutorial {.resource}
-
-The companion tutorial implementing the same LGCM with time-invariant covariates using lavaan's formula-based syntax, for direct comparison of the two engine approaches.
-
-**Badge:** TUTORIAL
-**URL:** https://longitudinal.dev/tutorials/lgcm-time-invariant-covariates
 
 ### Centering in Growth Models {.resource}
 

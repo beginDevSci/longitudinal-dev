@@ -31,7 +31,7 @@ This tutorial specifies a Multivariate Latent Growth Curve Model (MLGCM) in Open
 
 - **When to Use:** Choose OpenMx when you want explicit matrix control over the parallel-process structure, plan to add cross-lagged or coupling paths between domains, or want the full covariance structure among latent factors to be directly visible in the code.
 - **Key Advantage:** Every cross-domain covariance is a named `mxPath`, making it straightforward to test specific hypotheses about comorbidity — for example, whether baseline externalizing predicts the rate of internalizing change — by adding or constraining individual paths.
-- **What You'll Learn:** How to specify a multivariate LGCM in OpenMx using `mxModel` and `mxPath`; how to interpret within- and cross-domain latent factor associations; and how the specification compares to the equivalent lavaan model.
+- **What You'll Learn:** How to specify a multivariate LGCM in OpenMx using `mxModel` and `mxPath`; how to interpret within- and cross-domain latent factor associations; and how to declare explicit cross-domain covariance paths.
 
 # Data Access
 
@@ -407,7 +407,7 @@ The **within-domain parameters** describe each growth process independently. The
 
 The **cross-domain covariances** are the key multivariate parameters. The intercept-intercept covariance (cov_i_ext_i_int) captures baseline comorbidity — whether youth with high externalizing also tend to have high internalizing. The slope-slope covariance (cov_s_ext_s_int) captures co-development — whether changes in one domain track with changes in the other. The cross-domain intercept-slope covariances test whether baseline levels in one domain predict rates of change in the other.
 
-Residual variances are freely estimated per wave within each domain to accommodate potential changes in measurement precision across assessments. This matches the lavaan companion tutorial, which also freely estimates all residual variances.
+Residual variances are freely estimated per wave within each domain to accommodate potential changes in measurement precision across assessments.
 
 ## Visualization {.code}
 
@@ -471,7 +471,7 @@ This tutorial demonstrates how to specify a multivariate latent growth curve mod
 
 The RAM specification makes it natural to extend the parallel-process model. Adding directed coupling paths — where baseline externalizing predicts the slope of internalizing, or vice versa — requires only adding `mxPath(from = "i_ext", to = "s_int")` with a free parameter. This converts the correlational MLGCM into a cross-lagged coupling model that tests directional hypotheses about cascading effects between domains. Similarly, time-specific cross-domain residual covariances can be added to capture occasion-specific comorbidity beyond the latent factors.
 
-Compared to the lavaan companion tutorial, the OpenMx specification requires explicitly declaring every covariance between latent factors rather than relying on lavaan's default behavior of correlating all latent variables. This verbosity is intentional: it ensures that every cross-domain association is visible and named, making it straightforward to identify which specific hypotheses the model tests and to add constraints or extensions path by path.
+The OpenMx specification requires explicitly declaring every covariance between latent factors. This ensures that every cross-domain association is visible and named, making it straightforward to identify which specific hypotheses the model tests and to add constraints or extensions path by path.
 
 # Additional Resources
 
@@ -488,13 +488,6 @@ Step-by-step quantitative methods tutorial on modeling correlated growth traject
 
 **Badge:** VIGNETTE
 **URL:** https://quantdev.ssri.psu.edu/tutorials/parallel-process-latent-growth-curve-models
-
-### lavaan Version of This Tutorial {.resource}
-
-The companion tutorial implementing the same multivariate LGCM using lavaan's formula-based syntax, for direct comparison of the two engine approaches.
-
-**Badge:** TUTORIAL
-**URL:** https://longitudinal.dev/tutorials/mlgcm
 
 ### Bollen & Curran (2006): Latent Curve Models {.resource}
 

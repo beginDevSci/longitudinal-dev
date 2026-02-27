@@ -17,21 +17,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Re-implement the basic latent growth curve model in OpenMx, comparing matrix-based SEM specification with the equivalent lavaan workflow to estimate emotional suppression trajectories across ABCD assessments.
-description: Re-implement the basic latent growth curve model in OpenMx, comparing matrix-based SEM specification with the equivalent lavaan workflow to estimate emotional suppression trajectories across ABCD assessments.
+summary: Specify a basic latent growth curve model in OpenMx using explicit RAM path notation to estimate emotional suppression trajectories across ABCD assessments.
+description: Specify a basic latent growth curve model in OpenMx using explicit RAM path notation to estimate emotional suppression trajectories across ABCD assessments.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial re-implements the basic Latent Growth Curve Model (LGCM) from the companion lavaan tutorial using OpenMx, an alternative SEM engine that uses explicit matrix algebra for model specification. By fitting the same model to the same ABCD data, you can directly compare the two engines' syntax, estimation behavior, and output. OpenMx's matrix-based approach makes the underlying algebra transparent: factor loadings, means, and covariance components are specified as named matrices rather than formula shorthand. This tutorial examines emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
+This tutorial specifies a basic Latent Growth Curve Model (LGCM) using OpenMx's RAM path notation. OpenMx's matrix-based approach makes the underlying algebra transparent: factor loadings, means, and covariance components are specified as named paths rather than formula shorthand. This tutorial examines emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
 
 ## Features {.features}
 
-- **When to Use:** Choose OpenMx when you need explicit matrix control over model specification, custom optimization settings, or plan to extend to models that go beyond lavaan's formula syntax (e.g., state-space models, mixture distributions, non-standard constraints).
+- **When to Use:** Choose OpenMx when you need explicit matrix control over model specification, custom optimization settings, or plan to extend to complex models (e.g., state-space models, mixture distributions, non-standard constraints).
 - **Key Advantage:** The matrix specification makes every fixed and free element visible, which aids understanding of how SEM algebra maps to data — and makes it easier to add custom constraints or extensions later.
-- **What You'll Learn:** How to specify a basic LGCM in OpenMx using `mxModel`, `mxPath`, and `mxData`; how to interpret the output; and how results compare to the equivalent lavaan specification.
+- **What You'll Learn:** How to specify a basic LGCM in OpenMx using `mxModel`, `mxPath`, and `mxData`; how to interpret latent growth parameters; and how to compute fit indices using reference models.
 
 # Data Access
 
@@ -296,11 +296,11 @@ gt::gtsave(
 ```r
 ### Compute reference models for incremental fit indices
 # OpenMx requires explicit saturated and independence models to compute
-# chi-squared, CFI, TLI, and RMSEA (lavaan does this automatically)
+# chi-squared, CFI, TLI, and RMSEA
 ref_models <- mxRefModels(fit_mx, run = TRUE)
 mx_summary <- summary(fit_mx, refModels = ref_models)
 
-# Extract fit indices comparable to lavaan output
+# Extract fit indices
 fit_data <- data.frame(
   Metric = c("chi-squared", "df", "p-value", "CFI", "TLI", "RMSEA", "AIC", "BIC"),
   Value = c(
@@ -332,57 +332,6 @@ gt::gtsave(
 )
 ```
 
-## Comparison with lavaan {.code}
-
-```r
-### Side-by-side syntax comparison table
-comparison_data <- data.frame(
-  Element = c(
-    "Intercept loading",
-    "Slope loading",
-    "Latent means",
-    "Latent (co)variances",
-    "Residual variances",
-    "Data input",
-    "Estimation"
-  ),
-  lavaan = c(
-    "i =~ 1*Y3 + 1*Y4 + 1*Y5 + 1*Y6",
-    "s =~ 0*Y3 + 1*Y4 + 2*Y5 + 3*Y6",
-    "Implicit via growth()",
-    "i ~~ i; s ~~ s; i ~~ s",
-    "Y3 ~~ Y3 (per indicator)",
-    "data = df_wide",
-    "growth(..., missing = 'ml')"
-  ),
-  OpenMx = c(
-    "mxPath('intercept' -> vars, values=1, free=FALSE)",
-    "mxPath('slope' -> vars, values=c(0,1,2,3), free=FALSE)",
-    "mxPath('one' -> latentVars, free=TRUE)",
-    "mxPath(latentVars, arrows=2, connect='unique.pairs')",
-    "mxPath(manifestVars, arrows=2)",
-    "mxData(observed=df, type='raw')",
-    "mxRun(model)  # FIML by default for raw data"
-  )
-)
-
-comparison_table <- comparison_data %>%
-  gt() %>%
-  tab_header(title = "Syntax Comparison: lavaan vs OpenMx") %>%
-  cols_label(
-    Element = "Model Element",
-    lavaan = "lavaan",
-    OpenMx = "OpenMx"
-  )
-
-### Save comparison table
-gt::gtsave(
-  data = comparison_table,
-  filename = "syntax_comparison.html",
-  inline_css = FALSE
-)
-```
-
 ## Model Summary Output {.output}
 
 /stage4-artifacts/lgcm-basic-openmx/model_summary.html
@@ -391,13 +340,9 @@ gt::gtsave(
 
 /stage4-artifacts/lgcm-basic-openmx/model_fit_indices.html
 
-## Syntax Comparison Output {.output}
-
-/stage4-artifacts/lgcm-basic-openmx/syntax_comparison.html
-
 ## Interpretation {.note}
 
-Because this tutorial fits the identical model to the same data as the lavaan version, parameter estimates should be numerically equivalent (within rounding). Both engines use Full Information Maximum Likelihood (FIML) for raw data, so intercept means, slope means, latent variances, covariances, and residual variances should match closely. Any small differences arise from optimizer defaults (lavaan uses NLMINB; OpenMx uses SLSQP or NPSOL) rather than from substantive model differences. The key takeaway is that OpenMx's matrix-based specification makes every model element explicit — fixed loadings, free parameters, start values, and labels — which provides a foundation for extending the model to more complex specifications that go beyond formula-based shortcuts.
+OpenMx uses Full Information Maximum Likelihood (FIML) by default for raw data, estimating intercept means, slope means, latent variances, covariances, and residual variances simultaneously. The optimizer (SLSQP or NPSOL) iterates until convergence, and the summary output reports parameter estimates with standard errors derived from the inverse of the information matrix. The key takeaway is that OpenMx's matrix-based specification makes every model element explicit — fixed loadings, free parameters, start values, and labels — which provides a foundation for extending the model to more complex specifications.
 
 ## Visualization {.code}
 
@@ -433,15 +378,15 @@ ggsave(
 
 ## Visualization Notes {.note}
 
-Each gray line shows a participant's suppression trajectory across the four assessments, while blue points mark the observed scores and the red line traces the sample-wide mean. Because this tutorial uses the same data as the lavaan version, the visualization is identical — the difference lies entirely in how the model was specified and estimated under the hood. The upward tilt of the red line confirms the cohort-level increase in suppression, and the fan of gray lines illustrates the individual heterogeneity that the latent growth curve model is designed to capture.
+Each gray line shows a participant's suppression trajectory across the four assessments, while blue points mark the observed scores and the red line traces the sample-wide mean. The upward tilt of the red line confirms the cohort-level increase in suppression, and the fan of gray lines illustrates the individual heterogeneity that the latent growth curve model is designed to capture.
 
 # Discussion
 
-This tutorial demonstrates that OpenMx and lavaan produce equivalent results for the same LGCM specification, confirming that the choice of engine is about workflow preference and extensibility rather than substantive differences in standard models. OpenMx's RAM-type specification requires explicitly declaring every path — factor loadings, means, variances, and covariances — which can feel more verbose than lavaan's formula shorthand but makes the model algebra fully transparent.
+This tutorial demonstrates how to specify a basic LGCM using OpenMx's RAM-type path notation. The specification explicitly declares every path — factor loadings, means, variances, and covariances — making the model algebra fully transparent.
 
-The matrix-based approach becomes especially valuable when extending beyond standard growth models. OpenMx supports custom optimization constraints, definition variables for individually varying parameters, mixture models, and state-space formulations that are difficult or impossible to express in lavaan's formula syntax. For researchers who plan to build toward these extensions, starting with an OpenMx implementation of a basic LGCM establishes the workflow patterns needed for more complex specifications.
+The matrix-based approach becomes especially valuable when extending beyond standard growth models. OpenMx supports custom optimization constraints, definition variables for individually varying parameters, mixture models, and state-space formulations. For researchers who plan to build toward these extensions, starting with an OpenMx implementation of a basic LGCM establishes the workflow patterns needed for more complex specifications.
 
-The analysis itself replicates the lavaan findings: emotional suppression shows a small but reliable increase across Years 3–6 of the ABCD Study, with substantial individual differences in both initial levels and rates of change. The negative intercept-slope covariance indicates that youth with higher initial suppression tend to show slower growth, consistent with a regression-to-the-mean pattern.
+The analysis shows that emotional suppression increases across Years 3–6 of the ABCD Study, with substantial individual differences in both initial levels and rates of change. The negative intercept-slope covariance indicates that youth with higher initial suppression tend to show slower growth, consistent with a regression-to-the-mean pattern.
 
 # Additional Resources
 
@@ -458,13 +403,6 @@ Comprehensive user guide for the OpenMx package, including detailed coverage of 
 
 **Badge:** DOCS
 **URL:** https://openmx.ssri.psu.edu/docs/OpenMx/latest/
-
-### lavaan Version of This Tutorial {.resource}
-
-The companion tutorial implementing the same basic LGCM using lavaan's formula-based syntax, for direct comparison of the two engine approaches.
-
-**Badge:** TUTORIAL
-**URL:** https://longitudinal.dev/tutorials/lgcm-basic
 
 ### Neale et al. (2016) — OpenMx 2.0 {.resource}
 

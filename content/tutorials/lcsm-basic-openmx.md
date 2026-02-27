@@ -17,21 +17,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Specify a latent change score model in OpenMx using explicit RAM path notation, extending the lavaan companion tutorial to four time points for proper model identification and testable fit indices.
-description: Specify a latent change score model in OpenMx using explicit RAM path notation, extending the lavaan companion tutorial to four time points for proper model identification and testable fit indices.
+summary: Specify a latent change score model in OpenMx using explicit RAM path notation with four time points, producing a properly identified model with testable fit indices for height changes in ABCD youth.
+description: Specify a latent change score model in OpenMx using explicit RAM path notation with four time points, producing a properly identified model with testable fit indices for height changes in ABCD youth.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial specifies a Latent Change Score Model (LCSM) in OpenMx's RAM path notation, extending the companion lavaan tutorial from three to four time points. LCSMs treat change between measurement occasions as a latent variable, separating true change from measurement error. The LCSM is historically central to the OpenMx tradition — the model was formalized by John McArdle, the architect of the Mx software that OpenMx extends. By specifying each latent true score, change score, and autoregressive path as explicit `mxPath` declarations, the tutorial makes the algebra of the LCSM fully transparent: how observed scores decompose into latent true scores plus error, and how true scores at each occasion equal the prior true score plus a latent change factor. Using four waves (Baseline, Year 2, Year 4, Year 6) with equal residual variances produces a properly identified model with testable fit indices — an improvement over the 3-timepoint specification, which is under-identified. This tutorial analyzes height changes in ABCD youth across four assessment waves.
+This tutorial specifies a Latent Change Score Model (LCSM) in OpenMx's RAM path notation using four time points. LCSMs treat change between measurement occasions as a latent variable, separating true change from measurement error. By specifying each latent true score, change score, and autoregressive path as explicit `mxPath` declarations, the tutorial makes the algebra of the LCSM fully transparent: how observed scores decompose into latent true scores plus error, and how true scores at each occasion equal the prior true score plus a latent change factor. Using four waves (Baseline, Year 2, Year 4, Year 6) with equal residual variances produces a properly identified model with testable fit indices. This tutorial analyzes height changes in ABCD youth across four assessment waves.
 
 ## Features {.features}
 
 - **When to Use:** Choose OpenMx when you want explicit matrix control over the LCSM structure, plan to add proportional effects or coupled change processes, or want the model algebra to be fully visible in the code.
 - **Key Advantage:** Every path in the LCSM — factor loadings, autoregressive carryover, change score definitions, variances, and covariances — is declared as a named `mxPath`, making the model equation `eta(t) = eta(t-1) + delta(t)` directly readable in the code.
-- **What You'll Learn:** How to specify a basic LCSM in OpenMx using `mxModel` and `mxPath`; how to interpret latent means, variances, and covariances of initial status and change; and how the specification compares to the equivalent lavaan model.
+- **What You'll Learn:** How to specify a basic LCSM in OpenMx using `mxModel` and `mxPath`; how to interpret latent means, variances, and covariances of initial status and change; and how to compute fit indices using reference models.
 
 # Data Access
 
@@ -441,9 +441,9 @@ The histograms show the distribution of observed height changes across the three
 
 This tutorial demonstrates how to specify a Latent Change Score Model using OpenMx's RAM path notation, making the underlying algebra — `eta(t) = eta(t-1) + delta(t)` — directly visible in the code. Each path in the model corresponds to an explicit element of the LCSM framework: unit-weighted factor loadings link true scores to observations, autoregressive paths carry forward prior status, and change score paths define the latent difference.
 
-By extending from three to four time points and applying equality constraints on change score variances and residual variances, the tutorial achieves a properly identified model (df = 1) that yields testable fit indices and trustworthy standard errors — a meaningful improvement over the 3-timepoint lavaan companion. Adding further time points would allow relaxing the homogeneity constraints to examine whether growth heterogeneity varies across developmental stages.
+Using four time points with equality constraints on change score variances and residual variances produces a properly identified model (df = 1) with testable fit indices and trustworthy standard errors. Adding further time points would allow relaxing the homogeneity constraints to examine whether growth heterogeneity varies across developmental stages.
 
-The LCSM is historically associated with OpenMx's predecessor software (Mx), and the RAM specification makes it natural to extend the basic model. Proportional effects — where change depends on prior status — require only adding a single `mxPath(from = "eta1", to = "delta12")` with a free parameter. Bivariate LCSMs with cross-domain coupling, which test whether change in one construct drives change in another, extend the same logic by adding coupling paths between the two sets of latent variables. These extensions are straightforward in the RAM framework because each new hypothesis corresponds to a new path.
+The RAM specification makes it natural to extend the basic model. Proportional effects — where change depends on prior status — require only adding a single `mxPath(from = "eta1", to = "delta12")` with a free parameter. Bivariate LCSMs with cross-domain coupling, which test whether change in one construct drives change in another, extend the same logic by adding coupling paths between the two sets of latent variables. These extensions are straightforward in the RAM framework because each new hypothesis corresponds to a new path.
 
 # Additional Resources
 
@@ -460,13 +460,6 @@ Foundational paper by John McArdle introducing the latent change score framework
 
 **Badge:** PAPER
 **URL:** https://doi.org/10.1146/annurev.psych.60.110707.163612
-
-### lavaan Version of This Tutorial {.resource}
-
-The companion tutorial implementing the same basic LCSM using lavaan's formula-based syntax, for direct comparison of the two engine approaches.
-
-**Badge:** TUTORIAL
-**URL:** https://longitudinal.dev/tutorials/lcsm-basic
 
 ### Grimm, Ram & Estabrook: Growth Modeling {.resource}
 
