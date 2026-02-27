@@ -109,7 +109,6 @@ library(gtsummary)   # For generating publication-quality summary tables
 library(rstatix)     # Provides tidy-format statistical tests
 library(lme4)        # Linear mixed-effects models (LMMs)
 library(sjPlot)      # Visualization of mixed models
-library(kableExtra)  # Formatting & styling in HTML/Markdown reports
 library(performance) # Useful functions for model diagnostics & comparisons
 library(ggeffects)   # Adjusted regression predictions
 library(broom.mixed) # Tidy summaries of mixed models

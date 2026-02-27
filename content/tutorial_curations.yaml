@@ -58,4 +58,9 @@ workflows:
       - gee-count
       - gee-time-varying-covariate
 
+  neuroimaging:
+    label: "Neuroimaging"
+    tutorials:
+      - blmm-neuroimaging
+
 # Note: recently_updated is computed automatically from updated_at dates

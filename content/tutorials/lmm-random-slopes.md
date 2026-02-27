@@ -108,7 +108,6 @@ library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
 library(rstatix)     # Provides tidy-format statistical tests
 library(lme4)        # Linear mixed-effects models (LMMs)
-library(kableExtra)  # Formatting & styling in HTML/Markdown reports
 library(performance) # Useful functions for model diagnostics & comparisons
 library(lmerTest)    # Provides p-values for lmer models
 library(sjPlot)      # Visualization of mixed models

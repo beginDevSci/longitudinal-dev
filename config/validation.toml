@@ -85,7 +85,7 @@ validate_schema = true  # Validate against JSON schema (BUILD SCRIPT VALIDATES S
 # Can be overridden with R_EXECUTABLE environment variable.
 # Fallback logic tries: configured path → PATH → common locations
 executable = "Rscript"
-required_packages = ["tidyverse", "lavaan", "NBDCtools", "lme4", "lmerTest", "glmmTMB", "gtsummary", "broom", "broom.mixed", "gt", "arrow", "geepack", "semPlot", "performance", "OpenMx"]
+required_packages = ["tidyverse", "lavaan", "NBDCtools", "lme4", "lmerTest", "glmmTMB", "gtsummary", "broom", "broom.mixed", "gt", "arrow", "geepack", "semPlot", "sjPlot", "performance", "OpenMx", "rstatix", "ggeffects", "patchwork", "effectsize", "emmeans", "corrplot"]
 
 [output]
 terminal = true
