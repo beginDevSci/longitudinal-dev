@@ -36,12 +36,12 @@ pub fn DiscussionSection(model: DiscussionModel) -> impl IntoView {
         }
         .into_any()
     } else {
-        // Fallback: simple paragraph rendering
+        // Fallback: paragraph rendering (may contain inline HTML like <code>)
         let para_nodes = paragraphs
             .into_iter()
             .map(|p| {
-                let text = p.to_string();
-                view! { <p class="body-text">{text}</p> }
+                let html_content = p.to_string();
+                view! { <p class="body-text" inner_html={html_content} /> }
             })
             .collect_view();
 
