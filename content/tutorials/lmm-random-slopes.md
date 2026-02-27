@@ -341,7 +341,7 @@ ggsave(
 
 ## Visualization-1 {.output}
 
-![Visualization](stage4-artifacts/lmm-random-slopes/lmm_sjPlot_results.html)
+/stage4-artifacts/lmm-random-slopes/lmm_sjPlot_results.html
 
 ## Visualization-2 {.output}
 
