@@ -17,21 +17,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: advanced
 timepoints: 3_5
-summary: Fit a multivariate latent growth curve model in OpenMx's RAM notation to estimate parallel developmental processes and cross-domain associations between externalizing and internalizing symptoms.
-description: Fit a multivariate latent growth curve model in OpenMx's RAM notation to estimate parallel developmental processes and cross-domain associations between externalizing and internalizing symptoms.
+summary: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate intercepts and slopes of externalizing and internalizing symptoms across ABCD assessments.
+description: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate intercepts and slopes of externalizing and internalizing symptoms across ABCD assessments.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial specifies a Multivariate Latent Growth Curve Model (MLGCM) in OpenMx's RAM path notation, modeling parallel developmental trajectories of externalizing and internalizing symptoms simultaneously. By estimating separate intercept and slope factors for each domain and freely correlating all four latent factors, the model captures both within-domain growth patterns and cross-domain developmental associations. Each path — factor loadings, latent means, variances, and cross-domain covariances — is declared as an explicit `mxPath`, making the parallel-process structure fully transparent. This tutorial analyzes CBCL externalizing and internalizing T-scores in ABCD youth across four annual assessments (Baseline through Year 3).
+Multivariate Latent Growth Curve Modeling (MLGCM) simultaneously models trajectories of multiple outcomes, revealing how different developmental processes unfold together over time. By estimating intercept and slope factors for each construct in a unified framework, MLGCM captures individual growth patterns while quantifying dynamic interrelationships between developmental trajectories — including baseline comorbidity, co-development, and cross-domain predictive associations. This tutorial examines co-development of externalizing and internalizing symptoms in ABCD youth across four annual assessments (Baseline through Year 3), estimating parallel growth parameters and cross-domain correlations to reveal comorbidity patterns and shared developmental processes. The OpenMx implementation specifies each within- and cross-domain association as an explicit path, making the parallel-process structure directly readable in the code.
 
 ## Features {.features}
 
-- **When to Use:** Choose OpenMx when you want explicit matrix control over the parallel-process structure, plan to add cross-lagged or coupling paths between domains, or want the full covariance structure among latent factors to be directly visible in the code.
-- **Key Advantage:** Every cross-domain covariance is a named `mxPath`, making it straightforward to test specific hypotheses about comorbidity — for example, whether baseline externalizing predicts the rate of internalizing change — by adding or constraining individual paths.
-- **What You'll Learn:** How to specify a multivariate LGCM in OpenMx using `mxModel` and `mxPath`; how to interpret within- and cross-domain latent factor associations; and how to declare explicit cross-domain covariance paths.
+- **When to Use:** Applicable when you want to model parallel growth processes (e.g., externalizing and internalizing symptoms) simultaneously to understand how trajectories are linked across domains.
+- **Key Advantage:** Captures covariance between multiple latent intercepts and slopes, revealing whether baseline levels in one domain predict change in another and whether growth across domains is correlated.
+- **What You'll Learn:** How to specify multivariate LGCMs, interpret within- and cross-domain covariances among latent factors, and visualize coupled developmental trajectories.
 
 # Data Access
 
@@ -431,7 +431,7 @@ externalizing_plot <- ggplot(mean_externalizing_long,
     geom_line(color = "blue", linewidth = 1.2) +
     geom_point(color = "blue") +
     labs(title = "Mean Externalizing Trajectory",
-         subtitle = "MLGCM (OpenMx engine)",
+         subtitle = "Baseline to Year 3",
          y = "Mean Externalizing", x = "Time Point") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -442,7 +442,7 @@ internalizing_plot <- ggplot(mean_internalizing_long,
     geom_line(color = "red", linewidth = 1.2) +
     geom_point(color = "red") +
     labs(title = "Mean Internalizing Trajectory",
-         subtitle = "MLGCM (OpenMx engine)",
+         subtitle = "Baseline to Year 3",
          y = "Mean Internalizing", x = "Time Point") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -467,11 +467,11 @@ The side-by-side panels display the mean growth trajectories for externalizing (
 
 # Discussion
 
-This tutorial demonstrates how to specify a multivariate latent growth curve model using OpenMx's RAM path notation, with separate intercept and slope factors for each domain and explicit cross-domain covariances capturing comorbidity patterns.
+The multivariate growth model captures parallel trends in both externalizing and internalizing symptoms. Intercept and slope variances are significant for each domain, confirming that youth enter adolescence with different symptom levels and follow heterogeneous pathways even when the overall population trend points in the same direction.
 
-The RAM specification makes it natural to extend the parallel-process model. Adding directed coupling paths — where baseline externalizing predicts the slope of internalizing, or vice versa — requires only adding `mxPath(from = "i_ext", to = "s_int")` with a free parameter. This converts the correlational MLGCM into a cross-lagged coupling model that tests directional hypotheses about cascading effects between domains. Similarly, time-specific cross-domain residual covariances can be added to capture occasion-specific comorbidity beyond the latent factors.
+Cross-domain associations reveal the core comorbidity pattern. A positive intercept-intercept covariance indicates that youth with elevated baseline externalizing symptoms also tend to start high on internalizing problems. A positive slope-slope covariance indicates that changes in one domain track with changes in the other — improvements or worsening tend to co-occur across domains. Negative intercept-slope covariances within each domain suggest diminishing returns: adolescents with the highest baseline symptoms show the most change, but at a slower rate than peers with milder presentations.
 
-The OpenMx specification requires explicitly declaring every covariance between latent factors. This ensures that every cross-domain association is visible and named, making it straightforward to identify which specific hypotheses the model tests and to add constraints or extensions path by path.
+Extensions include adding directed coupling paths to test whether baseline levels in one domain predict rates of change in the other (converting the correlational MLGCM into a cross-lagged model), incorporating time-invariant covariates to explain cross-domain associations, and adding time-specific residual covariances to capture occasion-specific comorbidity beyond the latent factors.
 
 # Additional Resources
 

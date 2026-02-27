@@ -17,21 +17,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Specify a latent change score model in OpenMx using explicit RAM path notation with four time points, producing a properly identified model with testable fit indices for height changes in ABCD youth.
-description: Specify a latent change score model in OpenMx using explicit RAM path notation with four time points, producing a properly identified model with testable fit indices for height changes in ABCD youth.
+summary: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
+description: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial specifies a Latent Change Score Model (LCSM) in OpenMx's RAM path notation using four time points. LCSMs treat change between measurement occasions as a latent variable, separating true change from measurement error. By specifying each latent true score, change score, and autoregressive path as explicit `mxPath` declarations, the tutorial makes the algebra of the LCSM fully transparent: how observed scores decompose into latent true scores plus error, and how true scores at each occasion equal the prior true score plus a latent change factor. Using four waves (Baseline, Year 2, Year 4, Year 6) with equal residual variances produces a properly identified model with testable fit indices. This tutorial analyzes height changes in ABCD youth across four assessment waves.
+Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze height changes in ABCD youth, using equality constraints on change score variances and residual variances to produce a properly identified model with testable fit indices. The OpenMx implementation specifies each path explicitly, making the underlying algebra — observed score = true score + error, and true score at each occasion = prior true score + latent change — directly visible in the code.
 
 ## Features {.features}
 
-- **When to Use:** Choose OpenMx when you want explicit matrix control over the LCSM structure, plan to add proportional effects or coupled change processes, or want the model algebra to be fully visible in the code.
-- **Key Advantage:** Every path in the LCSM — factor loadings, autoregressive carryover, change score definitions, variances, and covariances — is declared as a named `mxPath`, making the model equation `eta(t) = eta(t-1) + delta(t)` directly readable in the code.
-- **What You'll Learn:** How to specify a basic LCSM in OpenMx using `mxModel` and `mxPath`; how to interpret latent means, variances, and covariances of initial status and change; and how to compute fit indices using reference models.
+- **When to Use:** Apply when you want to model change as an explicit latent construct with four or more time points, especially when measurement error is a concern or when you need a properly identified model with testable fit indices.
+- **Key Advantage:** With four time points and equality constraints, the LCSM yields df > 0, enabling chi-square tests and incremental fit indices (CFI, TLI, RMSEA) that are unavailable with just-identified specifications. This allows formal evaluation of whether the model's assumptions about change hold.
+- **What You'll Learn:** How to specify a basic LCSM in OpenMx, interpret the mean and variance of latent change, assess whether initial status predicts subsequent change, and evaluate model fit.
 
 # Data Access
 
@@ -415,7 +415,7 @@ change_plot <- df_wide %>%
   facet_wrap(~Period, scales = "free_y") +
   labs(
     title = "Distribution of Height Change Across Assessment Periods",
-    subtitle = "Basic LCSM (OpenMx engine)",
+    subtitle = "Basic LCSM — Four Time Points",
     x = "Height Change (cm)",
     y = "Count"
   ) +
@@ -439,11 +439,11 @@ The histograms show the distribution of observed height changes across the three
 
 # Discussion
 
-This tutorial demonstrates how to specify a Latent Change Score Model using OpenMx's RAM path notation, making the underlying algebra — `eta(t) = eta(t-1) + delta(t)` — directly visible in the code. Each path in the model corresponds to an explicit element of the LCSM framework: unit-weighted factor loadings link true scores to observations, autoregressive paths carry forward prior status, and change score paths define the latent difference.
+The Latent Change Score Model provides several advantages over simple difference scores for analyzing developmental change. By modeling change as a latent variable, LCSM separates true change from measurement error, yielding more reliable estimates of both average change and individual differences in change. This is particularly important when measurement reliability is imperfect, as raw difference scores can substantially underestimate true change variance.
 
-Using four time points with equality constraints on change score variances and residual variances produces a properly identified model (df = 1) with testable fit indices and trustworthy standard errors. Adding further time points would allow relaxing the homogeneity constraints to examine whether growth heterogeneity varies across developmental stages.
+Using four time points with equality constraints produces a properly identified model (df = 1), enabling formal goodness-of-fit testing. The model's assumptions — that change score variance and measurement error variance are constant across periods — can be evaluated directly through chi-square tests and incremental fit indices. These are mild assumptions for a stable physical measure like height, and relaxing them requires only additional time points to provide the necessary degrees of freedom.
 
-The RAM specification makes it natural to extend the basic model. Proportional effects — where change depends on prior status — require only adding a single `mxPath(from = "eta1", to = "delta12")` with a free parameter. Bivariate LCSMs with cross-domain coupling, which test whether change in one construct drives change in another, extend the same logic by adding coupling paths between the two sets of latent variables. These extensions are straightforward in the RAM framework because each new hypothesis corresponds to a new path.
+The covariance between initial status and change tests whether development follows a compensatory or cumulative pattern: a negative covariance suggests that shorter youth grow faster (regression toward the mean), while a positive covariance would indicate cumulative advantage. The covariances between successive change scores reveal whether faster growth in one period predicts faster or slower growth in the next, addressing questions about the consistency of individual growth trajectories. Extensions include proportional effects (where change depends on current level), bivariate models examining coupled change across two constructs, and piecewise specifications allowing change rates to differ across developmental periods.
 
 # Additional Resources
 

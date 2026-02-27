@@ -17,21 +17,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Specify a basic latent growth curve model in OpenMx using explicit RAM path notation to estimate emotional suppression trajectories across ABCD assessments.
-description: Specify a basic latent growth curve model in OpenMx using explicit RAM path notation to estimate emotional suppression trajectories across ABCD assessments.
+summary: Estimate average emotional suppression trajectories, growth rates, and individual variability across repeated ABCD assessments using latent growth curve modeling in OpenMx.
+description: Estimate average emotional suppression trajectories, growth rates, and individual variability across repeated ABCD assessments using latent growth curve modeling in OpenMx.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial specifies a basic Latent Growth Curve Model (LGCM) using OpenMx's RAM path notation. OpenMx's matrix-based approach makes the underlying algebra transparent: factor loadings, means, and covariance components are specified as named paths rather than formula shorthand. This tutorial examines emotional suppression in ABCD youth across four annual assessments, estimating the average trajectory and individual variation in initial levels and rates of change.
+Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments (Years 3–6), estimating the average trajectory and individual variation in initial levels and rates of change. The OpenMx implementation specifies each model element — factor loadings, means, variances, and covariances — as named paths, making the underlying algebra directly readable in the code.
 
 ## Features {.features}
 
-- **When to Use:** Choose OpenMx when you need explicit matrix control over model specification, custom optimization settings, or plan to extend to complex models (e.g., state-space models, mixture distributions, non-standard constraints).
-- **Key Advantage:** The matrix specification makes every fixed and free element visible, which aids understanding of how SEM algebra maps to data — and makes it easier to add custom constraints or extensions later.
-- **What You'll Learn:** How to specify a basic LGCM in OpenMx using `mxModel`, `mxPath`, and `mxData`; how to interpret latent growth parameters; and how to compute fit indices using reference models.
+- **When to Use:** Ideal when you have repeated measures and want to model the average growth trajectory plus individual deviations, with measurement error accounted for.
+- **Key Advantage:** LGCM provides latent intercept and slope factors, so you can quantify both initial status and change over time while separating true developmental change from measurement noise.
+- **What You'll Learn:** How to specify a basic LGCM in OpenMx, interpret intercept and slope estimates (means, variances, and their covariance), and assess overall model fit.
 
 # Data Access
 
@@ -342,7 +342,7 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-OpenMx uses Full Information Maximum Likelihood (FIML) by default for raw data, estimating intercept means, slope means, latent variances, covariances, and residual variances simultaneously. The optimizer (SLSQP or NPSOL) iterates until convergence, and the summary output reports parameter estimates with standard errors derived from the inverse of the information matrix. The key takeaway is that OpenMx's matrix-based specification makes every model element explicit — fixed loadings, free parameters, start values, and labels — which provides a foundation for extending the model to more complex specifications.
+The LGCM provides estimates of both population-average change and individual differences. The **mean intercept** represents the average suppression level at the first assessment wave, while the **mean slope** captures the average annual rate of change. The **intercept variance** quantifies individual differences in starting levels, and the **slope variance** captures individual differences in growth rates — a significant slope variance confirms that participants follow meaningfully different trajectories. The **intercept-slope covariance** tests whether youth who start higher tend to change faster or slower: a negative value suggests compensatory patterns where higher-starting individuals show slower growth, while a positive value would indicate cumulative advantage. Residual variances capture measurement error at each wave.
 
 ## Visualization {.code}
 
@@ -359,7 +359,7 @@ visualization <- ggplot(df_long_selected, aes(x = session_id, y = suppression, g
     geom_smooth(aes(group = 1), method = "lm", color = "red", linewidth = 1.2, se = TRUE, fill = "lightpink") +
     labs(
         title = "Emotional Suppression Trajectories Over Time",
-        subtitle = "Basic LGCM (OpenMx engine)",
+        subtitle = "Basic LGCM — Years 3 to 6",
         x = "Time (Years from Baseline)",
         y = "Suppression Score"
     ) +
@@ -382,11 +382,11 @@ Each gray line shows a participant's suppression trajectory across the four asse
 
 # Discussion
 
-This tutorial demonstrates how to specify a basic LGCM using OpenMx's RAM-type path notation. The specification explicitly declares every path — factor loadings, means, variances, and covariances — making the model algebra fully transparent.
+The analysis reveals heterogeneous suppression trajectories, with the overall trend indicating increasing suppression over time while individual trajectories vary substantially. The significant slope variance confirms that adolescents follow meaningfully different developmental paths — some rise steeply, others remain stable or even decline. The negative intercept-slope covariance indicates that youth who begin with higher suppression tend to show slower growth, consistent with a regression-to-the-mean or ceiling-effect pattern.
 
-The matrix-based approach becomes especially valuable when extending beyond standard growth models. OpenMx supports custom optimization constraints, definition variables for individually varying parameters, mixture models, and state-space formulations. For researchers who plan to build toward these extensions, starting with an OpenMx implementation of a basic LGCM establishes the workflow patterns needed for more complex specifications.
+The inclusion of both random intercepts and slopes provides a flexible framework for understanding variability in initial suppression levels and growth rates. Compared to a model with only fixed effects, the random-slope specification captures the heterogeneity visible in individual trajectory plots and yields more realistic standard errors for the population-average trend.
 
-The analysis shows that emotional suppression increases across Years 3–6 of the ABCD Study, with substantial individual differences in both initial levels and rates of change. The negative intercept-slope covariance indicates that youth with higher initial suppression tend to show slower growth, consistent with a regression-to-the-mean pattern.
+Extensions of the basic LGCM include conditional models with time-invariant covariates (to explain why individuals differ), piecewise specifications that allow change rates to differ across developmental periods, and multivariate models that examine co-development across multiple constructs. These extensions build directly on the intercept-slope framework established here.
 
 # Additional Resources
 

@@ -17,21 +17,21 @@ covariates: TIC
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Add time-invariant covariates to a latent growth curve model in OpenMx's RAM notation, predicting intercept and slope of ABCD emotional suppression from demographic and socioeconomic factors.
-description: Add time-invariant covariates to a latent growth curve model in OpenMx's RAM notation, predicting intercept and slope of ABCD emotional suppression from demographic and socioeconomic factors.
+summary: Add time-invariant covariates to latent growth curve models to evaluate how stable demographic and socioeconomic characteristics shift baseline levels and growth rates of ABCD emotional suppression.
+description: Add time-invariant covariates to latent growth curve models to evaluate how stable demographic and socioeconomic characteristics shift baseline levels and growth rates of ABCD emotional suppression.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-This tutorial extends the basic LGCM to include time-invariant covariates using OpenMx's RAM path notation. By adding regression paths from baseline demographic and socioeconomic predictors to the latent intercept and slope factors, the model explains why individuals differ in both their starting levels and rates of change. Each covariate effect is specified as an explicit `mxPath` declaration, making the conditional growth model fully transparent. This tutorial analyzes emotional suppression in ABCD youth across four annual assessments (Years 3-6), modeling how age, sex, parental education, and household income predict both baseline suppression levels and individual growth trajectories.
+Latent Growth Curve Modeling with time-invariant covariates extends basic growth modeling by explaining why individuals differ in initial levels and rates of change. By incorporating predictors like demographics or socioeconomic factors as covariates of latent intercept and slope factors, this approach reveals how stable characteristics shape developmental trajectories. This tutorial examines emotional suppression in ABCD youth across four annual assessments (Years 3–6), modeling how age, sex, parental education, and household income predict both baseline suppression levels and individual rates of change over time. The OpenMx implementation specifies each covariate regression path explicitly, connecting predictors to latent growth factors within the RAM framework.
 
 ## Features {.features}
 
-- **When to Use:** Choose OpenMx when you want explicit matrix control over how covariates enter the growth model, plan to add complex covariate interactions, or want to see the full path structure connecting predictors to latent growth factors.
-- **Key Advantage:** Each regression path from covariate to latent factor is a named `mxPath`, making it straightforward to add, remove, or constrain covariate effects and to extend the model with mediation or moderation paths.
-- **What You'll Learn:** How to specify an LGCM with time-invariant covariates in OpenMx using `mxModel` and `mxPath`; how to interpret conditional intercept and slope means; and how to declare covariate regression paths in the RAM framework.
+- **When to Use:** Use when baseline demographics or socioeconomic factors may predict both initial levels and individual growth trajectories, and you want to understand what drives developmental heterogeneity.
+- **Key Advantage:** Integrates covariates directly into the latent intercept and slope, revealing how each predictor shifts starting points and trajectories simultaneously while accounting for measurement error in the outcome.
+- **What You'll Learn:** How to add covariates to an LGCM, interpret their effects on intercept and slope factors, and evaluate whether covariates explain meaningful portions of growth heterogeneity.
 
 # Data Access
 
@@ -437,11 +437,11 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The conditional LGCM estimates the mean intercept and slope of emotional suppression after adjusting for baseline demographic and socioeconomic covariates. The **mean intercept (mean_i)** represents the expected suppression level at Year 3 for an individual at the sample mean on all centered covariates, while the **mean slope (mean_s)** represents their expected annual rate of change. The **residual intercept and slope variances** (var_i, var_s) capture individual differences that remain after accounting for covariate effects, and the **intercept-slope covariance** (cov_is) indicates whether higher-starting individuals tend to change faster or slower.
+The conditional LGCM estimates the mean intercept and slope of emotional suppression after adjusting for baseline demographic and socioeconomic covariates. The **mean intercept** represents the expected suppression level at Year 3 for an individual at the sample mean on all centered covariates, while the **mean slope** represents their expected annual rate of change. The **residual intercept and slope variances** capture individual differences that remain after accounting for covariate effects, and the **intercept-slope covariance** indicates whether higher-starting individuals tend to change faster or slower.
 
-The **regression coefficients** (b_age_i, b_fem_i, etc.) quantify how each covariate shifts the intercept or slope. Positive values indicate higher covariate levels predict higher suppression (for intercept paths) or steeper growth (for slope paths). Because covariates are centered at their sample means, the conditional latent means are directly interpretable as values for a "typical" participant.
+The **regression coefficients** quantify how each covariate shifts the intercept or slope. Positive values on intercept paths indicate that higher covariate levels predict higher baseline suppression; positive values on slope paths indicate steeper growth. Because covariates are centered at their sample means, the conditional latent means are directly interpretable as values for a "typical" participant.
 
-The equal residual variance constraint assumes stable measurement precision across the four annual waves. OpenMx uses FIML estimation by default with raw data, handling any remaining missingness at the likelihood level. This specification reports model-based standard errors; cluster-robust standard errors could be obtained by adding a sandwich estimator wrapper if site-level clustering is a concern.
+The equal residual variance constraint assumes stable measurement precision across the four annual waves. This model uses FIML estimation, handling any remaining missingness at the likelihood level.
 
 ## Visualization {.code}
 
@@ -460,7 +460,7 @@ visualization <- ggplot(df_long_selected,
                 linewidth = 1.2, se = TRUE, fill = "lightpink") +
     labs(
         title = "Suppression Growth with Confidence Intervals",
-        subtitle = "LGCM with Time-Invariant Covariates (OpenMx engine)",
+        subtitle = "LGCM with Time-Invariant Covariates",
         x = "Assessment Wave",
         y = "Suppression Score"
     ) +
@@ -486,11 +486,11 @@ The plot displays individual and overall trends in emotional suppression across 
 
 # Discussion
 
-This tutorial demonstrates how to add time-invariant covariates to a latent growth curve model using OpenMx's RAM path notation. Each regression path from a covariate to the latent intercept or slope is an explicit `mxPath` declaration, making the conditional model structure fully visible in the code.
+Suppression generally increased across assessments, yet youth followed noticeably different paths. Significant residual variance in both intercepts and slopes — after accounting for covariates — shows that demographic and socioeconomic factors explain only part of the heterogeneity, with substantial individual variability remaining.
 
-The RAM specification makes it natural to extend the covariate model. Adding interaction effects requires only creating a product variable and adding paths from it to the latent factors. Mediation chains — where a covariate affects the intercept, which in turn predicts the slope — can be specified by adding a directed path from `i` to `s`. Multiple-group models for comparing covariate effects across subpopulations extend the same logic by wrapping the model in `mxMultiGroup`. These extensions are straightforward because each new hypothesis corresponds to a new path or constraint.
+Age, sex, and socioeconomic markers each contributed to understanding trajectory differences. Older youth tended to enter with higher suppression but progress more slowly thereafter, suggesting a ceiling effect or developmental plateau. Sex differences appeared primarily in growth rates rather than starting levels. Household income and parental education each predicted baseline suppression in expected directions, with lower socioeconomic resources associated with higher initial levels.
 
-The OpenMx specification requires explicitly declaring covariate variances, covariances, and means as part of the model. This ensures that every element of the model is visible and modifiable, which becomes valuable as models grow in complexity.
+These patterns highlight meaningful stratification in both starting points and growth rates, while the remaining residual variance underscores that unmeasured factors — personality, peer context, coping strategies — also shape suppression development. Extensions include adding interaction terms to test whether covariate effects differ across subgroups, mediation models where initial status predicts subsequent change, and multiple-group specifications for formal cross-population comparisons.
 
 # Additional Resources
 
