@@ -328,11 +328,11 @@ diagnostics_table
 
 ## Interpretation {.note}
 
-The Poisson GEE models the expected number of alcohol use days as a function of time and sex, estimating population-averaged incidence rate ratios (IRRs). The **time coefficient** indicates how the rate of alcohol use days changes per assessment wave. An IRR greater than 1 means the expected count increases over time; an IRR of 1.5 would mean a 50% increase per wave.
+The Poisson GEE estimated a population-averaged IRR for time of 2.79 (95% CI: 2.61–2.98, p < .001), indicating that the expected count of alcohol use days nearly tripled with each assessment wave. The sex effect was not significant (IRR = 1.22, 95% CI: 0.99–1.51, p = .068), suggesting only a marginal difference between males and females in average alcohol use days after accounting for the time trend.
 
-The **scale parameter** from the Poisson GEE is a key diagnostic. Under a correctly specified Poisson model, the scale parameter should be approximately 1. Values substantially above 1 indicate **overdispersion** — more variability in the data than the Poisson distribution assumes. With count data like alcohol use days (many zeros, some large values), overdispersion is common. GEE with robust (sandwich) standard errors remains valid even under overdispersion because inference relies on the sandwich variance estimator rather than the assumed Poisson variance structure.
+The **scale parameter** of 2.448 confirms substantial **overdispersion** — the data have roughly 2.4 times more variability than the Poisson distribution assumes. This is expected for count data like alcohol use days with many zeros and occasional large values. GEE with robust (sandwich) standard errors remains valid under overdispersion because inference relies on the sandwich variance estimator rather than the assumed Poisson variance structure. The exchangeable correlation parameter of 0.048 indicates modest within-person clustering across waves.
 
-The **SE comparison** table highlights the difference between naive standard errors (which assume the Poisson variance is correct) and robust standard errors (which do not). When these differ substantially, it confirms that the Poisson variance assumption is violated but that robust inference protects against this misspecification. The IRRs remain consistent point estimates regardless, but confidence intervals should always be based on robust SEs.
+The **SE comparison** table shows that robust and naive standard errors are essentially identical for this model, suggesting the working correlation structure is well-specified. When these diverge substantially, it signals variance misspecification — but robust inference protects against this regardless.
 
 ## Visualization {.code}
 

@@ -306,13 +306,11 @@ irr_table
 
 ## Interpretation {.note}
 
-The negative binomial GLMM provides **conditional (subject-specific) incidence rate ratios** — these describe how the expected count changes for a given individual, holding their random effect constant. This differs from the population-averaged IRRs from GEE, which average over all individuals.
+The negative binomial GLMM with random intercepts and slopes (M3) estimated a conditional IRR for time of 2.79 (95% CI: 2.65–2.94, p < .001), indicating that, for a given individual, the expected count of alcohol use days nearly tripled per assessment wave. The sex effect was not significant (IRR = 1.27, 95% CI: 0.92–1.76, p = .142), suggesting no reliable difference between males and females after accounting for individual-level heterogeneity.
 
-The **time IRR** indicates the multiplicative change in expected alcohol use days per assessment wave for a given individual. An IRR of 1.8 means that, for the same person, the expected count increases by 80% per wave. The **sex IRR** compares expected counts between males and females with the same random effect value.
+**Model comparison** strongly favored the negative binomial with random slopes (M3: AIC = 8,672.7) over both the Poisson random-intercept model (M1: AIC = 9,063.0) and the NB random-intercept model (M2: AIC = 9,065.0). The large AIC improvement for M3 indicates that individuals differ not only in baseline alcohol use but also in their rates of change over time — a random-slopes specification is essential for these data.
 
-The **model comparison** between Poisson and negative binomial is critical. A large AIC/BIC improvement for the NB model confirms overdispersion: the data have more variability than the Poisson distribution assumes. The NB model adds a dispersion parameter that absorbs this extra variability, producing more appropriate standard errors and confidence intervals. With count data like alcohol use days (many zeros, some large values), the NB model is almost always preferred.
-
-**Conditional vs. marginal effects:** The conditional IRRs from the GLMM are typically larger than the marginal IRRs from the GEE count tutorial because they describe within-person effects. When random intercept variance is large, the conditional effects can be substantially larger than marginal effects — a feature, not a bug, as they answer different questions.
+**Conditional vs. marginal effects:** The conditional IRR for time (2.79) closely matches the population-averaged IRR from the GEE count tutorial (also 2.79), suggesting that the random effect distribution is relatively symmetric and the marginal-conditional gap is small for these data. When random intercept variance is large, conditional effects can be substantially larger than marginal effects — they answer different questions (within-person change vs. population-average change).
 
 ## Visualization {.code}
 
