@@ -25,7 +25,7 @@ description: Add time-invariant covariates to latent growth curve models to eval
 
 ## Summary {.summary}
 
-Latent Growth Curve Modeling with time-invariant covariates extends basic growth modeling by explaining why individuals differ in initial levels and rates of change. By incorporating predictors like demographics or socioeconomic factors as covariates of latent intercept and slope factors, this approach reveals how stable characteristics shape developmental trajectories. This tutorial examines emotional suppression in ABCD youth across four annual assessments (Years 3–6), modeling how age, sex, parental education, and household income predict both baseline suppression levels and individual rates of change over time. The OpenMx implementation specifies each covariate regression path explicitly, connecting predictors to latent growth factors within the RAM framework.
+Latent Growth Curve Modeling with time-invariant covariates extends basic growth modeling by explaining why individuals differ in initial levels and rates of change. By incorporating predictors like demographics or socioeconomic factors as covariates of latent intercept and slope factors, this approach reveals how stable characteristics shape developmental trajectories. This tutorial examines emotional suppression in ABCD youth across four annual assessments (Years 3–6), modeling how age, sex, parental education, and household income predict both baseline suppression levels and individual rates of change over time.
 
 ## Features {.features}
 
@@ -254,7 +254,7 @@ latent_vars <- c("i", "s")
 ### Build the LGCM with time-invariant covariates in OpenMx RAM notation
 # The model: outcomes = intercept + slope*time + error
 # Covariates predict latent intercept and slope via regression paths
-lgcm_tic_model <- mxModel(
+model <- mxModel(
   "LGCM_TIC",
   type = "RAM",
   manifestVars = manifest_vars,
@@ -339,21 +339,21 @@ lgcm_tic_model <- mxModel(
 )
 
 ### Add non-negativity bounds on variance parameters
-lgcm_tic_model <- mxModel(lgcm_tic_model,
+model <- mxModel(model,
   mxBounds(c("var_i", "var_s", "resvar"), min = 0.001))
 
 ### Fit the model
-fit_mx <- mxRun(lgcm_tic_model)
+fit <- mxRun(model)
 
 ### Display model summary
-summary(fit_mx)
+summary(fit)
 ```
 
 ## Format Model Summary Table {.code}
 
 ```r
 ### Extract parameter estimates into a tidy table
-param_table <- summary(fit_mx)$parameters
+param_table <- summary(fit)$parameters
 
 ### Focus on substantive parameters (exclude saturated covariate moments)
 covariate_moment_labels <- c("mean_age_c", "mean_female", "mean_edu_c",
@@ -392,8 +392,8 @@ gt::gtsave(
 
 ```r
 ### Compute reference models for incremental fit indices
-ref_models <- mxRefModels(fit_mx, run = TRUE)
-mx_summary <- summary(fit_mx, refModels = ref_models)
+ref_models <- mxRefModels(fit, run = TRUE)
+mx_summary <- summary(fit, refModels = ref_models)
 
 ### Extract fit indices
 fit_data <- data.frame(
@@ -437,11 +437,9 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The conditional LGCM estimates the mean intercept and slope of emotional suppression after adjusting for baseline demographic and socioeconomic covariates. The **mean intercept** represents the expected suppression level at Year 3 for an individual at the sample mean on all centered covariates, while the **mean slope** represents their expected annual rate of change. The **residual intercept and slope variances** capture individual differences that remain after accounting for covariate effects, and the **intercept-slope covariance** indicates whether higher-starting individuals tend to change faster or slower.
+Average suppression at Year 3 was 3.074 (SE = 0.019, p < .001) and climbed by 0.134 points per year (SE = 0.008, p < .001). Intercept and slope variances (0.336 and 0.040, both p < .001) confirmed sizable between-person differences, while the negative intercept-slope covariance (-0.041, p < .001) implied that adolescents starting high tended to rise more slowly. Fit indices (CFI = 0.948, TLI = 0.909, SRMR not available, RMSEA = 0.063) indicate the model captures the main longitudinal signal with only minor approximation error.
 
-The **regression coefficients** quantify how each covariate shifts the intercept or slope. Positive values on intercept paths indicate that higher covariate levels predict higher baseline suppression; positive values on slope paths indicate steeper growth. Because covariates are centered at their sample means, the conditional latent means are directly interpretable as values for a "typical" participant.
-
-The equal residual variance constraint assumes stable measurement precision across the four annual waves. This model uses FIML estimation, handling any remaining missingness at the likelihood level.
+Time-invariant covariates added interpretable structure. Older youth entered with higher suppression (b = 0.071, p = .001) yet showed flatter growth (b = -0.027, p = .004). Females increased more slowly than males (b = -0.042, p < .001). Lower household income related to higher intercepts (b = -0.058, p = .005) and marginally steeper slopes (b = 0.016, p = .079), whereas higher parental education predicted lower starting suppression (b = -0.041, p = .007). Collectively, the results highlight heterogeneous developmental courses shaped by demographic context as well as idiosyncratic factors.
 
 ## Visualization {.code}
 
@@ -490,7 +488,7 @@ Suppression generally increased across assessments, yet youth followed noticeabl
 
 Age, sex, and socioeconomic markers each contributed to understanding trajectory differences. Older youth tended to enter with higher suppression but progress more slowly thereafter, suggesting a ceiling effect or developmental plateau. Sex differences appeared primarily in growth rates rather than starting levels. Household income and parental education each predicted baseline suppression in expected directions, with lower socioeconomic resources associated with higher initial levels.
 
-These patterns highlight meaningful stratification in both starting points and growth rates, while the remaining residual variance underscores that unmeasured factors — personality, peer context, coping strategies — also shape suppression development. Extensions include adding interaction terms to test whether covariate effects differ across subgroups, mediation models where initial status predicts subsequent change, and multiple-group specifications for formal cross-population comparisons.
+These patterns highlight meaningful stratification in both starting points and growth rates, while the remaining residual variance underscores that unmeasured factors also shape suppression development. Extensions include adding interaction terms to test whether covariate effects differ across subgroups, mediation models where initial status predicts subsequent change, and multiple-group specifications for formal cross-population comparisons.
 
 # Additional Resources
 

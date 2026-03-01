@@ -25,11 +25,11 @@ description: Estimate average emotional suppression trajectories, growth rates, 
 
 ## Summary {.summary}
 
-Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments (Years 3–6), estimating the average trajectory and individual variation in initial levels and rates of change. The OpenMx implementation specifies each model element — factor loadings, means, variances, and covariances — as named paths, making the underlying algebra directly readable in the code.
+Latent Growth Curve Modeling (LGCM) analyzes longitudinal change by estimating growth trajectories as latent factors while distinguishing systematic development from measurement error. Using intercept and slope parameters, LGCM captures both population-average patterns and individual differences in developmental processes, providing more accurate estimates than traditional repeated measures approaches. This tutorial applies LGCM to examine emotional suppression in ABCD youth across four annual assessments (Years 3–6), estimating the average trajectory and individual variation in initial levels and rates of change.
 
 ## Features {.features}
 
-- **When to Use:** Ideal when you have repeated measures and want to model the average growth trajectory plus individual deviations, with measurement error accounted for.
+- **When to Use:** Ideal when you have repeated measures and want to model the average growth trajectory plus individual deviations.
 - **Key Advantage:** LGCM provides latent intercept and slope factors, so you can quantify both initial status and change over time while separating true developmental change from measurement noise.
 - **What You'll Learn:** How to specify a basic LGCM in OpenMx, interpret intercept and slope estimates (means, variances, and their covariance), and assess overall model fit.
 
@@ -215,7 +215,7 @@ manifest_vars <- c("Suppression_Year_3", "Suppression_Year_4",
 latent_vars <- c("intercept", "slope")
 
 ### Build the OpenMx growth model
-growth_model <- mxModel(
+model <- mxModel(
   "BasicLGCM",
   type = "RAM",
   manifestVars = manifest_vars,
@@ -254,17 +254,17 @@ growth_model <- mxModel(
 )
 
 ### Fit the model
-fit_mx <- mxRun(growth_model)
+fit <- mxRun(model)
 
 ### Display model summary
-summary(fit_mx)
+summary(fit)
 ```
 
 ## Format Model Summary Table {.code}
 
 ```r
 ### Extract parameter estimates into a tidy table
-param_table <- summary(fit_mx)$parameters
+param_table <- summary(fit)$parameters
 
 model_summary_table <- param_table %>%
   select(name, Estimate, Std.Error) %>%
@@ -297,8 +297,8 @@ gt::gtsave(
 ### Compute reference models for incremental fit indices
 # OpenMx requires explicit saturated and independence models to compute
 # chi-squared, CFI, TLI, and RMSEA
-ref_models <- mxRefModels(fit_mx, run = TRUE)
-mx_summary <- summary(fit_mx, refModels = ref_models)
+ref_models <- mxRefModels(fit, run = TRUE)
+mx_summary <- summary(fit, refModels = ref_models)
 
 # Extract fit indices
 fit_data <- data.frame(
@@ -342,7 +342,7 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The LGCM provides estimates of both population-average change and individual differences. The **mean intercept** represents the average suppression level at the first assessment wave, while the **mean slope** captures the average annual rate of change. The **intercept variance** quantifies individual differences in starting levels, and the **slope variance** captures individual differences in growth rates — a significant slope variance confirms that participants follow meaningfully different trajectories. The **intercept-slope covariance** tests whether youth who start higher tend to change faster or slower: a negative value suggests compensatory patterns where higher-starting individuals show slower growth, while a positive value would indicate cumulative advantage. Residual variances capture measurement error at each wave.
+The LGCM fit was generally strong (CFI = 0.949, TLI = 0.938, RMSEA = 0.092), with only the RMSEA hinting at modest residual misfit. Average suppression at Year 3 was 3.109 (SE = 0.012, p < .001) and rose by 0.110 points per year (SE = 0.005, p < .001), indicating a small but reliable increase. Intercept and slope variances (0.322 and 0.046, both p < .001) confirmed that adolescents differed markedly in both starting levels and rates of change. The negative intercept-slope covariance (-0.039, p < .001) implies that youth who began with high suppression tended to grow more slowly, whereas those starting lower closed the gap. Residual variances declined from 0.439 at Year 3 to 0.292 by Year 6, suggesting that measurements became more stable across successive assessments. Overall, the model depicts a cohort-wide rise in suppression layered on top of substantial between-person heterogeneity.
 
 ## Visualization {.code}
 

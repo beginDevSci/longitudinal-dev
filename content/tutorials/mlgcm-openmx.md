@@ -18,14 +18,14 @@ outcome_type: Continuous
 difficulty: advanced
 timepoints: 3_5
 summary: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate intercepts and slopes of externalizing and internalizing symptoms across ABCD assessments.
-description: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate intercepts and slopes of externalizing and internalizing symptoms across ABCD assessments.
+description: Fit multivariate latent growth curve models to estimate parallel developmental processes and relate intercepts and slopes.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-Multivariate Latent Growth Curve Modeling (MLGCM) simultaneously models trajectories of multiple outcomes, revealing how different developmental processes unfold together over time. By estimating intercept and slope factors for each construct in a unified framework, MLGCM captures individual growth patterns while quantifying dynamic interrelationships between developmental trajectories — including baseline comorbidity, co-development, and cross-domain predictive associations. This tutorial examines co-development of externalizing and internalizing symptoms in ABCD youth across four annual assessments (Baseline through Year 3), estimating parallel growth parameters and cross-domain correlations to reveal comorbidity patterns and shared developmental processes. The OpenMx implementation specifies each within- and cross-domain association as an explicit path, making the parallel-process structure directly readable in the code.
+Multivariate Latent Growth Curve Modeling (MLGCM) simultaneously models trajectories of multiple outcomes, revealing how different developmental processes unfold together over time. By estimating intercept and slope factors for each construct in a unified framework, MLGCM captures individual growth patterns while quantifying dynamic interrelationships between developmental trajectories — including baseline comorbidity, co-development, and cross-domain predictive associations. This tutorial examines co-development of externalizing and internalizing symptoms in ABCD youth across four annual assessments (Baseline through Year 3), estimating parallel growth parameters and cross-domain correlations to reveal comorbidity patterns and shared developmental processes.
 
 ## Features {.features}
 
@@ -206,7 +206,7 @@ descriptives_table
 
 # Statistical Analysis
 
-## Define and Fit Multivariate LGCM in OpenMx {.code}
+## Define and Fit Multivariate LGCM {.code}
 
 ```r
 ### Prepare data for OpenMx
@@ -223,7 +223,7 @@ latent_vars <- c("i_ext", "s_ext", "i_int", "s_int")
 
 ### Build the multivariate LGCM in OpenMx RAM notation
 # Two parallel growth processes with correlated latent factors
-mlgcm_model <- mxModel(
+model <- mxModel(
   "MLGCM",
   type = "RAM",
   manifestVars = manifest_vars,
@@ -310,17 +310,17 @@ mlgcm_model <- mxModel(
 )
 
 ### Fit the model
-fit_mx <- mxRun(mlgcm_model)
+fit <- mxRun(model)
 
 ### Display model summary
-summary(fit_mx)
+summary(fit)
 ```
 
 ## Format Model Summary Table {.code}
 
 ```r
 ### Extract parameter estimates into a tidy table
-param_table <- summary(fit_mx)$parameters
+param_table <- summary(fit)$parameters
 
 ### Focus on substantive parameters (exclude individual residual variances)
 resvar_labels <- c("resvar_ext1", "resvar_ext2", "resvar_ext3", "resvar_ext4",
@@ -356,8 +356,8 @@ gt::gtsave(
 
 ```r
 ### Compute reference models for incremental fit indices
-ref_models <- mxRefModels(fit_mx, run = TRUE)
-mx_summary <- summary(fit_mx, refModels = ref_models)
+ref_models <- mxRefModels(fit, run = TRUE)
+mx_summary <- summary(fit, refModels = ref_models)
 
 ### Extract fit indices
 fit_data <- data.frame(
@@ -401,13 +401,9 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The multivariate LGCM estimates separate intercept and slope factors for externalizing and internalizing symptoms, then freely correlates all four latent factors to capture cross-domain developmental associations.
+Externalizing symptoms averaged 45.4 at Baseline and declined by 0.416 points per year (both p < .001); internalizing symptoms started at 48.4 and fell by 0.274 points annually. Thus, both domains improved over the study window. Intercept variances of roughly 80 and slope variances of 3-4 confirmed large between-person differences, so the population mean hides substantial heterogeneity.
 
-The **within-domain parameters** describe each growth process independently. The mean intercepts capture average baseline levels, while the mean slopes capture annual rates of change. Within-domain intercept-slope covariances (cov_is_ext, cov_is_int) indicate whether youth with higher baseline symptoms change faster or slower — negative values suggest diminishing returns where the most symptomatic youth improve but at a slower rate.
-
-The **cross-domain covariances** are the key multivariate parameters. The intercept-intercept covariance (cov_i_ext_i_int) captures baseline comorbidity — whether youth with high externalizing also tend to have high internalizing. The slope-slope covariance (cov_s_ext_s_int) captures co-development — whether changes in one domain track with changes in the other. The cross-domain intercept-slope covariances test whether baseline levels in one domain predict rates of change in the other.
-
-Residual variances are freely estimated per wave within each domain to accommodate potential changes in measurement precision across assessments.
+Model fit was mixed — RMSEA (0.144) and TLI (0.899) suggested that additional cross-domain links might further reduce misfit, though CFI (0.921) was acceptable. Even so, the estimated covariances captured the core comorbidity pattern: youth who started high on externalizing also tended to start high on internalizing (covariance = 58.6, p < .001), and declines in one domain generally coincided with declines in the other (slope covariance = 4.32, p < .001). Negative intercept-slope covariances within each domain (-6.34 for externalizing, -5.56 for internalizing) imply diminishing returns — youth with the highest baseline symptoms improved, but at a slower rate than peers with milder presentations.
 
 ## Visualization {.code}
 
