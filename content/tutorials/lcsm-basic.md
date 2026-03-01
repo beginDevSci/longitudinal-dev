@@ -16,21 +16,21 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Model true change between measurement occasions using latent change score models that separate measurement error from systematic developmental change in ABCD data.
-description: Model true change between measurement occasions using latent change score models that separate measurement error from systematic developmental change in ABCD data.
+summary: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
+description: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-Latent Change Score Models (LCSM) provide a powerful framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM to analyze height changes in ABCD youth across multiple annual assessments, demonstrating how to specify and interpret basic LCSM parameters including initial status, change scores, and their variances and covariances.
+Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze height changes in ABCD youth across multiple annual assessments, demonstrating how to specify and interpret basic LCSM parameters including initial status, change scores, and their variances and covariances.
 
 ## Features {.features}
 
-- **When to Use:** Apply when you want to model change as an explicit latent construct, especially when measurement error is a concern or when you hypothesize that change depends on initial status (proportional effects).
+- **When to Use:** Apply when you want to model change as an explicit latent construct with four or more time points, especially when measurement error is a concern or when you need a properly identified model with testable fit indices.
 - **Key Advantage:** LCSM separates true score variance from error variance in the change score, providing more reliable estimates of individual differences in change than simple difference scores.
-- **What You'll Learn:** How to specify a basic LCSM in lavaan, interpret the mean and variance of latent change, and assess whether change is related to initial status through proportional effects.
+- **What You'll Learn:** How to specify a basic LCSM in lavaan, interpret the mean and variance of latent change, assess whether initial status predicts subsequent change, and evaluate model fit.
 
 # Data Access
 
@@ -135,16 +135,16 @@ abcd_data <- create_dataset(
 
 ```r
 ### Create a long-form dataset with relevant columns
+# Uses 4 time points (Baseline, Year 2, Year 4, Year 6) for model identification
 df_long <- abcd_data %>%
   select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ph_y_anthr__height_mean) %>%
-  # Filter to annual assessments, then keep only baseline, year 2, and year 4
   filter_events_abcd(conditions = c("annual")) %>%
-  filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A")) %>%
+  filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
   arrange(participant_id, session_id) %>%
   mutate(
     session_id = factor(session_id,
-                        levels = c("ses-00A", "ses-02A", "ses-04A"),
-                        labels = c("Baseline", "Year_2", "Year_4"))
+                        levels = c("ses-00A", "ses-02A", "ses-04A", "ses-06A"),
+                        labels = c("Baseline", "Year_2", "Year_4", "Year_6"))
   ) %>%
   rename(
     site = ab_g_dyn__design_site,
@@ -206,54 +206,64 @@ descriptives_table
 
 ```r
 # Define the Latent Change Score Model
-# This model treats change between T1 and T2 as a latent variable
-lcsm_model <- '
+# Uses 4 time points with equality constraints for identification (df = 1)
+model <- '
   # Define latent true scores at each time point
-  # Latent true score T1 is measured by observed Height_Baseline
   eta1 =~ 1*Height_Baseline
-
-  # Latent true score T2 is measured by observed Height_Year_2
   eta2 =~ 1*Height_Year_2
-
-  # Latent true score T3 is measured by observed Height_Year_4
   eta3 =~ 1*Height_Year_4
+  eta4 =~ 1*Height_Year_6
 
   # Define latent change scores
-  # Change from T1 to T2
   delta12 =~ 1*eta2
-  eta2 ~ 1*eta1  # Autoregressive path (carryover)
-
-  # Change from T2 to T3
   delta23 =~ 1*eta3
-  eta3 ~ 1*eta2  # Autoregressive path (carryover)
+  delta34 =~ 1*eta4
+
+  # Autoregressive paths (carryover from prior true score)
+  eta2 ~ 1*eta1
+  eta3 ~ 1*eta2
+  eta4 ~ 1*eta3
 
   # Means of latent variables
   eta1 ~ 1           # Mean of initial status
   delta12 ~ 1        # Mean change T1 to T2
   delta23 ~ 1        # Mean change T2 to T3
+  delta34 ~ 1        # Mean change T3 to T4
 
   # Variances
-  eta1 ~~ eta1       # Variance of initial status
-  delta12 ~~ delta12 # Variance of change T1-T2
-  delta23 ~~ delta23 # Variance of change T2-T3
+  eta1 ~~ eta1               # Variance of initial status
+  delta12 ~~ d*delta12       # Change variances constrained equal
+  delta23 ~~ d*delta23
+  delta34 ~~ d*delta34
 
   # Covariances between initial status and change
   eta1 ~~ delta12
   eta1 ~~ delta23
+  eta1 ~~ delta34
   delta12 ~~ delta23
+  delta12 ~~ delta34
+  delta23 ~~ delta34
 
-  # Residual variances (measurement error)
-  Height_Baseline ~~ e1*Height_Baseline
-  Height_Year_2 ~~ e2*Height_Year_2
-  Height_Year_4 ~~ e3*Height_Year_4
+  # Residual variances constrained equal across time points
+  Height_Baseline ~~ e*Height_Baseline
+  Height_Year_2 ~~ e*Height_Year_2
+  Height_Year_4 ~~ e*Height_Year_4
+  Height_Year_6 ~~ e*Height_Year_6
 
-  # Proportional effects (optional: change depends on prior level)
-  # delta12 ~ beta1*eta1
-  # delta23 ~ beta2*eta2
+  # Fix manifest intercepts to zero (latent means carry the mean structure)
+  Height_Baseline ~ 0*1
+  Height_Year_2 ~ 0*1
+  Height_Year_4 ~ 0*1
+  Height_Year_6 ~ 0*1
+
+  # Fix intermediate true score residual variances to zero
+  eta2 ~~ 0*eta2
+  eta3 ~~ 0*eta3
+  eta4 ~~ 0*eta4
 '
 
 # Fit the LCSM model
-fit <- sem(lcsm_model, data = df_wide, missing = "ml")
+fit <- sem(model, data = df_wide, missing = "ml")
 
 # Display model summary
 summary(fit, fit.measures = TRUE, standardized = TRUE)
@@ -317,33 +327,36 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The LCSM provides estimates of both the average change and individual differences in change. The **mean of the initial status (eta1)** represents the average height at baseline. The **mean of the latent change scores (delta12, delta23)** represent the average true change between assessment waves, adjusted for measurement error. These values should be interpreted as the population-average growth in height.
+The model fit was marginal (CFI = 0.946, RMSEA = 0.401, SRMR = 0.046, df = 1), with the large RMSEA indicating that the equality constraints are somewhat restrictive for height data spanning 6 years of adolescent growth. Average height at baseline was 55.39 cm (SE = 0.049, p < .001), with mean latent change scores of 4.83, 4.72, and 1.76 cm for the three successive periods — revealing clear growth deceleration as adolescents approach adult stature.
 
-The **variance of initial status** captures individual differences in baseline height, while the **variance of the change scores** captures individual differences in growth rates. A significant variance indicates that participants differ meaningfully in how much they changed. The **covariance between initial status and change** tests whether those who started higher grew more or less than those who started lower - a negative covariance suggests regression to the mean or compensatory growth patterns.
+Initial status variance was large (7.30, p < .001), confirming substantial individual differences in baseline height. The constrained change score variance (0.66, p < .001) indicated that individuals also differed in period-to-period growth rates, though less so than in starting levels. The covariance between initial status and the first change score was positive (1.08, p < .001), but later periods showed significant negative covariances (eta1-delta23 = -1.30, eta1-delta34 = -1.46, both p < .001) — taller youth at baseline grew less in later waves, consistent with earlier approach to adult stature. The positive covariance between the final two change scores (2.70, p < .001) suggests that growth in Years 4–6 was positively coupled across adjacent periods. Residual variance was 2.40 (constrained equal across waves).
 
 ## Visualization {.code}
 
 ```r
 ### Create visualization of change score distribution
-# Calculate observed change scores for comparison
 df_wide <- df_wide %>%
   mutate(
     observed_change_12 = Height_Year_2 - Height_Baseline,
-    observed_change_23 = Height_Year_4 - Height_Year_2
+    observed_change_23 = Height_Year_4 - Height_Year_2,
+    observed_change_34 = Height_Year_6 - Height_Year_4
   )
 
-### Plot distribution of change scores
+### Plot distribution of change scores across three periods
 change_plot <- df_wide %>%
-  select(observed_change_12, observed_change_23) %>%
+  select(observed_change_12, observed_change_23, observed_change_34) %>%
   pivot_longer(cols = everything(), names_to = "Period", values_to = "Change") %>%
   mutate(Period = factor(Period,
-                         levels = c("observed_change_12", "observed_change_23"),
-                         labels = c("Baseline to Year 2", "Year 2 to Year 4"))) %>%
+                         levels = c("observed_change_12", "observed_change_23",
+                                    "observed_change_34"),
+                         labels = c("Baseline to Year 2", "Year 2 to Year 4",
+                                    "Year 4 to Year 6"))) %>%
   ggplot(aes(x = Change, fill = Period)) +
   geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
   facet_wrap(~Period, scales = "free_y") +
   labs(
     title = "Distribution of Height Change Across Assessment Periods",
+    subtitle = "Basic LCSM — Four Time Points",
     x = "Height Change (cm)",
     y = "Count"
   ) +
@@ -363,15 +376,15 @@ ggsave(
 
 ## Visualization Notes {.note}
 
-The histograms display the distribution of observed height changes across the two assessment periods. The spread of each distribution reflects individual differences in growth rates - a wider distribution indicates greater heterogeneity in developmental trajectories. Note that these are observed difference scores; the LCSM estimates adjust for measurement error to provide more reliable estimates of true change variance. Comparing the two periods can reveal whether growth rates are constant (similar distributions) or accelerating/decelerating (shifting distributions).
+The histograms show the distribution of observed height changes across the three assessment periods. These are raw difference scores — the LCSM estimates are adjusted for measurement error and thus provide more reliable estimates of true change variance. The spread of each distribution reflects individual differences in growth rates: a wider distribution indicates greater heterogeneity. Comparing across periods reveals whether growth rates are decelerating (narrower and lower-centered distributions in later periods), consistent with the expected deceleration of height growth as adolescents approach adult stature.
 
 # Discussion
 
 The Latent Change Score Model provides several advantages over simple difference scores for analyzing developmental change. By modeling change as a latent variable, LCSM separates true change from measurement error, yielding more reliable estimates of both average change and individual differences in change. This is particularly important when measurement reliability is imperfect, as raw difference scores can substantially underestimate true change variance.
 
-The model also allows for direct hypothesis testing about the relationship between initial status and subsequent change. The covariance between initial status and change tests whether development is compensatory (negative covariance: those starting lower catch up) or cumulative (positive covariance: initial advantages compound over time). Additionally, proportional effects can be added to test whether the rate of change depends on the current level - a common pattern in biological and psychological development.
+Using four time points with equality constraints produces a properly identified model (df = 1), enabling formal goodness-of-fit testing. The model's assumptions — that change score variance and measurement error variance are constant across periods — can be evaluated directly through chi-square tests and incremental fit indices. These are mild assumptions for a stable physical measure like height, and relaxing them requires only additional time points to provide the necessary degrees of freedom.
 
-Extensions of the basic LCSM include bivariate models that examine coupled change across two constructs (e.g., height and weight), models with time-invariant or time-varying covariates, and piecewise models that allow change rates to differ across developmental periods. These extensions make LCSM a flexible framework for understanding complex developmental processes.
+The covariance between initial status and change tests whether development follows a compensatory or cumulative pattern: a negative covariance suggests that shorter youth grow faster (regression toward the mean), while a positive covariance would indicate cumulative advantage. The covariances between successive change scores reveal whether faster growth in one period predicts faster or slower growth in the next, addressing questions about the consistency of individual growth trajectories. Extensions include proportional effects (where change depends on current level), bivariate models examining coupled change across two constructs, and piecewise specifications allowing change rates to differ across developmental periods.
 
 # Additional Resources
 

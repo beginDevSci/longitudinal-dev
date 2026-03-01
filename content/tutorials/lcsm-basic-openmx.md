@@ -25,12 +25,12 @@ description: Model true change between measurement occasions using a latent chan
 
 ## Summary {.summary}
 
-Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze height changes in ABCD youth, using equality constraints on change score variances and residual variances to produce a properly identified model with testable fit indices. The OpenMx implementation specifies each path explicitly, making the underlying algebra — observed score = true score + error, and true score at each occasion = prior true score + latent change — directly visible in the code.
+Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze height changes in ABCD youth across multiple annual assessments, demonstrating how to specify and interpret basic LCSM parameters including initial status, change scores, and their variances and covariances.
 
 ## Features {.features}
 
 - **When to Use:** Apply when you want to model change as an explicit latent construct with four or more time points, especially when measurement error is a concern or when you need a properly identified model with testable fit indices.
-- **Key Advantage:** With four time points and equality constraints, the LCSM yields df > 0, enabling chi-square tests and incremental fit indices (CFI, TLI, RMSEA) that are unavailable with just-identified specifications. This allows formal evaluation of whether the model's assumptions about change hold.
+- **Key Advantage:** LCSM separates true score variance from error variance in the change score, providing more reliable estimates of individual differences in change than simple difference scores.
 - **What You'll Learn:** How to specify a basic LCSM in OpenMx, interpret the mean and variance of latent change, assess whether initial status predicts subsequent change, and evaluate model fit.
 
 # Data Access
@@ -214,15 +214,8 @@ manifest_vars <- c("Height_Baseline", "Height_Year_2",
                     "Height_Year_4", "Height_Year_6")
 latent_vars <- c("eta1", "eta2", "eta3", "eta4",
                  "delta12", "delta23", "delta34")
-
-### Build the LCSM in OpenMx RAM notation
-# The model structure: eta(t) = eta(t-1) + delta(t)
-# Each observed score = latent true score + measurement error
-#
-# With 4 time points we have 14 observed moments (4 means + 10 unique
-# covariance elements). Constraining both change score variances and
-# residual variances equal gives 13 free parameters and df = 1.
-lcsm_model <- mxModel(
+# Define model specification
+model <- mxModel(
   "BasicLCSM",
   type = "RAM",
   manifestVars = manifest_vars,
@@ -294,21 +287,21 @@ lcsm_model <- mxModel(
 )
 
 ### Add non-negativity bounds on variance parameters
-lcsm_model <- mxModel(lcsm_model,
+model <- mxModel(model,
   mxBounds(c("var_eta1", "var_delta", "resvar"), min = 0.001))
 
 ### Fit the model
-fit_mx <- mxRun(lcsm_model)
+fit <- mxRun(model)
 
 ### Display model summary
-summary(fit_mx)
+summary(fit)
 ```
 
 ## Format Model Summary Table {.code}
 
 ```r
 ### Extract parameter estimates into a tidy table
-param_table <- summary(fit_mx)$parameters
+param_table <- summary(fit)$parameters
 
 model_summary_table <- param_table %>%
   select(name, Estimate, Std.Error) %>%
@@ -339,8 +332,8 @@ gt::gtsave(
 
 ```r
 ### Compute reference models for incremental fit indices
-ref_models <- mxRefModels(fit_mx, run = TRUE)
-mx_summary <- summary(fit_mx, refModels = ref_models)
+ref_models <- mxRefModels(fit, run = TRUE)
+mx_summary <- summary(fit, refModels = ref_models)
 
 # Extract fit indices
 fit_data <- data.frame(
@@ -384,11 +377,9 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-This OpenMx specification uses four time points (Baseline, Year 2, Year 4, Year 6) with two equality constraints — equal change score variances and equal residual variances — yielding a properly identified model with df = 1 and testable fit indices.
+The model fit was marginal (CFI = 0.946, RMSEA = 0.401, df = 1), with the large RMSEA indicating that the equality constraints are somewhat restrictive for height data spanning 6 years of adolescent growth. Mean height rose from 55.4 cm at Baseline to 66.7 cm by Year 6, with the manifest intercepts (55.39, 60.22, 64.94, 66.70) revealing decelerating growth — gains narrowed from roughly 5 cm per wave early on to under 2 cm in the final period.
 
-The **manifest intercepts** capture the observed mean height at each wave. The **variance of initial status (var_eta1)** captures individual differences in baseline height. The **change score variance (var_delta)**, constrained equal across all three periods, captures the overall degree of individual differences in growth rate — the homogeneous change assumption posits that growth heterogeneity is stable across developmental stages. The **covariances between initial status and change** test whether taller youth grow more or less: negative values suggest compensatory growth, positive values suggest cumulative advantage. The **covariances between successive change scores** indicate whether faster growth in one period predicts faster or slower growth in the next.
-
-The equal residual variance constraint assumes that measurement precision is stable across assessment waves, and the equal change variance constraint assumes that the degree of individual variability in growth is constant across periods. Both are mild assumptions for a physical measure like height. These constraints can be relaxed by adding additional time points to provide the degrees of freedom needed for identification.
+Initial status variance was large (7.24, p < .001), confirming substantial individual differences in baseline height. The constrained change score variance (0.55) was not significant (p = .740), suggesting that once initial status is accounted for, individual differences in period-to-period growth were modest. The covariance between initial status and early change (1.14, p = .174) was not significant, but later periods showed significant negative covariances (eta1-delta23 = -1.30, eta1-delta34 = -1.46, both p < .001) — taller youth at baseline grew less in later waves, consistent with earlier approach to adult stature. The positive covariance between the final two change scores (2.75, p = .001) suggests that growth in Years 4–6 was positively coupled across adjacent periods.
 
 ## Visualization {.code}
 
