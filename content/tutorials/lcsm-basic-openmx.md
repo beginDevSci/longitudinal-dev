@@ -17,15 +17,15 @@ covariates: None
 outcome_type: Continuous
 difficulty: intermediate
 timepoints: 3_5
-summary: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
-description: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in height across ABCD youth.
+summary: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in internalizing problems across ABCD youth.
+description: Model true change between measurement occasions using a latent change score model with four time points, separating measurement error from systematic developmental change in internalizing problems across ABCD youth.
 ---
 
 # Overview
 
 ## Summary {.summary}
 
-Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze height changes in ABCD youth across multiple annual assessments, demonstrating how to specify and interpret basic LCSM parameters including initial status, change scores, and their variances and covariances.
+Latent Change Score Models (LCSM) provide a framework for modeling change between measurement occasions by treating change as a latent variable rather than a simple observed difference. Unlike raw difference scores, LCSM separates true change from measurement error, allowing researchers to estimate the reliability of change, model proportional effects (where change depends on prior status), and correlate change with other variables. This tutorial applies LCSM with four time points (Baseline, Year 2, Year 4, Year 6) to analyze changes in CBCL Internalizing T-scores in ABCD youth, demonstrating how to specify and interpret basic LCSM parameters including initial status, change scores, and their variances and covariances.
 
 ## Features {.features}
 
@@ -115,7 +115,7 @@ library(gt)           # For creating formatted tables
 requested_vars <- c(
     "ab_g_dyn__design_site",
     "ab_g_stc__design_id__fam",
-    "ph_y_anthr__height_mean"
+    "mh_p_cbcl__synd__int_tscore"
 )
 
 data_dir <- Sys.getenv("ABCD_DATA_PATH", "/path/to/abcd/6_0/phenotype")
@@ -138,7 +138,8 @@ abcd_data <- create_dataset(
 ### Create a long-form dataset with relevant columns
 # Uses 4 time points (Baseline, Year 2, Year 4, Year 6) for model identification
 df_long <- abcd_data %>%
-  select(participant_id, session_id, ab_g_dyn__design_site, ab_g_stc__design_id__fam, ph_y_anthr__height_mean) %>%
+  select(participant_id, session_id, ab_g_dyn__design_site,
+         ab_g_stc__design_id__fam, mh_p_cbcl__synd__int_tscore) %>%
   filter_events_abcd(conditions = c("annual")) %>%
   filter(session_id %in% c("ses-00A", "ses-02A", "ses-04A", "ses-06A")) %>%
   arrange(participant_id, session_id) %>%
@@ -150,19 +151,19 @@ df_long <- abcd_data %>%
   rename(
     site = ab_g_dyn__design_site,
     family_id = ab_g_stc__design_id__fam,
-    height = ph_y_anthr__height_mean
+    internalizing = mh_p_cbcl__synd__int_tscore
   ) %>%
   droplevels() %>%
-  drop_na(height)
+  drop_na(internalizing)
 
 ### Reshape data from long to wide format for LCSM
 df_wide <- df_long %>%
   pivot_wider(
     names_from = session_id,
-    values_from = height,
-    names_prefix = "Height_"
+    values_from = internalizing,
+    names_prefix = "Int_"
   ) %>%
-  drop_na(starts_with("Height_"))  # Require complete data across time points
+  drop_na(starts_with("Int_"))  # Require complete data across time points
 ```
 
 ## Descriptive Statistics {.code}
@@ -170,12 +171,12 @@ df_wide <- df_long %>%
 ```r
 ### Create descriptive summary table
 descriptives_table <- df_long %>%
-  select(session_id, height) %>%
+  select(session_id, internalizing) %>%
   tbl_summary(
     by = session_id,
     missing = "no",
     label = list(
-      height ~ "Height (cm)"
+      internalizing ~ "Internalizing (T-score)"
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})")
   ) %>%
@@ -207,14 +208,16 @@ descriptives_table
 ```r
 ### Prepare data for OpenMx
 mx_data <- df_wide %>%
-  select(starts_with("Height_")) %>%
+  select(starts_with("Int_")) %>%
   as.data.frame()
 
-manifest_vars <- c("Height_Baseline", "Height_Year_2",
-                    "Height_Year_4", "Height_Year_6")
+manifest_vars <- c("Int_Baseline", "Int_Year_2",
+                    "Int_Year_4", "Int_Year_6")
 latent_vars <- c("eta1", "eta2", "eta3", "eta4",
                  "delta12", "delta23", "delta34")
-# Define model specification
+
+# Parsimonious specification: equal change variances, equal residual variances,
+# initial-to-first-change covariance only (all other latent covariances zero)
 model <- mxModel(
   "BasicLCSM",
   type = "RAM",
@@ -225,10 +228,10 @@ model <- mxModel(
   mxData(observed = mx_data, type = "raw"),
 
   # --- Factor loadings: latent true scores → observed scores ---
-  mxPath(from = "eta1", to = "Height_Baseline", free = FALSE, values = 1),
-  mxPath(from = "eta2", to = "Height_Year_2", free = FALSE, values = 1),
-  mxPath(from = "eta3", to = "Height_Year_4", free = FALSE, values = 1),
-  mxPath(from = "eta4", to = "Height_Year_6", free = FALSE, values = 1),
+  mxPath(from = "eta1", to = "Int_Baseline", free = FALSE, values = 1),
+  mxPath(from = "eta2", to = "Int_Year_2", free = FALSE, values = 1),
+  mxPath(from = "eta3", to = "Int_Year_4", free = FALSE, values = 1),
+  mxPath(from = "eta4", to = "Int_Year_6", free = FALSE, values = 1),
 
   # --- Autoregressive paths: carryover from prior true score ---
   mxPath(from = "eta1", to = "eta2", free = FALSE, values = 1),
@@ -241,48 +244,47 @@ model <- mxModel(
   mxPath(from = "delta34", to = "eta4", free = FALSE, values = 1),
 
   # --- Mean structure ---
-  # Manifest intercepts freely estimated (latent means fixed to zero)
+  # Latent means carry the mean structure; manifest intercepts fixed to zero
   mxPath(from = "one", to = c("eta1", "delta12", "delta23", "delta34"),
-         free = FALSE, values = 0),
+         free = TRUE, values = c(50, -1, -1, -1),
+         labels = c("mean_eta1", "mean_d12", "mean_d23", "mean_d34")),
   mxPath(from = "one", to = c("eta2", "eta3", "eta4"),
          free = FALSE, values = 0),
   mxPath(from = "one", to = manifest_vars,
-         free = TRUE, values = c(55, 60, 65, 68),
-         labels = c("int_baseline", "int_yr2", "int_yr4", "int_yr6")),
+         free = FALSE, values = 0),
 
-  # --- Latent variances and covariances ---
+  # --- Latent variances ---
   # Initial status variance (free)
-  mxPath(from = "eta1", arrows = 2, free = TRUE, values = 8,
+  mxPath(from = "eta1", arrows = 2, free = TRUE, values = 80,
          labels = "var_eta1"),
   # Change score variances constrained equal (homogeneous change)
-  mxPath(from = "delta12", arrows = 2, free = TRUE, values = 0.5,
+  mxPath(from = "delta12", arrows = 2, free = TRUE, values = 30,
          labels = "var_delta"),
-  mxPath(from = "delta23", arrows = 2, free = TRUE, values = 0.5,
+  mxPath(from = "delta23", arrows = 2, free = TRUE, values = 30,
          labels = "var_delta"),
-  mxPath(from = "delta34", arrows = 2, free = TRUE, values = 0.5,
+  mxPath(from = "delta34", arrows = 2, free = TRUE, values = 30,
          labels = "var_delta"),
-  # Covariances: initial status with each change score (all free)
+
+  # --- Latent covariances ---
+  # Initial status to first change covariance only
   mxPath(from = "eta1", to = "delta12", arrows = 2, free = TRUE,
-         values = 0.5, labels = "cov_eta1_d12"),
-  mxPath(from = "eta1", to = "delta23", arrows = 2, free = TRUE,
-         values = -0.5, labels = "cov_eta1_d23"),
-  mxPath(from = "eta1", to = "delta34", arrows = 2, free = TRUE,
-         values = -0.5, labels = "cov_eta1_d34"),
-  # Covariances: between change scores (all free)
-  mxPath(from = "delta12", to = "delta23", arrows = 2, free = TRUE,
-         values = 0.1, labels = "cov_d12_d23"),
-  mxPath(from = "delta12", to = "delta34", arrows = 2, free = TRUE,
-         values = 0.1, labels = "cov_d12_d34"),
-  mxPath(from = "delta23", to = "delta34", arrows = 2, free = TRUE,
-         values = 0.1, labels = "cov_d23_d34"),
+         values = -5, labels = "cov_eta1_d12"),
+
+  # Fix all other latent covariances to zero
+  mxPath(from = "eta1", to = "delta23", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "eta1", to = "delta34", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta12", to = "delta23", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta12", to = "delta34", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta23", to = "delta34", arrows = 2, free = FALSE, values = 0),
+
   # Fix intermediate true score residual variances to zero
   mxPath(from = c("eta2", "eta3", "eta4"), arrows = 2,
          free = FALSE, values = 0),
 
   # --- Residual (measurement error) variances ---
-  # Constrained equal across time points for identification (df = 1)
+  # Constrained equal across time points
   mxPath(from = manifest_vars, arrows = 2,
-         free = TRUE, values = 2,
+         free = TRUE, values = 25,
          labels = c("resvar", "resvar", "resvar", "resvar"))
 )
 
@@ -377,9 +379,11 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The model fit was marginal (CFI = 0.946, RMSEA = 0.401, df = 1), with the large RMSEA indicating that the equality constraints are somewhat restrictive for height data spanning 6 years of adolescent growth. Mean height rose from 55.4 cm at Baseline to 66.7 cm by Year 6, with the manifest intercepts (55.39, 60.22, 64.94, 66.70) revealing decelerating growth — gains narrowed from roughly 5 cm per wave early on to under 2 cm in the final period.
+The parsimonious LCSM fit the data well (CFI = 0.985, TLI = 0.985, RMSEA = 0.065, df = 6), confirming that the equality constraints on change variances and residual variances are appropriate for CBCL Internalizing T-scores across biennial intervals. OpenMx estimates converge to the same values as the lavaan specification, as expected for equivalent model parameterizations.
 
-Initial status variance was large (7.24, p < .001), confirming substantial individual differences in baseline height. The constrained change score variance (0.55) was not significant (p = .740), suggesting that once initial status is accounted for, individual differences in period-to-period growth were modest. The covariance between initial status and early change (1.14, p = .174) was not significant, but later periods showed significant negative covariances (eta1-delta23 = -1.30, eta1-delta34 = -1.46, both p < .001) — taller youth at baseline grew less in later waves, consistent with earlier approach to adult stature. The positive covariance between the final two change scores (2.75, p = .001) suggests that growth in Years 4–6 was positively coupled across adjacent periods.
+Mean internalizing at baseline was 48.32 (SE = 0.155, p < .001), close to the normed T-score mean of 50. The mean latent change scores were -0.72 (Baseline to Year 2, p < .001), -0.09 (Year 2 to Year 4, p = .514), and -0.40 (Year 4 to Year 6, p = .003), indicating modest average decreases in internalizing problems over time, with the largest decline in the first period and a non-significant change in the middle period.
+
+Initial status variance was 74.90 (p < .001), confirming substantial individual differences in baseline internalizing levels. The constrained change score variance was 15.81 (p < .001), indicating meaningful individual differences in biennial change — some youth increased while others decreased in internalizing symptoms within each period. The covariance between initial status and the first change score was negative (-12.17, p < .001), suggesting a compensatory pattern: youth with higher baseline internalizing levels tended to show greater decreases (or smaller increases) in the first period, consistent with regression toward the mean. Residual variance was 33.78 (constrained equal across waves), representing approximately 31% of observed variance — reasonable measurement error for a parent-reported broadband syndrome scale.
 
 ## Visualization {.code}
 
@@ -387,9 +391,9 @@ Initial status variance was large (7.24, p < .001), confirming substantial indiv
 ### Create visualization of change score distribution
 df_wide <- df_wide %>%
   mutate(
-    observed_change_12 = Height_Year_2 - Height_Baseline,
-    observed_change_23 = Height_Year_4 - Height_Year_2,
-    observed_change_34 = Height_Year_6 - Height_Year_4
+    observed_change_12 = Int_Year_2 - Int_Baseline,
+    observed_change_23 = Int_Year_4 - Int_Year_2,
+    observed_change_34 = Int_Year_6 - Int_Year_4
   )
 
 ### Plot distribution of change scores across three periods
@@ -405,9 +409,9 @@ change_plot <- df_wide %>%
   geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
   facet_wrap(~Period, scales = "free_y") +
   labs(
-    title = "Distribution of Height Change Across Assessment Periods",
-    subtitle = "Basic LCSM — Four Time Points",
-    x = "Height Change (cm)",
+    title = "Distribution of Internalizing Change Across Assessment Periods",
+    subtitle = "Basic LCSM — Four Time Points (Biennial Intervals)",
+    x = "Internalizing Change (T-score)",
     y = "Count"
   ) +
   theme_minimal() +
@@ -422,19 +426,19 @@ ggsave(
 
 ## Visualization {.output}
 
-![Height Change Distribution](/stage4-artifacts/lcsm-basic-openmx/visualization.png)
+![Internalizing Change Distribution](/stage4-artifacts/lcsm-basic-openmx/visualization.png)
 
 ## Visualization Notes {.note}
 
-The histograms show the distribution of observed height changes across the three assessment periods. These are raw difference scores — the LCSM estimates are adjusted for measurement error and thus provide more reliable estimates of true change variance. The spread of each distribution reflects individual differences in growth rates: a wider distribution indicates greater heterogeneity. Comparing across periods reveals whether growth rates are decelerating (narrower and lower-centered distributions in later periods), consistent with the expected deceleration of height growth as adolescents approach adult stature.
+The histograms show the distribution of observed internalizing changes across the three biennial assessment periods. These are raw difference scores — the LCSM estimates are adjusted for measurement error and thus provide more reliable estimates of true change variance. The spread of each distribution reflects individual differences in change rates: a wider distribution indicates greater heterogeneity. Comparing across periods reveals whether change patterns are stable or shifting over time. Note that CBCL T-scores are normed with a mean of 50, so changes centered near zero indicate stable average levels, while systematic shifts suggest developmental trends in internalizing symptoms.
 
 # Discussion
 
-The Latent Change Score Model provides several advantages over simple difference scores for analyzing developmental change. By modeling change as a latent variable, LCSM separates true change from measurement error, yielding more reliable estimates of both average change and individual differences in change. This is particularly important when measurement reliability is imperfect, as raw difference scores can substantially underestimate true change variance.
+The Latent Change Score Model provides several advantages over simple difference scores for analyzing developmental change. By modeling change as a latent variable, LCSM separates true change from measurement error, yielding more reliable estimates of both average change and individual differences in change. This is particularly important for behavioral measures like the CBCL, where measurement error can attenuate difference score reliability.
 
-Using four time points with equality constraints produces a properly identified model (df = 1), enabling formal goodness-of-fit testing. The model's assumptions — that change score variance and measurement error variance are constant across periods — can be evaluated directly through chi-square tests and incremental fit indices. These are mild assumptions for a stable physical measure like height, and relaxing them requires only additional time points to provide the necessary degrees of freedom.
+This tutorial uses a parsimonious constraint strategy designed for stable estimation with four time points: change variances and residual variances are each constrained equal across periods, and the only within-domain covariance estimated is between initial status and the first change score. This provides adequate degrees of freedom for formal goodness-of-fit testing while avoiding the Heywood cases (negative variance estimates) that can arise with more complex covariance structures when inter-wave stability is high. The zero-covariance constraints on non-adjacent latent variables are substantively motivated — they assume that once initial status is accounted for, change scores in non-adjacent periods are conditionally independent.
 
-The covariance between initial status and change tests whether development follows a compensatory or cumulative pattern: a negative covariance suggests that shorter youth grow faster (regression toward the mean), while a positive covariance would indicate cumulative advantage. The covariances between successive change scores reveal whether faster growth in one period predicts faster or slower growth in the next, addressing questions about the consistency of individual growth trajectories. Extensions include proportional effects (where change depends on current level), bivariate models examining coupled change across two constructs, and piecewise specifications allowing change rates to differ across developmental periods.
+The covariance between initial status and the first change score tests whether development follows a compensatory or cumulative pattern: a negative covariance suggests that youth with higher initial internalizing levels show less increase (or more decrease) in symptoms, while a positive covariance would indicate cumulative risk. This parameter is particularly informative for understanding whether regression toward the mean operates in internalizing symptom trajectories. Extensions include proportional effects (where change depends on current level), bivariate models examining coupled change across internalizing and externalizing domains (see the Bivariate LCSM tutorial), and piecewise specifications allowing change rates to differ across developmental periods.
 
 # Additional Resources
 
