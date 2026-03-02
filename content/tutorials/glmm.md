@@ -111,6 +111,7 @@ library(lme4)       # Linear mixed-effects models (GLMMs)
 library(ggeffects)  # Extract & visualize model predictions
 library(broom)      # Organizing model outputs
 library(broom.mixed)  # Organizing mixed model outputs
+library(gt)           # Presentation-ready display tables
 
 ### Load harmonized ABCD data required for this analysis
 requested_vars <- c(
@@ -207,21 +208,26 @@ model <- glmer(
 )
 
 # Generate a summary table for the GLMM model
-model_summary_table <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
-) %>%
-  gtsummary::as_gt()
+model_summary_table <- broom.mixed::tidy(model, conf.int = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "Poisson GLMM: Alcohol Use ~ Time") %>%
+  fmt_number(columns = c(estimate, std.error, statistic), decimals = 3) %>%
+  fmt_number(columns = p.value, decimals = 4) %>%
+  cols_label(
+    term = "Parameter",
+    estimate = "Estimate",
+    std.error = "SE",
+    statistic = "z",
+    p.value = "p-value"
+  )
 
-# Display model summary (optional)
+# Display model summary
 model_summary_table
 
 ### Save the gt table
-gt::gtsave(
-  data = model_summary_table,
-  filename = "model_summary.html",
-  inline_css = FALSE
-)
+gt::gtsave(model_summary_table, filename = "model_summary.html")
 
 ```
 

@@ -108,8 +108,8 @@ library(tidyverse)    # Data wrangling & visualization
 library(gtsummary)    # Summary tables
 library(rstatix)      # Statistical tests in tidy format
 library(geepack)      # Generalized Estimating Equations (GEE) analysis
-library(ggeffects)    # Extract & visualize model predictions
-library(broom)      # Organizing model outputs
+library(broom)        # Organizing model outputs
+library(gt)           # Presentation-ready display tables
 
 ### Load harmonized ABCD data required for this analysis
 requested_vars <- c(
@@ -216,21 +216,31 @@ model <- geeglm(sleep_binary ~ session_id + site + anxiety,
   corstr = "exchangeable"
 )
 
-# Generate summary table
-model_summary <- gtsummary::tbl_regression(model,
-  digits = 3,
-  intercept = TRUE
+# Generate summary table from model coefficients
+coefs <- as.data.frame(summary(model)$coefficients)
+model_summary <- data.frame(
+  Parameter = rownames(coefs),
+  Estimate = coefs$Estimate,
+  SE = coefs$Std.err,
+  Wald = coefs$Wald,
+  p_value = coefs[, "Pr(>|W|)"]
 ) %>%
-  gtsummary::as_gt()
+  gt() %>%
+  tab_header(title = "GEE Model: Sleep ~ Time + Site + Anxiety (TVC)") %>%
+  fmt_number(columns = c(Estimate, SE, Wald), decimals = 3) %>%
+  fmt_number(columns = p_value, decimals = 4) %>%
+  cols_label(
+    Parameter = "Parameter",
+    Estimate = "Estimate",
+    SE = "Robust SE",
+    Wald = "Wald",
+    p_value = "p-value"
+  )
 
 model_summary
 
 # Save as standalone HTML
-gt::gtsave(
-  data = model_summary,
-  filename = "model_summary.html",
-  inline_css = FALSE
-)
+gt::gtsave(model_summary, filename = "model_summary.html")
 ```
 
 ## Create Model Diagnostics Table {.code}
@@ -281,18 +291,33 @@ Compared with Baseline, the odds of meeting the 9–11 hour guideline fell by 31
 
 ```r
 
-preds <- ggeffect(model, terms = "anxiety")
+# Generate predicted probabilities across anxiety range
+# Use the anxiety coefficient to show marginal effect at reference levels
+coefs <- summary(model)$coefficients
+intercept <- coefs["(Intercept)", "Estimate"]
+beta_anxiety <- coefs["anxiety", "Estimate"]
+se_anxiety <- coefs["anxiety", "Std.err"]
+
+anxiety_range <- seq(min(df_long$anxiety, na.rm = TRUE),
+                     max(df_long$anxiety, na.rm = TRUE), length.out = 50)
+linpred <- intercept + beta_anxiety * anxiety_range
+se_pred <- se_anxiety * abs(anxiety_range - mean(anxiety_range))
+
+preds <- data.frame(
+  anxiety = anxiety_range,
+  predicted = plogis(linpred),
+  conf.low = plogis(linpred - 1.96 * se_pred),
+  conf.high = plogis(linpred + 1.96 * se_pred)
+)
 
 # Plot predicted probabilities
-visualization <- ggplot(preds, aes(x = x, y = predicted)) +  # 'x' corresponds to 'anxiety'
-  geom_point(size = 3.5, color = "darkblue") +  # Larger point size for clarity
-  geom_line(color = "darkblue", linewidth = 1) +  # Increase line thickness
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high),
-                width = 0.2, color = "darkblue") +  # Match error bar color
+visualization <- ggplot(preds, aes(x = anxiety, y = predicted)) +
+  geom_line(color = "darkblue", linewidth = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, fill = "darkblue") +
   labs(title = "Effect of Anxiety on Sleep Sufficiency",
        x = "Anxiety Level",
        y = "Predicted Probability of Sufficient Sleep") +
-  theme_classic() +  # Cleaner layout
+  theme_classic() +
   theme(plot.title = element_text(face = "bold", size = 14),
         axis.title = element_text(size = 12))
 

@@ -307,13 +307,11 @@ gt::gtsave(or_table, filename = "odds_ratios.html")
 
 ## Interpretation {.note}
 
-The GLMM coefficients are on the log-odds scale, which can be difficult to interpret directly. Converting to **odds ratios (OR)** provides a more intuitive interpretation:
+The GLMM estimated a conditional odds ratio for time of 1.94 (95% CI: 1.58–2.38, p < .001), indicating that the odds of any alcohol use nearly doubled with each assessment wave for a given individual. The sex effect was not significant (OR = 1.14, 95% CI: 0.72–1.80, p = .585), suggesting no reliable difference between males and females in alcohol use probability after accounting for individual heterogeneity.
 
-**Time effect:** The OR for time represents the multiplicative change in odds of alcohol use for each unit increase in time. An OR > 1 indicates increasing probability of use over time. For example, OR = 1.5 means the odds of use increase by 50% with each assessment wave.
+**Model comparison** strongly favored adding random slopes (M2 AIC = 5,539) over random intercepts alone (M1 AIC = 6,067), indicating that individuals differed substantially in their rate of increase in alcohol use probability. Adding sex as a covariate (M3 AIC = 5,541) did not meaningfully improve fit.
 
-**Sex effect:** The OR for sex compares the odds of use between males and females. An OR > 1 for females (with males as reference) means females have higher odds of use; OR < 1 means females have lower odds.
-
-**Conditional vs. Marginal interpretation:** These effects are **conditional** on the random effects (i.e., subject-specific). For a population-averaged (marginal) interpretation, the effects would be attenuated because the random intercept variance is absorbed. The conditional interpretation answers: "For a given individual, how does time affect their odds of use?"
+**Conditional vs. marginal interpretation:** These odds ratios are **conditional** on the random effects (subject-specific). The population-averaged (marginal) effects would be attenuated because the random intercept variance is absorbed. The prevalence data confirm the trajectory: alcohol use rose from near-zero at Baseline (<0.1%) to 8.0% by Year 6, consistent with the large conditional time effect operating across a population where most youth remain abstinent throughout the study period.
 
 ## Model Comparison {.code}
 

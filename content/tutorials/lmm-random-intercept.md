@@ -108,8 +108,9 @@ library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
 library(rstatix)     # Provides tidy-format statistical tests
 library(lme4)        # Linear mixed-effects models (LMMs)
-library(kableExtra)  # Formatting & styling in HTML/Markdown reports
 library(performance) # Useful functions for model diagnostics & comparisons
+library(broom.mixed) # Tidy summaries of mixed models
+library(gt)          # Presentation-ready display tables
 
 ### Load harmonized ABCD data required for this analysis
 requested_vars <- c(
@@ -201,29 +202,39 @@ model <- lmerTest::lmer(
     data = df_long # Dataset containing repeated measures of cognition
 )
 
-# Generate a summary table for the LMM model
-model_summary_table <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
-) %>%
-  gtsummary::as_gt()
+# Generate a summary table for the LMM fixed effects
+model_summary_table <- broom.mixed::tidy(model, effects = "fixed", conf.int = TRUE) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "LMM Fixed Effects: Cognition ~ Time") %>%
+  fmt_number(columns = c(estimate, std.error, statistic), decimals = 3) %>%
+  fmt_number(columns = p.value, decimals = 4) %>%
+  cols_label(
+    term = "Parameter",
+    estimate = "Estimate",
+    std.error = "SE",
+    statistic = "t",
+    p.value = "p-value"
+  )
 
 ### Save the gt table
-gt::gtsave(
-  data = model_summary_table,
-  filename = "model_summary.html",
-  inline_css = FALSE
-)
+gt::gtsave(model_summary_table, filename = "model_summary.html")
 
-# Generate alternative summary table with variance components (sjPlot format)
-# This provides additional details on random effects not shown in gtsummary
-sjPlot::tab_model(model,
-    show.se = TRUE, show.df = FALSE, show.ci = FALSE,
-    digits = 3, pred.labels = c("Intercept", "Time"),
-    dv.labels = c("LMM Model (lme4)"), string.se = "SE",
-    string.p = "P-Value",
-    file = "lmm_model_results.html"
-)
+# Generate variance components table for random effects
+vc <- as.data.frame(VarCorr(model))
+random_table <- vc %>%
+  select(grp, var1, vcov, sdcor) %>%
+  gt() %>%
+  tab_header(title = "LMM Random Effects: Variance Components") %>%
+  fmt_number(columns = c(vcov, sdcor), decimals = 3) %>%
+  cols_label(
+    grp = "Group",
+    var1 = "Parameter",
+    vcov = "Variance",
+    sdcor = "Std. Dev."
+  )
+
+gt::gtsave(random_table, filename = "lmm_model_results.html")
 
 ```
 

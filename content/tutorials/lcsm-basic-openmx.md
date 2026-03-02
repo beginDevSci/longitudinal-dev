@@ -1,17 +1,18 @@
 ---
-title: "LCSM: Basic"
-slug: lcsm-basic
+title: "LCSM: Basic (OpenMx)"
+slug: lcsm-basic-openmx
 author: Biostatistics Working Group
-date_iso: 2025-11-06
+date_iso: 2026-02-26
 tags:
   - abcd-study
   - latent-change
   - structural-equation-modeling
+  - openmx
 family: LCSM
 family_label: Latent Change Score Models (LCSM)
-engine: lavaan
+engine: OpenMx
 engines:
-  - lavaan
+  - OpenMx
 covariates: None
 outcome_type: Continuous
 difficulty: intermediate
@@ -30,7 +31,7 @@ Latent Change Score Models (LCSM) provide a framework for modeling change betwee
 
 - **When to Use:** Apply when you want to model change as an explicit latent construct with four or more time points, especially when measurement error is a concern or when you need a properly identified model with testable fit indices.
 - **Key Advantage:** LCSM separates true score variance from error variance in the change score, providing more reliable estimates of individual differences in change than simple difference scores.
-- **What You'll Learn:** How to specify a basic LCSM in lavaan, interpret the mean and variance of latent change, assess whether initial status predicts subsequent change, and evaluate model fit.
+- **What You'll Learn:** How to specify a basic LCSM in OpenMx, interpret the mean and variance of latent change, assess whether initial status predicts subsequent change, and evaluate model fit.
 
 # Data Access
 
@@ -106,7 +107,7 @@ library(NBDCtools)    # ABCD data access helper
 library(tidyverse)    # Collection of R packages for data science
 library(arrow)        # For reading Parquet files
 library(gtsummary)    # Creating publication-quality tables
-library(lavaan)       # Structural Equation Modeling in R
+library(OpenMx)       # Matrix-based SEM engine
 library(broom)        # For tidying model outputs
 library(gt)           # For creating formatted tables
 
@@ -194,100 +195,134 @@ gt::gtsave(descriptives_table, filename = "descriptives_table.html")
 
 ### Print the table
 descriptives_table
-
 ```
 
 ## Descriptive Statistics Output {.output}
 
-/stage4-artifacts/lcsm-basic/descriptives_table.html
+/stage4-artifacts/lcsm-basic-openmx/descriptives_table.html
 
 # Statistical Analysis
 
-## Define and Fit Basic LCSM {.code}
+## Define and Fit Basic LCSM with OpenMx {.code}
 
 ```r
-# Define the Latent Change Score Model
+### Prepare data for OpenMx
+mx_data <- df_wide %>%
+  select(starts_with("Int_")) %>%
+  as.data.frame()
+
+manifest_vars <- c("Int_Baseline", "Int_Year_2",
+                    "Int_Year_4", "Int_Year_6")
+latent_vars <- c("eta1", "eta2", "eta3", "eta4",
+                 "delta12", "delta23", "delta34")
+
 # Parsimonious specification: equal change variances, equal residual variances,
 # initial-to-first-change covariance only (all other latent covariances zero)
-model <- '
-  # Define latent true scores at each time point
-  eta1 =~ 1*Int_Baseline
-  eta2 =~ 1*Int_Year_2
-  eta3 =~ 1*Int_Year_4
-  eta4 =~ 1*Int_Year_6
+model <- mxModel(
+  "BasicLCSM",
+  type = "RAM",
+  manifestVars = manifest_vars,
+  latentVars = latent_vars,
 
-  # Define latent change scores
-  delta12 =~ 1*eta2
-  delta23 =~ 1*eta3
-  delta34 =~ 1*eta4
+  # Data
+  mxData(observed = mx_data, type = "raw"),
 
-  # Autoregressive paths (carryover from prior true score)
-  eta2 ~ 1*eta1
-  eta3 ~ 1*eta2
-  eta4 ~ 1*eta3
+  # --- Factor loadings: latent true scores → observed scores ---
+  mxPath(from = "eta1", to = "Int_Baseline", free = FALSE, values = 1),
+  mxPath(from = "eta2", to = "Int_Year_2", free = FALSE, values = 1),
+  mxPath(from = "eta3", to = "Int_Year_4", free = FALSE, values = 1),
+  mxPath(from = "eta4", to = "Int_Year_6", free = FALSE, values = 1),
 
-  # Means of latent variables
-  eta1 ~ 1           # Mean of initial status
-  delta12 ~ 1        # Mean change T1 to T2
-  delta23 ~ 1        # Mean change T2 to T3
-  delta34 ~ 1        # Mean change T3 to T4
+  # --- Autoregressive paths: carryover from prior true score ---
+  mxPath(from = "eta1", to = "eta2", free = FALSE, values = 1),
+  mxPath(from = "eta2", to = "eta3", free = FALSE, values = 1),
+  mxPath(from = "eta3", to = "eta4", free = FALSE, values = 1),
 
-  # Variances
-  eta1 ~~ eta1               # Variance of initial status
-  delta12 ~~ d*delta12       # Change variances constrained equal
-  delta23 ~~ d*delta23
-  delta34 ~~ d*delta34
+  # --- Change score definitions ---
+  mxPath(from = "delta12", to = "eta2", free = FALSE, values = 1),
+  mxPath(from = "delta23", to = "eta3", free = FALSE, values = 1),
+  mxPath(from = "delta34", to = "eta4", free = FALSE, values = 1),
 
+  # --- Mean structure ---
+  # Latent means carry the mean structure; manifest intercepts fixed to zero
+  mxPath(from = "one", to = c("eta1", "delta12", "delta23", "delta34"),
+         free = TRUE, values = c(50, -1, -1, -1),
+         labels = c("mean_eta1", "mean_d12", "mean_d23", "mean_d34")),
+  mxPath(from = "one", to = c("eta2", "eta3", "eta4"),
+         free = FALSE, values = 0),
+  mxPath(from = "one", to = manifest_vars,
+         free = FALSE, values = 0),
+
+  # --- Latent variances ---
+  # Initial status variance (free)
+  mxPath(from = "eta1", arrows = 2, free = TRUE, values = 80,
+         labels = "var_eta1"),
+  # Change score variances constrained equal (homogeneous change)
+  mxPath(from = "delta12", arrows = 2, free = TRUE, values = 30,
+         labels = "var_delta"),
+  mxPath(from = "delta23", arrows = 2, free = TRUE, values = 30,
+         labels = "var_delta"),
+  mxPath(from = "delta34", arrows = 2, free = TRUE, values = 30,
+         labels = "var_delta"),
+
+  # --- Latent covariances ---
   # Initial status to first change covariance only
-  eta1 ~~ delta12
+  mxPath(from = "eta1", to = "delta12", arrows = 2, free = TRUE,
+         values = -5, labels = "cov_eta1_d12"),
 
   # Fix all other latent covariances to zero
-  eta1 ~~ 0*delta23
-  eta1 ~~ 0*delta34
-  delta12 ~~ 0*delta23
-  delta12 ~~ 0*delta34
-  delta23 ~~ 0*delta34
-
-  # Residual variances constrained equal across time points
-  Int_Baseline ~~ e*Int_Baseline
-  Int_Year_2 ~~ e*Int_Year_2
-  Int_Year_4 ~~ e*Int_Year_4
-  Int_Year_6 ~~ e*Int_Year_6
-
-  # Fix manifest intercepts to zero (latent means carry the mean structure)
-  Int_Baseline ~ 0*1
-  Int_Year_2 ~ 0*1
-  Int_Year_4 ~ 0*1
-  Int_Year_6 ~ 0*1
+  mxPath(from = "eta1", to = "delta23", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "eta1", to = "delta34", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta12", to = "delta23", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta12", to = "delta34", arrows = 2, free = FALSE, values = 0),
+  mxPath(from = "delta23", to = "delta34", arrows = 2, free = FALSE, values = 0),
 
   # Fix intermediate true score residual variances to zero
-  eta2 ~~ 0*eta2
-  eta3 ~~ 0*eta3
-  eta4 ~~ 0*eta4
-'
+  mxPath(from = c("eta2", "eta3", "eta4"), arrows = 2,
+         free = FALSE, values = 0),
 
-# Fit the LCSM model
-fit <- sem(model, data = df_wide, missing = "ml")
+  # --- Residual (measurement error) variances ---
+  # Constrained equal across time points
+  mxPath(from = manifest_vars, arrows = 2,
+         free = TRUE, values = 25,
+         labels = c("resvar", "resvar", "resvar", "resvar"))
+)
 
-# Display model summary
-summary(fit, fit.measures = TRUE, standardized = TRUE)
+### Add non-negativity bounds on variance parameters
+model <- mxModel(model,
+  mxBounds(c("var_eta1", "var_delta", "resvar"), min = 0.001))
+
+### Fit the model
+fit <- mxRun(model)
+
+### Display model summary
+summary(fit)
 ```
 
 ## Format Model Summary Table {.code}
 
 ```r
-# Extract model summary
-model_summary <- summary(fit)
+### Extract parameter estimates into a tidy table
+param_table <- summary(fit)$parameters
 
-# Convert lavaan output to a tidy dataframe and then to gt table
-model_summary_table <- broom::tidy(fit) %>%
-  filter(op %in% c("~1", "~~", "~")) %>%  # Focus on key parameters
-  select(term, estimate, std.error, statistic, p.value) %>%
+model_summary_table <- param_table %>%
+  select(name, Estimate, Std.Error) %>%
+  mutate(
+    z_value = Estimate / Std.Error,
+    p_value = 2 * pnorm(-abs(z_value))
+  ) %>%
   gt() %>%
-  tab_header(title = "Latent Change Score Model Results") %>%
-  fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 3)
+  tab_header(title = "Latent Change Score Model Results (OpenMx)") %>%
+  fmt_number(columns = c(Estimate, Std.Error, z_value, p_value), decimals = 3) %>%
+  cols_label(
+    name = "Parameter",
+    Estimate = "Estimate",
+    Std.Error = "Std. Error",
+    z_value = "z",
+    p_value = "p"
+  )
 
-# Save the gt table
+### Save the gt table
 gt::gtsave(
   data = model_summary_table,
   filename = "model_summary.html",
@@ -298,22 +333,35 @@ gt::gtsave(
 ## Format Model Fit Indices Table {.code}
 
 ```r
-# Extract and save model fit indices
-fit_indices <- fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
+### Compute reference models for incremental fit indices
+ref_models <- mxRefModels(fit, run = TRUE)
+mx_summary <- summary(fit, refModels = ref_models)
 
-fit_indices_table <- data.frame(
-  Metric = names(fit_indices),
-  Value = as.numeric(fit_indices)
-) %>%
+# Extract fit indices
+fit_data <- data.frame(
+  Metric = c("chi-squared", "df", "p-value", "CFI", "TLI", "RMSEA", "AIC", "BIC"),
+  Value = c(
+    mx_summary$Chi,
+    mx_summary$ChiDoF,
+    mx_summary$p,
+    mx_summary$CFI,
+    mx_summary$TLI,
+    mx_summary$RMSEA,
+    mx_summary$AIC.Mx,
+    mx_summary$BIC.Mx
+  )
+)
+
+fit_indices_table <- fit_data %>%
   gt() %>%
-  tab_header(title = "Model Fit Indices") %>%
+  tab_header(title = "Model Fit Indices (OpenMx)") %>%
   fmt_number(columns = Value, decimals = 3) %>%
   cols_label(
     Metric = "Fit Measure",
     Value = "Value"
   )
 
-# Save fit indices table
+### Save fit indices table
 gt::gtsave(
   data = fit_indices_table,
   filename = "model_fit_indices.html",
@@ -323,17 +371,17 @@ gt::gtsave(
 
 ## Model Summary Output {.output}
 
-/stage4-artifacts/lcsm-basic/model_summary.html
+/stage4-artifacts/lcsm-basic-openmx/model_summary.html
 
 ## Model Fit Indices Output {.output}
 
-/stage4-artifacts/lcsm-basic/model_fit_indices.html
+/stage4-artifacts/lcsm-basic-openmx/model_fit_indices.html
 
 ## Interpretation {.note}
 
-The parsimonious LCSM fit the data well (CFI = 0.985, TLI = 0.985, RMSEA = 0.065, SRMR = 0.052, df = 6), indicating that the equality constraints on change variances and residual variances are appropriate for CBCL Internalizing T-scores across biennial intervals. This is a substantial improvement over physical growth measures, which tend to have such high adjacent-wave stability that latent change score models struggle with identification.
+The parsimonious LCSM fit the data well (CFI = 0.985, TLI = 0.985, RMSEA = 0.065, df = 6), confirming that the equality constraints on change variances and residual variances are appropriate for CBCL Internalizing T-scores across biennial intervals. OpenMx estimates converge to the same values as the lavaan specification, as expected for equivalent model parameterizations.
 
-Mean internalizing at baseline was 48.32 (SE = 0.155, p < .001), close to the normed T-score mean of 50. The mean latent change scores were -0.72 (Baseline to Year 2, p < .001), -0.09 (Year 2 to Year 4, p = .515), and -0.40 (Year 4 to Year 6, p = .003), indicating modest average decreases in internalizing problems over time, with the largest decline in the first period and a non-significant change in the middle period.
+Mean internalizing at baseline was 48.32 (SE = 0.155, p < .001), close to the normed T-score mean of 50. The mean latent change scores were -0.72 (Baseline to Year 2, p < .001), -0.09 (Year 2 to Year 4, p = .514), and -0.40 (Year 4 to Year 6, p = .003), indicating modest average decreases in internalizing problems over time, with the largest decline in the first period and a non-significant change in the middle period.
 
 Initial status variance was 74.90 (p < .001), confirming substantial individual differences in baseline internalizing levels. The constrained change score variance was 15.81 (p < .001), indicating meaningful individual differences in biennial change — some youth increased while others decreased in internalizing symptoms within each period. The covariance between initial status and the first change score was negative (-12.17, p < .001), suggesting a compensatory pattern: youth with higher baseline internalizing levels tended to show greater decreases (or smaller increases) in the first period, consistent with regression toward the mean. Residual variance was 33.78 (constrained equal across waves), representing approximately 31% of observed variance — reasonable measurement error for a parent-reported broadband syndrome scale.
 
@@ -378,7 +426,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Internalizing Change Distribution](stage4-artifacts/lcsm-basic/visualization.png)
+![Internalizing Change Distribution](/stage4-artifacts/lcsm-basic-openmx/visualization.png)
 
 ## Visualization Notes {.note}
 
@@ -394,12 +442,12 @@ The covariance between initial status and the first change score tests whether d
 
 # Additional Resources
 
-### lavaan Tutorial on Latent Change Score Models {.resource}
+### OpenMx Latent Change Score Tutorial {.resource}
 
-Comprehensive guide to specifying LCSM and related longitudinal models in lavaan, including univariate and bivariate change score models with worked examples.
+Official OpenMx documentation covering latent change score models in the RAM framework, including univariate and bivariate specifications with worked examples.
 
 **Badge:** DOCS
-**URL:** https://lavaan.ugent.be/tutorial/growth.html
+**URL:** https://openmx.ssri.psu.edu/docs/OpenMx/latest/
 
 ### McArdle (2009): Latent Variable Modeling of Differences and Changes {.resource}
 
@@ -410,14 +458,7 @@ Foundational paper by John McArdle introducing the latent change score framework
 
 ### Grimm, Ram & Estabrook: Growth Modeling {.resource}
 
-Textbook covering structural equation modeling approaches to longitudinal data, with detailed chapters on latent change score models, including R code examples.
+Textbook covering structural equation modeling approaches to longitudinal data, with detailed chapters on latent change score models including OpenMx code examples.
 
 **Badge:** BOOK
 **URL:** https://www.guilford.com/books/Growth-Modeling/Grimm-Ram-Estabrook/9781462526062
-
-### semPlot Package for Model Visualization {.resource}
-
-R package for creating publication-quality path diagrams of structural equation models including LCSM, helping to visualize the model structure and parameter estimates.
-
-**Badge:** TOOL
-**URL:** https://cran.r-project.org/package=semPlot
