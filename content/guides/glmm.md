@@ -3,7 +3,7 @@ title: "Generalized Linear Mixed Models"
 slug: "glmm"
 description: "Extend mixed models to non-continuous outcomes — binary, count, and ordinal — while preserving individual-level trajectories."
 category: "mixed-models"
-tags: ["GLMM", "guide", "glmmTMB", "lme4"]
+tags: ["GLMM", "mixed-models", "glmmTMB", "longitudinal"]
 guide_type: "overview"
 ---
 
@@ -399,25 +399,21 @@ GLMM generally needs more data than LMM because:
 
 ## Common Pitfalls
 
-**Interpreting coefficients on the wrong scale** — Reporting β = -0.5 as "a decrease of 0.5" without specifying the scale. *Reality:* GLMM coefficients are on the link scale (log-odds, log). Always specify: "The log-odds decreased by 0.5, corresponding to an odds ratio of 0.61."
+> [!caution]
+> These mistakes are common but avoidable:
 
-**Treating conditional estimates as marginal** — Using GLMM odds ratios to make population-level statements like "the intervention reduced prevalence by X%." *Reality:* GLMM gives conditional (subject-specific) effects. Marginal effects are attenuated. Use GEE or marginalize explicitly if you need population-averaged estimates.
-
-**Ignoring overdispersion in count models** — Fitting a Poisson GLMM without checking whether variance exceeds the mean. *Reality:* Overdispersed Poisson models produce standard errors that are too small and p-values that are too optimistic. Always check and use negative binomial if needed.
-
-**Over-specifying random effects** — Adding random slopes for every predictor because "that's what the theory says." *Reality:* Complex random effects structures frequently fail to converge with realistic sample sizes. Start simple. The data will tell you what they can support.
-
-**Confusing Laplace and AGQ accuracy** — Assuming the default Laplace approximation is always sufficient. *Reality:* For binary outcomes with few repeated measures (< 5 per person), Laplace can produce biased estimates. Compare with `nAGQ = 7` in `glmer` to check.
-
-**Ignoring the mean-variance relationship** — Adding an observation-level random effect to a binary model "for overdispersion." *Reality:* Bernoulli variance is fully determined by the mean. An OLRE in a binary GLMM changes the model's meaning (it becomes a beta-binomial-like model), not just its variance.
-
-**Presenting odds ratios without context** — Reporting OR = 2.5 as "2.5 times more likely." *Reality:* OR = 2.5 means 2.5 times the *odds*, not 2.5 times the *probability*. The probability ratio depends on the baseline probability. At P = 0.01, OR = 2.5 roughly doubles the probability; at P = 0.50, it shifts probability to 0.71.
-
-**Using AIC to compare across distribution families** — Comparing AIC between a Poisson model and a negative binomial model fit with different packages or likelihoods. *Reality:* AIC comparisons are only valid when models are fit to the same data using the same likelihood. Comparing a Poisson `glmer` to a NB `glmmTMB` requires care — use the same package for both.
-
-**Fitting ordinal outcomes as continuous** — Treating a 4-point Likert scale as continuous in a standard LMM because "it's close enough." *Reality:* With few categories (< 5), the equal-interval assumption is strong and may distort conclusions. Use a cumulative link mixed model (`ordinal::clmm`) or treat with caution.
-
-**Forgetting to examine predicted probabilities** — Interpreting the model entirely through odds ratios without ever plotting predicted probabilities across time. *Reality:* Odds ratios are constant across the predictor range, but probability changes are not. A plot of predicted probabilities reveals the practical significance of effects and makes results accessible to non-statistical audiences.
+| Pitfall | Mistake | Fix |
+|---------|---------|-----|
+| Wrong-scale interpretation | Reporting β = −0.5 as "a decrease of 0.5" without specifying link scale | GLMM coefficients are log-odds or log; always state scale and provide OR/IRR |
+| Treating conditional as marginal | Using GLMM ORs for population claims like "reduced prevalence by X%" | GLMM gives conditional (subject-specific) effects; use GEE or marginalize for population averages |
+| Ignoring overdispersion | Fitting Poisson GLMM without checking variance > mean | Overdispersed Poisson gives too-small SEs; check and use negative binomial if needed |
+| Over-specifying random effects | Adding random slopes for every predictor | Complex RE structures often fail to converge; start simple and let data guide complexity |
+| Laplace vs. AGQ accuracy | Assuming Laplace approximation is always sufficient | For binary outcomes with < 5 observations per person, compare with `nAGQ = 7`; trust AGQ if they differ |
+| Ignoring mean-variance relationship | Adding OLRE to a binary model "for overdispersion" | Bernoulli variance is determined by the mean; OLRE changes model meaning, not just variance |
+| ORs without context | Reporting OR = 2.5 as "2.5 times more likely" | OR is odds ratio, not probability ratio; probability change depends on baseline |
+| AIC across families | Comparing AIC between Poisson and NB from different packages | AIC is valid only for same data and same likelihood; use the same package for both |
+| Ordinal as continuous | Treating a 4-point Likert scale as continuous in LMM | With < 5 categories, equal-interval assumption may distort results; use `ordinal::clmm` |
+| No predicted probability plots | Interpreting only through ORs without plotting predictions | ORs are constant across range but probability changes are not; plot for practical significance |
 
 ---
 

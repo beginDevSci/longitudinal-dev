@@ -3,7 +3,7 @@ title: "GLMM Walkthrough: Worked Example"
 slug: "glmm-walkthrough"
 description: "Step-by-step GLMM analysis from setup to interpretation — binary and count outcomes using simulated data in R."
 category: "mixed-models"
-tags: ["GLMM", "walkthrough", "glmmTMB", "lme4", "R"]
+tags: ["GLMM", "worked-example", "glmmTMB", "R", "simulation"]
 r_packages: ["glmmTMB", "lme4", "tidyverse", "MASS", "performance"]
 guide_type: "tutorial"
 parent_method: "glmm"

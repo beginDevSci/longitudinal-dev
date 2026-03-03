@@ -3,7 +3,7 @@ title: "GEE Reference"
 slug: "gee-reference"
 description: "Quick lookup for GEE syntax, correlation structures, QIC, robust SEs, and troubleshooting."
 category: "mixed-models"
-tags: ["GEE", "reference", "geepack", "cheat-sheet"]
+tags: ["GEE", "quick-reference", "geepack", "syntax"]
 r_packages: ["geepack"]
 guide_type: "reference"
 parent_method: "gee"
@@ -360,6 +360,9 @@ With 20–40 clusters, use the Mancl-DeRouen correction. `geepack` does not nati
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "GEE OR = 1.5, so each person's odds increase 50%" | GEE gives *marginal* (population-averaged) ORs, not individual |
@@ -509,11 +512,11 @@ fit <- ordgee(ordered(y) ~ time + treatment, id = id, data = df,
 
 ## Related Tutorials
 
-| Tutorial | Focus | Difficulty |
-|----------|-------|------------|
-| [GEE Basic](/tutorials/gee) | Introduction to GEE with geepack | Intro |
-| [GEE Count Outcomes](/tutorials/gee-count) | Poisson and NB marginal models | Intermediate |
-| [GEE Time-Varying Covariates](/tutorials/gee-time-varying-covariate) | Within-person predictors | Intermediate |
+| Tutorial | Focus |
+|----------|-------|
+| [GEE Basic](/tutorials/gee) | Introduction to GEE with geepack |
+| [GEE Count Outcomes](/tutorials/gee-count) | Poisson and NB marginal models |
+| [GEE Time-Varying Covariates](/tutorials/gee-time-varying-covariate) | Within-person predictors |
 
 ---
 

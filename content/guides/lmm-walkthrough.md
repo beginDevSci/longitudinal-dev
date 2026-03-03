@@ -3,7 +3,7 @@ title: "LMM Walkthrough: Worked Example"
 slug: "lmm-walkthrough"
 description: "Step-by-step LMM analysis from setup to interpretation using simulated data in R."
 category: "mixed-models"
-tags: ["LMM", "walkthrough", "lme4", "R"]
+tags: ["LMM", "worked-example", "lme4", "R", "simulation"]
 r_packages: ["lme4", "lmerTest", "tidyverse", "MASS", "performance"]
 guide_type: "tutorial"
 parent_method: "lmm"

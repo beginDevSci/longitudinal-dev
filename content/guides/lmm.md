@@ -3,7 +3,7 @@ title: "Linear Mixed Models"
 slug: "lmm"
 description: "Model individual trajectories while accounting for the nested structure of longitudinal data."
 category: "mixed-models"
-tags: ["LMM", "guide", "lme4", "multilevel"]
+tags: ["LMM", "mixed-models", "multilevel", "longitudinal"]
 guide_type: "overview"
 ---
 
@@ -396,29 +396,22 @@ With random slopes, the ICC is time-dependent; the single-number ICC interpretat
 
 ## Common Pitfalls
 
-Before applying LMM, be aware of these frequent mistakes.
+> [!caution]
+> These mistakes are common but avoidable:
 
-**Using REML for fixed effects comparison** — Comparing models with different fixed effects using REML. _Reality:_ REML likelihoods aren't comparable when fixed effects differ. Use ML (`REML = FALSE`) for model comparison.
-
-**Ignoring singular fit warnings** — Dismissing "boundary (singular) fit" messages. _Reality:_ A variance at zero often means the model is over-specified. Check `VarCorr()` and consider simplifying.
-
-**Over-specifying random effects** — Including random quadratic with only 4 time points. _Reality:_ You need enough within-person observations to estimate complex random effects. Start simple.
-
-**Treating BLUPs as data** — Using extracted random effects in secondary analyses as if they were observed data. _Reality:_ BLUPs are estimates with uncertainty. Include predictors in the model, not in post-hoc analyses of BLUPs.
-
-**Time coded as factor** — Treating time as categorical when you want a continuous slope. _Reality:_ Factor time gives dummy variables, not a growth trajectory. (It's fine if your goal is a nonparametric mean profile; you'll lose a single 'slope' interpretation.)
-
-**Misinterpreting ICC** — "ICC = 0.65 means the model explains 65%." _Reality:_ ICC is variance _partitioning_, not variance _explained_. It tells you how much is between- vs. within-person.
-
-**Ignoring residual assumptions** — Not checking whether residuals are approximately normal and homoscedastic. _Reality:_ Severe violations can bias standard errors. Always plot residuals vs. fitted. If measurements are closely spaced, consider AR(1) residual correlation and/or time-varying residual variance; inspect residual ACFs and plots.
-
-**Confusing marginal and conditional R²** — Reporting only marginal R² when random effects matter. _Reality:_ Marginal = fixed effects only; Conditional = fixed + random. Report both.
-
-**Centering confusion** — Not being clear about what the intercept represents. _Reality:_ The intercept's meaning depends on where time = 0. Be explicit about your centering choice.
-
-**Conflating statistical and practical significance** — "Slope variance is significant, so individual differences matter." _Reality:_ With large samples, even tiny variances are significant. Interpret effect sizes substantively.
-
-**Denominator d.f. and p-values** — Mixed-model degrees of freedom depend on the design; use Satterthwaite or Kenward–Roger approximations when reporting tests for fixed effects.
+| Pitfall | Mistake | Fix |
+|---------|---------|-----|
+| REML for fixed effects comparison | Comparing models with different fixed effects using REML | Use ML (`REML = FALSE`) for model comparison; REML likelihoods aren't comparable across fixed effects |
+| Ignoring singular fit warnings | Dismissing "boundary (singular) fit" messages | A variance at zero means over-specification; check `VarCorr()` and simplify |
+| Over-specifying random effects | Including random quadratic with only 4 time points | You need enough within-person observations for complex random effects; start simple |
+| Treating BLUPs as data | Using extracted random effects in secondary analyses as observed data | BLUPs have uncertainty; include predictors in the model, not in post-hoc BLUP analyses |
+| Time coded as factor | Treating time as categorical when you want a continuous slope | Factor time gives dummy variables, not a growth trajectory; use numeric time |
+| Misinterpreting ICC | "ICC = 0.65 means the model explains 65%" | ICC is variance *partitioning*, not variance *explained*; it tells you between- vs. within-person split |
+| Ignoring residual assumptions | Not checking normality and homoscedasticity of residuals | Severe violations bias SEs; plot residuals vs. fitted; consider AR(1) if closely spaced |
+| Confusing marginal and conditional R² | Reporting only marginal R² when random effects matter | Marginal = fixed effects only; Conditional = fixed + random; report both |
+| Centering confusion | Not being clear about what the intercept represents | The intercept depends on where time = 0; be explicit about centering choice |
+| Conflating statistical and practical significance | "Slope variance is significant, so individual differences matter" | With large N, tiny variances are significant; interpret effect sizes substantively |
+| Denominator d.f. and p-values | Assuming standard d.f. apply to mixed models | Use Satterthwaite or Kenward–Roger approximations for fixed-effect tests |
 
 ---
 

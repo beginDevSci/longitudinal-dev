@@ -3,7 +3,7 @@ title: "LMM Reference"
 slug: "lmm-reference"
 description: "Quick lookup for LMM syntax, diagnostics, parameters, and troubleshooting."
 category: "mixed-models"
-tags: ["LMM", "reference", "lme4", "cheat-sheet"]
+tags: ["LMM", "quick-reference", "lme4", "syntax"]
 r_packages: ["lme4", "lmerTest", "performance"]
 guide_type: "reference"
 parent_method: "lmm"
@@ -405,6 +405,9 @@ Unlike lavaan, lme4 constrains variances to be non-negative. If you see a varian
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "ICC = 0.65 means 65% explained" | ICC is variance *partitioning*, not variance *explained* |
@@ -631,12 +634,12 @@ For basic growth models, LMM and LGCM produce **identical estimates**.
 
 ## Related Tutorials
 
-| Tutorial | Focus | Difficulty |
-|----------|-------|------------|
-| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model | Intro |
-| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes | Intro |
-| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors | Intermediate |
-| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors | Intermediate |
+| Tutorial | Focus |
+|----------|-------|
+| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model |
+| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes |
+| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors |
+| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors |
 
 ---
 
