@@ -91,4 +91,83 @@ ggsave(file.path(output_dir, "gee_fig01_population_averaged.png"),
        p_gee, width = 8, height = 5, dpi = 150)
 
 cat("Saved: gee_fig01_population_averaged.png\n")
+
+# =============================================================================
+# FIGURE 02: Working Correlation Structure Comparison
+# Four-panel heatmap showing the four standard correlation structures
+# =============================================================================
+
+library(tidyr)
+
+alpha <- 0.45  # Representative correlation parameter
+T_waves <- 5
+
+# Build correlation matrices
+build_corr <- function(type, alpha, T) {
+  mat <- diag(T)
+  for (i in 1:T) {
+    for (j in 1:T) {
+      if (i != j) {
+        mat[i, j] <- switch(type,
+          independence = 0,
+          exchangeable = alpha,
+          ar1 = alpha^abs(i - j),
+          unstructured = {
+            # Use a plausible decaying pattern for illustration
+            base <- 0.55 - 0.08 * abs(i - j)
+            base + 0.05 * sin(i + j)  # slight irregularity
+          }
+        )
+      }
+    }
+  }
+  mat
+}
+
+structures <- c("independence", "exchangeable", "ar1", "unstructured")
+labels <- c("Independence", "Exchangeable", "AR(1)", "Unstructured")
+
+corr_data <- do.call(rbind, lapply(seq_along(structures), function(s) {
+  mat <- build_corr(structures[s], alpha, T_waves)
+  expand.grid(row = 1:T_waves, col = 1:T_waves) %>%
+    mutate(
+      value = as.vector(mat),
+      structure = factor(labels[s], levels = labels),
+      row_label = factor(paste0("W", row), levels = paste0("W", T_waves:1)),
+      col_label = factor(paste0("W", col), levels = paste0("W", 1:T_waves))
+    )
+}))
+
+p_corr <- ggplot(corr_data, aes(x = col_label, y = row_label, fill = value)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = sprintf("%.2f", value)),
+            size = 3, color = ifelse(corr_data$value > 0.5, "white", "gray20")) +
+  facet_wrap(~ structure, nrow = 1) +
+  scale_fill_gradient2(
+    low = "#F1F5F9", mid = "#60A5FA", high = "#1E40AF",
+    midpoint = 0.5, limits = c(0, 1),
+    name = "Correlation"
+  ) +
+  labs(
+    title = "Working Correlation Structures",
+    subtitle = paste0("5 waves, \u03B1 = ", alpha,
+                      " | All structures use the same \u03B1 where applicable")
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 15, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "gray40"),
+    strip.text = element_text(size = 12, face = "bold"),
+    axis.title = element_blank(),
+    axis.text = element_text(size = 9),
+    panel.grid = element_blank(),
+    legend.position = "bottom",
+    legend.key.width = unit(2, "cm")
+  ) +
+  coord_fixed()
+
+ggsave(file.path(output_dir, "gee_fig02_correlation_structures.png"),
+       p_corr, width = 12, height = 4, dpi = 150)
+
+cat("Saved: gee_fig02_correlation_structures.png\n")
 cat("\nAll GEE figures generated successfully!\n")

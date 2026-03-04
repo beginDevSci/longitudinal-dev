@@ -130,13 +130,10 @@ The working correlation matrix R(α) specifies how observations within a person 
 | **AR(1)** | Correlation decays with lag | Autoregressive | 1 (α) |
 | **Unstructured** | Each pair has its own correlation | No pattern assumed | T(T−1)/2 |
 
-```
-Independence:       Exchangeable:       AR(1):              Unstructured:
-[1 0 0 0]          [1 α α α]          [1  α  α² α³]       [1   α₁₂ α₁₃ α₁₄]
-[0 1 0 0]          [α 1 α α]          [α  1  α  α²]       [α₁₂ 1   α₂₃ α₂₄]
-[0 0 1 0]          [α α 1 α]          [α² α  1  α ]       [α₁₃ α₂₃ 1   α₃₄]
-[0 0 0 1]          [α α α 1]          [α³ α² α  1 ]       [α₁₄ α₂₄ α₃₄ 1  ]
-```
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/gee/gee_fig02_correlation_structures.png" alt="Working Correlation Structure Comparison" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">The four standard working correlation structures for 5 waves with α = 0.45. Independence assumes no correlation; exchangeable assumes all pairs are equally correlated; AR(1) shows exponential decay with lag; unstructured allows each pair its own value.</figcaption>
+</figure>
 
 **Choosing a structure:**
 
