@@ -338,6 +338,27 @@ fit_indep <- geeglm(y ~ time + group, id = id, data = df,
 
 ---
 
+## Interactive Exploration
+
+To build deeper intuition for how GEE works, use the interactive explorer below. Adjust the correlation structure and parameters to see how the working correlation matrix changes, how population-averaged (GEE) curves differ from conditional (GLMM) trajectories, and when robust SEs diverge from naive SEs.
+
+<iframe
+  src="/images/guides/gee/interactive/gee_explorer.html"
+  width="100%"
+  height="700"
+  style="border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; margin: 1.5rem 0;"
+  title="Interactive GEE Explorer">
+</iframe>
+
+This tool lets you:
+
+- **Switch correlation structures** — see how Independence, Exchangeable, AR(1), and Unstructured produce different R(α) matrices for the same α
+- **Adjust α** — watch the heatmap update in real-time as within-person correlation strengthens or weakens
+- **Compare marginal vs conditional** — the bold red GEE curve shows the population average; faded lines show individual GLMM trajectories. Increase τ² to see the curves diverge
+- **Examine SE behavior** — the bottom bar chart shows when robust SEs protect you from a misspecified working correlation (try Independence with high α)
+
+---
+
 ## Summary
 
 GEE provides population-averaged estimates for correlated data with minimal distributional assumptions:
