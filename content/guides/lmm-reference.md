@@ -3,7 +3,7 @@ title: "LMM Reference"
 slug: "lmm-reference"
 description: "Quick lookup for LMM syntax, diagnostics, parameters, and troubleshooting."
 category: "mixed-models"
-tags: ["LMM", "reference", "lme4", "cheat-sheet"]
+tags: ["LMM", "quick-reference", "lme4", "syntax"]
 r_packages: ["lme4", "lmerTest", "performance"]
 guide_type: "reference"
 parent_method: "lmm"
@@ -13,7 +13,7 @@ parent_method: "lmm"
 
 Fast lookup for syntax, diagnostics, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lmm-walkthrough). For conceptual background, see the [Overview](/guides/lmm).
 
-**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Checklists](#checklists) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -295,29 +295,6 @@ time          2.021   0.085     <- γ₁₀
 
 ---
 
-## Time Coding
-
-| Centering | Time Values | Intercept = |
-|-----------|-------------|-------------|
-| Wave 1 (default) | 0, 1, 2, 3, 4 | Score at Wave 1 |
-| Midpoint | -2, -1, 0, 1, 2 | Score at Wave 3 |
-| Final wave | -4, -3, -2, -1, 0 | Score at Wave 5 |
-| Actual months | 0, 6, 12, 18, 24 | Score at baseline; slope = per month |
-
-Slope interpretation unchanged by centering; intercept moves to the zero-point.
-
-### Recoding Time
-
-```r
-# Center at midpoint
-data_long$time_c <- data_long$time - 2
-
-# Use actual months
-data_long$months <- c(0, 6, 12, 18, 24)[data_long$wave]
-```
-
----
-
 ## Common Errors & Fixes
 
 | Issue | Symptom | Fix |
@@ -405,6 +382,9 @@ Unlike lavaan, lme4 constrains variances to be non-negative. If you see a varian
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "ICC = 0.65 means 65% explained" | ICC is variance *partitioning*, not variance *explained* |
@@ -471,30 +451,6 @@ slope_i <- fixef(mod)["time"] + re[person_i, "time"]
 ```r
 y_hat <- intercept_i + slope_i * t
 ```
-
----
-
-## Checklists
-
-### Before Running
-
-- [ ] Data in long format (one row per observation)
-- [ ] Time coded as numeric (not factor)
-- [ ] ID variable is factor or character
-- [ ] Checked for missing data patterns
-- [ ] Visualized individual trajectories
-
-### Before Reporting
-
-- [ ] Model converged without warnings
-- [ ] Checked for singular fit
-- [ ] Residual diagnostics examined
-- [ ] Used ML for model comparison, REML for final estimates
-- [ ] Fixed effects reported with SEs and CIs
-- [ ] Variance components reported (not just fixed effects)
-- [ ] R² (marginal and conditional) reported
-- [ ] Time coding explicitly stated
-- [ ] Interpreted effect sizes, not just p-values
 
 ---
 
@@ -569,21 +525,6 @@ mod <- brm(y ~ time + (1 + time | id),
 
 ---
 
-## LMM vs. LGCM
-
-| Aspect | LMM | LGCM |
-|--------|-----|------|
-| Data format | Long | Wide |
-| Software | lme4, nlme | lavaan, Mplus |
-| Fit indices | R², ICC | CFI, RMSEA, SRMR |
-| Individual estimates | BLUPs | Factor scores |
-| Time-varying covariates | Easy | More complex |
-| Latent variables | Not directly | Natural extension |
-
-For basic growth models, LMM and LGCM produce **identical estimates**.
-
----
-
 ## Resources
 
 ### Books
@@ -631,12 +572,12 @@ For basic growth models, LMM and LGCM produce **identical estimates**.
 
 ## Related Tutorials
 
-| Tutorial | Focus | Difficulty |
-|----------|-------|------------|
-| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model | Intro |
-| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes | Intro |
-| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors | Intermediate |
-| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors | Intermediate |
+| Tutorial | Focus |
+|----------|-------|
+| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model |
+| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes |
+| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors |
+| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors |
 
 ---
 

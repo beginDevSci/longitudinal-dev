@@ -3,7 +3,7 @@ title: "GLMM Reference"
 slug: "glmm-reference"
 description: "Quick lookup for GLMM syntax, distributions, link functions, diagnostics, and troubleshooting."
 category: "mixed-models"
-tags: ["GLMM", "reference", "glmmTMB", "lme4", "cheat-sheet"]
+tags: ["GLMM", "quick-reference", "glmmTMB", "syntax"]
 r_packages: ["glmmTMB", "lme4"]
 guide_type: "reference"
 parent_method: "glmm"
@@ -352,6 +352,9 @@ fit_simple <- glmer(y ~ time + (1 | id), data = df, family = binomial)
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "OR = 2.5 means 2.5× more likely" | OR is odds ratio, not probability ratio |
@@ -503,12 +506,12 @@ fit <- glmer(y ~ time + (1 | site/id), data = df, family = binomial)
 
 ## Related Tutorials
 
-| Tutorial | Focus | Difficulty |
-|----------|-------|------------|
-| [GLMM Basic](/tutorials/glmm) | Introduction to GLMM with glmmTMB | Intro |
-| [GLMM Binary Outcomes](/tutorials/glmm-binary) | Logistic random effects model | Intermediate |
-| [GLMM Count Outcomes](/tutorials/glmm-count) | Negative binomial mixed model | Intermediate |
-| [GLMM Interactions](/tutorials/glmm-interactions) | Cross-level and time interactions | Intermediate |
+| Tutorial | Focus |
+|----------|-------|
+| [GLMM Basic](/tutorials/glmm) | Introduction to GLMM with glmmTMB |
+| [GLMM Binary Outcomes](/tutorials/glmm-binary) | Logistic random effects model |
+| [GLMM Count Outcomes](/tutorials/glmm-count) | Negative binomial mixed model |
+| [GLMM Interactions](/tutorials/glmm-interactions) | Cross-level and time interactions |
 
 ---
 

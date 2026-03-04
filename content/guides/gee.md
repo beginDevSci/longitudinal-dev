@@ -3,7 +3,7 @@ title: "Generalized Estimating Equations"
 slug: "gee"
 description: "Estimate population-averaged effects for correlated data without modeling individual trajectories."
 category: "mixed-models"
-tags: ["GEE", "guide", "geepack", "marginal"]
+tags: ["GEE", "marginal-models", "geepack", "longitudinal"]
 guide_type: "overview"
 ---
 
@@ -298,25 +298,21 @@ For **non-linear models** (logit, log links), the estimands differ:
 
 ## Common Pitfalls
 
-**Treating GEE coefficients as conditional effects** — Interpreting the GEE odds ratio as if it applies to a specific person. *Reality:* GEE estimates marginal (population-averaged) effects. For binary outcomes, the marginal OR is always closer to 1.0 than the conditional OR from GLMM. Report them as "population-averaged."
+> [!caution]
+> These mistakes are common but avoidable:
 
-**Ignoring the MCAR assumption with substantial dropout** — Using standard GEE when 30% of participants have incomplete data and dropout is related to the outcome. *Reality:* If dropout is MAR (depends on observed values), GEE is biased. Use weighted GEE, multiple imputation, or switch to GLMM with FIML.
-
-**Using too few clusters** — Fitting GEE with 15 participants and trusting the sandwich SEs. *Reality:* The sandwich estimator needs large N (clusters, not total observations). With < 40 clusters, use bias-corrected variants or consider GLMM.
-
-**Over-interpreting the working correlation** — Reporting the estimated exchangeable correlation (α = 0.45) as the "true" within-person correlation. *Reality:* The working correlation is a nuisance parameter used for efficiency. It's not a reliable estimate of the actual correlation structure, especially under misspecification.
-
-**Comparing GEE and GLMM coefficients directly** — Noting that "the GEE odds ratio was 1.8 but the GLMM odds ratio was 2.4" and concluding one is wrong. *Reality:* They estimate different quantities. The marginal OR is *supposed* to be smaller than the conditional OR. Both can be correct for their respective targets.
-
-**Using naive SEs instead of robust** — Reporting model-based standard errors without the sandwich correction. *Reality:* Naive SEs are only valid if the working correlation is exactly correct — an assumption you can't verify. Always report robust SEs unless you have strong reasons to believe the working correlation is correct.
-
-**Fitting unstructured correlation with many time points** — Using `corstr = "unstructured"` with 10 waves and 80 participants. *Reality:* Unstructured requires estimating T(T-1)/2 = 45 correlation parameters. With limited clusters relative to time points, estimation becomes unstable. Use exchangeable or AR(1) instead.
-
-**Neglecting to check robust vs. naive SE agreement** — Never comparing the two sets of standard errors. *Reality:* Large discrepancies (> 20%) signal that the working correlation is substantially misspecified. While robust SEs remain valid, this is a useful diagnostic — a well-chosen working correlation gives you more efficient estimates.
-
-**Applying GEE to non-longitudinal clustered data without thought** — Using GEE for any clustered data (e.g., students within schools) without considering whether cluster-level effects matter. *Reality:* GEE estimates marginal effects averaging over clusters. If cluster-level variation is substantively important, a multilevel model is more informative.
-
-**Forgetting that QIC isn't a likelihood-based criterion** — Using QIC as if it were AIC and expecting the same statistical properties. *Reality:* QIC is based on quasi-likelihood, not full likelihood. It's useful for comparing correlation structures and mean models within GEE, but it doesn't have the same theoretical grounding as AIC/BIC. Use it as a guide, not an oracle.
+| Pitfall | Mistake | Fix |
+|---------|---------|-----|
+| Treating GEE coefficients as conditional | Interpreting GEE OR as applying to a specific person | GEE gives marginal (population-averaged) effects; marginal OR is always closer to 1.0 than conditional OR |
+| Ignoring MCAR assumption with dropout | Using standard GEE when dropout is related to the outcome | If dropout is MAR, GEE is biased; use weighted GEE, multiple imputation, or GLMM with FIML |
+| Using too few clusters | Fitting GEE with < 40 participants and trusting sandwich SEs | Sandwich estimator needs large N (clusters, not observations); use bias-corrected variants or GLMM |
+| Over-interpreting working correlation | Reporting estimated α as the "true" within-person correlation | Working correlation is a nuisance parameter for efficiency, not a reliable correlation estimate |
+| Comparing GEE and GLMM coefficients directly | Concluding one is wrong because ORs differ | They estimate different quantities; marginal OR < conditional OR by design |
+| Using naive SEs instead of robust | Reporting model-based SEs without sandwich correction | Naive SEs require exactly correct working correlation; always report robust SEs |
+| Unstructured correlation with many time points | Using `corstr = "unstructured"` with 10+ waves | Requires T(T−1)/2 parameters; becomes unstable with limited clusters; use exchangeable or AR(1) |
+| Not checking robust vs. naive SE agreement | Never comparing the two SE sets | Large discrepancies (> 20%) signal misspecified working correlation; useful diagnostic |
+| GEE for clustered data without thought | Using GEE for any clustering without considering cluster-level effects | GEE averages over clusters; if cluster variation matters substantively, use multilevel models |
+| QIC as likelihood-based criterion | Using QIC as if it were AIC with the same properties | QIC is quasi-likelihood-based; useful for relative comparison within GEE, but not as theoretically grounded |
 
 ---
 

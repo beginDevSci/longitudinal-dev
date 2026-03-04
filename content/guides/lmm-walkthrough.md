@@ -3,7 +3,7 @@ title: "LMM Walkthrough: Worked Example"
 slug: "lmm-walkthrough"
 description: "Step-by-step LMM analysis from setup to interpretation using simulated data in R."
 category: "mixed-models"
-tags: ["LMM", "walkthrough", "lme4", "R"]
+tags: ["LMM", "worked-example", "lme4", "R", "simulation"]
 r_packages: ["lme4", "lmerTest", "tidyverse", "MASS", "performance"]
 guide_type: "tutorial"
 parent_method: "lmm"
@@ -197,6 +197,8 @@ ggplot(data_long, aes(x = time, y = y)) +
        title = "Individual Trajectories with Mean Overlay") +
   theme_minimal()
 ```
+
+![Individual Trajectories with Mean](/images/guides/lmm/lmm_fig01_spaghetti.png)
 
 *Figure: Individual trajectories (gray) with mean trajectory overlay (blue). The upward trend shows positive average growth; the spread shows individual differences.*
 
@@ -477,7 +479,7 @@ head(re)
 ...
 ```
 
-These are BLUP/EBLUP estimates (conditional modes): person-specific deviations that are partially pooled toward the group mean.
+These are BLUPs (conditional modes): person-specific deviations that are partially pooled toward the group mean.
 
 ### Individual Trajectories
 
@@ -521,8 +523,8 @@ A key advantage of mixed models is **shrinkage**—extreme individual estimates 
 ols_estimates <- data_long %>%
   group_by(id) %>%
   summarise(
-    ols_intercept = coef(lm(y ~ time, data = cur_data()))[1],
-    ols_slope     = coef(lm(y ~ time, data = cur_data()))[2],
+    ols_intercept = coef(lm(y ~ time, data = pick(everything())))[1],
+    ols_slope     = coef(lm(y ~ time, data = pick(everything())))[2],
     .groups = "drop"
   )
 
@@ -544,6 +546,8 @@ ggplot(comparison, aes(x = ols_intercept, y = intercept)) +
        subtitle = "Points below diagonal = shrinkage toward mean") +
   theme_minimal()
 ```
+
+![Shrinkage Demonstration](/images/guides/lmm/lmm_fig10_shrinkage.png)
 
 *Figure: Shrinkage demonstration. Points near the dashed red line (y = x) show little shrinkage. Points pulled toward the grand mean (dotted lines) show substantial shrinkage—these are typically individuals with extreme OLS estimates.*
 
@@ -673,21 +677,7 @@ mod <- lmer(outcome ~ time + (1 + time | participant_id), data = data_long)
 summary(mod)
 ```
 
-### 4. Adjust Time Coding (if needed)
-
-If waves are unequally spaced, use actual time values:
-
-```r
-# Measurements at baseline, 1, 3, 6, and 12 months:
-# Create a mapping from wave labels to time values
-time_map <- c("1"=0, "2"=1, "3"=3, "4"=6, "5"=12)
-data_long$time <- unname(time_map[as.character(data_long$wave)])
-# Now slope = change per month
-```
-
-Set time = 0 at a meaningful reference (e.g., baseline) so the intercept is interpretable.
-
-✅ **Checkpoint**: Once your basic model runs, layer on diagnostics, model comparisons, and random effects extraction exactly as shown above.
+✅ **Checkpoint**: Once your basic model runs, layer on diagnostics, model comparisons, and random effects extraction exactly as shown above. See the [Reference](/guides/lmm-reference) for time coding options if your waves are unequally spaced.
 
 ---
 

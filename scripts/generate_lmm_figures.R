@@ -1,16 +1,68 @@
 # Generate LMM Guide Figures
+# Figure 01: Spaghetti Plot (individual trajectories with mean overlay)
 # Figure 10: Shrinkage Demonstration (simulated)
 # Figure 11: ICC Visualization
 
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(MASS)
 
 set.seed(42)
 
 # Output directory
 output_dir <- "public/images/guides/lmm"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# =============================================================================
+# FIGURE 01: Spaghetti Plot with Mean Trajectory
+# Individual growth trajectories showing between-person variability
+# =============================================================================
+
+n_persons_spag <- 200
+time_points_spag <- 0:4
+
+# Parameters matching the walkthrough
+gamma_00 <- 50; gamma_10 <- 2
+tau <- matrix(c(100, -2, -2, 1), nrow = 2)
+sigma_spag <- 5
+
+re <- mvrnorm(n_persons_spag, c(0, 0), tau)
+
+spag_data <- expand.grid(id = 1:n_persons_spag, time = time_points_spag) %>%
+  mutate(
+    y = gamma_00 + re[id, 1] + (gamma_10 + re[id, 2]) * time + rnorm(n(), 0, sigma_spag)
+  )
+
+mean_traj <- spag_data %>%
+  group_by(time) %>%
+  summarise(mean_y = mean(y), .groups = "drop")
+
+p_spaghetti <- ggplot(spag_data, aes(x = time, y = y)) +
+  geom_line(aes(group = id), alpha = 0.12, color = "gray50", linewidth = 0.4) +
+  geom_line(data = mean_traj, aes(y = mean_y),
+            color = "#3B82F6", linewidth = 1.8) +
+  geom_point(data = mean_traj, aes(y = mean_y),
+             color = "#3B82F6", size = 3.5) +
+  scale_x_continuous(breaks = 0:4, labels = paste("Wave", 1:5)) +
+  labs(
+    x = "Time",
+    y = "Score",
+    title = "Individual Growth Trajectories",
+    subtitle = paste0("N = ", n_persons_spag,
+                      " participants | Gray = individual | Blue = mean trajectory")
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(size = 15, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "gray40"),
+    panel.grid.minor = element_blank()
+  )
+
+ggsave(file.path(output_dir, "lmm_fig01_spaghetti.png"),
+       p_spaghetti, width = 8, height = 5, dpi = 150)
+
+cat("Saved: lmm_fig01_spaghetti.png\n")
 
 # =============================================================================
 # FIGURE 10: Shrinkage Demonstration

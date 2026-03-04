@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380">
+  <!-- Background -->
+  <rect width="800" height="380" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Random Intercept Only vs. Random Intercept + Slope</text>
+
+  <!-- Left Panel: Random Intercept Only -->
+  <rect x="30" y="50" width="360" height="300" fill="white" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+  <text x="210" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#374151">Random Intercept Only</text>
+  <text x="210" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">(Parallel lines — same slope for everyone)</text>
+
+  <!-- Left axes -->
+  <line x1="70" y1="290" x2="350" y2="290" stroke="#374151" stroke-width="1.5"/>
+  <line x1="70" y1="290" x2="70" y2="120" stroke="#374151" stroke-width="1.5"/>
+  <text x="210" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#374151">Time</text>
+  <text x="50" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#374151" transform="rotate(-90, 50, 205)">Score</text>
+
+  <!-- Time labels -->
+  <text x="90" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">0</text>
+  <text x="155" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">1</text>
+  <text x="220" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">2</text>
+  <text x="285" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">3</text>
+  <text x="340" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">4</text>
+
+  <!-- Left panel: Parallel lines (random intercept only) -->
+  <line x1="90" y1="275" x2="340" y2="215" stroke="#60a5fa" stroke-width="1.8" opacity="0.5"/>
+  <line x1="90" y1="260" x2="340" y2="200" stroke="#60a5fa" stroke-width="1.8" opacity="0.5"/>
+  <line x1="90" y1="245" x2="340" y2="185" stroke="#60a5fa" stroke-width="1.8" opacity="0.5"/>
+  <line x1="90" y1="225" x2="340" y2="165" stroke="#60a5fa" stroke-width="1.8" opacity="0.6"/>
+  <line x1="90" y1="205" x2="340" y2="145" stroke="#60a5fa" stroke-width="1.8" opacity="0.6"/>
+  <line x1="90" y1="185" x2="340" y2="125" stroke="#60a5fa" stroke-width="1.8" opacity="0.5"/>
+  <line x1="90" y1="165" x2="340" y2="140" stroke="#60a5fa" stroke-width="1.8" opacity="0.4"/>
+
+  <!-- Mean trajectory (thicker, darker) -->
+  <line x1="90" y1="220" x2="340" y2="160" stroke="#1d4ed8" stroke-width="3"/>
+
+  <!-- Bracket annotation for intercept spread -->
+  <line x1="82" y1="165" x2="82" y2="275" stroke="#1d4ed8" stroke-width="1.5"/>
+  <line x1="78" y1="165" x2="86" y2="165" stroke="#1d4ed8" stroke-width="1.5"/>
+  <line x1="78" y1="275" x2="86" y2="275" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="75" y="225" text-anchor="end" font-family="Arial, sans-serif" font-size="9" fill="#1d4ed8" transform="rotate(-90, 75, 225)">τ₀₀</text>
+
+  <!-- Annotation -->
+  <text x="210" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1d4ed8">Different starting points, same rate of change</text>
+
+
+  <!-- Right Panel: Random Intercept + Slope -->
+  <rect x="410" y="50" width="360" height="300" fill="white" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+  <text x="590" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#374151">Random Intercept + Slope</text>
+  <text x="590" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">(Non-parallel — slopes vary across people)</text>
+
+  <!-- Right axes -->
+  <line x1="450" y1="290" x2="730" y2="290" stroke="#374151" stroke-width="1.5"/>
+  <line x1="450" y1="290" x2="450" y2="120" stroke="#374151" stroke-width="1.5"/>
+  <text x="590" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#374151">Time</text>
+  <text x="430" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#374151" transform="rotate(-90, 430, 205)">Score</text>
+
+  <!-- Time labels -->
+  <text x="470" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">0</text>
+  <text x="535" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">1</text>
+  <text x="600" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">2</text>
+  <text x="665" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">3</text>
+  <text x="720" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">4</text>
+
+  <!-- Right panel: Non-parallel lines (random intercept + slope) -->
+  <line x1="470" y1="270" x2="720" y2="135" stroke="#f97316" stroke-width="1.8" opacity="0.6"/>
+  <line x1="470" y1="255" x2="720" y2="155" stroke="#f97316" stroke-width="1.8" opacity="0.5"/>
+  <line x1="470" y1="240" x2="720" y2="195" stroke="#f97316" stroke-width="1.8" opacity="0.6"/>
+  <line x1="470" y1="215" x2="720" y2="180" stroke="#f97316" stroke-width="1.8" opacity="0.5"/>
+  <line x1="470" y1="195" x2="720" y2="210" stroke="#f97316" stroke-width="1.8" opacity="0.6"/>
+  <line x1="470" y1="175" x2="720" y2="235" stroke="#f97316" stroke-width="1.8" opacity="0.5"/>
+  <line x1="470" y1="160" x2="720" y2="260" stroke="#f97316" stroke-width="1.8" opacity="0.5"/>
+
+  <!-- Mean trajectory (thicker, darker) -->
+  <line x1="470" y1="215" x2="720" y2="190" stroke="#c2410c" stroke-width="3"/>
+
+  <!-- Annotation -->
+  <text x="590" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#c2410c">Different starting points AND different rates of change</text>
+
+</svg>

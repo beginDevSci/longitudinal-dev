@@ -3,7 +3,7 @@ title: "LGCM Reference"
 slug: "lgcm-reference"
 description: "Quick lookup for LGCM syntax, fit indices, parameters, and troubleshooting."
 category: "growth-models"
-tags: ["LGCM", "reference", "lavaan", "cheat-sheet"]
+tags: ["LGCM", "quick-reference", "lavaan", "syntax"]
 r_packages: ["lavaan"]
 guide_type: "reference"
 parent_method: "lgcm"
@@ -274,6 +274,9 @@ parameterEstimates(fit) %>%
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "Everyone improved" (slope mean = 2) | Check slope variance—many may have slope ≤ 0 |
@@ -378,28 +381,20 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 
 ## Resources
 
-### Books
+Open-access resources for learning and applying LGCM.
 
-| Book | Focus |
-|------|-------|
-| Grimm, Ram, & Estabrook (2017). *Growth Modeling*. Guilford. | Comprehensive SEM/MLM coverage |
-| Bollen & Curran (2006). *Latent Curve Models*. Wiley. | Classic SEM treatment |
-| Singer & Willett (2003). *Applied Longitudinal Data Analysis*. Oxford. | MLM perspective, excellent pedagogy |
-| Little (2013). *Longitudinal Structural Equation Modeling*. Guilford. | Measurement issues |
+### Articles
 
-### Key Articles
-
-| Article | Contribution |
-|---------|--------------|
-| Curran, Obeidat, & Losardo (2010). *J Cognition & Development* | 12 FAQs comparing LGCM and MLM |
-| McNeish & Matta (2018). *Behavior Research Methods* | When approaches differ in practice |
-| Preacher et al. (2008). *Latent growth curve modeling*. Sage. | Centering and time coding guidance |
+| Article | Focus |
+|---------|-------|
+| Duncan & Duncan (2004). [The ABC's of LGM: An Introductory Guide to Latent Variable Growth Curve Modeling](https://pmc.ncbi.nlm.nih.gov/articles/PMC2888524/). | Conceptual introduction to LGCM — intercept/slope factors, path diagrams, growth parameters |
+| Biesanz, Deeb-Sossa, Papadakis, Bollen, & Curran (2004). [The Role of Coding Time in Estimating and Interpreting Growth Curve Models](https://curran.web.unc.edu/wp-content/uploads/sites/6785/2015/03/BiesanzDeeb-SossaPapadakisBollenCurran2004.pdf). | How time coding choices affect intercept meaning and growth factor (co)variances |
 
 ### Online
 
-- [lavaan tutorial](https://lavaan.ugent.be/tutorial/growth.html)
+- [lavaan tutorial: Growth models](https://lavaan.ugent.be/tutorial/growth.html)
 - [QuantDev tutorials](https://quantdev.ssri.psu.edu/)
-- [Curran-Bauer Analytics](https://www.youtube.com/@curranbauer) (YouTube)
+- [CenterStat](https://www.youtube.com/@centerstat) (YouTube — Curran & Bauer lectures on longitudinal methods)
 
 ---
 
@@ -412,20 +407,23 @@ Slope loadings: 0, 1, 2, 3, 4 (encode time)
 | **lme4 / nlme** | MLM approach; equivalent for basic models |
 | **semTools** | lavaan extensions (measurement invariance) |
 | **lcmm** | Latent class / mixture growth models |
-| **Mplus** | Gold standard for complex/mixture models; licensed |
+| **Mplus** | Gold standard for complex/mixture models; <span style="color: var(--color-text-error);">licensed</span> |
 | **Stata (sem)** | Good documentation; integrates with Stata workflow |
 
 ---
 
 ## Related Tutorials
 
-| Tutorial | Focus | Difficulty |
-|----------|-------|------------|
-| [LGCM Basic](/tutorials/lgcm-basic) | Linear growth with lavaan | Intro |
-| [LGCM Multiple Groups](/tutorials/lgcm-multiple-groups) | Group comparisons | Intermediate |
-| [LGCM Time-Invariant Covariates](/tutorials/lgcm-time-invariant-covariates) | Predictors of growth | Intermediate |
-| [LGCM Nesting](/tutorials/lgcm-nesting) | Nested/clustered data | Advanced |
-| [MLGCM](/tutorials/mlgcm) | Multivariate growth | Advanced |
+| Tutorial | Focus |
+|----------|-------|
+| [LGCM Basic](/tutorials/lgcm-basic) | Linear growth with lavaan |
+| [LGCM Basic (OpenMx)](/tutorials/lgcm-basic-openmx) | Linear growth with OpenMx |
+| [LGCM Multiple Groups](/tutorials/lgcm-multiple-groups) | Group comparisons |
+| [LGCM Time-Invariant Covariates](/tutorials/lgcm-time-invariant-covariates) | Predictors of growth |
+| [LGCM Time-Invariant Covariates (OpenMx)](/tutorials/lgcm-tic-openmx) | Predictors of growth with OpenMx |
+| [LGCM Nesting](/tutorials/lgcm-nesting) | Nested/clustered data |
+| [MLGCM](/tutorials/mlgcm) | Multivariate growth |
+| [MLGCM (OpenMx)](/tutorials/mlgcm-openmx) | Multivariate growth with OpenMx |
 
 ---
 

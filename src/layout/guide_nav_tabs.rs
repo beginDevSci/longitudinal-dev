@@ -65,6 +65,11 @@ impl GuideTabInfo {
     pub fn tutorial_url(&self) -> String {
         base_path::join(&format!("guides/{}-walkthrough/", self.method_slug))
     }
+
+    /// Get the URL for the reference page.
+    pub fn reference_url(&self) -> String {
+        base_path::join(&format!("guides/{}-reference/", self.method_slug))
+    }
 }
 
 /// Tab definition for rendering.
@@ -92,6 +97,11 @@ pub fn GuideNavTabs(info: GuideTabInfo) -> impl IntoView {
             label: "Worked Example",
             type_id: "tutorial",
             url: info.tutorial_url(),
+        },
+        TabDef {
+            label: "Reference",
+            type_id: "reference",
+            url: info.reference_url(),
         },
     ];
 
