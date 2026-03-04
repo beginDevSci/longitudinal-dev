@@ -13,6 +13,13 @@ When you measure the same people repeatedly, your observations aren't independen
 
 Consider a simple example: 200 participants measured at 5 time points each. You have 1,000 observations, but they're not 1,000 independent pieces of information. The 5 observations from Person 1 are more similar to each other than to observations from Person 47.
 
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/lmm/lmm_fig01_spaghetti.png" alt="Individual Growth Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Each gray line is one person's trajectory across 5 waves. The blue line is the group mean. Some people start high and stay flat; others start low and climb. The mean trajectory hides this individual variation.</figcaption>
+</figure>
+
+The mean tells you "the group improved"—but the real questions are about the spread: How much do starting points vary? Do people change at different rates? Standard approaches handle these poorly:
+
 | Approach                    | What It Does                                | Problem                                                                     |
 | --------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
 | **Ignore nesting**          | Treat all 1,000 observations as independent | SEs too small, p-values too optimistic                                      |
@@ -26,6 +33,12 @@ Consider a simple example: 200 participants measured at 5 time points each. You 
 - **Random effects**: Parameters that vary across individuals (person-specific deviations)
 
 **Quick mental model**: Think of LMM as "fit one regression line per person, then summarize those lines." Each individual gets their own intercept and slope, but these estimates are informed by the whole sample—extreme values get pulled toward the group average, and people with sparse data borrow strength from others.
+
+---
+
+> [!tip] **Before You Continue**
+>
+> If you're familiar with [LGCM](/guides/lgcm), LMM estimates the same growth parameters—intercept means/variances, slope means/variances, and their covariance—using a multilevel regression framework instead of SEM. For basic linear growth, the two approaches produce identical estimates. LMM's advantages emerge with unbalanced data, person-specific timing, and time-varying covariates.
 
 ---
 
@@ -198,21 +211,15 @@ Each person has their own intercept AND slope. Lines can have different starting
 
 ### Visualizing the Difference
 
-```
-Random Intercept Only          Random Intercept + Slope
-(parallel lines)               (non-parallel lines)
+![Random Effects Comparison](/images/guides/lmm/random_effects_comparison.svg)
 
-    │    ╱                         │      ╱
-    │   ╱                          │   ╱╱
-    │  ╱                           │  ╱ ╱
-    │ ╱                            │ ╱  ╱
-    │╱                             │╱  ╱
-    └──────────                    └─────────
-       Time                           Time
+*Left: Random intercept only — lines are parallel (everyone changes at the same rate) but start at different levels. Right: Random intercept + slope — lines can cross because people differ in both starting level and rate of change. The dark line is the mean trajectory in both cases.*
 
-All same slope,                  Different people,
-different intercepts             different slopes
-```
+<div class="sr-only">
+
+Two panels comparing random effect structures. Left panel (Random Intercept Only): Seven parallel lines at different vertical positions, all with the same slope, showing that individuals differ in starting level but change at the same rate. Right panel (Random Intercept + Slope): Seven non-parallel lines with different angles, some steep and some flat, showing that individuals differ in both starting level and rate of change. A thicker mean trajectory line appears in both panels.
+
+</div>
 
 ---
 
@@ -426,6 +433,10 @@ You now have the conceptual foundation for understanding LMM:
 - **ICC** tells you how much variance is between- vs. within-person, justifying the mixed model approach
 
 This is enough to understand what LMM does and why. To actually _fit_ one, continue to the worked example.
+
+> [!info] **Scope**
+>
+> This overview covers two-level linear mixed models for continuous outcomes with a single clustering variable (persons). Not covered: three-level models (e.g., observations within persons within sites), generalized mixed models for binary/count outcomes ([GLMM](/guides/glmm)), Bayesian estimation ([brms](https://cran.r-project.org/package=brms)), nonlinear growth curves, and multivariate mixed models. See the tutorial links for code and estimation details.
 
 ---
 
