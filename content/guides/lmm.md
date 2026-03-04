@@ -9,9 +9,13 @@ guide_type: "overview"
 
 ## Why Mixed Models?
 
-When you measure the same people repeatedly, your observations aren't independent. A person who scores high at Time 1 will likely score high at Time 2. Standard regression assumes each data point is independent—violating this assumption inflates your confidence and produces misleading p-values.
+When you measure the same people repeatedly, your observations aren't independent. A person who scores high at Time 1 is more likely to score high at Time 2. Standard regression ignores this, leading to:
 
-Consider a simple example: 200 participants measured at 5 time points each. You have 1,000 observations, but they're not 1,000 independent pieces of information. The 5 observations from Person 1 are more similar to each other than to observations from Person 47.
+- Inflated confidence in your estimates
+- Misleading p-values
+- No way to model individual differences in change
+
+Consider 200 participants measured at 5 time points each. You have 1,000 observations, but they're not 1,000 independent pieces of information—the 5 observations from Person 1 are more similar to each other than to observations from Person 47.
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/lmm/lmm_fig01_spaghetti.png" alt="Individual Growth Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
@@ -38,7 +42,13 @@ The mean tells you "the group improved"—but the real questions are about the s
 
 > [!tip] **Before You Continue**
 >
-> If you're familiar with [LGCM](/guides/lgcm), LMM estimates the same growth parameters—intercept means/variances, slope means/variances, and their covariance—using a multilevel regression framework instead of SEM. For basic linear growth, the two approaches produce identical estimates. LMM's advantages emerge with unbalanced data, person-specific timing, and time-varying covariates.
+> Look at the spaghetti plot above. Before reading further, consider:
+>
+> 1. **Intercept spread**: How much do starting points vary at Wave 1?
+> 2. **Slope divergence**: Do the lines fan out over time, or stay roughly parallel?
+> 3. **Intercept-slope relationship**: Do people who start high tend to change faster, slower, or neither?
+>
+> Hold these observations in mind—we'll return to them when discussing random effects.
 
 ---
 
@@ -69,6 +79,10 @@ LMM explicitly partitions variance into:
 
 This distinction is fundamental to understanding longitudinal change.
 
+### Missing Data Handling
+
+LMM uses all available observations under maximum likelihood—participants who miss waves still contribute information without listwise deletion. The key assumption is Missing At Random (MAR): missingness can depend on observed variables, but not on the missing values themselves.
+
 ### Natural Framework for Predictors
 
 Adding predictors is straightforward:
@@ -91,16 +105,6 @@ LMM works well when you have:
 | **Nested structure**   | Observations clearly belong to individuals                      |
 | **Interest in change** | Not just "do groups differ?" but "how do individuals change?"   |
 | **Adequate sample**    | 50+ individuals for simple models; 100+ recommended             |
-
-**Example scenarios where LMM shines:**
-
-- **Therapy outcome study**: 150 participants complete depression inventories at 8 weekly sessions. Some miss sessions. You want to estimate average symptom reduction and identify who improves faster.
-- **Cognitive aging study**: 300 participants complete memory tests every 2 years over a decade. Timing varies slightly. You want to model decline and test whether education predicts slower decline.
-- **Intensive longitudinal diary study**: 80 participants report daily mood for 30 days. You're interested in how daily stress relates to mood within persons, while capturing stable individual differences.
-
-> [!note] **When to consider alternatives**
->
-> LMM may not be the best choice when you have: only 2 time points (simpler methods like change scores may suffice), categorical outcomes (use GLMM), interest in latent variables (consider SEM approaches), complex dependency structures (time series models), or interest in discrete trajectory classes (growth mixture models).
 
 ---
 
@@ -138,7 +142,7 @@ LMM simultaneously answers two questions: _How do people change on average?_ (fi
 
 **Notation**: u₀ᵢ, u₁ᵢ (the deviations); τ₀₀, τ₁₁ (their variances)
 
-**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the _average_ intercept (fixed) and the _variance_ of intercepts across people (random). Person-specific estimates are derived quantities (BLUP/EBLUP estimates), not directly estimated coefficients.
+**Key insight**: We don't estimate a separate intercept for each person as a "parameter." Instead, we estimate the _average_ intercept (fixed) and the _variance_ of intercepts across people (random). Person-specific estimates are derived quantities (Best Linear Unbiased Predictions, or BLUPs), not directly estimated coefficients.
 
 ### The Combined Model
 
@@ -323,9 +327,7 @@ These expressions hold for any numeric time coding; centering time (e.g., at bas
 
 ## Interactive Exploration
 
-> [!tip] **Build intuition with the interactive tool**
->
-> The visualization below lets you experiment with LMM parameters and see how they shape trajectories.
+To build deeper intuition for how LMM parameters affect trajectories, use the interactive explorer below. Adjust the sliders to see how changing the intercept mean, slope variance, and other parameters affects the spaghetti plot in real-time.
 
 <iframe
   src="/images/guides/lmm/interactive/lmm_random_effects_explorer.html"
@@ -361,20 +363,6 @@ id   y_t1  y_t2  y_t3             id   time   y
                                   2    1      54
                                   ...
 ```
-
-### Time Coding
-
-How you code time affects interpretation:
-
-| Coding         | Time values               | Intercept means                                     |
-| -------------- | ------------------------- | --------------------------------------------------- |
-| Zero at start  | 0, 1, 2, 3, 4             | Expected score at baseline                          |
-| Zero at center | -2, -1, 0, 1, 2           | Expected score at middle wave                       |
-| Actual time    | 0, 6, 12, 18, 24 (months) | Expected score at month 0; slope = change per month |
-
-**Recommendation**: Start with zero at baseline (0, 1, 2, ...). Adjust if your research question focuses on a different time point.
-
-Rescaling time (e.g., months → years) rescales the slope and its variance; choose units that are meaningful for interpretation.
 
 ### Missing Data
 
@@ -416,9 +404,7 @@ With random slopes, the ICC is time-dependent; the single-number ICC interpretat
 | Misinterpreting ICC | "ICC = 0.65 means the model explains 65%" | ICC is variance *partitioning*, not variance *explained*; it tells you between- vs. within-person split |
 | Ignoring residual assumptions | Not checking normality and homoscedasticity of residuals | Severe violations bias SEs; plot residuals vs. fitted; consider AR(1) if closely spaced |
 | Confusing marginal and conditional R² | Reporting only marginal R² when random effects matter | Marginal = fixed effects only; Conditional = fixed + random; report both |
-| Centering confusion | Not being clear about what the intercept represents | The intercept depends on where time = 0; be explicit about centering choice |
 | Conflating statistical and practical significance | "Slope variance is significant, so individual differences matter" | With large N, tiny variances are significant; interpret effect sizes substantively |
-| Denominator d.f. and p-values | Assuming standard d.f. apply to mixed models | Use Satterthwaite or Kenward–Roger approximations for fixed-effect tests |
 
 ---
 
@@ -429,7 +415,6 @@ You now have the conceptual foundation for understanding LMM:
 - **Nested data require mixed models**—ignoring the dependency structure produces misleading standard errors
 - **Fixed effects** capture population-average trajectories; **random effects** capture individual variation around those averages
 - **Shrinkage** improves individual estimates by borrowing strength across people—especially valuable with sparse data
-- **Time coding** determines what the intercept represents and must match your research question
 - **ICC** tells you how much variance is between- vs. within-person, justifying the mixed model approach
 
 This is enough to understand what LMM does and why. To actually _fit_ one, continue to the worked example.

@@ -274,6 +274,9 @@ parameterEstimates(fit) %>%
 
 ## Interpretation Pitfalls
 
+> [!caution]
+> These mistakes are common but avoidable:
+
 | Mistake | Reality |
 |---------|---------|
 | "Everyone improved" (slope mean = 2) | Check slope variance—many may have slope ≤ 0 |

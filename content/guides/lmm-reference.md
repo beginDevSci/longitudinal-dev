@@ -13,7 +13,7 @@ parent_method: "lmm"
 
 Fast lookup for syntax, diagnostics, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lmm-walkthrough). For conceptual background, see the [Overview](/guides/lmm).
 
-**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Checklists](#checklists) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -295,29 +295,6 @@ time          2.021   0.085     <- γ₁₀
 
 ---
 
-## Time Coding
-
-| Centering | Time Values | Intercept = |
-|-----------|-------------|-------------|
-| Wave 1 (default) | 0, 1, 2, 3, 4 | Score at Wave 1 |
-| Midpoint | -2, -1, 0, 1, 2 | Score at Wave 3 |
-| Final wave | -4, -3, -2, -1, 0 | Score at Wave 5 |
-| Actual months | 0, 6, 12, 18, 24 | Score at baseline; slope = per month |
-
-Slope interpretation unchanged by centering; intercept moves to the zero-point.
-
-### Recoding Time
-
-```r
-# Center at midpoint
-data_long$time_c <- data_long$time - 2
-
-# Use actual months
-data_long$months <- c(0, 6, 12, 18, 24)[data_long$wave]
-```
-
----
-
 ## Common Errors & Fixes
 
 | Issue | Symptom | Fix |
@@ -477,30 +454,6 @@ y_hat <- intercept_i + slope_i * t
 
 ---
 
-## Checklists
-
-### Before Running
-
-- [ ] Data in long format (one row per observation)
-- [ ] Time coded as numeric (not factor)
-- [ ] ID variable is factor or character
-- [ ] Checked for missing data patterns
-- [ ] Visualized individual trajectories
-
-### Before Reporting
-
-- [ ] Model converged without warnings
-- [ ] Checked for singular fit
-- [ ] Residual diagnostics examined
-- [ ] Used ML for model comparison, REML for final estimates
-- [ ] Fixed effects reported with SEs and CIs
-- [ ] Variance components reported (not just fixed effects)
-- [ ] R² (marginal and conditional) reported
-- [ ] Time coding explicitly stated
-- [ ] Interpreted effect sizes, not just p-values
-
----
-
 ## Advanced Extensions
 
 ### Time-Varying Covariates
@@ -569,21 +522,6 @@ mod <- brm(y ~ time + (1 + time | id),
            family = gaussian(),
            chains = 4, cores = 4)
 ```
-
----
-
-## LMM vs. LGCM
-
-| Aspect | LMM | LGCM |
-|--------|-----|------|
-| Data format | Long | Wide |
-| Software | lme4, nlme | lavaan, Mplus |
-| Fit indices | R², ICC | CFI, RMSEA, SRMR |
-| Individual estimates | BLUPs | Factor scores |
-| Time-varying covariates | Easy | More complex |
-| Latent variables | Not directly | Natural extension |
-
-For basic growth models, LMM and LGCM produce **identical estimates**.
 
 ---
 
