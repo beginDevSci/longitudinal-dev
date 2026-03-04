@@ -27,6 +27,11 @@ These are **marginal** questions — they ask about averages, not individuals. Y
 
 The result: consistent, efficient estimates of population-averaged effects with robust inference — and far fewer assumptions than GLMM.
 
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/gee/gee_fig01_population_averaged.png" alt="Population-Averaged Trends" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Faded lines are individual probability trajectories — what a mixed model would estimate. Bold curves are population-averaged trends — what GEE estimates. GEE answers "what happens on average?" without modeling person-specific variation.</figcaption>
+</figure>
+
 ---
 
 > [!tip] **Before You Continue**
@@ -228,6 +233,42 @@ Where Q is the quasi-likelihood evaluated under independence working correlation
 
 ---
 
+## Interpretation
+
+GEE coefficients are **marginal** (population-averaged) effects on the link scale — the same scale as a standard GLM. This is GEE's interpretive advantage: no random effects to condition on.
+
+### Binary Outcomes (Logistic GEE)
+
+Coefficients are log-odds of the population proportion. Exponentiate for marginal odds ratios:
+
+| Parameter | Link Scale | Natural Scale |
+|-----------|-----------|---------------|
+| Intercept | Log-odds of population prevalence at time = 0 | Prevalence = logit⁻¹(β₀) |
+| Time coefficient | Change in log-odds per unit time | Marginal OR = exp(β₁) |
+| Predictor coefficient | Difference in log-odds | Marginal OR = exp(β) |
+
+**Example**: β₁ = -0.25 for time → OR = exp(-0.25) = 0.78. Across the population, the odds of the outcome decrease by ~22% per wave.
+
+**Marginal vs. conditional**: The marginal OR from GEE is always closer to 1.0 than the conditional OR from GLMM. This isn't bias — they answer different questions. The gap grows with random effect variance: more individual heterogeneity means more attenuation when averaging across individuals.
+
+### Count Outcomes (Log-link GEE)
+
+Coefficients are on the log scale. Exponentiate for marginal incidence rate ratios (IRR):
+
+| Parameter | Link Scale | Natural Scale |
+|-----------|-----------|---------------|
+| Intercept | Log population rate at time = 0 | Population rate = exp(β₀) |
+| Time coefficient | Change in log rate per unit time | Marginal IRR = exp(β₁) |
+| Predictor coefficient | Difference in log rate | Marginal IRR = exp(β) |
+
+**Example**: β₁ = 0.10 for time → IRR = exp(0.10) = 1.11. Across the population, the expected rate increases by ~11% per wave.
+
+### Continuous Outcomes (Identity-link GEE)
+
+With a continuous outcome, GEE coefficients are on the original scale — identical to LMM fixed effects. The marginal/conditional distinction disappears because the identity link is linear: averaging over individuals and applying the model give the same result.
+
+---
+
 ## Practical Considerations
 
 ### Missing Data: The MCAR Requirement
@@ -277,22 +318,6 @@ fit_ar1   <- geeglm(y ~ time + group, id = id, data = df,
 fit_indep <- geeglm(y ~ time + group, id = id, data = df,
                      family = binomial, corstr = "independence")
 ```
-
-### GEE vs. GLMM: A Practical Comparison
-
-For **linear models** (identity link), GEE and LMM give essentially the same fixed effects. The choice is about inference philosophy and assumptions.
-
-For **non-linear models** (logit, log links), the estimands differ:
-
-| Aspect | GEE (Marginal) | GLMM (Conditional) |
-|--------|-----------------|---------------------|
-| **Target** | Population average | Subject-specific |
-| **Coefficients** | Marginal effects | Conditional effects |
-| **OR/IRR magnitude** | Smaller (attenuated) | Larger |
-| **Random effects** | Not estimated | Estimated |
-| **Missing data** | MCAR required | MAR sufficient |
-| **Model comparison** | QIC | AIC, BIC, LRT |
-| **Distributional assumptions** | Fewer | More (RE distribution) |
 
 ---
 
