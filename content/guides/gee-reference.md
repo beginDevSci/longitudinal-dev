@@ -13,7 +13,7 @@ parent_method: "gee"
 
 Fast lookup for syntax, correlation structures, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/gee-walkthrough). For conceptual background, see the [Overview](/guides/gee).
 
-**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -305,6 +305,18 @@ apply(betas, 2, sd)
 
 ---
 
+## Parameters
+
+| Parameter | Interpretation |
+|-----------|----------------|
+| β₀ (intercept) | Marginal log-odds (or log-count) at reference levels |
+| β₁ (time) | Marginal change per time unit on link scale |
+| βₖ (predictor) | Marginal effect of predictor on link scale |
+| α (correlation) | Working correlation parameter(s) |
+| φ (scale) | Dispersion parameter |
+
+---
+
 ## Common Errors & Fixes
 
 | Issue | Symptom | Fix |
@@ -401,7 +413,7 @@ marginal_beta <- conditional_beta * c_star
 
 ---
 
-## Extensions
+## Advanced Extensions
 
 ### Time-Varying Covariates
 
@@ -457,18 +469,6 @@ fit <- ordgee(ordered(y) ~ time + treatment, id = id, data = df,
 | **Model comparison** | QIC | AIC, BIC, LRT |
 | **Distributional assumptions** | Fewer | More |
 | **For linear models** | Identical to LMM fixed effects | Identical to GEE |
-
----
-
-## Parameters
-
-| Parameter | Interpretation |
-|-----------|----------------|
-| β₀ (intercept) | Marginal log-odds (or log-count) at reference levels |
-| β₁ (time) | Marginal change per time unit on link scale |
-| βₖ (predictor) | Marginal effect of predictor on link scale |
-| α (correlation) | Working correlation parameter(s) |
-| φ (scale) | Dispersion parameter |
 
 ---
 

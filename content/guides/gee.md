@@ -328,6 +328,10 @@ GEE provides population-averaged estimates for correlated data with minimal dist
 
 The choice between GEE and GLMM isn't about which is "better" — it's about which question you're asking. Use GEE when the population average is the quantity of interest and you want robust, assumption-light inference.
 
+> [!info] **Scope**
+>
+> This overview covers standard GEE for binary and count outcomes with a single clustering variable (persons). Not covered: weighted GEE for MAR dropout, multinomial/ordinal GEE ([multgee](https://cran.r-project.org/package=multgee)), penalized GEE, doubly robust estimators, and alternating logistic regressions. See the tutorial links for code and estimation details.
+
 ---
 
 ## Next Steps
@@ -336,8 +340,5 @@ The choice between GEE and GLMM isn't about which is "better" — it's about whi
 
 **[Walkthrough: Worked Example →](/guides/gee-walkthrough)**
 Step-by-step R code to fit GEE models, compare correlation structures, and examine robust SEs.
-
-**[Quick Reference →](/guides/gee-reference)**
-Syntax cheat sheets, correlation structure tables, QIC usage, and troubleshooting.
 
 </div>
