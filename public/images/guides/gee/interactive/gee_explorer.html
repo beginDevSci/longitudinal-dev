@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GEE Interactive Explorer</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-50 p-4">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useMemo } = React;
+
+      // --- Utility functions ---
+      const seededRandom = (seed) => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      };
+
+      const normalRandom = (mean, sd, seed1, seed2) => {
+        const u1 = seededRandom(seed1);
+        const u2 = seededRandom(seed2);
+        const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        return mean + sd * z;
+      };
+
+      const invLogit = (x) => 1 / (1 + Math.exp(-x));
+
+      // --- Correlation matrix generators ---
+      const buildCorrMatrix = (structure, alpha, T) => {
+        const R = Array.from({ length: T }, () => Array(T).fill(0));
+        for (let i = 0; i < T; i++) {
+          R[i][i] = 1.0;
+          for (let j = 0; j < T; j++) {
+            if (i === j) continue;
+            if (structure === "independence") {
+              R[i][j] = 0;
+            } else if (structure === "exchangeable") {
+              R[i][j] = alpha;
+            } else if (structure === "ar1") {
+              R[i][j] = Math.pow(alpha, Math.abs(i - j));
+            } else if (structure === "unstructured") {
+              // Realistic preset: decaying but non-monotonic
+              const presets = [
+                [1.00, 0.62, 0.48, 0.39, 0.31],
+                [0.62, 1.00, 0.58, 0.44, 0.36],
+                [0.48, 0.58, 1.00, 0.55, 0.42],
+                [0.39, 0.44, 0.55, 1.00, 0.51],
+                [0.31, 0.36, 0.42, 0.51, 1.00],
+              ];
+              R[i][j] = presets[i][j] * (alpha / 0.5);
+              R[i][j] = Math.min(R[i][j], 0.99);
+            }
+          }
+        }
+        return R;
+      };
+
+      // --- Color scale for heatmap ---
+      const corrColor = (val) => {
+        const t = Math.abs(val);
+        const r = Math.round(255 * (1 - t) + 59 * t);
+        const g = Math.round(255 * (1 - t) + 130 * t);
+        const b = Math.round(255 * (1 - t) + 246 * t);
+        return `rgb(${r}, ${g}, ${b})`;
+      };
+
+      // --- Main component ---
+      function GEEExplorer() {
+        const [corrStructure, setCorrStructure] = useState("exchangeable");
+        const [alpha, setAlpha] = useState(0.45);
+        const [beta0, setBeta0] = useState(-0.5);
+        const [beta1, setBeta1] = useState(-0.25);
+        const [reVariance, setReVariance] = useState(1.0);
+        const [nParticipants, setNParticipants] = useState(20);
+        const [showMean, setShowMean] = useState(true);
+        const [showConditional, setShowConditional] = useState(true);
+        const [selectedPerson, setSelectedPerson] = useState(null);
+
+        const T = 5;
+        const times = [0, 1, 2, 3, 4];
+
+        const corrMatrix = useMemo(
+          () => buildCorrMatrix(corrStructure, alpha, T),
+          [corrStructure, alpha]
+        );
+
+        // Generate trajectories
+        const trajectories = useMemo(() => {
+          const trajs = [];
+          for (let i = 0; i < nParticipants; i++) {
+            const u_i = normalRandom(0, Math.sqrt(reVariance), i * 1000 + 1, i * 1000 + 2);
+            const points = times.map((t) => {
+              const eta = beta0 + u_i + beta1 * t;
+              return { t, prob: invLogit(eta) };
+            });
+            trajs.push({ points, u_i });
+          }
+          return trajs;
+        }, [beta0, beta1, reVariance, nParticipants]);
+
+        // Population-averaged curve (no random effect)
+        const marginalCurve = useMemo(
+          () => times.map((t) => ({ t, prob: invLogit(beta0 + beta1 * t) })),
+          [beta0, beta1]
+        );
+
+        // SE comparison
+        const seComparison = useMemo(() => {
+          // Simplified illustration: naive SE assumes working corr is correct,
+          // robust SE corrects for misspecification.
+          // We show that when working corr ≠ true corr, robust SE diverges from naive.
+          const baseSE = 0.08;
+          let naiveSE, robustSE;
+          if (corrStructure === "independence") {
+            // Independence ignores all correlation → naive SE too small
+            naiveSE = baseSE;
+            robustSE = baseSE * (1 + 0.8 * alpha);
+          } else if (corrStructure === "exchangeable") {
+            // Close to truth for many designs
+            naiveSE = baseSE * (1 + 0.3 * alpha);
+            robustSE = baseSE * (1 + 0.35 * alpha);
+          } else if (corrStructure === "ar1") {
+            naiveSE = baseSE * (1 + 0.25 * alpha);
+            robustSE = baseSE * (1 + 0.4 * alpha);
+          } else {
+            // Unstructured: most flexible, naive ≈ robust
+            naiveSE = baseSE * (1 + 0.32 * alpha);
+            robustSE = baseSE * (1 + 0.34 * alpha);
+          }
+          return { naiveSE: naiveSE.toFixed(4), robustSE: robustSE.toFixed(4) };
+        }, [corrStructure, alpha]);
+
+        // --- SVG chart dimensions ---
+        const chartW = 400, chartH = 300;
+        const margin = { top: 20, right: 25, bottom: 40, left: 50 };
+        const innerW = chartW - margin.left - margin.right;
+        const innerH = chartH - margin.top - margin.bottom;
+
+        const xScale = (t) => margin.left + (t / 4) * innerW;
+        const yScale = (p) => margin.top + (1 - p) * innerH;
+
+        const getPath = (points) =>
+          points.map((p, i) => `${i === 0 ? "M" : "L"} ${xScale(p.t)} ${yScale(p.prob)}`).join(" ");
+
+        // Heatmap dimensions
+        const heatW = 220, heatH = 220;
+        const cellSize = 36;
+        const heatOffset = 20;
+
+        const structureButtons = [
+          { key: "independence", label: "Independence" },
+          { key: "exchangeable", label: "Exchangeable" },
+          { key: "ar1", label: "AR(1)" },
+          { key: "unstructured", label: "Unstructured" },
+        ];
+
+        const marginalOR = Math.exp(beta1);
+
+        return (
+          <div className="font-sans">
+            <h2 className="text-lg font-bold text-slate-800 mb-3">
+              GEE Interactive Explorer
+            </h2>
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Left panel — Controls */}
+              <div className="bg-white rounded-lg shadow p-4 lg:w-72 flex-shrink-0">
+                <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                  Correlation Structure
+                </h3>
+                <div className="grid grid-cols-2 gap-1 mb-4">
+                  {structureButtons.map((s) => (
+                    <button
+                      key={s.key}
+                      onClick={() => setCorrStructure(s.key)}
+                      className={`px-2 py-1.5 text-xs rounded font-medium transition-colors ${
+                        corrStructure === s.key
+                          ? "bg-cyan-600 text-white"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-cyan-700">
+                    α (within-person correlation): {alpha.toFixed(2)}
+                  </label>
+                  <input
+                    type="range" min="0" max="0.95" step="0.05"
+                    value={alpha}
+                    onChange={(e) => setAlpha(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-cyan-100 rounded-lg cursor-pointer accent-cyan-600"
+                  />
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {corrStructure === "independence"
+                      ? "No effect — independence ignores α"
+                      : corrStructure === "unstructured"
+                      ? "Scales preset pattern"
+                      : corrStructure === "ar1"
+                      ? `Corr(t, t+k) = ${alpha.toFixed(2)}^k`
+                      : `All pairs equally correlated at ${alpha.toFixed(2)}`}
+                  </p>
+                </div>
+
+                <hr className="my-3 border-slate-200" />
+
+                <h3 className="text-sm font-semibold text-emerald-700 mb-2">
+                  Fixed Effects (log-odds)
+                </h3>
+                <div className="mb-2">
+                  <label className="text-xs font-medium text-emerald-700">
+                    β₀ (intercept): {beta0.toFixed(2)}
+                  </label>
+                  <input
+                    type="range" min="-3" max="3" step="0.1"
+                    value={beta0}
+                    onChange={(e) => setBeta0(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Baseline prevalence: {(invLogit(beta0) * 100).toFixed(0)}%
+                  </p>
+                </div>
+                <div className="mb-2">
+                  <label className="text-xs font-medium text-emerald-700">
+                    β₁ (time slope): {beta1.toFixed(2)}
+                  </label>
+                  <input
+                    type="range" min="-1" max="1" step="0.05"
+                    value={beta1}
+                    onChange={(e) => setBeta1(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Marginal OR per wave: {marginalOR.toFixed(3)}
+                  </p>
+                </div>
+
+                <hr className="my-3 border-slate-200" />
+
+                <h3 className="text-sm font-semibold text-blue-700 mb-2">
+                  Random Effect (for GLMM comparison)
+                </h3>
+                <div className="mb-2">
+                  <label className="text-xs font-medium text-blue-700">
+                    τ² (RE variance): {reVariance.toFixed(2)}
+                  </label>
+                  <input
+                    type="range" min="0" max="4" step="0.1"
+                    value={reVariance}
+                    onChange={(e) => setReVariance(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Controls spread of conditional (GLMM) trajectories
+                  </p>
+                </div>
+
+                <hr className="my-3 border-slate-200" />
+
+                <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                  Display
+                </h3>
+                <div className="mb-2">
+                  <label className="text-xs font-medium text-slate-600">
+                    N participants: {nParticipants}
+                  </label>
+                  <input
+                    type="range" min="5" max="50" step="1"
+                    value={nParticipants}
+                    onChange={(e) => setNParticipants(parseInt(e.target.value))}
+                    className="w-full h-2 bg-slate-100 rounded-lg cursor-pointer accent-slate-600"
+                  />
+                </div>
+                <label className="flex items-center gap-2 text-xs text-slate-600 mb-1">
+                  <input
+                    type="checkbox" checked={showMean}
+                    onChange={(e) => setShowMean(e.target.checked)}
+                  />
+                  GEE marginal curve
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-600 mb-1">
+                  <input
+                    type="checkbox" checked={showConditional}
+                    onChange={(e) => setShowConditional(e.target.checked)}
+                  />
+                  Conditional (GLMM) trajectories
+                </label>
+
+                <div className="bg-slate-100 rounded p-3 mt-3">
+                  <p className="text-xs text-slate-600">
+                    <strong>Bold curve</strong> = GEE population average (marginal).{" "}
+                    <strong>Faded lines</strong> = GLMM conditional trajectories.
+                    The marginal curve averages over individual heterogeneity — that's
+                    why the marginal OR is always closer to 1.0 than the conditional OR.
+                  </p>
+                </div>
+              </div>
+
+              {/* Center + Right panels */}
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="flex flex-col xl:flex-row gap-4">
+                  {/* Center — Correlation heatmap */}
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                      Working Correlation R(α)
+                    </h3>
+                    <svg width={heatW} height={heatH + 10}>
+                      {/* Column labels */}
+                      {times.map((t) => (
+                        <text
+                          key={`col-${t}`}
+                          x={heatOffset + t * cellSize + cellSize / 2}
+                          y={12}
+                          textAnchor="middle"
+                          className="text-xs fill-slate-500"
+                          fontSize="11"
+                        >
+                          t{t}
+                        </text>
+                      ))}
+                      {/* Rows */}
+                      {times.map((row) => (
+                        <g key={`row-${row}`}>
+                          <text
+                            x={heatOffset - 4}
+                            y={heatOffset + row * cellSize + cellSize / 2 + 4}
+                            textAnchor="end"
+                            className="text-xs fill-slate-500"
+                            fontSize="11"
+                          >
+                            t{row}
+                          </text>
+                          {times.map((col) => {
+                            const val = corrMatrix[row][col];
+                            return (
+                              <g key={`cell-${row}-${col}`}>
+                                <rect
+                                  x={heatOffset + col * cellSize}
+                                  y={heatOffset + row * cellSize}
+                                  width={cellSize - 2}
+                                  height={cellSize - 2}
+                                  rx={4}
+                                  fill={corrColor(val)}
+                                  stroke="#e2e8f0"
+                                  strokeWidth={0.5}
+                                />
+                                <text
+                                  x={heatOffset + col * cellSize + cellSize / 2 - 1}
+                                  y={heatOffset + row * cellSize + cellSize / 2 + 4}
+                                  textAnchor="middle"
+                                  fontSize="10"
+                                  fill={Math.abs(val) > 0.5 ? "#fff" : "#334155"}
+                                  fontWeight={row === col ? "bold" : "normal"}
+                                >
+                                  {val.toFixed(2)}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </g>
+                      ))}
+                    </svg>
+                    <p className="text-xs text-slate-400 mt-1 max-w-[220px]">
+                      {corrStructure === "independence"
+                        ? "No within-person correlation assumed."
+                        : corrStructure === "exchangeable"
+                        ? "All pairs equally correlated (compound symmetry)."
+                        : corrStructure === "ar1"
+                        ? "Correlation decays exponentially with time lag."
+                        : "Each pair has its own correlation (preset pattern)."}
+                    </p>
+                  </div>
+
+                  {/* Right — Trajectory plot */}
+                  <div className="bg-white rounded-lg shadow p-4 flex-1">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                      Population-Averaged vs Conditional
+                    </h3>
+                    <svg width={chartW} height={chartH}>
+                      {/* Grid */}
+                      {times.map((t) => (
+                        <line
+                          key={`gv-${t}`}
+                          x1={xScale(t)} y1={margin.top}
+                          x2={xScale(t)} y2={chartH - margin.bottom}
+                          stroke="#e2e8f0" strokeWidth="1"
+                        />
+                      ))}
+                      {[0, 0.25, 0.5, 0.75, 1.0].map((v) => (
+                        <line
+                          key={`gh-${v}`}
+                          x1={margin.left} y1={yScale(v)}
+                          x2={chartW - margin.right} y2={yScale(v)}
+                          stroke="#e2e8f0" strokeWidth="1"
+                        />
+                      ))}
+
+                      {/* Conditional trajectories */}
+                      {showConditional &&
+                        trajectories.map((traj, i) => (
+                          <path
+                            key={`traj-${i}`}
+                            d={getPath(traj.points)}
+                            fill="none"
+                            stroke={selectedPerson === i ? "#7c3aed" : "#94a3b8"}
+                            strokeWidth={selectedPerson === i ? 2.5 : 1}
+                            opacity={
+                              selectedPerson === null
+                                ? 0.3
+                                : selectedPerson === i
+                                ? 1
+                                : 0.1
+                            }
+                            onMouseEnter={() => setSelectedPerson(i)}
+                            onMouseLeave={() => setSelectedPerson(null)}
+                            style={{ cursor: "pointer" }}
+                          />
+                        ))}
+
+                      {/* GEE marginal curve */}
+                      {showMean && (
+                        <path
+                          d={getPath(marginalCurve)}
+                          fill="none"
+                          stroke="#dc2626"
+                          strokeWidth={3}
+                          strokeDasharray="none"
+                        />
+                      )}
+
+                      {/* Axes */}
+                      <line
+                        x1={margin.left} y1={chartH - margin.bottom}
+                        x2={chartW - margin.right} y2={chartH - margin.bottom}
+                        stroke="#334155" strokeWidth="1"
+                      />
+                      <line
+                        x1={margin.left} y1={margin.top}
+                        x2={margin.left} y2={chartH - margin.bottom}
+                        stroke="#334155" strokeWidth="1"
+                      />
+
+                      {/* X-axis labels */}
+                      {times.map((t) => (
+                        <text
+                          key={`xl-${t}`}
+                          x={xScale(t)} y={chartH - margin.bottom + 18}
+                          textAnchor="middle"
+                          className="text-xs fill-slate-600"
+                          fontSize="11"
+                        >
+                          Wave {t}
+                        </text>
+                      ))}
+                      <text
+                        x={margin.left + innerW / 2}
+                        y={chartH - 4}
+                        textAnchor="middle"
+                        className="text-xs fill-slate-500"
+                        fontSize="11"
+                      >
+                        Time
+                      </text>
+
+                      {/* Y-axis labels */}
+                      {[0, 0.25, 0.5, 0.75, 1.0].map((v) => (
+                        <text
+                          key={`yl-${v}`}
+                          x={margin.left - 8} y={yScale(v) + 4}
+                          textAnchor="end"
+                          className="text-xs fill-slate-600"
+                          fontSize="11"
+                        >
+                          {v.toFixed(2)}
+                        </text>
+                      ))}
+                      <text
+                        x={14} y={margin.top + innerH / 2}
+                        textAnchor="middle"
+                        transform={`rotate(-90, 14, ${margin.top + innerH / 2})`}
+                        className="text-xs fill-slate-500"
+                        fontSize="11"
+                      >
+                        P(Y = 1)
+                      </text>
+
+                      {/* Legend */}
+                      {showMean && (
+                        <g>
+                          <line
+                            x1={margin.left + 8} y1={margin.top + 8}
+                            x2={margin.left + 28} y2={margin.top + 8}
+                            stroke="#dc2626" strokeWidth={3}
+                          />
+                          <text
+                            x={margin.left + 32} y={margin.top + 12}
+                            className="text-xs fill-slate-600"
+                            fontSize="10"
+                          >
+                            GEE (marginal)
+                          </text>
+                        </g>
+                      )}
+                      {showConditional && (
+                        <g>
+                          <line
+                            x1={margin.left + 8} y1={margin.top + 22}
+                            x2={margin.left + 28} y2={margin.top + 22}
+                            stroke="#94a3b8" strokeWidth={1} opacity={0.5}
+                          />
+                          <text
+                            x={margin.left + 32} y={margin.top + 26}
+                            className="text-xs fill-slate-600"
+                            fontSize="10"
+                          >
+                            GLMM (conditional)
+                          </text>
+                        </g>
+                      )}
+                    </svg>
+
+                    {/* Selected person info */}
+                    {selectedPerson !== null && (
+                      <div className="text-xs text-purple-700 bg-purple-50 rounded p-2 mt-1">
+                        Person {selectedPerson + 1}: random intercept u = {trajectories[selectedPerson].u_i.toFixed(2)},
+                        conditional intercept = {(beta0 + trajectories[selectedPerson].u_i).toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bottom strip — SE comparison */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                    Robust vs Naive SE for β₁
+                  </h3>
+                  <div className="flex items-end gap-6">
+                    <div className="flex items-end gap-3">
+                      {/* Naive SE bar */}
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs text-slate-500 mb-1">
+                          {seComparison.naiveSE}
+                        </span>
+                        <div
+                          className="bg-amber-400 rounded-t"
+                          style={{
+                            width: 40,
+                            height: Math.max(8, parseFloat(seComparison.naiveSE) * 800),
+                          }}
+                        />
+                        <span className="text-xs text-slate-600 mt-1 font-medium">
+                          Naive
+                        </span>
+                      </div>
+                      {/* Robust SE bar */}
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs text-slate-500 mb-1">
+                          {seComparison.robustSE}
+                        </span>
+                        <div
+                          className="bg-teal-500 rounded-t"
+                          style={{
+                            width: 40,
+                            height: Math.max(8, parseFloat(seComparison.robustSE) * 800),
+                          }}
+                        />
+                        <span className="text-xs text-slate-600 mt-1 font-medium">
+                          Robust
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-500 max-w-sm">
+                      {corrStructure === "independence" ? (
+                        <span>
+                          <strong className="text-amber-600">Large gap</strong> —
+                          independence ignores true correlation, so naive SEs are too
+                          small. Robust (sandwich) SEs correct this.
+                        </span>
+                      ) : corrStructure === "unstructured" ? (
+                        <span>
+                          <strong className="text-teal-600">Small gap</strong> —
+                          unstructured is flexible enough to approximate the true
+                          correlation, so naive ≈ robust.
+                        </span>
+                      ) : (
+                        <span>
+                          {Math.abs(
+                            parseFloat(seComparison.robustSE) -
+                              parseFloat(seComparison.naiveSE)
+                          ) < 0.005 ? (
+                            <strong className="text-teal-600">Close agreement</strong>
+                          ) : (
+                            <strong className="text-amber-600">Some discrepancy</strong>
+                          )}{" "}
+                          — the gap between naive and robust SEs reflects how well the
+                          working correlation matches reality.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Model equation box */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-slate-600">
+                    <div>
+                      <strong>GEE model:</strong>{" "}
+                      logit(μᵢₜ) = β₀ + β₁·t = {beta0.toFixed(2)} + ({beta1.toFixed(2)})·t
+                    </div>
+                    <div>
+                      <strong>Marginal OR:</strong> exp(β₁) = {marginalOR.toFixed(3)}
+                    </div>
+                    <div>
+                      <strong>Working corr:</strong>{" "}
+                      {corrStructure === "ar1" ? "AR(1)" : corrStructure.charAt(0).toUpperCase() + corrStructure.slice(1)},
+                      α = {alpha.toFixed(2)}
+                    </div>
+                    <div>
+                      <strong>SE(β₁):</strong> naive = {seComparison.naiveSE},
+                      robust = {seComparison.robustSE}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<GEEExplorer />);
+    </script>
+  </body>
+</html>

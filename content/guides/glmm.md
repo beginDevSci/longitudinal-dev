@@ -23,7 +23,12 @@ Fitting a standard LMM to these outcomes creates real problems:
 | **Count** | Ignores floor at zero; assumes symmetric errors around the mean |
 | **Ordinal** | Treats category distances as equal; misrepresents the outcome scale |
 
-These aren't minor technical issues — they distort your estimates, standard errors, and conclusions. A model that predicts a -15% probability of substance use isn't just aesthetically wrong; it's structurally misspecified.
+These issues go beyond surface-level concerns — they can distort estimates, standard errors, and conclusions. For example, a model that predicts a -15% probability of substance use signals a fundamental mismatch between the model and the data's structure.
+
+<figure style="margin: 1.5rem 0;">
+<img src="/images/guides/glmm/glmm_fig01_binary_trajectories.png" alt="Individual Probability Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+<figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Each gray line is one person's probability trajectory across 5 waves. The blue line is the group mean. Some people start with high probability and decline steeply; others start low and stay flat. All trajectories are naturally bounded between 0% and 100%.</figcaption>
+</figure>
 
 **Generalized Linear Mixed Models (GLMM)** solve this by combining two ideas:
 
@@ -36,9 +41,13 @@ The result: you get individual trajectories for non-continuous outcomes, with pr
 
 > [!tip] **Before You Continue**
 >
-> If you're comfortable with linear mixed models (LMM), you already understand the core idea — fixed effects for population averages, random effects for individual deviations. GLMM adds one layer: a link function that transforms the outcome scale so that the linear predictor maps correctly to the outcome's natural range.
+> Before reading further, consider your outcome variable:
 >
-> If LMM is unfamiliar, start with the [LMM Overview](/guides/lmm) first.
+> 1. **Type**: Is it binary (yes/no), a count (0, 1, 2, …), or ordinal (mild/moderate/severe)?
+> 2. **Boundaries**: Does it have a floor at zero? Is it bounded between 0 and 1?
+> 3. **Variance pattern**: Does variability change with the level of the outcome?
+>
+> These properties determine which distribution and link function your model needs. If your outcome is continuous, you likely need [LMM](/guides/lmm) instead.
 
 ---
 
@@ -59,6 +68,18 @@ Random effects operate on the *link scale* (e.g., log-odds for binary, log for c
 GLMM estimates are **conditional** — they describe the effect of a predictor *for a specific individual*, holding their random effects constant. This is the natural quantity when you care about within-person change: "How does *this person's* probability of substance use change over time?"
 
 This contrasts with **marginal** (population-averaged) approaches like GEE, which answer: "How does the *average probability* change over time?" The distinction matters because averaging nonlinear functions gives different results than applying the function to averages.
+
+### Missing Data Handling
+
+GLMM uses all available observations under maximum likelihood — participants who miss waves still contribute information without listwise deletion. The key assumption is Missing At Random (MAR): missingness can depend on observed variables, but not on the missing values themselves.
+
+### Handles Unbalanced Data Gracefully
+
+Like LMM, GLMM naturally handles unbalanced designs — participants can have different numbers of observations, measurement timing can vary, and some waves can be missing entirely. You don't need complete data from everyone to fit the model.
+
+### Flexible Time Structures
+
+Time can be equally spaced (0, 1, 2, 3, 4), unequally spaced (0, 3, 6, 12, 24 months), or person-specific (actual measurement dates). Code time as a continuous variable with appropriate values — the link function and random effects machinery work the same regardless of spacing.
 
 ### Flexible Predictor Framework
 
@@ -81,8 +102,6 @@ GLMM works well when you have:
 | **Interest in individual differences** | Not just average trends — person-level trajectories |
 | **Adequate sample** | 50+ clusters minimum; 100+ recommended for complex models |
 | **Conditional effects needed** | You want subject-specific (not population-averaged) estimates |
-
-If you only need **population-averaged** effects and don't care about individual trajectories, consider [GEE](/guides/gee) instead — it's simpler, makes fewer assumptions, and directly estimates marginal effects.
 
 ---
 
@@ -205,62 +224,6 @@ This integral generally has no closed-form solution, requiring numerical approxi
 
 ---
 
-## Model Specification in R
-
-Two primary packages handle GLMM in R, each with different strengths:
-
-### glmmTMB
-
-The more flexible option, supporting negative binomial, zero-inflated, and other distributions:
-
-```r
-library(glmmTMB)
-
-# Binary outcome — random intercept
-fit <- glmmTMB(outcome ~ time + predictor + (1 | id),
-               data = df, family = binomial)
-
-# Count outcome — negative binomial, random intercept + slope
-fit <- glmmTMB(outcome ~ time + predictor + (time | id),
-               data = df, family = nbinom2)
-
-# Zero-inflated count
-fit <- glmmTMB(outcome ~ time + (time | id),
-               zi = ~ time,
-               data = df, family = nbinom2)
-```
-
-### lme4::glmer
-
-The more established option, well-supported but limited to exponential family distributions:
-
-```r
-library(lme4)
-
-# Binary outcome — random intercept
-fit <- glmer(outcome ~ time + predictor + (1 | id),
-             data = df, family = binomial)
-
-# Poisson count — random intercept + slope
-fit <- glmer(outcome ~ time + predictor + (time | id),
-             data = df, family = poisson)
-```
-
-### Which to Choose?
-
-| Feature | glmmTMB | lme4::glmer |
-|---------|---------|-------------|
-| Negative binomial | Yes (nbinom1, nbinom2) | Via `MASS::glmer.nb` |
-| Zero-inflation | Yes (built-in `zi` formula) | No |
-| Estimation | TMB (Laplace) | Laplace or AGQ |
-| Adaptive GH quadrature | No | Yes (`nAGQ > 1`) |
-| Speed | Generally faster | Varies |
-| Ecosystem | Growing | Mature (merTools, effects, etc.) |
-
-**Recommendation**: Use `glmmTMB` for count models (better NB and zero-inflation support) and `lme4::glmer` for binary models when you want AGQ estimation or the mature `lme4` tooling ecosystem.
-
----
-
 ## Interpretation
 
 GLMM parameters live on the link scale. Interpretation requires transforming back to the natural scale — and understanding that these are **conditional** (subject-specific) effects.
@@ -293,16 +256,7 @@ Coefficients are on the **log scale**. Exponentiate for incidence rate ratios (I
 
 ### Converting to Probability Scale (Binary)
 
-For presentation, convert log-odds to predicted probabilities:
-
-```r
-# Predicted probabilities at the population level (random effects = 0)
-newdata <- data.frame(time = 0:4, predictor = mean(df$predictor))
-newdata$prob <- predict(fit, newdata = newdata, type = "response",
-                        re.form = NA)
-```
-
-Setting `re.form = NA` gives predictions at the "average" individual (random effects = 0). These are conditional predictions at the random effect mean, *not* marginal (population-averaged) predictions — the distinction matters when random effect variance is large.
+For presentation, convert log-odds to predicted probabilities by applying the inverse logit function. Predictions at the "average" individual (random effects = 0) are conditional predictions at the random effect mean, *not* marginal (population-averaged) predictions — the distinction matters when random effect variance is large.
 
 ---
 
@@ -329,21 +283,40 @@ Neither is "right" — they answer different questions. Use GLMM when individual
 
 ---
 
-## Estimation Methods
+## Interactive Exploration
 
-Unlike LMM, where maximum likelihood has a closed-form solution for the random effects integral, GLMM requires numerical approximation:
+To build deeper intuition for how GLMM parameters affect trajectories, use the interactive explorer below. Adjust the sliders to see how changing the intercept, slope, and random effect variances affects individual trajectories on both the response and link scales.
 
-| Method | How It Works | Trade-off |
-|--------|-------------|-----------|
-| **Laplace approximation** | Second-order Taylor expansion of the integrand | Fast; default in glmmTMB and glmer. Can be inaccurate with few observations per cluster or binary outcomes with small cluster sizes |
-| **Adaptive Gauss-Hermite (AGQ)** | Numerical integration with quadrature points | More accurate for binary outcomes; slow with multiple random effects. Only in `glmer(nAGQ = k)` |
-| **MCMC (Bayesian)** | Full posterior sampling | Most flexible; handles complex models well. Requires prior specification and convergence diagnostics |
+<iframe
+  src="/images/guides/glmm/interactive/glmm_explorer.html"
+  width="100%"
+  height="700"
+  style="border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; margin: 1.5rem 0;"
+  title="Interactive GLMM Explorer">
+</iframe>
 
-**Practical guidance**: Start with Laplace (the default). For binary outcomes with small cluster sizes (< 5 observations per person), compare results with AGQ (`nAGQ = 7` or higher). If results differ meaningfully, trust AGQ. For complex models where AGQ is infeasible (multiple random effects), Laplace is your best frequentist option.
+This tool lets you:
+
+- Toggle between **binary** (logistic) and **count** (log-link) outcomes to see how different link functions shape trajectories
+- Adjust fixed effects on the link scale and watch the response-scale trajectories change nonlinearly
+- Modify random effect variances to see individual trajectories spread or converge
+- Switch to **link scale** view to see the linear model underneath the nonlinear response
 
 ---
 
 ## Practical Considerations
+
+### Estimation
+
+Unlike LMM, GLMM doesn't have a closed-form solution — it uses numerical approximation to integrate over random effects. In practice you rarely need to worry about this, but it helps to know the options:
+
+| Method | When to use | Trade-off |
+|--------|-------------|-----------|
+| **Laplace** (default) | Most models | Fast; may lose accuracy with very few observations per person |
+| **AGQ** (nAGQ = 7+) | Binary outcomes, < 5 obs/person | More accurate but slower; limited to simple random effect structures |
+| **Bayesian (MCMC)** | Complex models, small samples | Most flexible; requires prior specification and convergence checks |
+
+**Practical guidance**: Start with Laplace. For binary outcomes with few observations per person, compare with AGQ — if estimates change meaningfully, trust AGQ.
 
 ### Overdispersion
 
@@ -395,6 +368,16 @@ GLMM generally needs more data than LMM because:
 - Random intercept + slope: 100+ clusters, 5+ observations per cluster
 - These are minimums — more is always better for stable estimates
 
+### Missing Data
+
+GLMM uses all available observations under maximum likelihood — participants who miss waves still contribute information without listwise deletion. The key assumption is **Missing At Random (MAR)**: missingness can depend on observed variables (e.g., treatment group, prior outcomes), but not on the unobserved missing values themselves.
+
+- Include auxiliary covariates that predict missingness to make the MAR assumption more plausible
+- Rows with missing predictors are typically dropped; consider imputation if predictor missingness is non-trivial
+- Binary and count outcomes carry less information per observation than continuous outcomes, so missing data has a relatively larger impact on precision
+
+**Caution**: If dropout is related to the outcome trajectory itself (MNAR — e.g., participants with worsening symptoms are more likely to leave the study), estimates may be biased. Consider sensitivity analyses or pattern-mixture models.
+
 ---
 
 ## Common Pitfalls
@@ -429,6 +412,10 @@ GLMM extends the mixed model framework to handle outcomes that aren't continuous
 
 The conceptual leap from LMM to GLMM is smaller than it appears. If you understand random intercepts and slopes in a linear model, you understand them in a GLMM — they just live on a transformed scale.
 
+> [!info] **Scope**
+>
+> This overview covers two-level GLMMs for binary and count outcomes with a single clustering variable (persons). Not covered: ordinal mixed models ([ordinal::clmm](https://cran.r-project.org/package=ordinal)), zero-inflated models in depth, Bayesian estimation ([brms](https://cran.r-project.org/package=brms)), spatial or crossed random effects, and multivariate GLMMs. See the tutorial links for code and estimation details.
+
 ---
 
 ## Next Steps
@@ -437,8 +424,5 @@ The conceptual leap from LMM to GLMM is smaller than it appears. If you understa
 
 **[Walkthrough: Worked Example →](/guides/glmm-walkthrough)**
 Step-by-step R code to simulate data, fit binary and count GLMMs, and interpret results.
-
-**[Quick Reference →](/guides/glmm-reference)**
-Syntax cheat sheets, distribution tables, diagnostics checklist, and troubleshooting.
 
 </div>

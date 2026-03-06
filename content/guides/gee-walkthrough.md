@@ -14,9 +14,11 @@ parent_method: "gee"
 This tutorial walks through a complete GEE analysis with a binary longitudinal outcome. By the end, you will have:
 
 1. Simulated correlated binary data with known parameters
-2. Fit GEE with different working correlation structures
+2. Fit GEE with different working correlation structures and visualized marginal predictions
 3. Compared robust vs. naive standard errors
 4. Compared GEE (marginal) and GLMM (conditional) results
+5. Fit a brief count outcome model with Poisson GEE
+6. Checked diagnostics (residuals, influential clusters)
 
 ---
 
@@ -40,12 +42,12 @@ This tutorial walks through a complete GEE analysis with a binary longitudinal o
                  ▼
 ┌─────────────────────────────────┐
 │ 4. Fit GEE Models               │
-│    Compare correlation structs  │
+│    Compare structs + visualize  │
 └────────────────┬────────────────┘
                  ▼
 ┌─────────────────────────────────┐
 │ 5. Robust vs. Naive SEs         │
-│    Compare inference methods    │
+│    Compare + visualize          │
 └────────────────┬────────────────┘
                  ▼
 ┌─────────────────────────────────┐
@@ -54,7 +56,17 @@ This tutorial walks through a complete GEE analysis with a binary longitudinal o
 └────────────────┬────────────────┘
                  ▼
 ┌─────────────────────────────────┐
-│ 7. Interpret Results            │
+│ 7. Count Outcome (Brief)        │
+│    Poisson GEE + IRRs           │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 8. Diagnostics                  │
+│    Residuals, influence         │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 9. Interpret Results            │
 │    ORs, predicted probabilities │
 └─────────────────────────────────┘
 ```
@@ -202,6 +214,33 @@ fit_exch$geese$alpha   # Exchangeable: single α
 fit_ar1$geese$alpha    # AR(1): single α
 ```
 
+### Marginal Predicted Probabilities
+
+Visualize what GEE actually estimates — population-averaged probability curves:
+
+```r
+pred_grid <- expand.grid(time = 0:4, treatment = c(0, 1))
+pred_grid$prob <- predict(fit_exch, newdata = pred_grid, type = "response")
+
+pred_grid %>%
+  mutate(group = factor(treatment, labels = c("Control", "Treatment"))) %>%
+  ggplot(aes(x = time, y = prob, color = group)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_x_continuous(breaks = 0:4, labels = paste("Wave", 1:5)) +
+  labs(x = "Time", y = "Predicted Probability",
+       title = "GEE Marginal Predicted Probabilities",
+       color = "Group") +
+  theme_minimal()
+```
+
+**What to look for:**
+- These are **population-averaged** curves — not individual trajectories
+- Both groups decline over time (negative time coefficient)
+- Treatment group is consistently lower (negative treatment coefficient)
+- Unlike GLMM, there are no person-specific curves — GEE estimates one curve per group
+
 ---
 
 ## Step 5: Robust vs. Naive SEs
@@ -226,11 +265,32 @@ comparison
 ```
 
 **Interpreting the ratio:**
-- Ratio ≈ 1.0: Working correlation is approximately correct
-- Ratio > 1.2: Working correlation is misspecified — robust SEs are wider (protecting you)
-- Ratio < 0.8: Unusual — may indicate small-sample issues
 
-✅ **Checkpoint**: Since the data were generated with exchangeable-like correlation and we fit exchangeable, the ratio should be close to 1.0.
+| Ratio | Meaning |
+|-------|---------|
+| 0.9–1.1 | Working correlation is approximately correct |
+| 1.1–1.3 | Mild misspecification — robust SEs slightly wider |
+| > 1.3 | Substantial misspecification — consider different corstr |
+| < 0.9 | Unusual — may indicate small-sample instability |
+
+### Visualize SE Comparison
+
+```r
+comparison %>%
+  pivot_longer(c(robust, naive), names_to = "type", values_to = "se") %>%
+  ggplot(aes(x = term, y = se, fill = type)) +
+  geom_col(position = "dodge", width = 0.6) +
+  scale_fill_manual(values = c(naive = "steelblue", robust = "coral"),
+                    labels = c("Naive", "Robust")) +
+  labs(x = "Parameter", y = "Standard Error",
+       title = "Robust vs. Naive Standard Errors",
+       fill = "SE Type") +
+  theme_minimal()
+```
+
+When bars are similar height, the working correlation is reasonable. Large discrepancies signal misspecification — the robust SEs are protecting you.
+
+✅ **Checkpoint**: Since the data were generated with exchangeable-like correlation and we fit exchangeable, the ratio should be close to 1.0 and the bars should be nearly equal.
 
 ---
 
@@ -295,7 +355,86 @@ pred_grid %>%
 
 ---
 
-## Step 7: Interpret Results
+## Step 7: Count Outcome (Brief)
+
+GEE handles count outcomes the same way — change the family to Poisson. Here's a minimal example using the same simulated data with a count outcome added:
+
+```r
+# Add a count outcome to existing data
+df <- df %>%
+  mutate(
+    eta_count = 1.0 + (-0.15 * time) + (-0.4 * treatment) + ri,
+    count = rpois(n(), exp(eta_count))
+  )
+
+# Fit Poisson GEE
+fit_count <- geeglm(count ~ time + treatment, id = id, data = df,
+                     family = poisson, corstr = "exchangeable")
+summary(fit_count)
+
+# Incidence Rate Ratios
+exp(coef(fit_count))
+exp(confint(fit_count))
+```
+
+| Parameter | Scale | Interpretation |
+|-----------|-------|----------------|
+| Time | IRR = exp(β₁) | Per-wave change in population rate |
+| Treatment | IRR = exp(β₂) | Treatment vs control rate ratio |
+
+**Key difference from binary**: Coefficients are on the log scale; exponentiate for incidence rate ratios (IRRs) instead of odds ratios. Check the dispersion parameter (`fit_count$geese$gamma`) — values well above 1 suggest overdispersion. GEE's sandwich SEs account for overdispersion automatically, but a negative binomial model may fit the mean structure better.
+
+✅ **Checkpoint**: IRRs should be close to the true generating values: exp(-0.15) ≈ 0.86 for time, exp(-0.40) ≈ 0.67 for treatment.
+
+---
+
+## Step 8: Diagnostics
+
+### Residual Check
+
+```r
+tibble(
+  fitted = fitted(fit_exch),
+  residual = residuals(fit_exch, type = "pearson")
+) %>%
+  ggplot(aes(x = fitted, y = residual)) +
+  geom_point(alpha = 0.3) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(x = "Fitted Values", y = "Pearson Residuals",
+       title = "Residuals vs. Fitted (Exchangeable GEE)") +
+  theme_minimal()
+```
+
+For binary outcomes, residuals naturally form two bands (one for y = 0, one for y = 1). Focus on whether there are systematic trends rather than expecting random scatter.
+
+### Influential Clusters
+
+Check whether any individual disproportionately affects the results:
+
+```r
+ids <- unique(df$id)
+loo_coefs <- map_dfr(ids, \(drop_id) {
+  fit_i <- update(fit_exch, data = filter(df, id != drop_id))
+  tibble(dropped = drop_id, term = names(coef(fit_i)), est = coef(fit_i))
+})
+
+loo_coefs %>%
+  group_by(term) %>%
+  summarise(
+    mean_est = round(mean(est), 4),
+    sd_est   = round(sd(est), 4),
+    max_diff = round(max(abs(est - mean(est))), 4),
+    .groups = "drop"
+  )
+```
+
+If dropping a single cluster substantially changes coefficients, investigate that cluster. With N = 200, no single person should have outsized influence.
+
+✅ **Checkpoint**: The standard deviation across leave-one-out estimates should be small relative to the coefficient values.
+
+---
+
+## Step 9: Interpret Results
 
 ### GEE Results Summary
 
@@ -366,13 +505,18 @@ fit_indep <- geeglm(y ~ time + treatment, id = id, data = df,
 summary(fit_exch)
 summary(fit_ar1)
 
+# --- Marginal predicted probabilities ---
+pred_grid <- expand.grid(time = 0:4, treatment = c(0, 1))
+pred_grid$prob <- predict(fit_exch, newdata = pred_grid, type = "response")
+
 # --- Robust vs naive SEs ---
 robust_se <- summary(fit_exch)$coefficients[, "Std.err"]
 naive_se  <- sqrt(diag(fit_exch$geese$vbeta.naiv))
-data.frame(term = names(coef(fit_exch)),
-           robust = round(robust_se, 4),
-           naive = round(naive_se, 4),
-           ratio = round(robust_se / naive_se, 3))
+comparison <- data.frame(term = names(coef(fit_exch)),
+                         robust = round(robust_se, 4),
+                         naive = round(naive_se, 4),
+                         ratio = round(robust_se / naive_se, 3))
+comparison
 
 # --- Compare GEE vs GLMM ---
 fit_glmm <- glmer(y ~ time + treatment + (1 | id),
@@ -382,6 +526,30 @@ data.frame(term = names(coef(fit_exch)),
            GEE = round(coef(fit_exch), 3),
            GLMM = round(fixef(fit_glmm), 3),
            ratio = round(coef(fit_exch) / fixef(fit_glmm), 3))
+
+# --- Count outcome (Poisson GEE) ---
+df <- df %>%
+  mutate(
+    eta_count = 1.0 + (-0.15 * time) + (-0.4 * treatment) + ri,
+    count = rpois(n(), exp(eta_count))
+  )
+
+fit_count <- geeglm(count ~ time + treatment, id = id, data = df,
+                     family = poisson, corstr = "exchangeable")
+exp(coef(fit_count))
+exp(confint(fit_count))
+
+# --- Diagnostics ---
+# Residuals
+tibble(fitted = fitted(fit_exch),
+       residual = residuals(fit_exch, type = "pearson"))
+
+# Leave-one-cluster-out influence check
+ids <- unique(df$id)
+loo_coefs <- map_dfr(ids, \(drop_id) {
+  fit_i <- update(fit_exch, data = filter(df, id != drop_id))
+  tibble(dropped = drop_id, term = names(coef(fit_i)), est = coef(fit_i))
+})
 
 # --- ORs ---
 exp(coef(fit_exch))
@@ -410,9 +578,30 @@ df <- read_csv("my_data.csv") %>%
 |---------|--------|-------------------|
 | Binary | `binomial` | Exchangeable or AR(1) |
 | Count | `poisson` | Exchangeable or AR(1) |
-| Continuous | `gaussian` | AR(1) or unstructured |
 
-### 3. Fit and Examine
+### 3. Start Simple, Compare
+
+```r
+# Start with exchangeable
+fit1 <- geeglm(outcome ~ time + group, id = id, data = df,
+               family = binomial, corstr = "exchangeable")
+
+# Compare with AR(1)
+fit2 <- geeglm(outcome ~ time + group, id = id, data = df,
+               family = binomial, corstr = "ar1")
+
+# Compare QIC
+QIC(fit1); QIC(fit2)
+
+# Check robust vs naive SE agreement
+robust1 <- summary(fit1)$coefficients[, "Std.err"]
+naive1  <- sqrt(diag(fit1$geese$vbeta.naiv))
+round(robust1 / naive1, 3)
+```
+
+Lower QIC and robust/naive ratio near 1.0 both favor a structure. If they disagree, trust robust SEs and use the structure with better QIC.
+
+### 4. Fit and Examine
 
 ```r
 fit <- geeglm(outcome ~ time + group, id = id, data = df,

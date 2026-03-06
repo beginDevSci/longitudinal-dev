@@ -13,7 +13,7 @@ parent_method: "glmm"
 
 Fast lookup for syntax, distributions, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/glmm-walkthrough). For conceptual background, see the [Overview](/guides/glmm).
 
-**Jump to:** [Syntax](#syntax) · [Distributions](#distributions--link-functions) · [Estimation](#estimation) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics-checklist) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#syntax) · [Distributions](#distributions--link-functions) · [Estimation](#estimation) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics-checklist) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -294,6 +294,20 @@ fit$sdr$pdHess  # Should be TRUE
 
 ---
 
+## Parameters
+
+| Parameter | Symbol | Interpretation |
+|-----------|--------|----------------|
+| Fixed intercept | β₀ | Baseline level on link scale (at RE = 0) |
+| Fixed slope | β₁ | Change per time unit on link scale |
+| Random intercept SD | σ₀ | Between-person variability in baseline |
+| Random slope SD | σ₁ | Between-person variability in change rate |
+| RE correlation | ρ₀₁ | Relationship between baseline and change |
+| Dispersion (NB) | θ | Inverse overdispersion; larger = less dispersion |
+| ZI probability | π | Probability of structural zero |
+
+---
+
 ## Common Errors & Fixes
 
 | Issue | Symptom | Fix |
@@ -401,7 +415,7 @@ pnorm(0, mean = fixef(fit)["time"],
 
 ---
 
-## Extensions
+## Advanced Extensions
 
 ### Time-Invariant Predictors
 
@@ -447,20 +461,6 @@ fit <- clmm(ordered_y ~ time + treatment + (1 | id), data = df)
 # Observations nested in people nested in sites
 fit <- glmer(y ~ time + (1 | site/id), data = df, family = binomial)
 ```
-
----
-
-## Parameters
-
-| Parameter | Symbol | Interpretation |
-|-----------|--------|----------------|
-| Fixed intercept | β₀ | Baseline level on link scale (at RE = 0) |
-| Fixed slope | β₁ | Change per time unit on link scale |
-| Random intercept SD | σ₀ | Between-person variability in baseline |
-| Random slope SD | σ₁ | Between-person variability in change rate |
-| RE correlation | ρ₀₁ | Relationship between baseline and change |
-| Dispersion (NB) | θ | Inverse overdispersion; larger = less dispersion |
-| ZI probability | π | Probability of structural zero |
 
 ---
 

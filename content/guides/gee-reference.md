@@ -13,7 +13,7 @@ parent_method: "gee"
 
 Fast lookup for syntax, correlation structures, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/gee-walkthrough). For conceptual background, see the [Overview](/guides/gee).
 
-**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -44,9 +44,6 @@ fit <- geeglm(y ~ time + x, id = id, data = df,
 fit <- geeglm(y ~ time + x, id = id, data = df,
               family = poisson, corstr = "exchangeable")
 
-# Continuous — Gaussian with AR(1)
-fit <- geeglm(y ~ time + x, id = id, data = df,
-              family = gaussian, corstr = "ar1")
 ```
 
 > [!note] **Data must be sorted by cluster**
@@ -112,6 +109,38 @@ Independence:       Exchangeable:       AR(1):              Unstructured:
 3. Compare using **QIC** (see below)
 4. Check robust vs naive SE agreement — large discrepancy = poor fit
 5. Use **unstructured** only with ≤ 5 time points and ≥ 100 clusters
+
+### Decision Tree
+
+```
+                    Start here
+                        │
+            ┌───────────┴───────────┐
+            │  Few time points      │
+            │  (≤ 5) and ≥ 100      │
+            │  clusters?            │
+            └───────┬───────┬───────┘
+                Yes │       │ No
+                    ▼       ▼
+            ┌───────────┐ ┌─────────────────┐
+            │ Consider  │ │ Exchangeable     │
+            │ Unstruc-  │ │ (safe default)   │
+            │ tured     │ └────────┬─────────┘
+            └───────────┘          │
+                          ┌────────┴────────┐
+                          │ Expect temporal  │
+                          │ decay?           │
+                          └───┬─────────┬───┘
+                          Yes │         │ No
+                              ▼         ▼
+                     ┌──────────┐  ┌──────────────┐
+                     │ Try AR(1)│  │ Stay with    │
+                     │ + compare│  │ exchangeable │
+                     │ QIC      │  └──────────────┘
+                     └──────────┘
+```
+
+In all cases, compare robust vs naive SEs — large discrepancy means the working correlation is far from reality.
 
 ### Extract Estimated Correlation
 
@@ -261,6 +290,15 @@ data.frame(
 
 ## Diagnostics
 
+### Checklist
+
+| Check | When | How |
+|-------|------|-----|
+| Robust vs naive SE ratio | Always | Compare SEs; ratio should be 0.9–1.1 |
+| Residual plot | Always | Pearson residuals vs fitted |
+| Overdispersion | Count models | Dispersion parameter near 1 |
+| Influential clusters | Suspect outliers | Leave-one-cluster-out |
+
 ### Check Correlation Structure Choice
 
 ```r
@@ -302,6 +340,31 @@ for (i in seq_along(ids)) {
 # Check for outlier clusters
 apply(betas, 2, sd)
 ```
+
+---
+
+## Parameters
+
+| Parameter | Interpretation |
+|-----------|----------------|
+| β₀ (intercept) | Marginal log-odds (or log-count) at reference levels |
+| β₁ (time) | Marginal change per time unit on link scale |
+| βₖ (predictor) | Marginal effect of predictor on link scale |
+| α (correlation) | Working correlation parameter(s) |
+| φ (scale) | Dispersion parameter |
+
+---
+
+## Time Coding
+
+| Coding | Values (5 waves) | Intercept = |
+|--------|-------------------|-------------|
+| Wave 1 (default) | 0, 1, 2, 3, 4 | Marginal mean at Wave 1 |
+| Midpoint | -2, -1, 0, 1, 2 | Marginal mean at Wave 3 |
+| Final wave | -4, -3, -2, -1, 0 | Marginal mean at Wave 5 |
+| Actual months | 0, 3, 6, 12, 24 | Marginal mean at baseline |
+
+Slope interpretation is unchanged by centering — only the intercept meaning shifts to the zero-point. On the link scale (logit, log), this also affects the scale at which the intercept's OR or IRR is evaluated.
 
 ---
 
@@ -401,7 +464,7 @@ marginal_beta <- conditional_beta * c_star
 
 ---
 
-## Extensions
+## Advanced Extensions
 
 ### Time-Varying Covariates
 
@@ -424,13 +487,6 @@ fit <- geeglm(y ~ time * treatment, id = id, data = df,
 fit <- geeglm(count ~ time + treatment, id = id, data = df,
               family = poisson, corstr = "exchangeable")
 exp(coef(fit))  # IRRs
-```
-
-### Continuous Outcomes
-
-```r
-fit <- geeglm(score ~ time + treatment, id = id, data = df,
-              family = gaussian, corstr = "ar1")
 ```
 
 ### Multinomial / Ordinal
@@ -456,19 +512,7 @@ fit <- ordgee(ordered(y) ~ time + treatment, id = id, data = df,
 | **Missing data** | MCAR | MAR (FIML) |
 | **Model comparison** | QIC | AIC, BIC, LRT |
 | **Distributional assumptions** | Fewer | More |
-| **For linear models** | Identical to LMM fixed effects | Identical to GEE |
-
----
-
-## Parameters
-
-| Parameter | Interpretation |
-|-----------|----------------|
-| β₀ (intercept) | Marginal log-odds (or log-count) at reference levels |
-| β₁ (time) | Marginal change per time unit on link scale |
-| βₖ (predictor) | Marginal effect of predictor on link scale |
-| α (correlation) | Working correlation parameter(s) |
-| φ (scale) | Dispersion parameter |
+| **For continuous outcomes** | Identical to LMM fixed effects — use [LMM](/guides/lmm) instead |  |
 
 ---
 
