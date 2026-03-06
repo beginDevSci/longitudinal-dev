@@ -7,11 +7,9 @@ tags: ["GEE", "marginal-models", "geepack", "longitudinal"]
 guide_type: "overview"
 ---
 
-## When You Care About the Population, Not the Person
+## When the Question Is About the Population
 
-Mixed models — both LMM and GLMM — estimate **conditional** effects: what happens for a *specific individual*, accounting for their random effect. This is the right question when individual trajectories matter.
-
-But sometimes they don't. Sometimes the question is purely about the population:
+Some longitudinal questions are about population-level patterns, not individual trajectories:
 
 - Does this intervention reduce the **average prevalence** of substance use?
 - Is the **population rate** of emergency visits declining over time?
@@ -19,13 +17,15 @@ But sometimes they don't. Sometimes the question is purely about the population:
 
 These are **marginal** questions — they ask about averages, not individuals. You don't need to model person-specific trajectories to answer them. You just need to account for the fact that repeated measures on the same person are correlated.
 
-**Generalized Estimating Equations (GEE)** do exactly this. Instead of specifying a full probability model for the data (as GLMM does), GEE takes a semi-parametric approach:
+**Generalized Estimating Equations (GEE)** are designed for exactly this. GEE takes a semi-parametric approach:
 
 1. Specify how the mean relates to predictors (the regression model)
 2. Specify a **working correlation structure** to approximate within-person dependence
 3. Use a **sandwich estimator** to produce valid standard errors *even if the working correlation is wrong*
 
-The result: consistent, efficient estimates of population-averaged effects with robust inference — and far fewer assumptions than GLMM.
+The result: consistent, efficient estimates of population-averaged effects with robust inference — and fewer distributional assumptions than mixed-model alternatives.
+
+This contrasts with mixed models (LMM, GLMM), which estimate **conditional** effects — what happens for a specific individual, accounting for their random effect. GEE deliberately sets aside individual-level modeling to focus on population averages.
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/gee/gee_fig01_population_averaged.png" alt="Population-Averaged Trends" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
@@ -36,7 +36,7 @@ The result: consistent, efficient estimates of population-averaged effects with 
 
 > [!tip] **Before You Continue**
 >
-> GEE and GLMM answer fundamentally different questions. Neither is "better" — they target different estimands. If you need individual trajectories, random effect variances, or subject-specific predictions, use [GLMM](/guides/glmm). If you need population-averaged effects with minimal distributional assumptions, read on.
+> GEE and GLMM answer fundamentally different questions — neither is "better." If you need individual trajectories, random effect variances, or subject-specific predictions, see [GLMM](/guides/glmm). If you need population-averaged effects with minimal distributional assumptions, read on.
 
 ---
 
@@ -98,18 +98,6 @@ Unlike LMM and GLMM (which handle MAR), standard GEE assumes **Missing Completel
 | **Outcome type** | Binary, count, ordinal |
 | **Missing data mechanism** | MCAR or approximately MCAR (see below) |
 
-### When to Prefer GEE Over GLMM
-
-| Scenario | GEE | GLMM |
-|----------|-----|------|
-| Research question is about population averages | ✓ | |
-| You distrust random effects distributional assumptions | ✓ | |
-| You want model-robust inference | ✓ | |
-| You need individual predictions or random effects | | ✓ |
-| You need to model individual heterogeneity | | ✓ |
-| You have informative dropout (MAR) | | ✓ |
-| You want likelihood-based model comparison | | ✓ |
-
 ---
 
 ## Key Components
@@ -134,7 +122,7 @@ The working correlation matrix R(α) specifies how observations within a person 
 
 > [!note] **The working correlation doesn't have to be right**
 >
-> With robust SEs, the choice of working correlation affects *efficiency* (precision) but not *consistency* (validity). A badly wrong working correlation gives wider confidence intervals than necessary, but they still have correct coverage. A close-to-correct working correlation gives tighter intervals.
+> With robust SEs, the choice of working correlation affects *efficiency* (precision) but not *consistency* (validity). A poorly specified working correlation gives wider confidence intervals than necessary, but they still have correct coverage. A close-to-correct working correlation gives tighter intervals.
 
 ### The Sandwich Estimator
 
@@ -255,6 +243,27 @@ Coefficients are on the log scale. Exponentiate for marginal incidence rate rati
 
 ---
 
+## Interactive Exploration
+
+To build deeper intuition for how GEE works, use the interactive explorer below. Adjust the correlation structure and parameters to see how the working correlation matrix changes, how population-averaged (GEE) curves differ from conditional (GLMM) trajectories, and when robust SEs diverge from naive SEs.
+
+<iframe
+  src="/images/guides/gee/interactive/gee_explorer.html"
+  width="100%"
+  height="700"
+  style="border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; margin: 1.5rem 0;"
+  title="Interactive GEE Explorer">
+</iframe>
+
+This tool lets you:
+
+- **Switch correlation structures** — see how Independence, Exchangeable, AR(1), and Unstructured produce different R(α) matrices for the same α
+- **Adjust α** — watch the heatmap update in real-time as within-person correlation strengthens or weakens
+- **Compare marginal vs conditional** — the bold red GEE curve shows the population average; faded lines show individual GLMM trajectories. Increase τ² to see the curves diverge
+- **Examine SE behavior** — the bottom bar chart shows when robust SEs protect you from a misspecified working correlation (try Independence with high α)
+
+---
+
 ## Practical Considerations
 
 ### Missing Data: The MCAR Requirement
@@ -324,27 +333,6 @@ fit_indep <- geeglm(y ~ time + group, id = id, data = df,
 | Not checking robust vs. naive SE agreement | Never comparing the two SE sets | Large discrepancies (> 20%) signal misspecified working correlation; useful diagnostic |
 | GEE for clustered data without thought | Using GEE for any clustering without considering cluster-level effects | GEE averages over clusters; if cluster variation matters substantively, use multilevel models |
 | QIC as likelihood-based criterion | Using QIC as if it were AIC with the same properties | QIC is quasi-likelihood-based; useful for relative comparison within GEE, but not as theoretically grounded |
-
----
-
-## Interactive Exploration
-
-To build deeper intuition for how GEE works, use the interactive explorer below. Adjust the correlation structure and parameters to see how the working correlation matrix changes, how population-averaged (GEE) curves differ from conditional (GLMM) trajectories, and when robust SEs diverge from naive SEs.
-
-<iframe
-  src="/images/guides/gee/interactive/gee_explorer.html"
-  width="100%"
-  height="700"
-  style="border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; margin: 1.5rem 0;"
-  title="Interactive GEE Explorer">
-</iframe>
-
-This tool lets you:
-
-- **Switch correlation structures** — see how Independence, Exchangeable, AR(1), and Unstructured produce different R(α) matrices for the same α
-- **Adjust α** — watch the heatmap update in real-time as within-person correlation strengthens or weakens
-- **Compare marginal vs conditional** — the bold red GEE curve shows the population average; faded lines show individual GLMM trajectories. Increase τ² to see the curves diverge
-- **Examine SE behavior** — the bottom bar chart shows when robust SEs protect you from a misspecified working correlation (try Independence with high α)
 
 ---
 
