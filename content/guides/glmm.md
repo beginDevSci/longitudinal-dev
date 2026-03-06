@@ -23,7 +23,7 @@ Fitting a standard LMM to these outcomes creates real problems:
 | **Count** | Ignores floor at zero; assumes symmetric errors around the mean |
 | **Ordinal** | Treats category distances as equal; misrepresents the outcome scale |
 
-These aren't minor technical issues — they distort your estimates, standard errors, and conclusions. A model that predicts a -15% probability of substance use isn't just aesthetically wrong; it's structurally misspecified.
+These issues go beyond surface-level concerns — they can distort estimates, standard errors, and conclusions. For example, a model that predicts a -15% probability of substance use signals a fundamental mismatch between the model and the data's structure.
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/glmm/glmm_fig01_binary_trajectories.png" alt="Individual Probability Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
@@ -73,6 +73,14 @@ This contrasts with **marginal** (population-averaged) approaches like GEE, whic
 
 GLMM uses all available observations under maximum likelihood — participants who miss waves still contribute information without listwise deletion. The key assumption is Missing At Random (MAR): missingness can depend on observed variables, but not on the missing values themselves.
 
+### Handles Unbalanced Data Gracefully
+
+Like LMM, GLMM naturally handles unbalanced designs — participants can have different numbers of observations, measurement timing can vary, and some waves can be missing entirely. You don't need complete data from everyone to fit the model.
+
+### Flexible Time Structures
+
+Time can be equally spaced (0, 1, 2, 3, 4), unequally spaced (0, 3, 6, 12, 24 months), or person-specific (actual measurement dates). Code time as a continuous variable with appropriate values — the link function and random effects machinery work the same regardless of spacing.
+
 ### Flexible Predictor Framework
 
 Like LMM, you can include:
@@ -94,8 +102,6 @@ GLMM works well when you have:
 | **Interest in individual differences** | Not just average trends — person-level trajectories |
 | **Adequate sample** | 50+ clusters minimum; 100+ recommended for complex models |
 | **Conditional effects needed** | You want subject-specific (not population-averaged) estimates |
-
-If you only need **population-averaged** effects and don't care about individual trajectories, consider [GEE](/guides/gee) instead — it's simpler, makes fewer assumptions, and directly estimates marginal effects.
 
 ---
 
@@ -302,9 +308,15 @@ This tool lets you:
 
 ### Estimation
 
-Unlike LMM, GLMM requires numerical approximation of the random effects integral. The default **Laplace approximation** is fast but can be inaccurate with few observations per cluster or binary outcomes with small cluster sizes. **Adaptive Gauss-Hermite quadrature (AGQ)** is more accurate for binary outcomes but slower with multiple random effects. For complex models, **Bayesian (MCMC)** estimation offers the most flexibility but requires prior specification and convergence diagnostics.
+Unlike LMM, GLMM doesn't have a closed-form solution — it uses numerical approximation to integrate over random effects. In practice you rarely need to worry about this, but it helps to know the options:
 
-**Practical guidance**: Start with Laplace. For binary outcomes with < 5 observations per person, compare with AGQ — if results differ meaningfully, trust AGQ.
+| Method | When to use | Trade-off |
+|--------|-------------|-----------|
+| **Laplace** (default) | Most models | Fast; may lose accuracy with very few observations per person |
+| **AGQ** (nAGQ = 7+) | Binary outcomes, < 5 obs/person | More accurate but slower; limited to simple random effect structures |
+| **Bayesian (MCMC)** | Complex models, small samples | Most flexible; requires prior specification and convergence checks |
+
+**Practical guidance**: Start with Laplace. For binary outcomes with few observations per person, compare with AGQ — if estimates change meaningfully, trust AGQ.
 
 ### Overdispersion
 
@@ -355,6 +367,16 @@ GLMM generally needs more data than LMM because:
 - Random intercept only: 50+ clusters, 5+ observations per cluster
 - Random intercept + slope: 100+ clusters, 5+ observations per cluster
 - These are minimums — more is always better for stable estimates
+
+### Missing Data
+
+GLMM uses all available observations under maximum likelihood — participants who miss waves still contribute information without listwise deletion. The key assumption is **Missing At Random (MAR)**: missingness can depend on observed variables (e.g., treatment group, prior outcomes), but not on the unobserved missing values themselves.
+
+- Include auxiliary covariates that predict missingness to make the MAR assumption more plausible
+- Rows with missing predictors are typically dropped; consider imputation if predictor missingness is non-trivial
+- Binary and count outcomes carry less information per observation than continuous outcomes, so missing data has a relatively larger impact on precision
+
+**Caution**: If dropout is related to the outcome trajectory itself (MNAR — e.g., participants with worsening symptoms are more likely to leave the study), estimates may be biased. Consider sensitivity analyses or pattern-mixture models.
 
 ---
 

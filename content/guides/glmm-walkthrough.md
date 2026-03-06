@@ -16,7 +16,8 @@ This tutorial walks through two complete GLMM analyses — one binary, one count
 1. Simulated longitudinal data with known parameters for both outcome types
 2. Visualized trajectories on both the observed and link scales
 3. Fit and compared binary and count GLMMs
-4. Interpreted results as odds ratios and incidence rate ratios
+4. Extracted and visualized individual predicted trajectories
+5. Interpreted results as odds ratios and incidence rate ratios
 
 ---
 
@@ -49,12 +50,17 @@ This tutorial walks through two complete GLMM analyses — one binary, one count
 └────────────────┬────────────────┘
                  ▼
 ┌─────────────────────────────────┐
-│ 6. Diagnostics                  │
+│ 6. Individual Trajectories      │
+│    Predicted curves per person  │
+└────────────────┬────────────────┘
+                 ▼
+┌─────────────────────────────────┐
+│ 7. Diagnostics                  │
 │    Overdispersion, residuals    │
 └────────────────┬────────────────┘
                  ▼
 ┌─────────────────────────────────┐
-│ 7. Interpret Results            │
+│ 8. Interpret Results            │
 │    OR, IRR, predicted values    │
 └─────────────────────────────────┘
 ```
@@ -206,7 +212,7 @@ cbind(
 
 ### Compare with AGQ
 
-For binary outcomes, Laplace approximation can be inaccurate with few observations per person. Compare:
+With binary outcomes and few observations per person, it's worth checking whether a more precise estimation method changes results:
 
 ```r
 fit_bin_agq <- glmer(binary ~ time + treatment + (1 | id),
@@ -273,7 +279,68 @@ exp(fixef(fit_pois)$cond)
 
 ---
 
-## Step 6: Diagnostics
+## Step 6: Individual Trajectories
+
+One of GLMM's strengths is that it estimates person-specific trajectories. Extract conditional predictions and plot them to see what the model is actually estimating.
+
+### Binary: Predicted Probability Trajectories
+
+```r
+# Get conditional predictions (including random effects)
+df$pred_prob <- predict(fit_bin, type = "response")
+
+# Select a sample of individuals
+sample_ids <- sample(unique(df$id), 12)
+
+df %>%
+  filter(id %in% sample_ids) %>%
+  ggplot(aes(x = time, y = pred_prob, group = id, color = factor(treatment))) +
+  geom_line(linewidth = 0.8) +
+  geom_point(aes(y = binary), alpha = 0.3, size = 1.5) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_x_continuous(breaks = 0:4, labels = paste("Wave", 1:5)) +
+  scale_color_manual(values = c("steelblue", "coral"), labels = c("Control", "Treatment")) +
+  labs(x = "Time", y = "Predicted Probability",
+       title = "Individual Predicted Trajectories (Binary)",
+       color = "Group") +
+  theme_minimal()
+```
+
+**What to look for:**
+- Each person has their own trajectory, determined by their random intercept
+- Trajectories are bounded between 0% and 100% (the logit link ensures this)
+- Treatment group trajectories sit lower than control group trajectories
+- Points show observed binary outcomes (0 or 1) for comparison
+
+### Link Scale vs Response Scale
+
+The same trajectories look different depending on the scale. On the link scale (log-odds), trajectories are parallel lines — random intercepts shift them vertically. On the response scale (probability), the same shifts produce non-parallel, S-shaped curves:
+
+```r
+# Get link-scale predictions
+df$pred_logodds <- predict(fit_bin, type = "link")
+
+df %>%
+  filter(id %in% sample_ids) %>%
+  select(id, time, treatment, pred_logodds, pred_prob) %>%
+  pivot_longer(c(pred_logodds, pred_prob), names_to = "scale", values_to = "value") %>%
+  mutate(scale = ifelse(scale == "pred_logodds", "Link Scale (Log-Odds)", "Response Scale (Probability)")) %>%
+  ggplot(aes(x = time, y = value, group = id, color = factor(treatment))) +
+  geom_line(linewidth = 0.7) +
+  facet_wrap(~ scale, scales = "free_y") +
+  scale_color_manual(values = c("steelblue", "coral"), labels = c("Control", "Treatment")) +
+  scale_x_continuous(breaks = 0:4, labels = paste("W", 1:5)) +
+  labs(x = "Time", y = "Predicted Value",
+       title = "Same Trajectories, Different Scales",
+       color = "Group") +
+  theme_minimal()
+```
+
+✅ **Checkpoint**: On the link scale, lines should be parallel (same slope, different intercepts). On the response scale, the same trajectories curve and compress near 0 and 1.
+
+---
+
+## Step 7: Diagnostics
 
 ### Binary Model Diagnostics
 
@@ -330,7 +397,7 @@ df %>%
 
 ---
 
-## Step 7: Interpret Results
+## Step 8: Interpret Results
 
 ### Binary Model Summary
 
