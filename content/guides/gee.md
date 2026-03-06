@@ -74,6 +74,18 @@ This makes GEE particularly attractive when you distrust distributional assumpti
 
 GEE coefficients have the same interpretation as coefficients from a standard GLM fit to independent data — just with appropriate standard errors for the correlation. No random effects to condition on, no link-scale complications for marginal summaries.
 
+### Handles Unbalanced Data Gracefully
+
+Like LMM and GLMM, GEE naturally handles unbalanced designs — participants can have different numbers of observations, measurement timing can vary, and some waves can be missing entirely. The estimating equations use all available observations from each person.
+
+### Flexible Time Structures
+
+Time can be equally spaced (0, 1, 2, 3, 4), unequally spaced (0, 3, 6, 12, 24 months), or person-specific (actual measurement dates). Code time as a continuous variable with appropriate values — the estimating equation machinery works the same regardless of spacing.
+
+### Missing Data: Important Limitation
+
+Unlike LMM and GLMM (which handle MAR), standard GEE assumes **Missing Completely At Random (MCAR)** — the strongest and least realistic missing data assumption. If dropout depends on observed variables, GEE estimates may be biased without correction. See [Practical Considerations](#practical-considerations) for mitigations including weighted GEE and multiple imputation.
+
 ---
 
 ## When GEE is Appropriate
@@ -83,7 +95,7 @@ GEE coefficients have the same interpretation as coefficients from a standard GL
 | **Repeated measures** | 3+ waves (GEE works with 2, but limited) |
 | **Interest in population averages** | Not individual trajectories |
 | **Adequate clusters** | 40+ individuals minimum; 100+ recommended for robust SEs |
-| **Outcome type** | Binary, count, continuous, ordinal |
+| **Outcome type** | Binary, count, ordinal |
 | **Missing data mechanism** | MCAR or approximately MCAR (see below) |
 
 ### When to Prefer GEE Over GLMM
@@ -100,24 +112,9 @@ GEE coefficients have the same interpretation as coefficients from a standard GL
 
 ---
 
-## Conceptual Foundations
+## Key Components
 
-### The Estimating Equation
-
-GEE is based on solving a set of **estimating equations** — generalizations of the score equations from maximum likelihood. For each person *i* with observations at times *t* = 1, …, nᵢ:
-
-```
-U(β) = Σᵢ D'ᵢ Vᵢ⁻¹ (yᵢ - μᵢ) = 0
-```
-
-Where:
-- **Dᵢ** = ∂μᵢ/∂β — how the mean responds to parameter changes
-- **Vᵢ** = A^(1/2) R(α) A^(1/2) — the "working" covariance matrix
-- **A** = diagonal matrix of variance functions
-- **R(α)** = working correlation matrix
-- **yᵢ - μᵢ** = residuals
-
-This looks complex, but the intuition is simple: find β values that make the weighted residuals equal zero on average, where the weights account for the correlation structure.
+GEE has two distinctive building blocks beyond the mean model itself. Instead of specifying a full probability model (as GLMM does), GEE finds parameter values that make weighted residuals sum to zero across all participants — where the weights come from a **working correlation structure** and inference is protected by the **sandwich estimator**. See [Mathematical Foundations](#mathematical-foundations) for formal notation.
 
 ### Working Correlation Structures
 
@@ -134,13 +131,6 @@ The working correlation matrix R(α) specifies how observations within a person 
 <img src="/images/guides/gee/gee_fig02_correlation_structures.png" alt="Working Correlation Structure Comparison" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
 <figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">The four standard working correlation structures for 5 waves with α = 0.45. Independence assumes no correlation; exchangeable assumes all pairs are equally correlated; AR(1) shows exponential decay with lag; unstructured allows each pair its own value.</figcaption>
 </figure>
-
-**Choosing a structure:**
-
-- **Independence**: When correlations are weak or you rely entirely on robust SEs. Surprisingly often a reasonable starting point.
-- **Exchangeable**: When all time pairs are roughly equally correlated — common in cluster-randomized studies. Default choice for many applications.
-- **AR(1)**: When adjacent measurements are more correlated than distant ones — natural for time-series-like data.
-- **Unstructured**: When you have few time points (≤ 5) and enough clusters to estimate all pairwise correlations. Most flexible but most parameters.
 
 > [!note] **The working correlation doesn't have to be right**
 >
@@ -260,9 +250,8 @@ Coefficients are on the log scale. Exponentiate for marginal incidence rate rati
 
 **Example**: β₁ = 0.10 for time → IRR = exp(0.10) = 1.11. Across the population, the expected rate increases by ~11% per wave.
 
-### Continuous Outcomes (Identity-link GEE)
-
-With a continuous outcome, GEE coefficients are on the original scale — identical to LMM fixed effects. The marginal/conditional distinction disappears because the identity link is linear: averaging over individuals and applying the model give the same result.
+> [!note] **Continuous outcomes?**
+> For continuous outcomes with an identity link, GEE coefficients are identical to LMM fixed effects — use [LMM](/guides/lmm) instead.
 
 ---
 
@@ -373,7 +362,7 @@ The choice between GEE and GLMM isn't about which is "better" — it's about whi
 
 > [!info] **Scope**
 >
-> This overview covers standard GEE for binary and count outcomes with a single clustering variable (persons). Not covered: weighted GEE for MAR dropout, multinomial/ordinal GEE ([multgee](https://cran.r-project.org/package=multgee)), penalized GEE, doubly robust estimators, and alternating logistic regressions. See the tutorial links for code and estimation details.
+> This overview covers standard GEE for binary and count outcomes with a single clustering variable (persons). Not covered: weighted GEE for MAR dropout, ordinal GEE (see [Reference](/guides/gee-reference#multinomial--ordinal) for `ordgee` syntax), multinomial GEE ([multgee](https://cran.r-project.org/package=multgee)), penalized GEE, doubly robust estimators, and alternating logistic regressions.
 
 ---
 
