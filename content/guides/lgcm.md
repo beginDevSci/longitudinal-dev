@@ -83,7 +83,7 @@ LGCM works well when you have:
 
 ---
 
-## Key Components of Linear LGCM
+## Key Components
 
 Regardless of your statistical background, these are the building blocks of every LGCM.
 
@@ -330,9 +330,7 @@ The key assumption is **Missing At Random (MAR)**: missingness can depend on *ob
 
 FIML assumes MAR and correct model specification. Include auxiliary variables related to missingness (and the outcome) to bolster MAR plausibility and reduce bias.
 
----
-
-## Time Coding
+### Time Coding
 
 Slope factor loadings define how time enters the model. This determines:
 
@@ -340,7 +338,7 @@ Slope factor loadings define how time enters the model. This determines:
 - How to interpret the slope
 - Whether unequal spacing is handled correctly
 
-### Standard Coding (0, 1, 2, 3, 4)
+#### Standard Coding (0, 1, 2, 3, 4)
 
 | Wave | Loading | Meaning |
 |------|---------|----------|
@@ -354,7 +352,7 @@ With this coding:
 - **Intercept** = expected score at Time 0 (Wave 1)
 - **Slope** = expected change per 1-unit increase in time
 
-### Centering at Different Time Points
+#### Centering at Different Time Points
 
 Shift the zero point to change what the intercept represents:
 
@@ -380,7 +378,7 @@ Three panels showing the same linear trajectory with different intercept locatio
 
 **When does centering matter?** When you add predictors. If you ask "Does baseline depression predict growth?", the intercept-predictor relationship depends on where you defined the intercept.
 
-### Non-Equidistant Time Points
+#### Non-Equidistant Time Points
 
 If waves aren't equally spaced, use actual time values:
 

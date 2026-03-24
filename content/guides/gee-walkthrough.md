@@ -456,7 +456,9 @@ summary(fit_exch)
 - **Treatment OR ≈ 0.51**: The treatment group has ~49% lower odds than controls, on average across the population
 - These describe **population trends**, not individual trajectories
 
-### Written Summary
+---
+
+## Written Summary
 
 > We estimated a GEE model with exchangeable working correlation for a binary longitudinal outcome (N = 200, 5 waves). Using robust standard errors, the population-averaged odds of the outcome decreased over time (OR = 0.78, 95% CI [0.72, 0.85], p < .001) and were lower in the treatment group (OR = 0.51, 95% CI [0.35, 0.74], p < .001). The estimated within-person correlation was α = 0.22. Robust and naive SEs were in close agreement, supporting the exchangeable working correlation specification. Marginal estimates were attenuated relative to conditional GLMM estimates by a factor of ~0.84, consistent with the random intercept variance (σ² ≈ 1.0).
 
