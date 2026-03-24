@@ -29,11 +29,6 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
     let description = guide.description.to_string();
     let category = guide.category.to_string();
     let tags = guide.tags.iter().map(|t| t.to_string()).collect::<Vec<_>>();
-    let r_packages = guide
-        .r_packages
-        .iter()
-        .map(|p| p.to_string())
-        .collect::<Vec<_>>();
     let html_content = guide.html_content.to_string();
     let outline = guide.outline.clone();
 
@@ -74,14 +69,6 @@ pub fn GuideLayout(guide: Guide) -> impl IntoView {
                             view! {
                                 <span class="px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent border border-accent/20">
                                     {tag.clone()}
-                                </span>
-                            }
-                        }).collect_view()}
-
-                        {r_packages.iter().map(|pkg| {
-                            view! {
-                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                                    {pkg.clone()}
                                 </span>
                             }
                         }).collect_view()}
