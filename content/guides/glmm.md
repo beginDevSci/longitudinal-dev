@@ -9,33 +9,25 @@ guide_type: "overview"
 
 ## When Outcomes Aren't Continuous
 
-Linear mixed models assume a continuous, normally distributed outcome. But many longitudinal questions involve outcomes that aren't continuous:
+Many longitudinal outcomes aren't continuous — and they need models that respect their structure:
 
 - Did the participant use a substance? (**binary**: yes/no)
 - How many days did they use in the past month? (**count**: 0, 1, 2, …)
 - What was their symptom severity rating? (**ordinal**: mild, moderate, severe)
 
-Fitting a standard LMM to these outcomes creates real problems:
+**Generalized Linear Mixed Models (GLMM)** handle these outcomes by combining two ideas:
 
-| Outcome Type | What Goes Wrong with LMM |
-|-------------|--------------------------|
-| **Binary** | Predicted probabilities outside [0, 1]; wrong variance structure |
-| **Count** | Ignores floor at zero; assumes symmetric errors around the mean |
-| **Ordinal** | Treats category distances as equal; misrepresents the outcome scale |
+1. **Generalized linear models (GLM)**: Map the outcome to an appropriate scale through a *link function*, and model variance as a function of the mean
+2. **Mixed models**: Include random effects to capture individual-level variation over time
 
-These issues go beyond surface-level concerns — they can distort estimates, standard errors, and conclusions. For example, a model that predicts a -15% probability of substance use signals a fundamental mismatch between the model and the data's structure.
+The result: individual trajectories for non-continuous outcomes, with proper handling of the outcome's distributional properties.
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/glmm/glmm_fig01_binary_trajectories.png" alt="Individual Probability Trajectories" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
 <figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Each gray line is one person's probability trajectory across 5 waves. The blue line is the group mean. Some people start with high probability and decline steeply; others start low and stay flat. All trajectories are naturally bounded between 0% and 100%.</figcaption>
 </figure>
 
-**Generalized Linear Mixed Models (GLMM)** solve this by combining two ideas:
-
-1. **Generalized linear models (GLM)**: Map the outcome to an appropriate scale through a *link function*, and model variance as a function of the mean
-2. **Mixed models**: Include random effects to capture individual-level variation over time
-
-The result: you get individual trajectories for non-continuous outcomes, with proper handling of the outcome's distributional properties.
+Treating these outcomes as continuous may seem harmless, but it creates real problems — predicted probabilities outside [0, 1], counts below zero, ordinal distances treated as equal. A model that predicts a -15% probability of substance use signals a fundamental mismatch between the model and the data's structure. GLMM avoids these issues by design.
 
 ---
 

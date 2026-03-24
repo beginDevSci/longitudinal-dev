@@ -7,15 +7,15 @@ tags: ["GEE", "marginal-models", "geepack", "longitudinal"]
 guide_type: "overview"
 ---
 
-## When the Question Is About the Population
+## When Your Focus Is the Population, Not the Person
 
-Some longitudinal questions are about population-level patterns, not individual trajectories:
+Some longitudinal questions are about population-level patterns:
 
 - Does this intervention reduce the **average prevalence** of substance use?
 - Is the **population rate** of emergency visits declining over time?
 - Across all participants, does the **average count** differ by treatment group?
 
-These are **marginal** questions — they ask about averages, not individuals. You don't need to model person-specific trajectories to answer them. You just need to account for the fact that repeated measures on the same person are correlated.
+These are **marginal** questions — they ask what happens on average across the population. Answering them requires accounting for repeated measures on the same person, but it doesn't require modeling each person's individual trajectory.
 
 **Generalized Estimating Equations (GEE)** are designed for exactly this. GEE takes a semi-parametric approach:
 
@@ -23,9 +23,7 @@ These are **marginal** questions — they ask about averages, not individuals. Y
 2. Specify a **working correlation structure** to approximate within-person dependence
 3. Use a **sandwich estimator** to produce valid standard errors *even if the working correlation is wrong*
 
-The result: consistent, efficient estimates of population-averaged effects with robust inference — and fewer distributional assumptions than mixed-model alternatives.
-
-This contrasts with mixed models (LMM, GLMM), which estimate **conditional** effects — what happens for a specific individual, accounting for their random effect. GEE deliberately sets aside individual-level modeling to focus on population averages.
+The result: consistent, efficient estimates of population-averaged effects with robust inference and minimal distributional assumptions.
 
 <figure style="margin: 1.5rem 0;">
 <img src="/images/guides/gee/gee_fig01_population_averaged.png" alt="Population-Averaged Trends" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
