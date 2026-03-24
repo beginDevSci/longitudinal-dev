@@ -3,7 +3,8 @@ title: "Generalized Linear Mixed Models"
 slug: "glmm"
 description: "Extend mixed models to non-continuous outcomes — binary, count, and ordinal — while preserving individual-level trajectories."
 category: "mixed-models"
-tags: ["GLMM", "mixed-models", "glmmTMB", "longitudinal"]
+tags: ["GLMM", "mixed-models", "longitudinal"]
+r_packages: ["glmmTMB"]
 guide_type: "overview"
 ---
 

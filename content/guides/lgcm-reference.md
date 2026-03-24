@@ -3,7 +3,7 @@ title: "LGCM Reference"
 slug: "lgcm-reference"
 description: "Quick lookup for LGCM syntax, fit indices, parameters, and troubleshooting."
 category: "growth-models"
-tags: ["LGCM", "quick-reference", "lavaan", "syntax"]
+tags: ["LGCM", "quick-reference", "syntax"]
 r_packages: ["lavaan"]
 guide_type: "reference"
 parent_method: "lgcm"

@@ -3,7 +3,7 @@ title: "GEE Reference"
 slug: "gee-reference"
 description: "Quick lookup for GEE syntax, correlation structures, QIC, robust SEs, and troubleshooting."
 category: "mixed-models"
-tags: ["GEE", "quick-reference", "geepack", "syntax"]
+tags: ["GEE", "quick-reference", "syntax"]
 r_packages: ["geepack"]
 guide_type: "reference"
 parent_method: "gee"

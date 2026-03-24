@@ -3,7 +3,8 @@ title: "Generalized Estimating Equations"
 slug: "gee"
 description: "Estimate population-averaged effects for correlated data without modeling individual trajectories."
 category: "mixed-models"
-tags: ["GEE", "marginal-models", "geepack", "longitudinal"]
+tags: ["GEE", "marginal-models", "longitudinal"]
+r_packages: ["geepack"]
 guide_type: "overview"
 ---
 

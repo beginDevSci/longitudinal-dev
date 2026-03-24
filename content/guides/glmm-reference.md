@@ -3,7 +3,7 @@ title: "GLMM Reference"
 slug: "glmm-reference"
 description: "Quick lookup for GLMM syntax, distributions, link functions, diagnostics, and troubleshooting."
 category: "mixed-models"
-tags: ["GLMM", "quick-reference", "glmmTMB", "syntax"]
+tags: ["GLMM", "quick-reference", "syntax"]
 r_packages: ["glmmTMB", "lme4"]
 guide_type: "reference"
 parent_method: "glmm"

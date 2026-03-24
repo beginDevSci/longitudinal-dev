@@ -4,6 +4,7 @@ slug: "lgcm"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
 tags: ["LGCM", "growth-models", "SEM", "longitudinal"]
+r_packages: ["lavaan"]
 guide_type: "overview"
 ---
 

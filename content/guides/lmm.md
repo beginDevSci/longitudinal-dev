@@ -4,6 +4,7 @@ slug: "lmm"
 description: "Model individual trajectories while accounting for the nested structure of longitudinal data."
 category: "mixed-models"
 tags: ["LMM", "mixed-models", "multilevel", "longitudinal"]
+r_packages: ["lme4"]
 guide_type: "overview"
 ---
 

@@ -3,7 +3,7 @@ title: "GEE Walkthrough: Worked Example"
 slug: "gee-walkthrough"
 description: "Step-by-step GEE analysis from setup to interpretation — comparing correlation structures, robust SEs, and GEE vs GLMM results."
 category: "mixed-models"
-tags: ["GEE", "worked-example", "geepack", "R", "simulation"]
+tags: ["GEE", "worked-example", "R", "simulation"]
 r_packages: ["geepack", "lme4", "tidyverse", "MASS"]
 guide_type: "tutorial"
 parent_method: "gee"

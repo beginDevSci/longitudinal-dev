@@ -3,7 +3,7 @@ title: "LMM Reference"
 slug: "lmm-reference"
 description: "Quick lookup for LMM syntax, diagnostics, parameters, and troubleshooting."
 category: "mixed-models"
-tags: ["LMM", "quick-reference", "lme4", "syntax"]
+tags: ["LMM", "quick-reference", "syntax"]
 r_packages: ["lme4", "lmerTest", "performance"]
 guide_type: "reference"
 parent_method: "lmm"
