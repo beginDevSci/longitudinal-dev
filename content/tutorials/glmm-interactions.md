@@ -360,11 +360,11 @@ ggsave(
 
 ## Visualization 1: Interaction Effect {.output}
 
-![Interaction Effect](stage4-artifacts/glmm-interactions/visualization.png)
+![Interaction Effect](/stage4-artifacts/glmm-interactions/visualization.png)
 
 ## Visualization 2: Predicted vs Observed {.output}
 
-![Predicted vs Observed](stage4-artifacts/glmm-interactions/visualization2.png)
+![Predicted vs Observed](/stage4-artifacts/glmm-interactions/visualization2.png)
 
 ## Visualization Interpretation {.note}
 

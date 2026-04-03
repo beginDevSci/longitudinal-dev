@@ -30,7 +30,7 @@ Generalized Estimating Equations for count outcomes extend the GEE framework fro
 ## Features {.features}
 
 - **When to Use:** Apply when your outcome is a non-negative integer count measured repeatedly and you want population-averaged trends while accounting for within-subject correlation.
-- **Key Advantage:** GEE with Poisson or quasi-Poisson family provides valid marginal rate ratio estimates even when the variance-mean relationship is misspecified, as long as the mean model is correct and robust standard errors are used.
+- **Key Advantage:** GEE with Poisson family provides valid marginal rate ratio estimates even when the variance-mean relationship is misspecified, as long as the mean model is correct and robust standard errors are used.
 - **What You'll Learn:** How to fit Poisson GEE, detect and handle overdispersion, compare robust versus naive standard errors, and interpret incidence rate ratios for count outcomes.
 
 # Data Access
@@ -360,7 +360,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Count Distribution by Wave](stage4-artifacts/gee-count/visualization.png)
+![Count Distribution by Wave](/stage4-artifacts/gee-count/visualization.png)
 
 ## Visualization Notes {.note}
 

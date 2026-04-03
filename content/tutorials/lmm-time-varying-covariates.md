@@ -384,7 +384,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Cognition Trajectories by Average Height](stage4-artifacts/lmm-time-varying-covariates/visualization.png)
+![Cognition Trajectories by Average Height](/stage4-artifacts/lmm-time-varying-covariates/visualization.png)
 
 ## Visualization Notes {.note}
 

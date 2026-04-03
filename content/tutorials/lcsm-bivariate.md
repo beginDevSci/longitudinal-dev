@@ -698,7 +698,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Coupled Change Scatter Plot](stage4-artifacts/lcsm-bivariate/visualization.png)
+![Coupled Change Scatter Plot](/stage4-artifacts/lcsm-bivariate/visualization.png)
 
 ## Visualization Notes {.note}
 

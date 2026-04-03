@@ -389,7 +389,7 @@ ggsave(
 
 ## Predicted Probabilities Plot {.output}
 
-![Predicted Probabilities of Alcohol Use](stage4-artifacts/glmm-binary/visualization.png)
+![Predicted Probabilities of Alcohol Use](/stage4-artifacts/glmm-binary/visualization.png)
 
 ## Visualization Notes {.note}
 
@@ -399,11 +399,11 @@ Note that these marginal probabilities will be closer to 0.5 than the conditiona
 
 # Discussion
 
-This analysis demonstrates the application of GLMMs to binary longitudinal outcomes, a common scenario in developmental and clinical research where the outcome is whether an event has occurred (e.g., substance use initiation, symptom presence, milestone achievement). The logit link function ensures that predicted probabilities remain bounded between 0 and 1, while the random effects structure accounts for the correlation among repeated measures from the same individual.
+The analysis reveals a steep developmental increase in alcohol use probability across adolescence, with odds nearly doubling per biennial assessment wave. Despite this strong time effect, prevalence remained low overall — rising from near-zero at Baseline to roughly 8% by Year 6 — so the large conditional odds ratio reflects rapid relative change from a very low base rather than high absolute risk. Sex did not significantly predict alcohol use in this sample after accounting for individual heterogeneity.
 
-Key findings typically include: (1) The time effect captures the developmental trajectory of risk - whether and how fast the probability of the outcome changes over time; (2) The random intercept variance quantifies individual differences in baseline susceptibility; (3) The random slope variance (if included) captures heterogeneity in developmental trajectories - some individuals may show steeper increases in risk than others.
+The substantial random slope variance (M2 AIC improvement of ~500 over M1) indicates that adolescents follow markedly different trajectories — some transition to use earlier and more steeply than others. This heterogeneity is a natural target for conditional models: adding time-invariant predictors (e.g., family risk factors, neighborhood characteristics) could help explain who transitions earlier. Time-varying covariates (e.g., peer substance use, stress) could further clarify within-person drivers of use onset.
 
-Several extensions are possible: (1) Time-varying covariates can be added to examine how changes in other factors relate to changes in outcome probability; (2) Interaction terms (e.g., time × sex) can test whether trajectories differ by group; (3) Alternative link functions (probit, complementary log-log) may better suit certain data patterns; (4) Zero-inflation or hurdle models can handle outcomes with excess zeros.
+The distinction between conditional and marginal effects is particularly consequential here because the random intercept variance is large relative to the fixed effects. Population-averaged estimates from a GEE model would show a more attenuated time effect, reflecting the fact that most youth remain abstinent throughout the study period. Both perspectives — individual-level risk trajectories (GLMM) and population-level prevalence trends (GEE) — are informative for different policy and intervention questions.
 
 # Additional Resources
 

@@ -271,8 +271,8 @@ comparison_table
 
 ```r
 ### Extract IRRs from the best-fitting model
-### Use m_nb as the primary model (random intercept NB)
-irr_data <- broom.mixed::tidy(m_nb, conf.int = TRUE, exponentiate = TRUE) %>%
+### Use m_nb_slope (M3: NB with random intercept + slope) per model comparison
+irr_data <- broom.mixed::tidy(m_nb_slope, conf.int = TRUE, exponentiate = TRUE) %>%
   filter(effect == "fixed") %>%
   select(term, estimate, conf.low, conf.high, std.error, p.value) %>%
   rename(
@@ -369,7 +369,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Predicted Counts Over Time](stage4-artifacts/glmm-count/visualization.png)
+![Predicted Counts Over Time](/stage4-artifacts/glmm-count/visualization.png)
 
 ## Visualization Notes {.note}
 

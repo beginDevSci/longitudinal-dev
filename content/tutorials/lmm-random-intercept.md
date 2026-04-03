@@ -325,7 +325,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Visualization](stage4-artifacts/lmm-random-intercept/visualization.png)
+![Visualization](/stage4-artifacts/lmm-random-intercept/visualization.png)
 
 ## Interpretation {.note}
 

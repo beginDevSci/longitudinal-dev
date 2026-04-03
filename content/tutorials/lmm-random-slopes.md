@@ -345,7 +345,7 @@ ggsave(
 
 ## Visualization-2 {.output}
 
-![Visualization](stage4-artifacts/lmm-random-slopes/visualization.png)
+![Visualization](/stage4-artifacts/lmm-random-slopes/visualization.png)
 
 ## Interpretation {.note}
 

@@ -378,7 +378,7 @@ ggsave(
 
 ## Visualization {.output}
 
-![Internalizing Change Distribution](stage4-artifacts/lcsm-basic/visualization.png)
+![Internalizing Change Distribution](/stage4-artifacts/lcsm-basic/visualization.png)
 
 ## Visualization Notes {.note}
 
