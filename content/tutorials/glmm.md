@@ -108,7 +108,6 @@ library(tidyverse)  # Data wrangling & visualization
 library(gtsummary)  # Summary tables
 library(rstatix)    # Tidy-format statistical tests
 library(lme4)       # Linear mixed-effects models (GLMMs)
-library(ggeffects)  # Extract & visualize model predictions
 library(broom)      # Organizing model outputs
 library(broom.mixed)  # Organizing mixed model outputs
 library(gt)           # Presentation-ready display tables

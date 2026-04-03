@@ -108,9 +108,7 @@ library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
 library(rstatix)     # Provides tidy-format statistical tests
 library(lme4)        # Linear mixed-effects models (LMMs)
-library(sjPlot)      # Visualization of mixed models
 library(performance) # Useful functions for model diagnostics & comparisons
-library(ggeffects)   # Adjusted regression predictions
 library(broom.mixed) # Tidy summaries of mixed models
 library(gt)          # Presentation-ready display tables
 
@@ -327,10 +325,28 @@ The **random effects** (see Model Summary Output-2) reveal substantial variabili
 
 ```r
 # Get predicted neurocognition scores by parental education
-preds_edu <- ggpredict(model, terms = "parent_education")  # Correct function
+# Use predict() with a grid of education levels at mean time
+edu_levels <- sort(unique(df_long$parent_education))
+newdata <- data.frame(
+  parent_education = edu_levels,
+  time = mean(df_long$time, na.rm = TRUE),
+  site = levels(df_long$site)[1]
+)
+newdata$predicted <- predict(model, newdata = newdata, re.form = NA)
+
+# Compute approximate SEs using fixed-effects variance-covariance matrix
+X <- model.matrix(~ time + parent_education + site, data = newdata)
+vcov_mat <- as.matrix(vcov(model))
+# Align columns in case of factor level mismatches
+shared_cols <- intersect(colnames(X), colnames(vcov_mat))
+se_pred <- sqrt(diag(X[, shared_cols, drop = FALSE] %*%
+                      vcov_mat[shared_cols, shared_cols] %*%
+                      t(X[, shared_cols, drop = FALSE])))
+newdata$conf.low <- newdata$predicted - 1.96 * se_pred
+newdata$conf.high <- newdata$predicted + 1.96 * se_pred
 
 # Plot
-visualization <- ggplot(preds_edu, aes(x = x, y = predicted)) +
+visualization <- ggplot(newdata, aes(x = parent_education, y = predicted)) +
   geom_point(size = 3, color = "darkred") +
   geom_line(group = 1, color = "darkred") +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
