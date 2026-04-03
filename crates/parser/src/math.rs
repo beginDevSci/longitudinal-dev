@@ -148,7 +148,7 @@ mod tests {
     #[test]
     fn test_no_false_positives() {
         let html = "<p>Use $HOME for your home directory.</p>";
-        let result = render_math_in_html(html);
+        let _result = render_math_in_html(html);
         // $HOME alone shouldn't be matched (no closing $)
         // Actually it will be matched since there's content between $
         // This is a limitation - code blocks should use backticks

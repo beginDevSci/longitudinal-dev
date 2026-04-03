@@ -46,8 +46,8 @@ impl<'a> Stage5Validator<'a> {
         };
 
         // 2. Inject execution metadata from Stage 4 if available
-        let enriched_json = if self.config.inject_metadata && stage4_result.is_some() {
-            self.add_metadata(json_value, stage4_result.unwrap())?
+        let enriched_json = if let Some(s4) = stage4_result.filter(|_| self.config.inject_metadata) {
+            self.add_metadata(json_value, s4)?
         } else {
             json_value
         };
