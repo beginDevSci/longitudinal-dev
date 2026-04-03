@@ -379,7 +379,7 @@ gt::gtsave(
 
 ## Interpretation {.note}
 
-The parsimonious LCSM fit the data well (CFI = 0.985, TLI = 0.985, RMSEA = 0.065, df = 6), confirming that the equality constraints on change variances and residual variances are appropriate for CBCL Internalizing T-scores across biennial intervals. OpenMx estimates converge to the same values as the lavaan specification, as expected for equivalent model parameterizations.
+The parsimonious LCSM fit the data well (CFI = 0.985, TLI = 0.985, RMSEA = 0.065, df = 6), confirming that the equality constraints on change variances and residual variances are appropriate for CBCL Internalizing T-scores across biennial intervals.
 
 Mean internalizing at baseline was 48.32 (SE = 0.155, p < .001), close to the normed T-score mean of 50. The mean latent change scores were -0.72 (Baseline to Year 2, p < .001), -0.09 (Year 2 to Year 4, p = .514), and -0.40 (Year 4 to Year 6, p = .003), indicating modest average decreases in internalizing problems over time, with the largest decline in the first period and a non-significant change in the middle period.
 

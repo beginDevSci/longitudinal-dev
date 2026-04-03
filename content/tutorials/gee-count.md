@@ -17,8 +17,8 @@ covariates: TIC
 outcome_type: Count
 difficulty: intermediate
 timepoints: 3_5
-summary: Fit population-averaged GEE models for count outcomes, compare Poisson and quasi-Poisson specifications, detect overdispersion, and interpret rate ratios for repeated-measures ABCD data.
-description: Fit population-averaged GEE models for count outcomes, compare Poisson and quasi-Poisson specifications, detect overdispersion, and interpret rate ratios for repeated-measures ABCD data.
+summary: Fit population-averaged GEE models for count outcomes, detect overdispersion, and interpret rate ratios for repeated-measures ABCD data.
+description: Fit population-averaged GEE models for count outcomes, detect overdispersion, and interpret rate ratios for repeated-measures ABCD data.
 ---
 
 # Overview
