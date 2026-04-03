@@ -60,8 +60,9 @@ generate_mock_var <- function(var_name, n_rows, participant_idx = NULL) {
     }
   }
 
-  # Sex/Gender variables - FIXED to return numeric codes
-  # ABCD stores sex as numeric: 1 = Male, 2 = Female
+  # Sex/Gender variables - return numeric codes matching ABCD data
+  # ABCD stores sex as numeric: 1=Male, 2=Female
+  # categ_to_factor=TRUE creates factor with numeric levels, labels added as attributes
   else if (grepl("(cohort_sex|demo.*sex)", var_name, ignore.case = TRUE)) {
     return(sample(c(1, 2), n_rows, replace = TRUE))
   }
@@ -106,6 +107,14 @@ generate_mock_var <- function(var_name, n_rows, participant_idx = NULL) {
   # ABCD household income (3-level version): 1-3
   else if (grepl("cohort_income", var_name, ignore.case = TRUE)) {
     return(sample(1:3, n_rows, replace = TRUE))
+  }
+
+  # TLFB Substance Use - use days (0-30 range, skewed toward 0 for realistic data)
+  # Matches: su_y_tlfb__alc__1mo_ud, su_y_tlfb__mj__1mo_ud, etc.
+  else if (grepl("tlfb.*_ud$", var_name, ignore.case = TRUE)) {
+    # Most youth report 0 use days, with declining probability for higher values
+    probs <- c(0.7, rep(0.3/30, 30))  # 70% zero, 30% spread across 1-30
+    return(sample(0:30, n_rows, replace = TRUE, prob = probs))
   }
 
   # Handedness (Edinburgh Handedness Inventory Score)

@@ -3,7 +3,8 @@ title: "Latent Growth Curve Models"
 slug: "lgcm"
 description: "Model individual trajectories over time using SEM-based growth curves."
 category: "growth-models"
-tags: ["LGCM", "guide", "SEM", "lavaan"]
+tags: ["LGCM", "growth-models", "SEM", "longitudinal"]
+r_packages: ["lavaan"]
 guide_type: "overview"
 ---
 
@@ -83,7 +84,7 @@ LGCM works well when you have:
 
 ---
 
-## Key Components of Linear LGCM
+## Key Components
 
 Regardless of your statistical background, these are the building blocks of every LGCM.
 
@@ -166,7 +167,7 @@ One of LGCM's most informative parameters is the relationship between where peop
 <figcaption style="font-style: italic; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">Scatterplot of individual intercepts vs. slopes. The negative correlation (r ≈ -0.20) indicates that participants who started higher tended to grow slightly slower.</figcaption>
 </figure>
 
-These patterns aren't just statistical curiosities—they have substantive meaning:
+These patterns have substantive meaning:
 
 - A **negative** intercept-slope correlation in a therapy study might mean patients with severe symptoms improve more
 - A **positive** correlation in educational research might indicate a "Matthew effect" where initial advantages compound over time
@@ -269,32 +270,11 @@ The path diagram provides a visual grammar for LGCM:
 
 *The intercept factor has all loadings fixed to 1. The slope factor has loadings encoding time (0, 1, 2, 3, 4). The curved arrow represents the covariance between factors. Residuals (ε) capture occasion-specific variation.*
 
-<details>
-<summary>Text description (for accessibility)</summary>
+<div class="sr-only">
 
-```
-              ┌─────────────┐          ┌─────────────┐
-              │  Intercept  │          │    Slope    │
-              │    (η₁)     │◄────────►│    (η₂)     │
-              └──────┬──────┘          └──────┬──────┘
-                     │                        │
-     ┌───────┬───────┼───────┬───────┐       │
-     │1      │1      │1      │1      │1      │
-     ▼       ▼       ▼       ▼       ▼       │
-   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐    │
-   │y1 │   │y2 │   │y3 │   │y4 │   │y5 │    │
-   └─┬─┘   └─┬─┘   └─┬─┘   └─┬─┘   └─┬─┘    │
-     ▲       ▲       ▲       ▲       ▲       │
-     │0      │1      │2      │3      │4      │
-     └───────┴───────┴───────┴───────┴───────┘
+Path diagram description: Two latent factors (Intercept η₁ and Slope η₂) connected by a double-headed arrow representing their covariance. The Intercept factor has loadings of 1 to all five observed variables (y1–y5). The Slope factor has loadings of 0, 1, 2, 3, 4 to y1–y5 respectively. Residual variances are omitted for clarity.
 
-Intercept loadings (top): all 1s
-Slope loadings (bottom): 0, 1, 2, 3, 4
-Double-headed arrow: factor covariance
-Residual variances omitted for clarity
-```
-
-</details>
+</div>
 
 **Key insight**: Unlike exploratory factor analysis, LGCM *fixes* the factor loadings. You don't estimate them—you set them based on your time coding. This constraint is what makes the intercept and slope *interpretable* as starting level and rate of change.
 
@@ -351,9 +331,7 @@ The key assumption is **Missing At Random (MAR)**: missingness can depend on *ob
 
 FIML assumes MAR and correct model specification. Include auxiliary variables related to missingness (and the outcome) to bolster MAR plausibility and reduce bias.
 
----
-
-## Time Coding
+### Time Coding
 
 Slope factor loadings define how time enters the model. This determines:
 
@@ -361,7 +339,7 @@ Slope factor loadings define how time enters the model. This determines:
 - How to interpret the slope
 - Whether unequal spacing is handled correctly
 
-### Standard Coding (0, 1, 2, 3, 4)
+#### Standard Coding (0, 1, 2, 3, 4)
 
 | Wave | Loading | Meaning |
 |------|---------|----------|
@@ -375,7 +353,7 @@ With this coding:
 - **Intercept** = expected score at Time 0 (Wave 1)
 - **Slope** = expected change per 1-unit increase in time
 
-### Centering at Different Time Points
+#### Centering at Different Time Points
 
 Shift the zero point to change what the intercept represents:
 
@@ -389,17 +367,11 @@ Shift the zero point to change what the intercept represents:
 
 *How time coding determines the intercept's location. All three panels show the same trajectory, but the intercept (marked "I") refers to different time points depending on where you place the zero in your slope loadings. The slope (rate of change) remains identical across all three.*
 
-<details>
-<summary>Text description (if image doesn't render)</summary>
+<div class="sr-only">
 
-Three panels showing the same linear trajectory with different intercept locations:
-- **Left (Wave 1 centering)**: Loadings 0,1,2,3,4 — intercept "I" marked at Wave 1
-- **Center (Midpoint centering)**: Loadings -2,-1,0,1,2 — intercept "I" marked at Wave 3
-- **Right (Final wave centering)**: Loadings -4,-3,-2,-1,0 — intercept "I" marked at Wave 5
+Three panels showing the same linear trajectory with different intercept locations. Left (Wave 1 centering): Loadings 0,1,2,3,4 — intercept marked at Wave 1. Center (Midpoint centering): Loadings -2,-1,0,1,2 — intercept marked at Wave 3. Right (Final wave centering): Loadings -4,-3,-2,-1,0 — intercept marked at Wave 5. The slope (line angle) is identical in all three; only the intercept reference point changes.
 
-The slope (line angle) is identical in all three; only the intercept reference point changes.
-
-</details>
+</div>
 
 > [!note] **Centering and the slope**
 >
@@ -407,7 +379,7 @@ The slope (line angle) is identical in all three; only the intercept reference p
 
 **When does centering matter?** When you add predictors. If you ask "Does baseline depression predict growth?", the intercept-predictor relationship depends on where you defined the intercept.
 
-### Non-Equidistant Time Points
+#### Non-Equidistant Time Points
 
 If waves aren't equally spaced, use actual time values:
 
@@ -427,27 +399,21 @@ Rescaling the time metric also rescales the slope mean and variance (e.g., per-m
 
 ## Common Pitfalls
 
-Before applying LGCM, be aware of these frequent misinterpretations.
+> [!caution]
+> These mistakes are common but avoidable:
 
-**Ignoring slope variance** — Concluding "everyone improved" because mean slope = 2. *Reality:* If slope SD = 2, roughly 16% have slopes ≤ 0. Always report variance alongside the mean.
-
-**Misreading intercept-slope correlation** — Assuming negative correlation means high starters declined. *Reality:* Negative correlation means high starters *grew slower*, not that they declined. Combine with slope mean to interpret direction.
-
-**Confusing means with individuals** — Stating "the model shows steady improvement" as if everyone follows this pattern. *Reality:* The mean trajectory summarizes the group; individual trajectories can look wildly different. Plot spaghetti plots alongside the mean.
-
-**Equating good fit with truth** — Assuming RMSEA < .06 proves the model is correct. *Reality:* Good fit means *plausible*, not *true*. Multiple models can fit the same data. Always compare alternatives (quadratic, piecewise).
-
-**Misinterpreting recentered intercepts** — Recentering time at midpoint but still interpreting the intercept as "baseline." *Reality:* The intercept refers to wherever time = 0 in your coding. Match interpretation to your time coding.
-
-**Ignoring residual autocorrelation** — Assuming residuals are independent across time without checking. *Reality:* Large modification indices or poor fit may indicate carryover effects. Check modification indices; consider autoregressive structures if needed.
-
-**Overfitting with too few time points** — Fitting a quadratic model with 4 waves (0 df) and concluding "quadratic growth." *Reality:* Just-identified models fit perfectly by construction—there's no test of fit. Ensure positive degrees of freedom.
-
-**Ignoring the missing data mechanism** — Using FIML and assuming everything is fine. *Reality:* FIML assumes MAR. If dropout depends on unobserved values (MNAR), estimates may be biased. Examine who drops out; include auxiliary variables; conduct sensitivity analyses.
-
-**Over-interpreting non-significant variance** — Slope variance p = .08, so "everyone changes at the same rate." *Reality:* You may be underpowered; p = .08 isn't strong evidence of zero. Report the estimate and confidence interval, not just the p-value.
-
-**Forgetting to look at the data** — Jumping straight to modeling without visualization. *Reality:* You might miss outliers, nonlinearity, subgroups, or data errors. Always plot spaghetti plots first.
+| Pitfall | Mistake | Fix |
+|---------|---------|-----|
+| Ignoring slope variance | "Everyone improved" (mean slope = 2) | If slope SD = 2, ~16% have slopes ≤ 0. Always report variance alongside the mean |
+| Misreading I-S correlation | Negative correlation = high starters *declined* | Negative correlation = high starters *grew slower*. Combine with slope mean for direction |
+| Confusing means with individuals | "The model shows steady improvement" | The mean summarizes the group; individual trajectories can differ wildly. Plot spaghetti plots |
+| Equating good fit with truth | RMSEA < .06 proves the model is correct | Good fit = *plausible*, not *true*. Always compare alternatives (quadratic, piecewise) |
+| Misinterpreting recentered intercepts | Recentered at midpoint but interpreted as "baseline" | The intercept refers to wherever time = 0 in your coding. Match interpretation to coding |
+| Ignoring residual autocorrelation | Assumed residuals are independent without checking | Poor fit (or large modification indices) may indicate carryover effects. Consider autoregressive structures |
+| Overfitting with too few waves | Quadratic model with 4 waves (0 df) | Just-identified models fit perfectly by construction. Ensure positive degrees of freedom |
+| Ignoring missing data mechanism | Used FIML and assumed everything is fine | FIML assumes MAR. If dropout depends on unobserved values (MNAR), estimates may be biased. Include auxiliary variables |
+| Over-interpreting non-significant variance | Slope variance p = .08, so "no differences" | You may be underpowered. Report the estimate and CI, not just the p-value |
+| Forgetting to look at the data | Jumped straight to modeling | You might miss outliers, nonlinearity, or subgroups. Always plot spaghetti plots first |
 
 ---
 

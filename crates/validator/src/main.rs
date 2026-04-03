@@ -26,6 +26,7 @@ mod cache;
 mod config;
 mod executor;
 mod output;
+mod privacy;
 mod r_prelude;
 mod rscript;
 mod stages;

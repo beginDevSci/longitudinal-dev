@@ -243,18 +243,22 @@ print(d_value)
 model <- lm(height_diff ~ handedness + site, data = df_wide)
 
 # Generate a summary table for the regression model
-model_summary <- gtsummary::tbl_regression(model,
-    digits = 3,
-    intercept = TRUE
-) %>%
-  gtsummary::as_gt()
+model_summary <- broom::tidy(model, conf.int = TRUE) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "Regression: Difference Score ~ Handedness + Site") %>%
+  fmt_number(columns = c(estimate, std.error, statistic), decimals = 3) %>%
+  fmt_number(columns = p.value, decimals = 4) %>%
+  cols_label(
+    term = "Parameter",
+    estimate = "Estimate",
+    std.error = "SE",
+    statistic = "t",
+    p.value = "p-value"
+  )
 
 # Save as standalone HTML
-gt::gtsave(
-  data = model_summary,
-  filename = "model_summary.html",
-  inline_css = FALSE # ensures self-contained output
-)
+gt::gtsave(model_summary, filename = "model_summary.html")
 
 ```
 

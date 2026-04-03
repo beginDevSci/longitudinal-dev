@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive GLMM Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // Seeded random number generator
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
+    // Box-Muller transform for normal random numbers
+    const normalRandom = (mean, sd, seed1, seed2) => {
+      const u1 = seededRandom(seed1);
+      const u2 = seededRandom(seed2);
+      const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return mean + sd * z;
+    };
+
+    // Generate correlated random effects
+    const generateCorrelatedPair = (sd1, sd2, corr, seed1, seed2, seed3) => {
+      const z1 = normalRandom(0, 1, seed1, seed2);
+      const z2 = normalRandom(0, 1, seed2, seed3);
+      const u1 = sd1 * z1;
+      const u2 = sd2 * (corr * z1 + Math.sqrt(Math.max(0, 1 - corr * corr)) * z2);
+      return [u1, u2];
+    };
+
+    // Link functions
+    const invLogit = (x) => 1 / (1 + Math.exp(-x));
+    const expFunc = (x) => Math.exp(x);
+
+    function GLMMExplorer() {
+      // Outcome type
+      const [outcomeType, setOutcomeType] = useState("binary");
+
+      // Fixed effects (on link scale)
+      const [interceptMean, setInterceptMean] = useState(0.8);
+      const [slopeMean, setSlopeMean] = useState(-0.35);
+
+      // Random effects (on link scale)
+      const [interceptSD, setInterceptSD] = useState(1.2);
+      const [slopeSD, setSlopeSD] = useState(0.2);
+      const [correlation, setCorrelation] = useState(-0.2);
+
+      // Display
+      const [nParticipants, setNParticipants] = useState(30);
+      const [showMean, setShowMean] = useState(true);
+      const [showLinkScale, setShowLinkScale] = useState(false);
+      const [selectedPerson, setSelectedPerson] = useState(null);
+
+      // Defaults per outcome type
+      const defaults = {
+        binary: { intercept: 0.8, slope: -0.35, intSD: 1.2, slpSD: 0.2 },
+        count:  { intercept: 1.5, slope: 0.15,  intSD: 0.5, slpSD: 0.1 }
+      };
+
+      const handleOutcomeChange = (type) => {
+        setOutcomeType(type);
+        const d = defaults[type];
+        setInterceptMean(d.intercept);
+        setSlopeMean(d.slope);
+        setInterceptSD(d.intSD);
+        setSlopeSD(d.slpSD);
+        setSelectedPerson(null);
+      };
+
+      // Inverse link
+      const invLink = outcomeType === "binary" ? invLogit : expFunc;
+      const linkLabel = outcomeType === "binary" ? "Log-Odds" : "Log Count";
+      const responseLabel = outcomeType === "binary" ? "Probability" : "Expected Count";
+
+      // Generate trajectories
+      const trajectories = useMemo(() => {
+        const trajs = [];
+        for (let i = 0; i < nParticipants; i++) {
+          const [u0, u1] = generateCorrelatedPair(
+            interceptSD, slopeSD, correlation,
+            i * 1000 + 1, i * 1000 + 2, i * 1000 + 3
+          );
+
+          const personIntercept = interceptMean + u0;
+          const personSlope = slopeMean + u1;
+
+          const points = [0, 1, 2, 3, 4].map(t => {
+            const eta = personIntercept + personSlope * t;
+            const mu = invLink(eta);
+            return { time: t, eta, mu };
+          });
+
+          trajs.push({ id: i, points, u0, u1, personIntercept, personSlope });
+        }
+        return trajs;
+      }, [interceptMean, slopeMean, interceptSD, slopeSD, correlation, nParticipants, outcomeType]);
+
+      // Mean trajectory
+      const meanPoints = useMemo(() => {
+        return [0, 1, 2, 3, 4].map(t => {
+          const eta = interceptMean + slopeMean * t;
+          const mu = invLink(eta);
+          return { time: t, eta, mu };
+        });
+      }, [interceptMean, slopeMean, outcomeType]);
+
+      // SVG dimensions
+      const width = 450, height = 320;
+      const margin = { top: 20, right: 30, bottom: 40, left: 55 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const xScale = (t) => margin.left + (t / 4) * innerWidth;
+
+      // Y extent for response scale
+      const yExtentResponse = useMemo(() => {
+        if (outcomeType === "binary") return [0, 1];
+        const allMu = trajectories.flatMap(t => t.points.map(p => p.mu));
+        const maxMu = Math.max(...allMu, ...meanPoints.map(p => p.mu));
+        return [0, Math.ceil(maxMu * 1.2)];
+      }, [trajectories, meanPoints, outcomeType]);
+
+      // Y extent for link scale
+      const yExtentLink = useMemo(() => {
+        const allEta = trajectories.flatMap(t => t.points.map(p => p.eta));
+        const minEta = Math.min(...allEta, ...meanPoints.map(p => p.eta));
+        const maxEta = Math.max(...allEta, ...meanPoints.map(p => p.eta));
+        const pad = (maxEta - minEta) * 0.1 || 1;
+        return [minEta - pad, maxEta + pad];
+      }, [trajectories, meanPoints]);
+
+      const yExtent = showLinkScale ? yExtentLink : yExtentResponse;
+      const yScale = (y) => margin.top + innerHeight - ((y - yExtent[0]) / (yExtent[1] - yExtent[0])) * innerHeight;
+
+      const getPath = (points, useLinkScale) => {
+        return points.map((p, i) => {
+          const y = useLinkScale ? p.eta : p.mu;
+          const sy = yScale(y);
+          return `${i === 0 ? 'M' : 'L'} ${xScale(p.time)} ${sy}`;
+        }).join(' ');
+      };
+
+      // Y-axis tick marks
+      const yTicks = useMemo(() => {
+        if (showLinkScale) {
+          const range = yExtent[1] - yExtent[0];
+          const step = range > 6 ? 2 : range > 3 ? 1 : 0.5;
+          const ticks = [];
+          let v = Math.ceil(yExtent[0] / step) * step;
+          while (v <= yExtent[1]) { ticks.push(v); v += step; }
+          return ticks;
+        }
+        if (outcomeType === "binary") return [0, 0.25, 0.5, 0.75, 1.0];
+        const max = yExtent[1];
+        const step = max > 20 ? 5 : max > 10 ? 2 : 1;
+        const ticks = [];
+        for (let v = 0; v <= max; v += step) ticks.push(v);
+        return ticks;
+      }, [yExtent, showLinkScale, outcomeType]);
+
+      // Format y-axis labels
+      const formatY = (v) => {
+        if (showLinkScale) return v.toFixed(1);
+        if (outcomeType === "binary") return `${(v * 100).toFixed(0)}%`;
+        return v.toFixed(1);
+      };
+
+      // Effect size display
+      const effectDisplay = useMemo(() => {
+        if (outcomeType === "binary") {
+          const or = Math.exp(slopeMean);
+          const p0 = invLogit(interceptMean);
+          const p4 = invLogit(interceptMean + slopeMean * 4);
+          return { or: or.toFixed(2), p0: (p0 * 100).toFixed(1), p4: (p4 * 100).toFixed(1) };
+        } else {
+          const irr = Math.exp(slopeMean);
+          const c0 = Math.exp(interceptMean);
+          const c4 = Math.exp(interceptMean + slopeMean * 4);
+          return { irr: irr.toFixed(2), c0: c0.toFixed(1), c4: c4.toFixed(1) };
+        }
+      }, [interceptMean, slopeMean, outcomeType]);
+
+      // Slider ranges per outcome type
+      const sliderConfig = outcomeType === "binary"
+        ? { intMin: -3, intMax: 3, intStep: 0.1, slpMin: -1, slpMax: 1, slpStep: 0.05,
+            intSDMax: 3, slpSDMax: 0.8 }
+        : { intMin: -1, intMax: 3, intStep: 0.1, slpMin: -0.5, slpMax: 0.5, slpStep: 0.05,
+            intSDMax: 1.5, slpSDMax: 0.3 };
+
+      return (
+        <div className="p-4 bg-slate-50 min-h-screen">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-xl font-bold text-slate-800 mb-1">GLMM Explorer</h1>
+            <p className="text-slate-600 text-sm mb-4">
+              Explore how fixed effects and random effects shape individual trajectories for non-continuous outcomes.
+            </p>
+
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Controls Panel */}
+              <div className="bg-white rounded-lg shadow p-4 lg:w-80 space-y-4">
+
+                {/* Outcome Type Toggle */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Outcome Type</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleOutcomeChange("binary")}
+                      className={`flex-1 text-xs py-1.5 rounded font-medium ${
+                        outcomeType === "binary"
+                          ? "bg-violet-100 text-violet-700 border border-violet-300"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >Binary (Logistic)</button>
+                    <button
+                      onClick={() => handleOutcomeChange("count")}
+                      className={`flex-1 text-xs py-1.5 rounded font-medium ${
+                        outcomeType === "count"
+                          ? "bg-violet-100 text-violet-700 border border-violet-300"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >Count (Log)</button>
+                  </div>
+                </div>
+
+                {/* Fixed Effects */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">
+                    Fixed Effects (β) — {linkLabel} Scale
+                  </h2>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-emerald-700">Intercept (β₀)</label>
+                      <span className="text-xs font-mono text-slate-600">{interceptMean.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min={sliderConfig.intMin} max={sliderConfig.intMax}
+                           step={sliderConfig.intStep} value={interceptMean}
+                           onChange={(e) => setInterceptMean(Number(e.target.value))}
+                           className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600" />
+                    <p className="text-xs text-slate-500">
+                      {outcomeType === "binary"
+                        ? `= ${(invLogit(interceptMean) * 100).toFixed(1)}% probability at baseline`
+                        : `= ${Math.exp(interceptMean).toFixed(1)} expected count at baseline`}
+                    </p>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-emerald-700">Slope (β₁)</label>
+                      <span className="text-xs font-mono text-slate-600">{slopeMean.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min={sliderConfig.slpMin} max={sliderConfig.slpMax}
+                           step={sliderConfig.slpStep} value={slopeMean}
+                           onChange={(e) => setSlopeMean(Number(e.target.value))}
+                           className="w-full h-2 bg-emerald-100 rounded-lg cursor-pointer accent-emerald-600" />
+                    <p className="text-xs text-slate-500">
+                      {outcomeType === "binary"
+                        ? `OR = ${Math.exp(slopeMean).toFixed(2)} per time unit`
+                        : `IRR = ${Math.exp(slopeMean).toFixed(2)} per time unit`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Random Effects */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">
+                    Random Effects — {linkLabel} Scale
+                  </h2>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">Intercept SD</label>
+                      <span className="text-xs font-mono text-slate-600">{interceptSD.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min="0" max={sliderConfig.intSDMax} step="0.1" value={interceptSD}
+                           onChange={(e) => setInterceptSD(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">Individual differences in baseline {outcomeType === "binary" ? "log-odds" : "log-count"}</p>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">Slope SD</label>
+                      <span className="text-xs font-mono text-slate-600">{slopeSD.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min="0" max={sliderConfig.slpSDMax} step="0.05" value={slopeSD}
+                           onChange={(e) => setSlopeSD(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">Individual differences in rate of change</p>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-blue-700">I-S Correlation (ρ)</label>
+                      <span className="text-xs font-mono text-slate-600">{correlation.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min="-0.9" max="0.9" step="0.1" value={correlation}
+                           onChange={(e) => setCorrelation(Number(e.target.value))}
+                           className="w-full h-2 bg-blue-100 rounded-lg cursor-pointer accent-blue-600" />
+                    <p className="text-xs text-slate-500">
+                      {correlation < 0 ? "High baseline → slower change" : correlation > 0 ? "High baseline → faster change" : "No relationship"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Display Options */}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Display</h2>
+
+                  <div className="mb-2">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-700">Participants</label>
+                      <span className="text-xs font-mono text-slate-600">{nParticipants}</span>
+                    </div>
+                    <input type="range" min="5" max="100" value={nParticipants}
+                           onChange={(e) => setNParticipants(Number(e.target.value))}
+                           className="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-slate-600" />
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-2">
+                    <label className="flex items-center text-xs">
+                      <input type="checkbox" checked={showMean} onChange={(e) => setShowMean(e.target.checked)}
+                             className="mr-1" />
+                      Show mean
+                    </label>
+                    <label className="flex items-center text-xs">
+                      <input type="checkbox" checked={showLinkScale} onChange={(e) => setShowLinkScale(e.target.checked)}
+                             className="mr-1" />
+                      Link scale
+                    </label>
+                  </div>
+                </div>
+
+                {/* Effect Size Display */}
+                <div className="bg-slate-100 rounded p-3">
+                  <div className="text-xs font-semibold text-slate-700 mb-1">
+                    {outcomeType === "binary" ? "Mean Trajectory" : "Mean Trajectory"}
+                  </div>
+                  {outcomeType === "binary" ? (
+                    <div>
+                      <div className="text-xs text-slate-600">
+                        Baseline: <span className="font-bold">{effectDisplay.p0}%</span> →
+                        Wave 5: <span className="font-bold">{effectDisplay.p4}%</span>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        OR = {effectDisplay.or} per time unit
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-slate-600">
+                        Baseline: <span className="font-bold">{effectDisplay.c0}</span> →
+                        Wave 5: <span className="font-bold">{effectDisplay.c4}</span>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        IRR = {effectDisplay.irr} per time unit
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Visualization Panel */}
+              <div className="flex-1 space-y-4">
+                {/* Main trajectory plot */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                    Individual Trajectories — {showLinkScale ? linkLabel : responseLabel} Scale
+                  </h3>
+                  <svg width={width} height={height} className="w-full" viewBox={`0 0 ${width} ${height}`}>
+                    {/* Grid lines */}
+                    {[0, 1, 2, 3, 4].map(t => (
+                      <line key={`grid-v-${t}`} x1={xScale(t)} y1={margin.top} x2={xScale(t)} y2={height - margin.bottom}
+                            stroke="#e2e8f0" strokeWidth="1" />
+                    ))}
+                    {yTicks.map(v => (
+                      <line key={`grid-h-${v}`} x1={margin.left} y1={yScale(v)} x2={width - margin.right} y2={yScale(v)}
+                            stroke="#e2e8f0" strokeWidth="1" />
+                    ))}
+
+                    {/* Individual trajectories */}
+                    {trajectories.map((traj, i) => (
+                      <path
+                        key={traj.id}
+                        d={getPath(traj.points, showLinkScale)}
+                        fill="none"
+                        stroke={selectedPerson === i ? "#7c3aed" : "#94a3b8"}
+                        strokeWidth={selectedPerson === i ? 2.5 : 1}
+                        opacity={selectedPerson === null ? 0.35 : selectedPerson === i ? 1 : 0.12}
+                        onMouseEnter={() => setSelectedPerson(i)}
+                        onMouseLeave={() => setSelectedPerson(null)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    ))}
+
+                    {/* Mean trajectory */}
+                    {showMean && (
+                      <path d={getPath(meanPoints, showLinkScale)} fill="none"
+                            stroke="#3b82f6" strokeWidth="3" strokeDasharray="8,4" />
+                    )}
+
+                    {/* Axes */}
+                    <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom}
+                          stroke="#334155" strokeWidth="1" />
+                    <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom}
+                          stroke="#334155" strokeWidth="1" />
+
+                    {/* X-axis labels */}
+                    {[0, 1, 2, 3, 4].map(t => (
+                      <text key={t} x={xScale(t)} y={height - margin.bottom + 20} textAnchor="middle"
+                            className="text-xs fill-slate-600">Time {t}</text>
+                    ))}
+
+                    {/* Y-axis labels */}
+                    {yTicks.map(v => (
+                      <text key={v} x={margin.left - 8} y={yScale(v) + 4} textAnchor="end"
+                            className="text-xs fill-slate-600">{formatY(v)}</text>
+                    ))}
+
+                    {/* Y-axis title */}
+                    <text x={15} y={height / 2} textAnchor="middle"
+                          transform={`rotate(-90, 15, ${height/2})`}
+                          className="text-xs fill-slate-600">
+                      {showLinkScale ? linkLabel : responseLabel}
+                    </text>
+                  </svg>
+
+                  {/* Selected person info */}
+                  {selectedPerson !== null && (
+                    <div className="mt-2 p-2 bg-violet-50 rounded text-xs">
+                      <span className="font-semibold">Person {selectedPerson + 1}:</span>
+                      {' '}β₀+u₀ = {trajectories[selectedPerson].personIntercept.toFixed(2)}
+                      {outcomeType === "binary"
+                        ? ` (${(invLogit(trajectories[selectedPerson].personIntercept) * 100).toFixed(1)}% at baseline)`
+                        : ` (${Math.exp(trajectories[selectedPerson].personIntercept).toFixed(1)} at baseline)`},
+                      {' '}β₁+u₁ = {trajectories[selectedPerson].personSlope.toFixed(3)}
+                      {outcomeType === "binary"
+                        ? ` (OR = ${Math.exp(trajectories[selectedPerson].personSlope).toFixed(2)})`
+                        : ` (IRR = ${Math.exp(trajectories[selectedPerson].personSlope).toFixed(2)})`}
+                    </div>
+                  )}
+                </div>
+
+                {/* Model equation */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">Current Model</h3>
+                  <div className="font-mono text-sm bg-slate-100 p-3 rounded">
+                    <div className="text-slate-700">
+                      {outcomeType === "binary" ? "logit(P" : "log(μ"}
+                      <sub>it</sub>{outcomeType === "binary" ? ")" : ")"} ={" "}
+                      <span className="text-emerald-600">{interceptMean.toFixed(2)}</span> +{" "}
+                      <span className="text-emerald-600">{slopeMean.toFixed(2)}</span>(Time) +{" "}
+                      <span className="text-blue-600">u<sub>0i</sub></span> +{" "}
+                      <span className="text-blue-600">u<sub>1i</sub></span>(Time)
+                    </div>
+                    <div className="mt-2 text-xs text-slate-500">
+                      <span className="text-emerald-600">■</span> Fixed effects ({linkLabel}) |{" "}
+                      <span className="text-blue-600">■</span> Random effects (SD: {interceptSD.toFixed(2)}, {slopeSD.toFixed(2)}; ρ={correlation.toFixed(1)}) |{" "}
+                      Family: {outcomeType === "binary" ? "Bernoulli" : "Poisson/NB"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="mt-4 text-xs text-slate-500 bg-slate-100 p-3 rounded">
+              <strong>Tips:</strong>{" "}
+              Toggle "Link scale" to see trajectories on the log-odds or log scale — this is where the linear model lives.
+              Switch between Binary and Count to see how the link function shapes trajectories differently.
+              Set Slope SD = 0 to see what happens when everyone changes at the same rate.
+              Hover over trajectories to see individual parameters.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<GLMMExplorer />);
+  </script>
+</body>
+</html>

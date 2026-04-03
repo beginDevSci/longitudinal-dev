@@ -108,10 +108,9 @@ library(tidyverse)   # For data manipulation & visualization
 library(gtsummary)   # For generating publication-quality summary tables
 library(rstatix)     # Provides tidy-format statistical tests
 library(lme4)        # Linear mixed-effects models (LMMs)
-library(sjPlot)      # Visualization of mixed models
-library(kableExtra)  # Formatting & styling in HTML/Markdown reports
 library(performance) # Useful functions for model diagnostics & comparisons
-library(ggeffects)   # Adjusted regression predictions
+library(broom.mixed) # Tidy summaries of mixed models
+library(gt)          # Presentation-ready display tables
 
 ### Load harmonized ABCD data required for this analysis
 requested_vars <- c(
@@ -175,6 +174,10 @@ df_long <- df_long %>%
     family_id = ab_g_stc__design_id__fam,
     cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
   ) %>%
+  mutate(
+    site = as.character(site),
+    family_id = as.character(family_id)
+  ) %>%
   group_by(participant_id) %>%
   filter(sum(!is.na(cognition)) >= 2) %>%
   ungroup() %>%
@@ -228,33 +231,43 @@ model <- lmerTest::lmer(
   data = df_long
 )
 
-# Generate summary table for the LMM model
-model_summary <- gtsummary::tbl_regression(model,
-  digits = 3,
-  intercept = TRUE
-) %>%
-  gtsummary::as_gt()
+# Generate summary table for the LMM fixed effects
+model_summary <- broom.mixed::tidy(model, effects = "fixed", conf.int = TRUE) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  gt() %>%
+  tab_header(title = "LMM Fixed Effects: Cognition ~ Time + Parent Education") %>%
+  fmt_number(columns = c(estimate, std.error, statistic), decimals = 3) %>%
+  fmt_number(columns = p.value, decimals = 4) %>%
+  cols_label(
+    term = "Parameter",
+    estimate = "Estimate",
+    std.error = "SE",
+    statistic = "t",
+    p.value = "p-value"
+  )
 
 # Display model summary
 model_summary
 
 # Save the gt table
-gt::gtsave(
-  data = model_summary,
-  filename = "model_summary_table.html",
-  inline_css = FALSE
-)
+gt::gtsave(model_summary, filename = "model_summary_table.html")
 
-# Generate comprehensive diagnostics with sjPlot
-sjPlot::tab_model(model,
-  show.se = TRUE, show.df = FALSE, show.ci = FALSE,
-  digits = 3,
-  pred.labels = c("Intercept", "Time", "Parent Education"),
-  dv.labels = c("LMM Model (lme4)"),
-  string.se = "SE",
-  string.p = "P-Value",
-  file = "lmm_model_results.html"
-)
+# Generate variance components table for random effects
+vc <- as.data.frame(VarCorr(model))
+random_table <- vc %>%
+  select(grp, var1, var2, vcov, sdcor) %>%
+  gt() %>%
+  tab_header(title = "LMM Random Effects: Variance Components") %>%
+  fmt_number(columns = c(vcov, sdcor), decimals = 3) %>%
+  cols_label(
+    grp = "Group",
+    var1 = "Parameter 1",
+    var2 = "Parameter 2",
+    vcov = "Variance/Covariance",
+    sdcor = "Std. Dev./Corr."
+  )
+
+gt::gtsave(random_table, filename = "lmm_model_results.html")
 ```
 
 ## Test Education × Time Interaction {.code}
@@ -316,10 +329,27 @@ The **random effects** (see Model Summary Output-2) reveal substantial variabili
 
 ```r
 # Get predicted neurocognition scores by parental education
-preds_edu <- ggpredict(model, terms = "parent_education")  # Correct function
+# Use predict() with a grid of education levels at mean time
+edu_levels <- sort(unique(df_long$parent_education))
+newdata <- data.frame(
+  parent_education = edu_levels,
+  time = mean(df_long$time, na.rm = TRUE)
+)
+newdata$predicted <- predict(model, newdata = newdata, re.form = NA)
+
+# Compute approximate SEs using fixed-effects variance-covariance matrix
+# Only include fixed-effect terms (site is a grouping variable, not a predictor)
+X <- model.matrix(~ time + parent_education, data = newdata)
+vcov_mat <- as.matrix(vcov(model))
+shared_cols <- intersect(colnames(X), colnames(vcov_mat))
+se_pred <- sqrt(diag(X[, shared_cols, drop = FALSE] %*%
+                      vcov_mat[shared_cols, shared_cols] %*%
+                      t(X[, shared_cols, drop = FALSE])))
+newdata$conf.low <- newdata$predicted - 1.96 * se_pred
+newdata$conf.high <- newdata$predicted + 1.96 * se_pred
 
 # Plot
-visualization <- ggplot(preds_edu, aes(x = x, y = predicted)) +
+visualization <- ggplot(newdata, aes(x = parent_education, y = predicted)) +
   geom_point(size = 3, color = "darkred") +
   geom_line(group = 1, color = "darkred") +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +

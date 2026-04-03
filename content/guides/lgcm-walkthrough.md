@@ -3,7 +3,7 @@ title: "LGCM Walkthrough: Worked Example"
 slug: "lgcm-walkthrough"
 description: "Step-by-step LGCM analysis from setup to interpretation using simulated data in R."
 category: "growth-models"
-tags: ["LGCM", "walkthrough", "lavaan", "R"]
+tags: ["LGCM", "worked-example", "R", "simulation"]
 r_packages: ["lavaan", "tidyverse", "MASS"]
 guide_type: "tutorial"
 parent_method: "lgcm"

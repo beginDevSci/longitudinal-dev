@@ -12,6 +12,7 @@ featured:
   - lgcm-basic                # Introduces growth modeling paradigm
   - gee                       # Alternative to mixed models, different assumptions
   - glmm                      # Extends LMM to non-continuous outcomes
+  - lcsm-basic                # Latent change score modeling
   - residualized-change-score # Simple change-score approach
 
 # Workflows: Problem-first collections organized by use case
@@ -20,7 +21,9 @@ workflows:
     label: "Time-Varying Effects"
     tutorials:
       - lmm-time-invariant-covariates
+      - lmm-time-varying-covariates
       - lgcm-time-invariant-covariates
+      - lgcm-tic-openmx
       - gee-time-varying-covariate
 
   complex_designs:
@@ -29,12 +32,18 @@ workflows:
       - lgcm-multiple-groups
       - lgcm-nesting
       - mlgcm
+      - mlgcm-openmx
 
   growth_and_change:
     label: "Growth & Change"
     tutorials:
       - lgcm-basic
+      - lgcm-basic-openmx
+      - lcsm-basic
+      - lcsm-basic-openmx
+      - lcsm-bivariate
       - mlgcm
+      - mlgcm-openmx
       - difference-score_paired-ttest
       - difference-score_simple-regression
 
@@ -42,8 +51,16 @@ workflows:
     label: "Non-Continuous Outcomes"
     tutorials:
       - glmm
+      - glmm-binary
+      - glmm-count
       - glmm-interactions
       - gee
+      - gee-count
       - gee-time-varying-covariate
+
+  neuroimaging:
+    label: "Neuroimaging"
+    tutorials:
+      - blmm-neuroimaging
 
 # Note: recently_updated is computed automatically from updated_at dates

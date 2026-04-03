@@ -32,16 +32,18 @@ pnpm-lock.yaml
 # Generated code (build.rs output)
 /src/generated/
 
-# Environment
+# Environment (local paths, credentials, etc.)
 .env
 .env.local
 .env.*.local
+.envrc
 
 # OS
 .DS_Store
 Thumbs.db
 
 # Logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -78,5 +80,5 @@ OPTION_A_PLAN*.md
 # Note: /docs/ is NOT ignored - it's used for GitHub Pages deployment
 
 # Generated JSON from markdown (Stage 5 validation)
-# Auto-generated with random IDs and timestamps - ignore to reduce diff noise
-content/posts/*.post.json
+# NOTE: These are committed to ensure CI builds work (build.rs embeds them)
+# content/posts/*.post.json
