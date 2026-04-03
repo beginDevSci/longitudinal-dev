@@ -174,6 +174,10 @@ df_long <- df_long %>%
     family_id = ab_g_stc__design_id__fam,
     cognition = nc_y_nihtb__comp__cryst__fullcorr_tscore
   ) %>%
+  mutate(
+    site = as.character(site),
+    family_id = as.character(family_id)
+  ) %>%
   group_by(participant_id) %>%
   filter(sum(!is.na(cognition)) >= 2) %>%
   ungroup() %>%
@@ -329,15 +333,14 @@ The **random effects** (see Model Summary Output-2) reveal substantial variabili
 edu_levels <- sort(unique(df_long$parent_education))
 newdata <- data.frame(
   parent_education = edu_levels,
-  time = mean(df_long$time, na.rm = TRUE),
-  site = levels(df_long$site)[1]
+  time = mean(df_long$time, na.rm = TRUE)
 )
 newdata$predicted <- predict(model, newdata = newdata, re.form = NA)
 
 # Compute approximate SEs using fixed-effects variance-covariance matrix
-X <- model.matrix(~ time + parent_education + site, data = newdata)
+# Only include fixed-effect terms (site is a grouping variable, not a predictor)
+X <- model.matrix(~ time + parent_education, data = newdata)
 vcov_mat <- as.matrix(vcov(model))
-# Align columns in case of factor level mismatches
 shared_cols <- intersect(colnames(X), colnames(vcov_mat))
 se_pred <- sqrt(diag(X[, shared_cols, drop = FALSE] %*%
                       vcov_mat[shared_cols, shared_cols] %*%
