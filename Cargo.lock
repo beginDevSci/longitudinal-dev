@@ -2027,7 +2027,7 @@ dependencies = [
  "longitudinal_parser",
  "longitudinal_writer",
  "once_cell",
- "pulldown-cmark 0.10.3",
+ "pulldown-cmark",
  "regex",
  "serde",
  "serde-wasm-bindgen",
@@ -2054,7 +2054,7 @@ dependencies = [
  "clap",
  "katex",
  "predicates",
- "pulldown-cmark 0.11.3",
+ "pulldown-cmark",
  "regex",
  "serde",
  "serde_json",
@@ -2610,19 +2610,6 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.10.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76979bea66e7875e7509c4ec5300112b316af87fa7a252ca91c448b32dfe3993"
-dependencies = [
- "bitflags 2.10.0",
- "getopts",
- "memchr",
- "pulldown-cmark-escape 0.10.1",
- "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark"
 version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "679341d22c78c6c649893cbd6c3278dcbe9fc4faa62fea3a9296ae2b50c14625"
@@ -2630,15 +2617,9 @@ dependencies = [
  "bitflags 2.10.0",
  "getopts",
  "memchr",
- "pulldown-cmark-escape 0.11.0",
+ "pulldown-cmark-escape",
  "unicase",
 ]
-
-[[package]]
-name = "pulldown-cmark-escape"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd348ff538bc9caeda7ee8cad2d1d48236a1f443c1fa3913c6a02fe0043b1dd3"
 
 [[package]]
 name = "pulldown-cmark-escape"
