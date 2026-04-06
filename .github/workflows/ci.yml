@@ -21,7 +21,7 @@ jobs:
           target: wasm32-unknown-unknown
 
       - name: Cache cargo registry
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry/index
@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       - name: Cache cargo binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cargo/bin
           key: ${{ runner.os }}-cargo-bin-wasm-bindgen-0.2.104
