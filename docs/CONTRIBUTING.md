@@ -89,22 +89,17 @@ The site renders the generated JSON in `content/posts/`, not the Markdown, so a 
 
 ### Previewing Locally
 
-Build the whole site into `dist/` and serve it at http://localhost:8000:
+Build the site into `dist/` and serve it at http://localhost:8000:
 
 ```bash
 make serve
 ```
 
-Press Ctrl+C to stop the server. `make serve` rebuilds the site every time it starts.
+Press Ctrl+C to stop the server. `make serve` rebuilds the site every time it starts. To build without serving, run `make ssg`; `cd dist && python3 -m http.server 8000` then serves the result.
 
-For a faster build that skips the WebGPU brain viewer:
+`make ssg` and `make serve` leave the WebGPU brain viewer out of the WASM bundle that every page loads; no page uses the viewer at the moment. `make ssg-minimal` is an alias for `make ssg`, kept so existing instructions still work. To include the viewer, use `make ssg-viewer` or `make serve-viewer`. `make watch` (cargo-leptos) still includes the viewer, because the cargo-leptos settings in `Cargo.toml` turn it on.
 
-```bash
-make ssg-minimal
-cd dist && python3 -m http.server 8000
-```
-
-Both builds use base path `/`, so links behave as they do at the site root. Neither clears `dist/`, so after renaming or removing a page, run `rm -rf dist` before building; otherwise the old page stays in the preview and can hide a broken link.
+The `ssg` and `serve` targets, with or without the viewer, use base path `/`, so links behave as they do at the site root. None of them clears `dist/`, so after renaming or removing a page, run `rm -rf dist` before building; otherwise the old page stays in the preview and can hide a broken link.
 
 #### Refreshing After a Guide Edit
 
@@ -114,7 +109,7 @@ The site generator reads `content/guides/*.md` and `content/tutorial_curations.y
 ./target/release/longitudinal_dev --outdir dist
 ```
 
-This takes a few seconds; reload the page to see the change. Leave `SITE_BASE_PATH` unset so the base path stays `/`. Tutorial JSON, Toolkit YAML, Rust code, and CSS are compiled into the build, so rerun `make serve` or `make ssg-minimal` after changing those.
+This takes a few seconds; reload the page to see the change. Leave `SITE_BASE_PATH` unset so the base path stays `/`. Tutorial JSON, Toolkit YAML, Rust code, and CSS are compiled into the build, so rerun `make serve` or `make ssg` after changing those.
 
 ### Branches and Pull Requests
 
@@ -136,7 +131,7 @@ As configured in this repository:
 
 - `.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch. It builds with `SITE_BASE_PATH=/longitudinal-dev/` and deploys the result to GitHub Pages. It doesn't wait for CI.
 - `scripts/build/cloudflare_build.sh` is a build script for a Cloudflare Pages environment. It builds with base path `/` unless `SITE_BASE_PATH` is set.
-- `make deploy` runs `scripts/deploy/deploy_github_pages.sh`, which is written to build with `/longitudinal-dev/` and push the result to a `gh-pages` branch. **Don't run it:** after switching branches it deletes every top-level entry in the working copy except `.git`, including `dist/` and Git-ignored files such as `target/` and `.envrc`, and then fails.
+- `make deploy` runs `scripts/deploy/deploy_github_pages.sh`, which is disabled: it prints a message and exits before running any Git or file commands. The steps below that guard are written to build with `/longitudinal-dev/` and push the result to a `gh-pages` branch, but after switching branches they delete every top-level entry in the working copy except `.git`, including `dist/` and Git-ignored files such as `target/` and `.envrc`, and then fail. Keep the guard until the publishing workflow is confirmed.
 
 Which of these serves https://longitudinal.dev hasn't been confirmed yet.
 
@@ -181,7 +176,7 @@ Bad: "fix stuff"
 
 Before submitting a PR:
 
-1. **Build successfully**: `make ssg` (or `make ssg-minimal`) should complete without errors. [TESTING.md](TESTING.md) describes the preflight script, `scripts/dev/check.sh`
+1. **Build successfully**: `make ssg` should complete without errors. [TESTING.md](TESTING.md) describes the preflight script, `scripts/dev/check.sh`
 2. **Check links**: Verify all internal and external links work
 3. **Test locally**: Browse the generated site at `http://localhost:8000`
 4. **Verify examples**: Run any code examples to ensure they work
