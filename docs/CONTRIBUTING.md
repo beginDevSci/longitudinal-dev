@@ -123,18 +123,24 @@ git checkout -b feature/my-change
 git push origin feature/my-change
 ```
 
-Then open a pull request from your branch to `main`, describing what changed and why. CI (`.github/workflows/ci.yml`) runs on pull requests to `main`: it builds the site, runs the tests and clippy, and audits dependencies.
+Then open a pull request from your branch to `main`, describing what changed and why. CI (`.github/workflows/ci.yml`) runs on pull requests to `main`: it builds the site, checks that it still compiles with the brain viewer, runs the tests and clippy, and audits dependencies. `main` only accepts changes through pull requests, and the CI check has to pass before merging.
 
 ### Publishing
 
-https://longitudinal.dev is served by a Cloudflare Pages project connected to this repository:
+https://longitudinal.dev is served by a Cloudflare Pages project connected to this repository. It publishes the `production` branch, not `main`:
 
-- **Every push to `main` goes live.** Cloudflare builds it with `scripts/build/cloudflare_build.sh`, which runs `make ssg` with base path `/`, and publishes the result to longitudinal.dev. Cloudflare doesn't wait for CI, so make sure CI passes on the pull request before merging.
-- **Every other pushed branch gets a preview build** at a public `*.longitudinal-dev.pages.dev` address, and Cloudflare comments the address on the branch's pull request. Use it to check a change in the production build before merging.
+- **Merging to `main` doesn't publish.** Cloudflare builds `main` as a preview at https://main.longitudinal-dev.pages.dev, so merged changes can be checked in the production build before they go live.
+- **To publish, fast-forward `production` to `main`:**
+  ```bash
+  git fetch origin
+  git push origin origin/main:production
+  ```
+  Cloudflare then builds `production` with `scripts/build/cloudflare_build.sh`, which runs `make ssg` with base path `/`, and publishes the result to longitudinal.dev. `production` doesn't accept force pushes or deletion. To undo a release, roll back to an earlier production deployment in the Cloudflare dashboard, then revert the change on `main` before publishing again.
+- **Every other pushed branch gets a preview build** at a public `*.longitudinal-dev.pages.dev` address, and Cloudflare comments the address on the branch's pull request.
 
 Two other publishing paths exist in this repository, and neither changes what visitors see:
 
-- `.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch. It builds with `SITE_BASE_PATH=/longitudinal-dev/` and deploys the result to GitHub Pages. Visitors don't reach that copy: GitHub Pages only redirects `www.longitudinal.dev` to `longitudinal.dev`.
+- `.github/workflows/deploy.yml` builds with `SITE_BASE_PATH=/longitudinal-dev/` and deploys the result to GitHub Pages. It runs only when started by hand from the Actions tab. Visitors don't reach that copy: GitHub Pages only redirects `www.longitudinal.dev` to `longitudinal.dev`.
 - `make deploy` runs `scripts/deploy/deploy_github_pages.sh`, which is disabled: it prints a message and exits before running any Git or file commands. The steps below that guard were written to build with `/longitudinal-dev/` and push the result to a `gh-pages` branch, but after switching branches they delete every top-level entry in the working copy except `.git`, including `dist/` and Git-ignored files such as `target/` and `.envrc`, and then fail. Leave the guard in place.
 
 ### Branch Naming Conventions
