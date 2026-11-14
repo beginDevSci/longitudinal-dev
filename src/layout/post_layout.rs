@@ -289,7 +289,7 @@ pub fn PostLayout(
                 <TableOfContents
                     toc_items=toc_items
                     download_data=code_downloads
-                    repo_url="https://github.com/swhawes/leptos-test".to_string()
+                    repo_url=crate::config::REPO_URL.to_string()
                     slug=current_slug.clone()
                 />
             </div>

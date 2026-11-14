@@ -6,3 +6,6 @@
 /// Set to false to quickly disable the suggestion flow without removing code.
 /// This gates both the EditPageButton visibility and the EditorModalIsland functionality.
 pub const ENABLE_SUGGESTIONS: bool = true;
+
+/// Public source repository, used for "Edit on GitHub" links.
+pub const REPO_URL: &str = "https://github.com/beginDevSci/longitudinal-dev";
