@@ -77,6 +77,8 @@ cargo build --target wasm32-unknown-unknown -p brain_viewer_facade --features we
 cargo test -p io_formats
 ```
 
+The standard site builds (`make ssg`, `make serve`) leave the viewer out of the site's shared WASM bundle. To compile it in, use `make ssg-viewer`, or `make serve-viewer` to build and preview at http://localhost:8000.
+
 ### Usage
 
 The viewer is embedded in tutorials via the `BrainViewerIsland` component from `brain_viewer_facade`. See `crates/brain_viewer_facade/src/lib.rs` for usage examples.
