@@ -90,8 +90,9 @@ hook-install:
 	@echo "✅ Pre-commit hook installed"
 
 # Generate static site. The WebGPU brain viewer is opt-in (see ssg-viewer):
-# it adds ~0.7 MB (gzip) to the WASM bundle every page loads. xtask turns the
-# viewer on whenever WEBGPU_VIEWER is set, to any value, so unset it here.
+# it adds ~1.4 MB (~0.5 MB gzipped) to the WASM bundle every page loads. xtask
+# turns the viewer on whenever WEBGPU_VIEWER is set, to any value, so unset it
+# here.
 ssg:
 	@env -u WEBGPU_VIEWER cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
 
