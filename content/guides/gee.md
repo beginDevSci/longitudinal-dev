@@ -101,7 +101,7 @@ Unlike LMM and GLMM (which handle MAR), standard GEE assumes **Missing Completel
 
 ## Key Components
 
-GEE has two distinctive building blocks beyond the mean model itself. Instead of specifying a full probability model (as GLMM does), GEE finds parameter values that make weighted residuals sum to zero across all participants — where the weights come from a **working correlation structure** and inference is protected by the **sandwich estimator**. See [Mathematical Foundations](#mathematical-foundations) for formal notation.
+GEE has two distinctive building blocks beyond the mean model itself. Instead of specifying a full probability model (as GLMM does), GEE finds parameter values that make weighted residuals sum to zero across all participants — where the weights come from a **working correlation structure** and inference is protected by the **sandwich estimator**. See [Mathematical Foundations](#the-gee-framework) for formal notation.
 
 ### Working Correlation Structures
 
@@ -349,7 +349,7 @@ The choice between GEE and GLMM isn't about which is "better" — it's about whi
 
 > [!info] **Scope**
 >
-> This overview covers standard GEE for binary and count outcomes with a single clustering variable (persons). Not covered: weighted GEE for MAR dropout, ordinal GEE (see [Reference](/guides/gee-reference#multinomial--ordinal) for `ordgee` syntax), multinomial GEE ([multgee](https://cran.r-project.org/package=multgee)), penalized GEE, doubly robust estimators, and alternating logistic regressions.
+> This overview covers standard GEE for binary and count outcomes with a single clustering variable (persons). Not covered: weighted GEE for MAR dropout, ordinal GEE (see [Reference](/guides/gee-reference/#multinomial-ordinal) for `ordgee` syntax), multinomial GEE ([multgee](https://cran.r-project.org/package=multgee)), penalized GEE, doubly robust estimators, and alternating logistic regressions.
 
 ---
 

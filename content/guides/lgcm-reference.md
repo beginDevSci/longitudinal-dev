@@ -13,7 +13,7 @@ parent_method: "lgcm"
 
 Fast lookup for syntax, fit indices, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lgcm-walkthrough). For conceptual background, see the [Overview](/guides/lgcm).
 
-**Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation--missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors--fixes) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#lavaan-syntax) · [Estimation](#estimation-missing-data) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Fit Indices](#fit-indices) · [Errors & Fixes](#common-errors-fixes) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -416,14 +416,14 @@ Open-access resources for learning and applying LGCM.
 
 | Tutorial | Focus |
 |----------|-------|
-| [LGCM Basic](/tutorials/lgcm-basic) | Linear growth with lavaan |
-| [LGCM Basic (OpenMx)](/tutorials/lgcm-basic-openmx) | Linear growth with OpenMx |
-| [LGCM Multiple Groups](/tutorials/lgcm-multiple-groups) | Group comparisons |
-| [LGCM Time-Invariant Covariates](/tutorials/lgcm-time-invariant-covariates) | Predictors of growth |
-| [LGCM Time-Invariant Covariates (OpenMx)](/tutorials/lgcm-tic-openmx) | Predictors of growth with OpenMx |
-| [LGCM Nesting](/tutorials/lgcm-nesting) | Nested/clustered data |
-| [MLGCM](/tutorials/mlgcm) | Multivariate growth |
-| [MLGCM (OpenMx)](/tutorials/mlgcm-openmx) | Multivariate growth with OpenMx |
+| [LGCM Basic](/abcd/lgcm/lgcm-basic/) | Linear growth with lavaan |
+| [LGCM Basic (OpenMx)](/abcd/lgcm/lgcm-basic-openmx/) | Linear growth with OpenMx |
+| [LGCM Multiple Groups](/abcd/lgcm/lgcm-multiple-groups/) | Group comparisons |
+| [LGCM Time-Invariant Covariates](/abcd/lgcm/lgcm-time-invariant-covariates/) | Predictors of growth |
+| [LGCM Time-Invariant Covariates (OpenMx)](/abcd/lgcm/lgcm-tic-openmx/) | Predictors of growth with OpenMx |
+| [LGCM Nesting](/abcd/lgcm/lgcm-nesting/) | Nested/clustered data |
+| [MLGCM](/abcd/lgcm/mlgcm/) | Multivariate growth |
+| [MLGCM (OpenMx)](/abcd/lgcm/mlgcm-openmx/) | Multivariate growth with OpenMx |
 
 ---
 
