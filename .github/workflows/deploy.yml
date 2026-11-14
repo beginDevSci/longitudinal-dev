@@ -1,9 +1,10 @@
 name: Deploy to GitHub Pages
 
+# Manual only. longitudinal.dev is served by Cloudflare Pages from the
+# production branch; visitors never reach this GitHub Pages copy, which only
+# redirects www.longitudinal.dev to longitudinal.dev.
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
