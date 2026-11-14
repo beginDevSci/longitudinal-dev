@@ -291,6 +291,7 @@ pub fn PostLayout(
                     download_data=code_downloads
                     repo_url=crate::config::REPO_URL.to_string()
                     slug=current_slug.clone()
+                    icon_base=base_path::join("images/ui/")
                 />
             </div>
         </div>
