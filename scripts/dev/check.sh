@@ -117,6 +117,6 @@ else
     done
     echo ""
     echo -e "${YELLOW}Fix the issues above before committing.${NC}"
-    echo -e "See ${BLUE}TESTING.md${NC} for detailed guidance."
+    echo -e "See ${BLUE}docs/TESTING.md${NC} for detailed guidance."
     exit 1
 fi
