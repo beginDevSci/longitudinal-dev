@@ -391,20 +391,18 @@ fn check_prefers_reduced_motion(window: &web_sys::Window) -> bool {
         .unwrap_or(false)
 }
 
-/// Expand any parent <details class="tutorial-module"> elements.
+/// Expand every <details> ancestor of the anchor target.
+///
+/// Covers both `tutorial-module` sections and plain <details> blocks such as
+/// "Mathematical Foundations": headings inside a closed block can't be
+/// scrolled to, and the click handler prevents the browser's own expansion.
 #[cfg(target_arch = "wasm32")]
 fn expand_parent_modules(element: &web_sys::Element) {
     let mut current = element.parent_element();
 
     while let Some(parent) = current {
-        // Check if this is a tutorial-module details element
-        if parent.tag_name().to_lowercase() == "details" {
-            if let Some(class_list) = parent.get_attribute("class") {
-                if class_list.contains("tutorial-module") {
-                    // Expand it by setting the open attribute
-                    let _ = parent.set_attribute("open", "");
-                }
-            }
+        if parent.tag_name().eq_ignore_ascii_case("details") {
+            let _ = parent.set_attribute("open", "");
         }
 
         current = parent.parent_element();

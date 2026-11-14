@@ -11,7 +11,11 @@ use leptos::prelude::*;
 pub fn EditPageButton(
     slug: String,
 ) -> impl IntoView {
-    let github_edit_url = format!("https://github.com/swhawes/leptos-test/edit/main/content/tutorials/{}.md", slug);
+    let github_edit_url = format!(
+        "{}/edit/main/content/tutorials/{}.md",
+        crate::config::REPO_URL,
+        slug
+    );
 
     // Handler to open the editor modal via custom event
     let on_click = move |_| {

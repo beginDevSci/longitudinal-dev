@@ -13,7 +13,7 @@ parent_method: "glmm"
 
 Fast lookup for syntax, distributions, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/glmm-walkthrough). For conceptual background, see the [Overview](/guides/glmm).
 
-**Jump to:** [Syntax](#syntax) · [Distributions](#distributions--link-functions) · [Estimation](#estimation) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics-checklist) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#syntax) · [Distributions](#distributions-link-functions) · [Estimation](#estimation) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics-checklist) · [Parameters](#parameters) · [Errors & Fixes](#common-errors-fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -508,10 +508,10 @@ fit <- glmer(y ~ time + (1 | site/id), data = df, family = binomial)
 
 | Tutorial | Focus |
 |----------|-------|
-| [GLMM Basic](/tutorials/glmm) | Introduction to GLMM with glmmTMB |
-| [GLMM Binary Outcomes](/tutorials/glmm-binary) | Logistic random effects model |
-| [GLMM Count Outcomes](/tutorials/glmm-count) | Negative binomial mixed model |
-| [GLMM Interactions](/tutorials/glmm-interactions) | Cross-level and time interactions |
+| [GLMM Basic](/abcd/glmm/glmm/) | Introduction to GLMM with glmmTMB |
+| [GLMM Binary Outcomes](/abcd/glmm/glmm-binary/) | Logistic random effects model |
+| [GLMM Count Outcomes](/abcd/glmm/glmm-count/) | Negative binomial mixed model |
+| [GLMM Interactions](/abcd/glmm/glmm-interactions/) | Cross-level and time interactions |
 
 ---
 

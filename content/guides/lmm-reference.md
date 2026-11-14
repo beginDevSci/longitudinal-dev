@@ -13,7 +13,7 @@ parent_method: "lmm"
 
 Fast lookup for syntax, diagnostics, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/lmm-walkthrough). For conceptual background, see the [Overview](/guides/lmm).
 
-**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#lme4-syntax) · [ML vs. REML](#estimation-ml-vs-reml) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Errors & Fixes](#common-errors-fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -574,10 +574,10 @@ mod <- brm(y ~ time + (1 + time | id),
 
 | Tutorial | Focus |
 |----------|-------|
-| [LMM Random Intercept](/tutorials/lmm-random-intercept) | Basic random intercept model |
-| [LMM Random Slopes](/tutorials/lmm-random-slopes) | Adding random slopes |
-| [LMM Time-Invariant Covariates](/tutorials/lmm-time-invariant-covariates) | Between-person predictors |
-| [LMM Time-Varying Covariates](/tutorials/lmm-time-varying-covariates) | Within-person predictors |
+| [LMM Random Intercept](/abcd/lmm/lmm-random-intercept/) | Basic random intercept model |
+| [LMM Random Slopes](/abcd/lmm/lmm-random-slopes/) | Adding random slopes |
+| [LMM Time-Invariant Covariates](/abcd/lmm/lmm-time-invariant-covariates/) | Between-person predictors |
+| [LMM Time-Varying Covariates](/abcd/lmm/lmm-time-varying-covariates/) | Within-person predictors |
 
 ---
 

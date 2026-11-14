@@ -40,6 +40,9 @@ pub fn TableOfContents(
     #[prop(optional)] download_data: Option<CodeDownloadData>,
     #[prop(optional)] repo_url: Option<String>,
     slug: String,
+    /// URL of the UI icon directory, e.g. "/images/ui/". Computed during SSG
+    /// because SITE_BASE_PATH is not visible to the hydrated WASM.
+    icon_base: String,
 ) -> impl IntoView {
     let download_data = download_data.unwrap_or_default();
     let repo_url = repo_url.unwrap_or_default();
@@ -168,6 +171,7 @@ pub fn TableOfContents(
                                                         filename="code.md".to_string()
                                                         label="Markdown".to_string()
                                                         icon_type="markdown".to_string()
+                                                        icon_base=icon_base.clone()
                                                     />
 
                                                     // R download button
@@ -181,6 +185,7 @@ pub fn TableOfContents(
                                                                     filename="code.R".to_string()
                                                                     label="R".to_string()
                                                                     icon_type="r".to_string()
+                                                                    icon_base=icon_base.clone()
                                                                 />
                                                             }
                                                         })}
@@ -196,6 +201,7 @@ pub fn TableOfContents(
                                                                     filename="code.py".to_string()
                                                                     label="Python".to_string()
                                                                     icon_type="python".to_string()
+                                                                    icon_base=icon_base.clone()
                                                                 />
                                                             }
                                                         })}
@@ -257,6 +263,8 @@ pub fn DownloadButton(
     filename: String,
     label: String,
     icon_type: String,
+    /// URL of the UI icon directory, e.g. "/images/ui/".
+    icon_base: String,
 ) -> impl IntoView {
     let download_action = move |_| {
         #[cfg(target_arch = "wasm32")]
@@ -314,14 +322,14 @@ pub fn DownloadButton(
         >
             {match icon_type.as_str() {
                 "markdown" => {
-                    view! { <img src="images/ui/markdown-logo.svg" alt="Markdown" class="download-btn-icon download-btn-icon--invert"/> }
+                    view! { <img src=format!("{icon_base}markdown-logo.svg") alt="Markdown" class="download-btn-icon download-btn-icon--invert"/> }
                         .into_any()
                 }
                 "r" => {
-                    view! { <img src="images/ui/r-logo.svg" alt="R" class="download-btn-icon"/> }.into_any()
+                    view! { <img src=format!("{icon_base}r-logo.svg") alt="R" class="download-btn-icon"/> }.into_any()
                 }
                 "python" => {
-                    view! { <img src="images/ui/python-logo.svg" alt="Python" class="download-btn-icon"/> }
+                    view! { <img src=format!("{icon_base}python-logo.svg") alt="Python" class="download-btn-icon"/> }
                         .into_any()
                 }
                 _ => {
@@ -335,9 +343,10 @@ pub fn DownloadButton(
 
 /// TOC link component with JavaScript navigation (interactive island)
 ///
-/// Handles anchor navigation properly when <base href="/"> is set
-/// by using JavaScript scrollIntoView instead of relying on browser's
-/// default anchor behavior.
+/// Scrolls with scrollIntoView and records the section with replaceState,
+/// so clicking through the TOC doesn't add a history entry per section.
+/// The relative "#id" URL resolves against the current page because the
+/// site renders no <base> tag (see SiteLayout).
 #[island]
 pub fn TocLink(target_id: String, title: String, padding_left: i32) -> impl IntoView {
     // Clone target_id for use in both the closure and the view

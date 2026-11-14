@@ -13,7 +13,7 @@ parent_method: "gee"
 
 Fast lookup for syntax, correlation structures, and troubleshooting. For step-by-step learning, see the [Walkthrough](/guides/gee-walkthrough). For conceptual background, see the [Overview](/guides/gee).
 
-**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors--fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
+**Jump to:** [Syntax](#syntax) · [Correlation Structures](#correlation-structures) · [Extract Output](#extract-output) · [Model Comparison](#model-comparison-qic) · [Robust SEs](#robust-vs-naive-ses) · [Diagnostics](#diagnostics) · [Parameters](#parameters) · [Time Coding](#time-coding) · [Errors & Fixes](#common-errors-fixes) · [Troubleshooting](#troubleshooting) · [Pitfalls](#interpretation-pitfalls) · [Formulas](#quick-formulas) · [Extensions](#advanced-extensions) · [Resources](#resources)
 
 ---
 
@@ -558,9 +558,9 @@ fit <- ordgee(ordered(y) ~ time + treatment, id = id, data = df,
 
 | Tutorial | Focus |
 |----------|-------|
-| [GEE Basic](/tutorials/gee) | Introduction to GEE with geepack |
-| [GEE Count Outcomes](/tutorials/gee-count) | Poisson and NB marginal models |
-| [GEE Time-Varying Covariates](/tutorials/gee-time-varying-covariate) | Within-person predictors |
+| [GEE Basic](/abcd/gee/gee/) | Introduction to GEE with geepack |
+| [GEE Count Outcomes](/abcd/gee/gee-count/) | Poisson and NB marginal models |
+| [GEE Time-Varying Covariates](/abcd/gee/gee-time-varying-covariate/) | Within-person predictors |
 
 ---
 
