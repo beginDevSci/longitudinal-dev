@@ -68,6 +68,14 @@ jobs:
       - name: Build SSG site
         run: make ssg
 
+      # make ssg leaves the WebGPU brain viewer out (it's opt-in through
+      # make ssg-viewer), so check that both halves of the site still compile
+      # with it, using the same features xtask passes.
+      - name: Check the build with the WebGPU brain viewer
+        run: |
+          cargo check --locked --target wasm32-unknown-unknown --lib --no-default-features --features hydrate,webgpu-viewer
+          cargo check --locked --bin longitudinal_dev --features ssr,webgpu-viewer
+
       - name: Test (unit + integration)
         run: cargo test --locked --features ssr
 
