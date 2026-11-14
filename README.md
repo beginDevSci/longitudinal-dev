@@ -33,6 +33,25 @@ Thank you to all contributors and supporters.
 
 ---
 
+## 🗺️ Repository Map
+
+To set up the tools and preview the site locally, see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
+| What | Where |
+|------|-------|
+| Method Guides | [`content/guides/`](content/guides/): one Markdown file per page (overview, `-walkthrough`, `-reference`). The `slug` in the frontmatter sets the URL; `TEMPLATE.md` isn't published. |
+| ABCD tutorials, source | [`content/tutorials/`](content/tutorials/): the Markdown authors edit. |
+| ABCD tutorials, rendered | [`content/posts/`](content/posts/): `*.post.json` generated from that Markdown by the validation pipeline ([`crates/validator`](crates/validator/), [`crates/parser`](crates/parser/)) and compiled into the site by [`build.rs`](build.rs). The site renders this JSON, so editing only the Markdown doesn't change the page. |
+| Tutorial catalog curation | [`content/tutorial_curations.yaml`](content/tutorial_curations.yaml): featured tutorials and workflow groups on the ABCD Analyses page. |
+| Toolkit | [`content/resources.yaml`](content/resources.yaml) and [`content/tools.yaml`](content/tools.yaml), rendered by the Toolkit pages in [`src/pages/`](src/pages/). |
+| Shared layouts | [`src/layout/`](src/layout/): `site_layout.rs` (page shell), `top_nav.rs`, `post_layout.rs` (tutorials), `guide_layout.rs` (guides). Site-wide styles are in [`style/input.css`](style/input.css). |
+| Other pages | [`src/main.rs`](src/main.rs) generates every page and contains the homepage and catalog headers; About and the ABCD overview are in [`src/pages/`](src/pages/). |
+| Static files | [`public/`](public/): images and data, copied into the build unchanged. |
+| Build | [`Makefile`](Makefile) targets run [`src/bin/xtask.rs`](src/bin/xtask.rs), which builds the WASM, CSS, and HTML into `dist/`. |
+| Suggestions API | [`workers/suggestions/`](workers/suggestions/): the Cloudflare Worker behind "Suggest changes". |
+
+---
+
 ## 🧠 Brain Viewer
 
 The repository includes an interactive 3D brain surface viewer for visualizing neuroimaging statistical results. Built with Rust/WebAssembly and WebGPU.
@@ -64,4 +83,4 @@ The viewer is embedded in tutorials via the `BrainViewerIsland` component from `
 
 ---
 
-**For developers and contributors:** Technical documentation, build instructions, and development workflows can be found in the `docs/` directory.
+**For developers and contributors:** Setup, local preview, and the branch workflow are in [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md); testing is covered in [docs/TESTING.md](docs/TESTING.md). Other files in `docs/` are design notes and plans.
