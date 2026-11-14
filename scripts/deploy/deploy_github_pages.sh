@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+
+# Disabled: after switching to gh-pages, the steps below delete every
+# top-level entry in the working copy except .git (including dist/ and
+# Git-ignored files) and then fail. Keep this guard until the production
+# publishing workflow is confirmed.
+echo "Manual deployment is disabled until the production publishing workflow is confirmed" >&2
+exit 1
+
 set -euo pipefail
 
 echo "🚀 Deploying to GitHub Pages..."
