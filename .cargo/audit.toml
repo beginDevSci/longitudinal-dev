@@ -9,4 +9,8 @@
 ignore = [
     "RUSTSEC-2024-0436",  # paste (via leptos)
     "RUSTSEC-2024-0320",  # yaml-rust (via syntect)
+    "RUSTSEC-2025-0141",  # bincode 1 (via syntect)
+    "RUSTSEC-2026-0441",  # pin-utils (via futures-util)
+    "RUSTSEC-2026-0173",  # proc-macro-error2 (via leptos macros)
+    "RUSTSEC-2024-0449",  # unsafe-libyaml (via serde_yaml)
 ]
