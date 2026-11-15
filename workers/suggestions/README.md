@@ -2,6 +2,8 @@
 
 Cloudflare Worker for handling page edit suggestions from the frontend. Validates submissions, implements rate limiting, and creates GitHub issues for each suggestion.
 
+The Worker is deployed by hand with Wrangler, separately from the site. For the full deployment and site-integration steps, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Features
 
 - ✅ **Honeypot spam protection** - Rejects submissions with filled honeypot field

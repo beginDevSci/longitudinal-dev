@@ -1,6 +1,6 @@
-# Step 7: Deployment & Integration Guide
+# Suggestions API: Deployment & Integration Guide
 
-Complete step-by-step guide to deploy the Cloudflare Worker and integrate it with your frontend.
+Complete step-by-step guide to deploy the Cloudflare Worker and integrate it with your frontend. Commands assume you start at the repository root.
 
 ---
 

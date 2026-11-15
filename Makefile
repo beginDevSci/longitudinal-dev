@@ -1,4 +1,4 @@
-.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg ssg-viewer ssg-minimal serve serve-viewer deploy bootstrap watch check-guide-hierarchy stage4 stage4-nix refresh-tutorial generate-placeholders check-r-env check-artifacts
+.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg ssg-viewer ssg-minimal serve serve-viewer bootstrap watch check-guide-hierarchy stage4 stage4-nix refresh-tutorial generate-placeholders check-r-env check-artifacts
 
 # Default target shows help
 help:
@@ -15,7 +15,6 @@ help:
 	@echo "  make ssg-viewer             - Generate static site with the WebGPU brain viewer"
 	@echo "  make ssg-minimal            - Same as make ssg (kept for existing instructions)"
 	@echo "  make build                  - Build the project (library and binaries)"
-	@echo "  make deploy                 - Build and deploy to GitHub Pages"
 	@echo ""
 	@echo "  VALIDATION:"
 	@echo "  make content                - Build, test, and lint (main workflow)"
@@ -114,10 +113,6 @@ serve-viewer: ssg-viewer
 	@echo "🌐 Serving site at http://localhost:8000"
 	@echo "Press Ctrl+C to stop"
 	@cd dist && python3 -m http.server 8000
-
-# Deploy to GitHub Pages
-deploy:
-	@./scripts/deploy/deploy_github_pages.sh
 
 # Bootstrap: check prerequisites and install tools
 bootstrap:
