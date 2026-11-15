@@ -1,19 +1,20 @@
-.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg serve deploy bootstrap watch check-guide-hierarchy stage4 stage4-nix refresh-tutorial generate-placeholders check-r-env check-artifacts
+.PHONY: content test build clippy validate validate-json validate-tutorials validate-tutorials-force all help hook-install ssg ssg-viewer ssg-minimal serve serve-viewer bootstrap watch check-guide-hierarchy stage4 stage4-nix refresh-tutorial generate-placeholders check-r-env check-artifacts
 
 # Default target shows help
 help:
 	@echo "Available targets:"
 	@echo ""
 	@echo "  DEVELOPMENT:"
-	@echo "  make serve                  - Build and serve site at http://localhost:8000 (with brain viewer)"
+	@echo "  make serve                  - Build and serve site at http://localhost:8000"
+	@echo "  make serve-viewer           - Same, with the WebGPU brain viewer compiled in"
 	@echo "  make watch                  - Run development server with live reload (cargo-leptos)"
 	@echo "  make bootstrap              - Check prerequisites and install tools (first-time setup)"
 	@echo ""
 	@echo "  BUILD:"
-	@echo "  make ssg                    - Generate static site to ./dist (with brain viewer)"
-	@echo "  make ssg-minimal            - Generate static site without brain viewer (faster)"
+	@echo "  make ssg                    - Generate static site to ./dist (brain viewer omitted)"
+	@echo "  make ssg-viewer             - Generate static site with the WebGPU brain viewer"
+	@echo "  make ssg-minimal            - Same as make ssg (kept for existing instructions)"
 	@echo "  make build                  - Build the project (library and binaries)"
-	@echo "  make deploy                 - Build and deploy to GitHub Pages"
 	@echo ""
 	@echo "  VALIDATION:"
 	@echo "  make content                - Build, test, and lint (main workflow)"
@@ -87,23 +88,31 @@ hook-install:
 	@install -m 0755 scripts/pre-commit .git/hooks/pre-commit
 	@echo "✅ Pre-commit hook installed"
 
-# Generate static site
+# Generate static site. The WebGPU brain viewer is opt-in (see ssg-viewer):
+# it adds ~1.4 MB (~0.5 MB gzipped) to the WASM bundle every page loads. xtask
+# turns the viewer on whenever WEBGPU_VIEWER is set, to any value, so unset it
+# here.
 ssg:
+	@env -u WEBGPU_VIEWER cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
+
+# Generate static site with the WebGPU brain viewer compiled in
+ssg-viewer:
 	@WEBGPU_VIEWER=1 cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
 
-# Generate and serve static site (with interactive brain viewer)
+# Same as ssg; kept so existing instructions keep working
+ssg-minimal: ssg
+
+# Generate and serve static site
 serve: ssg
 	@echo "🌐 Serving site at http://localhost:8000"
 	@echo "Press Ctrl+C to stop"
 	@cd dist && python3 -m http.server 8000
 
-# Generate SSG without brain viewer (smaller WASM, faster build)
-ssg-minimal:
-	@cargo run --locked --features ssr --bin xtask --release -- build-ssg --outdir dist
-
-# Deploy to GitHub Pages
-deploy:
-	@./scripts/deploy/deploy_github_pages.sh
+# Generate and serve static site with the WebGPU brain viewer
+serve-viewer: ssg-viewer
+	@echo "🌐 Serving site at http://localhost:8000"
+	@echo "Press Ctrl+C to stop"
+	@cd dist && python3 -m http.server 8000
 
 # Bootstrap: check prerequisites and install tools
 bootstrap:

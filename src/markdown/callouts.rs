@@ -238,13 +238,10 @@ fn try_bold_prefix_style(events: &[Event<'_>]) -> Option<CalloutMatch> {
             (BoldPrefixState::InStrong, Event::Text(text)) => {
                 // Check if this is a callout type label
                 let trimmed = text.trim().trim_end_matches(':');
-                if let Some(ct) = CalloutType::from_bold_marker(trimmed) {
-                    marker_type = Some(ct);
-                    state = BoldPrefixState::FoundMarkerText;
-                } else {
-                    // Not a recognized callout type, abort
-                    return None;
-                }
+                // Not a recognized callout type: abort
+                let ct = CalloutType::from_bold_marker(trimmed)?;
+                marker_type = Some(ct);
+                state = BoldPrefixState::FoundMarkerText;
             }
             (BoldPrefixState::FoundMarkerText, Event::End(TagEnd::Strong)) => {
                 state = BoldPrefixState::AfterStrong;

@@ -2,6 +2,8 @@
 
 Cloudflare Worker for handling page edit suggestions from the frontend. Validates submissions, implements rate limiting, and creates GitHub issues for each suggestion.
 
+The Worker is deployed by hand with Wrangler, separately from the site. For the full deployment and site-integration steps, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Features
 
 - ✅ **Honeypot spam protection** - Rejects submissions with filled honeypot field
@@ -63,7 +65,7 @@ Also verify these settings match your configuration:
 [vars]
 GITHUB_OWNER = "swhawes"  # Your GitHub username/org
 GITHUB_REPO = "leptos-test"  # Your repository name
-ALLOWED_ORIGIN = "https://swhawes.github.io"  # Your site origin
+ALLOWED_ORIGINS = "https://swhawes.github.io"  # Comma-separated list of site origins
 MAX_SIZE_BYTES = 51200  # 50 KB
 RATE_LIMIT_PER_HOUR = 10
 ```
@@ -211,7 +213,7 @@ Origin: https://swhawes.github.io
 2. **Required fields:** `slug`, `page_url`, `edits` must be present and non-empty
 3. **Slug format:** Must match `^[a-z0-9-]+$` (lowercase, numbers, hyphens only)
 4. **Size limit:** Total request body ≤ 50 KB
-5. **Origin:** Must match `ALLOWED_ORIGIN` environment variable
+5. **Origin:** Must be listed in the `ALLOWED_ORIGINS` environment variable
 
 ## GitHub Integration
 
@@ -281,9 +283,9 @@ View metrics in Cloudflare Dashboard:
 
 ### "Origin not allowed" Error
 
-- Verify `ALLOWED_ORIGIN` in `wrangler.toml` matches your site exactly (including https://)
+- Verify `ALLOWED_ORIGINS` in `wrangler.toml` lists your site's origin exactly (including https://)
 - Check that the frontend is sending the correct `Origin` header
-- For local testing, temporarily update `ALLOWED_ORIGIN` to `http://localhost:3000`
+- For local testing, temporarily add `http://localhost:3000` to `ALLOWED_ORIGINS`
 - Origin validation is strict - must be an exact match (case-sensitive)
 
 ### Rate Limiting Behavior

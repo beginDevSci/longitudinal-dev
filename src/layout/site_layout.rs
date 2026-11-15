@@ -23,8 +23,6 @@ pub fn SiteLayout(
     current_path: Option<String>,
     children: Children,
 ) -> impl IntoView {
-    // Always compute base path (defaults to "/" if SITE_BASE_PATH not set)
-    let base = base_path::base_path();
     let base_trimmed = base_path::base_path_trimmed();
     let css_url = base_path::join("pkg/blog.css");
 
@@ -38,8 +36,10 @@ pub fn SiteLayout(
                 </script>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                // Always render base tag for consistent path resolution
-                <base href=base/>
+                // No <base> tag: it resolves fragment links (#id) and
+                // history.pushState("#id") against the site root, so section
+                // links would point at the homepage. Build URLs with
+                // base_path::join instead.
                 // Use base path for stylesheet URL
                 <link rel="stylesheet" href=css_url/>
                 // KaTeX CSS for math rendering (guides use server-side KaTeX)
