@@ -1,8 +1,7 @@
 name: Deploy to GitHub Pages
 
 # Manual only. longitudinal.dev is served by Cloudflare Pages from the
-# production branch; visitors never reach this GitHub Pages copy, which only
-# redirects www.longitudinal.dev to longitudinal.dev.
+# production branch; visitors never reach this GitHub Pages copy.
 on:
   workflow_dispatch:
 

@@ -3,7 +3,6 @@
 ```
 scripts/
 ├─ build/   # helpers that build CSS/SSG or watch WASM artifacts
-├─ deploy/  # scripts that publish builds
 ├─ dev/     # local tooling (bootstrap, preflight checks, etc.)
 └─ pre-commit
 ```
@@ -13,9 +12,6 @@ scripts/
 - `watch_wasm.sh` – Watches for Rust changes and rebuilds the WASM bundle. Set `MODE=release` for production parity.
 
 **Note:** CSS and SSG builds are now handled by `cargo xtask build-ssg` (see `src/bin/xtask.rs`).
-
-## deploy/
-- `deploy_github_pages.sh` – Builds with the correct base path and pushes the site to `gh-pages`.
 
 ## dev/
 - `check.sh` – Main preflight entry point (fmt, clippy, tests, optional SSG build, tutorial validation).
