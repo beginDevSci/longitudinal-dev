@@ -16,7 +16,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: stable
+          # The version comes from rust-toolchain.toml.
           components: rustfmt, clippy
           target: wasm32-unknown-unknown
 
@@ -86,13 +86,8 @@ jobs:
           fi
 
       - name: Security audit
-        run: |
-          # Ignore unmaintained warnings for transitive dependencies we cannot control
-          # RUSTSEC-2024-0436: paste (via leptos) - unmaintained but no security issue
-          # RUSTSEC-2024-0320: yaml-rust (via syntect) - unmaintained but no security issue
-          cargo audit --deny warnings \
-            --ignore RUSTSEC-2024-0436 \
-            --ignore RUSTSEC-2024-0320
+        # Accepted advisories, with reasons, are listed in .cargo/audit.toml.
+        run: cargo audit --deny warnings
 
       - name: Tailwind compliance checks
         run: |

@@ -1,0 +1,12 @@
+# Configuration for cargo-audit, used by CI and the weekly Security Audit
+# workflow (both run `cargo audit --deny warnings`).
+# See: https://github.com/rustsec/rustsec/blob/main/cargo-audit/audit.toml.example
+
+[advisories]
+# "Unmaintained" warnings for transitive dependencies with no maintained
+# replacement available through their parent crates. None of these is a known
+# vulnerability. Remove an entry once its parent crate drops the dependency.
+ignore = [
+    "RUSTSEC-2024-0436",  # paste (via leptos)
+    "RUSTSEC-2024-0320",  # yaml-rust (via syntect)
+]
