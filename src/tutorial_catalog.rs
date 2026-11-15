@@ -1096,7 +1096,7 @@ pub fn TutorialCatalog(tutorials: Vec<TutorialData>) -> impl IntoView {
 
         // Sort: if searching, sort by score first, then by selected sort
         if !query.is_empty() {
-            results.sort_by(|a, b| b.0.cmp(&a.0)); // Higher score first
+            results.sort_by_key(|a| std::cmp::Reverse(a.0)); // Higher score first
         } else {
             match sort {
                 SortOption::Newest => results.sort_by(|a, b| b.3.updated_at.cmp(&a.3.updated_at)),
@@ -1532,7 +1532,7 @@ pub fn TutorialCatalogFetch(
             .collect();
 
         if !query.is_empty() {
-            results.sort_by(|a, b| b.0.cmp(&a.0));
+            results.sort_by_key(|a| std::cmp::Reverse(a.0));
         } else {
             match sort {
                 SortOption::Newest => results.sort_by(|a, b| b.3.updated_at.cmp(&a.3.updated_at)),
