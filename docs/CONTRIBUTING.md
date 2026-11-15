@@ -41,7 +41,7 @@ Ready to contribute directly? Here's how to work with the repository.
 ### Prerequisites
 
 - **Git**
-- **Rust** via [rustup](https://rustup.rs). `rust-toolchain.toml` selects the stable toolchain with the `wasm32-unknown-unknown` target, `rustfmt`, and `clippy`.
+- **Rust** via [rustup](https://rustup.rs). `rust-toolchain.toml` pins Rust 1.100.0 with the `wasm32-unknown-unknown` target, `rustfmt`, and `clippy`; rustup installs that version the first time you build. CI and the Cloudflare build use the same version.
 - **`wasm-bindgen-cli` 0.2.104**, exactly. It has to match the `wasm-bindgen` version in `Cargo.lock`. `make bootstrap` installs it.
 - **Node.js and npm** for the Tailwind CSS build (CI uses Node 22).
 - **Python 3** for the local preview server.
